@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "PuttTrack",
+    "slug": "putttrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0D1B2A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.putttrack.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D1B2A"
+      },
+      "package": "com.putttrack.app"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true
+        }
+      ]
+    ],
+    "scheme": "putttrack",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
