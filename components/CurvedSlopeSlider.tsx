@@ -4,21 +4,21 @@ import {
   LayoutChangeEvent,
 } from 'react-native';
 import Svg, {
-  Path, Circle, Line, Defs, LinearGradient, Stop, Rect,
+  Path, Circle, Line, Defs, LinearGradient, Stop, Rect, Text as SvgText,
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../constants/theme';
 
-// Snap values: -5 = ">4% R→L", -4…0…4, +5 = ">4% L→R"
+// Snap values: -3.5 = ">3.5% R→L", 0 = straight, +3.5 = ">3.5% L→R"
 const SNAP_VALUES = [
-  -5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5,
+  -3.5, -3, -2.5, -2, -1.5, -1, -0.5,
   0,
-  0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5,
+  0.5, 1, 1.5, 2, 2.5, 3, 3.5,
 ];
-const N = SNAP_VALUES.length - 1; // 18
+const N = SNAP_VALUES.length - 1; // 14
 
-const ARCH_H = 44;  // height of arch component
-const PAD_TOP = 8;  // space above arch peak
+const ARCH_H = 64;  // increased height for better usability
+const PAD_TOP = 10;
 
 // y-position on the arch for a given normalised position t ∈ [0,1]
 // Parabola: y=0 at centre, y=(ARCH_H-PAD_TOP) at edges
@@ -37,8 +37,8 @@ function tToSnap(t: number): number {
 }
 
 function formatValue(v: number): string {
-  if (v === -5) return '>4% R→L';
-  if (v ===  5) return '>4% L→R';
+  if (v === -3.5) return '>3.5% R→L';
+  if (v ===  3.5) return '>3.5% L→R';
   if (v ===  0) return 'Straight';
   return `${Math.abs(v)}% ${v < 0 ? 'R→L' : 'L→R'}`;
 }
@@ -47,9 +47,11 @@ interface Props {
   value: number;
   onChange: (v: number) => void;
   disabled?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }
 
-export function CurvedSlopeSlider({ value, onChange, disabled = false }: Props) {
+export function CurvedSlopeSlider({ value, onChange, disabled = false, onDragStart, onDragEnd }: Props) {
   const [w, setW] = useState(300);
   const startT    = useRef(valueToT(value));
   const lastSnap  = useRef(value);
@@ -61,6 +63,7 @@ export function CurvedSlopeSlider({ value, onChange, disabled = false }: Props) 
       onPanResponderGrant: () => {
         startT.current = valueToT(value);
         lastSnap.current = value;
+        onDragStart?.();
       },
       onPanResponderMove: (_, gs) => {
         const newT   = Math.max(0, Math.min(1, startT.current + gs.dx / w));
@@ -71,6 +74,8 @@ export function CurvedSlopeSlider({ value, onChange, disabled = false }: Props) 
           onChange(snapped);
         }
       },
+      onPanResponderRelease: () => onDragEnd?.(),
+      onPanResponderTerminate: () => onDragEnd?.(),
     })
   ).current;
 
@@ -119,33 +124,52 @@ export function CurvedSlopeSlider({ value, onChange, disabled = false }: Props) 
             strokeLinecap="round"
           />
 
-          {/* Tick marks at each snap */}
+          {/* Tick marks with labels */}
           {SNAP_VALUES.map((sv, i) => {
             const ti   = i / N;
             const tx   = ti * w;
             const ty   = archY(ti);
-            const isBig = sv === 0 || Math.abs(sv) === 2 || Math.abs(sv) === 4 || Math.abs(sv) === 5;
-            const half = isBig ? 5 : 3;
+            const isBig = sv === 0 || Math.abs(sv) === 1 || Math.abs(sv) === 2 || Math.abs(sv) === 3 || Math.abs(sv) === 3.5;
+            const half = isBig ? 6 : 3;
             return (
-              <Line
-                key={sv}
-                x1={tx} y1={ty - half}
-                x2={tx} y2={ty + half}
-                stroke={sv === 0 ? '#FFFFFFAA' : '#FFFFFF44'}
-                strokeWidth={isBig ? 1.5 : 1}
-              />
+              <React.Fragment key={sv}>
+                <Line
+                  x1={tx} y1={ty - half}
+                  x2={tx} y2={ty + half}
+                  stroke={sv === 0 ? '#FFFFFFAA' : '#FFFFFF44'}
+                  strokeWidth={isBig ? 1.5 : 1}
+                />
+                {isBig && (
+                  <SvgText
+                    x={tx}
+                    y={ARCH_H + 14}
+                    textAnchor="middle"
+                    fill={sv === 0 ? '#FFFFFF99' : '#FFFFFF55'}
+                    fontSize={7}
+                  >
+                    {sv === 0 ? '0' : Math.abs(sv) === 3.5 ? '>3.5' : String(Math.abs(sv))}
+                  </SvgText>
+                )}
+              </React.Fragment>
             );
           })}
 
-          {/* Thumb */}
+          {/* Thumb — wider pill shape */}
+          <Path
+            d={`M ${thumbX - 18},${thumbY} L ${thumbX + 18},${thumbY}`}
+            stroke={disabled ? '#666' : '#FFFFFF'}
+            strokeWidth={4}
+            strokeLinecap="round"
+            opacity={disabled ? 0.4 : 0.3}
+          />
           <Circle
             cx={thumbX}
             cy={thumbY}
-            r={11}
+            r={13}
             fill={thumbFill}
             opacity={disabled ? 0.4 : 1}
             stroke={disabled ? '#666' : '#FFFFFF'}
-            strokeWidth={2}
+            strokeWidth={2.5}
           />
 
           {/* Side labels */}

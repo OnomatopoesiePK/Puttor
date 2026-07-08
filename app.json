@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "PuttTrack",
+    "name": "Puttor",
     "slug": "putttrack",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,13 +19,7 @@
       "package": "com.putttrack.app"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-sqlite",
-        {
-          "enableFTS": true
-        }
-      ]
+      "expo-router"
     ],
     "scheme": "putttrack",
     "experiments": {

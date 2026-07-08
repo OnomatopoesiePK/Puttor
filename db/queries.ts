@@ -1,5 +1,5 @@
 import { getDatabase } from './database';
-import { getBaseline } from '../data/strokesGained';
+import { getBaseline, TOUR_BASELINE } from '../data/strokesGained';
 import { calculateSG } from '../utils/sgCalculator';
 
 // ─── Settings ────────────────────────────────────────────────────────────────
@@ -56,6 +56,7 @@ export interface Round {
   weather: 'cold' | 'warm' | 'hot';
   date: string;
   is_complete: number;
+  hole_count: number;
   notes: string;
   putter_name?: string;
 }
@@ -96,9 +97,27 @@ export async function getRound(id: number): Promise<Round | null> {
   `, [id]);
 }
 
-export async function completeRound(id: number): Promise<void> {
+export async function completeRound(id: number, holeCount = 18): Promise<void> {
   const db = await getDatabase();
-  await db.runAsync('UPDATE rounds SET is_complete = 1 WHERE id = ?', [id]);
+  await db.runAsync('UPDATE rounds SET is_complete = 1, hole_count = ? WHERE id = ?', [holeCount, id]);
+}
+
+export async function updateRound(
+  id: number,
+  patch: Partial<Pick<Round, 'course_name' | 'putter_id' | 'stimp' | 'wind' | 'weather' | 'notes' | 'is_complete' | 'hole_count'>>
+): Promise<void> {
+  const db = await getDatabase();
+  const keys = Object.keys(patch) as Array<keyof typeof patch>;
+  if (keys.length === 0) return;
+  const setClause = keys.map((k) => `${k} = ?`).join(', ');
+  const values = keys.map((k) => patch[k] as string | number | null);
+  await db.runAsync(`UPDATE rounds SET ${setClause} WHERE id = ?`, [...values, id]);
+}
+
+export async function deleteRound(id: number): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM putts WHERE round_id = ?', [id]);
+  await db.runAsync('DELETE FROM rounds WHERE id = ?', [id]);
 }
 
 // ─── Putts ────────────────────────────────────────────────────────────────────
@@ -125,6 +144,9 @@ export interface Putt {
   hill_slope_pct: number;
   double_break: string | null;
   result: PuttResult;
+  lip_out: number;
+  miss_read: number;
+  bad_strike: number;
   sg_baseline: number;
   sg_actual: number;
   created_at: string;
@@ -139,23 +161,29 @@ export async function addPutt(params: {
   hill_slope_pct: number;
   double_break: string | null;
   result: PuttResult;
+  lip_out?: boolean;
+  miss_read?: boolean;
+  bad_strike?: boolean;
 }): Promise<Putt> {
   const db = await getDatabase();
-  const baseline = getBaseline(params.distance_m === 0 ? 0.25 : params.distance_m);
+  const normalizedDistance = params.distance_m < 0.5 ? 0.3 : params.distance_m;
+  const baseline = getBaseline(normalizedDistance);
   const sg = calculateSG(
-    params.distance_m === 0 ? 0.25 : params.distance_m,
+    normalizedDistance,
     params.result === 'holed'
   );
 
   const run = await db.runAsync(
     `INSERT INTO putts
        (round_id, hole_number, putt_number, distance_m, side_slope_pct,
-        hill_slope_pct, double_break, result, sg_baseline, sg_actual)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        hill_slope_pct, double_break, result, lip_out, miss_read, bad_strike,
+        sg_baseline, sg_actual)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       params.round_id, params.hole_number, params.putt_number,
-      params.distance_m, params.side_slope_pct, params.hill_slope_pct,
+      normalizedDistance, params.side_slope_pct, params.hill_slope_pct,
       params.double_break, params.result,
+      params.lip_out ? 1 : 0, params.miss_read ? 1 : 0, params.bad_strike ? 1 : 0,
       baseline.makeProbability, sg,
     ]
   );
@@ -163,6 +191,10 @@ export async function addPutt(params: {
   return {
     id: run.lastInsertRowId,
     ...params,
+    distance_m: normalizedDistance,
+    lip_out: params.lip_out ? 1 : 0,
+    miss_read: params.miss_read ? 1 : 0,
+    bad_strike: params.bad_strike ? 1 : 0,
     sg_baseline: baseline.makeProbability,
     sg_actual: sg,
     created_at: new Date().toISOString(),
@@ -177,23 +209,29 @@ export async function updatePutt(
     hill_slope_pct: number;
     double_break: string | null;
     result: PuttResult;
+    lip_out?: boolean;
+    miss_read?: boolean;
+    bad_strike?: boolean;
   }
 ): Promise<void> {
   const db = await getDatabase();
-  const baseline = getBaseline(params.distance_m === 0 ? 0.25 : params.distance_m);
+  const normalizedDistance = params.distance_m < 0.5 ? 0.3 : params.distance_m;
+  const baseline = getBaseline(normalizedDistance);
   const sg = calculateSG(
-    params.distance_m === 0 ? 0.25 : params.distance_m,
+    normalizedDistance,
     params.result === 'holed'
   );
 
   await db.runAsync(
     `UPDATE putts
      SET distance_m=?, side_slope_pct=?, hill_slope_pct=?,
-         double_break=?, result=?, sg_baseline=?, sg_actual=?
+         double_break=?, result=?, lip_out=?, miss_read=?, bad_strike=?,
+         sg_baseline=?, sg_actual=?
      WHERE id=?`,
     [
-      params.distance_m, params.side_slope_pct, params.hill_slope_pct,
+      normalizedDistance, params.side_slope_pct, params.hill_slope_pct,
       params.double_break, params.result,
+      params.lip_out ? 1 : 0, params.miss_read ? 1 : 0, params.bad_strike ? 1 : 0,
       baseline.makeProbability, sg, id,
     ]
   );
@@ -212,6 +250,18 @@ export async function deletePutt(id: number): Promise<void> {
   await db.runAsync('DELETE FROM putts WHERE id = ?', [id]);
 }
 
+export async function deletePuttsAfterOnHole(
+  roundId: number,
+  holeNumber: number,
+  puttNumber: number
+): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'DELETE FROM putts WHERE round_id = ? AND hole_number = ? AND putt_number > ?',
+    [roundId, holeNumber, puttNumber]
+  );
+}
+
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
 export interface DistanceBracket {
@@ -219,6 +269,7 @@ export interface DistanceBracket {
   made: number;
   total: number;
   tourMakePct: number;
+  sgTotal: number;
 }
 
 export interface RoundStats {
@@ -229,10 +280,23 @@ export interface RoundStats {
   makeByDistance: DistanceBracket[];
   missCounts: Record<string, number>;
   puttsByHole: Record<number, number>;
+  leaveByMissDirection: Record<string, { count: number; avgLeaveM: number }>;
+  missReasonCounts: { missRead: number; badStrike: number; both: number };
 }
 
 export async function getRoundStats(roundId: number): Promise<RoundStats> {
   const putts = await getPuttsForRound(roundId);
+
+  const averageTourMakePctForInterval = (min: number, max: number) => {
+    const baselineMax = TOUR_BASELINE[TOUR_BASELINE.length - 1].distanceM;
+    const effectiveMax = max >= 999 ? baselineMax : max;
+    const samples: number[] = [];
+    for (let d = min; d <= effectiveMax + 1e-9; d += 0.5) {
+      samples.push(getBaseline(Number(d.toFixed(1))).makeProbability * 100);
+    }
+    if (samples.length === 0) return 0;
+    return samples.reduce((sum, v) => sum + v, 0) / samples.length;
+  };
 
   const totalPutts = putts.length;
   const holeSet = new Set(putts.map((p) => p.hole_number));
@@ -246,26 +310,33 @@ export async function getRoundStats(roundId: number): Promise<RoundStats> {
   }
 
   const BRACKETS = [
-    { label: '<1 m',  min: 0,  max: 1  },
-    { label: '1–2 m', min: 1,  max: 2  },
-    { label: '2–3 m', min: 2,  max: 3  },
-    { label: '3–5 m', min: 3,  max: 5  },
-    { label: '5–10 m',min: 5,  max: 10 },
-    { label: '>10 m', min: 10, max: 999 },
+    { label: '0–1m',   min: 0,  max: 1,  mid: 0.5  },
+    { label: '1–2m',   min: 1,  max: 2,  mid: 1.5  },
+    { label: '2–3m',   min: 2,  max: 3,  mid: 2.5  },
+    { label: '3–4m',   min: 3,  max: 4,  mid: 3.5  },
+    { label: '4–5m',   min: 4,  max: 5,  mid: 4.5  },
+    { label: '5–6m',   min: 5,  max: 6,  mid: 5.5  },
+    { label: '6–7m',   min: 6,  max: 7,  mid: 6.5  },
+    { label: '7–9m',   min: 7,  max: 9,  mid: 8.0  },
+    { label: '9–12m',  min: 9,  max: 12, mid: 10.5 },
+    { label: '12–15m', min: 12, max: 15, mid: 13.5 },
+    { label: '15–20m', min: 15, max: 20, mid: 17.5 },
+    { label: '20+m',   min: 20, max: 999,mid: 25.0 },
   ];
 
   const makeByDistance: DistanceBracket[] = BRACKETS.map((b) => {
     const dm = putts.filter((p) => {
-      const d = p.distance_m === 0 ? 0.25 : p.distance_m;
+      const d = p.distance_m < 0.5 ? 0.3 : p.distance_m;
       return d >= b.min && d < b.max;
     });
     const made = dm.filter((p) => p.result === 'holed').length;
-    const mid  = b.max === 999 ? 15 : (b.min + b.max) / 2;
+    const sgTotal = dm.reduce((sum, p) => sum + p.sg_actual, 0);
     return {
       bracket: b.label,
       made,
       total: dm.length,
-      tourMakePct: getBaseline(mid).makeProbability * 100,
+      tourMakePct: averageTourMakePctForInterval(b.min, b.max),
+      sgTotal,
     };
   });
 
@@ -274,5 +345,54 @@ export async function getRoundStats(roundId: number): Promise<RoundStats> {
     missCounts[p.result] = (missCounts[p.result] ?? 0) + 1;
   }
 
-  return { totalPutts, holes, avgPuttsPerHole, sgTotal, makeByDistance, missCounts, puttsByHole };
+  const missReasonCounts = {
+    missRead:  putts.filter((p) => p.miss_read === 1 && p.bad_strike === 0).length,
+    badStrike: putts.filter((p) => p.bad_strike === 1 && p.miss_read === 0).length,
+    both:      putts.filter((p) => p.miss_read === 1 && p.bad_strike === 1).length,
+  };
+
+  // Leave-distance analysis: for each non-holed putt, the next putt on the same
+  // hole is the "leave". Group by the miss direction of the first putt.
+  const byHole: Record<number, Putt[]> = {};
+  for (const p of putts) {
+    if (!byHole[p.hole_number]) byHole[p.hole_number] = [];
+    byHole[p.hole_number].push(p);
+  }
+  const leaveSamples: Record<string, number[]> = {};
+  for (const holePutts of Object.values(byHole)) {
+    const byPuttNumber = new Map<number, Putt>();
+    for (const p of holePutts) {
+      const existing = byPuttNumber.get(p.putt_number);
+      if (!existing || p.id > existing.id) byPuttNumber.set(p.putt_number, p);
+    }
+
+    const sorted = [...byPuttNumber.values()].sort((a, b) =>
+      a.putt_number !== b.putt_number ? a.putt_number - b.putt_number : a.id - b.id
+    );
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const p = sorted[i];
+      if (p.result !== 'holed') {
+        const next = sorted[i + 1];
+        if (!leaveSamples[p.result]) leaveSamples[p.result] = [];
+        leaveSamples[p.result].push(Math.max(0.3, next.distance_m));
+      }
+    }
+  }
+  const leaveByMissDirection: Record<string, { count: number; avgLeaveM: number }> = {};
+  for (const [dir, samples] of Object.entries(leaveSamples)) {
+    const count = samples.length;
+    const avgLeaveM = count > 0
+      ? samples.reduce((sum, v) => sum + v, 0) / count
+      : 0;
+    leaveByMissDirection[dir] = {
+      count,
+      avgLeaveM,
+    };
+  }
+
+  return {
+    totalPutts, holes, avgPuttsPerHole, sgTotal,
+    makeByDistance, missCounts, puttsByHole,
+    leaveByMissDirection, missReasonCounts,
+  };
 }

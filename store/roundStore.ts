@@ -7,6 +7,9 @@ interface PuttDraft {
   hillSlopePct: number;
   doubleBreak: string | null;
   result: PuttResult | null;
+  lipOut: boolean;
+  missRead: boolean;
+  badStrike: boolean;
 }
 
 interface RoundState {
@@ -20,10 +23,14 @@ interface RoundState {
   setRound: (id: number) => void;
   setDraft: (patch: Partial<PuttDraft>) => void;
   resetDraft: () => void;
+  resetAfterMiss: () => void;
   addPutt: (putt: Putt) => void;
   updatePuttInStore: (putt: Putt) => void;
+  removePuttsAfterOnHole: (holeNumber: number, puttNumber: number) => void;
   setReviewIndex: (index: number | null) => void;
+  setCurrentHole: (hole: number) => void;
   goNextHole: () => void;
+  restartFromHoleOne: () => void;
   reset: () => void;
 
   // Derived helpers (computed inline)
@@ -32,11 +39,25 @@ interface RoundState {
 }
 
 const DEFAULT_DRAFT: PuttDraft = {
-  distanceM: 3.0,
+  distanceM: 6.0,  // default 6m for first putt
   sideSlopePct: 0,
   hillSlopePct: 0,
   doubleBreak: null,
   result: null,
+  lipOut: false,
+  missRead: false,
+  badStrike: false,
+};
+
+const MISS_DRAFT: PuttDraft = {
+  distanceM: 0.3,  // <0.5m for subsequent putts
+  sideSlopePct: 0,
+  hillSlopePct: 0,
+  doubleBreak: null,
+  result: null,
+  lipOut: false,
+  missRead: false,
+  badStrike: false,
 };
 
 export const useRoundStore = create<RoundState>((set, get) => ({
@@ -53,12 +74,21 @@ export const useRoundStore = create<RoundState>((set, get) => ({
 
   resetDraft: () => set({ draft: { ...DEFAULT_DRAFT }, reviewIndex: null }),
 
+  resetAfterMiss: () => set({ draft: { ...MISS_DRAFT }, reviewIndex: null }),
+
   addPutt: (putt) =>
     set((s) => ({ allPutts: [...s.allPutts, putt] })),
 
   updatePuttInStore: (putt) =>
     set((s) => ({
       allPutts: s.allPutts.map((p) => (p.id === putt.id ? putt : p)),
+    })),
+
+  removePuttsAfterOnHole: (holeNumber, puttNumber) =>
+    set((s) => ({
+      allPutts: s.allPutts.filter(
+        (p) => !(p.hole_number === holeNumber && p.putt_number > puttNumber)
+      ),
     })),
 
   setReviewIndex: (index) => {
@@ -73,6 +103,9 @@ export const useRoundStore = create<RoundState>((set, get) => ({
           hillSlopePct:  p.hill_slope_pct,
           doubleBreak:   p.double_break,
           result:        p.result,
+          lipOut:        p.lip_out === 1,
+          missRead:      p.miss_read === 1,
+          badStrike:     p.bad_strike === 1,
         },
       });
     } else {
@@ -80,12 +113,26 @@ export const useRoundStore = create<RoundState>((set, get) => ({
     }
   },
 
+  setCurrentHole: (hole) =>
+    set((s) => ({
+      currentHole: Math.max(1, Math.min(18, hole)),
+      reviewIndex: null,
+      draft: { ...s.draft },
+    })),
+
   goNextHole: () =>
     set((s) => ({
       currentHole: s.currentHole + 1,
       reviewIndex: null,
       draft: { ...DEFAULT_DRAFT },
     })),
+
+  restartFromHoleOne: () =>
+    set({
+      currentHole: 1,
+      reviewIndex: null,
+      draft: { ...DEFAULT_DRAFT },
+    }),
 
   reset: () =>
     set({

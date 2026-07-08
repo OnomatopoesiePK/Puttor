@@ -30,7 +30,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="⛳" label="ON COURSE" focused={focused} />
+            <TabIcon emoji="⛳" label="Course" focused={focused} />
           ),
         }}
       />
@@ -38,7 +38,7 @@ export default function TabsLayout() {
         name="games"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🎯" label="GAMES" focused={focused} />
+            <TabIcon emoji="🎯" label="Games" focused={focused} />
           ),
         }}
       />
@@ -46,7 +46,7 @@ export default function TabsLayout() {
         name="statistics"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📊" label="STATS" focused={focused} />
+            <TabIcon emoji="📊" label="Stats" focused={focused} />
           ),
         }}
       />
@@ -54,7 +54,7 @@ export default function TabsLayout() {
         name="settings"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="⚙️" label="SETTINGS" focused={focused} />
+            <TabIcon emoji="⚙️" label="Settings" focused={focused} />
           ),
         }}
       />
@@ -63,9 +63,9 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  tabIcon: { alignItems: 'center', gap: 3 },
+  tabIcon: { alignItems: 'center', gap: 3, width: 76 },
   emoji:        { fontSize: 22, opacity: 0.5 },
   emojiFocused: { opacity: 1 },
-  tabLabel:      { fontSize: 9, fontWeight: '600', color: colors.textMuted, letterSpacing: 0.8 },
+  tabLabel:      { fontSize: 11, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.2 },
   tabLabelFocused: { color: colors.primary },
 });

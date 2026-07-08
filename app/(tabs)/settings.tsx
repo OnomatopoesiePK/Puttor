@@ -115,7 +115,7 @@ export default function SettingsTab() {
         {/* About */}
         <SectionHeader title="ABOUT" />
         <View style={styles.card}>
-          <Text style={styles.aboutText}>PuttTrack v1.0</Text>
+          <Text style={styles.aboutText}>Puttor v1.0</Text>
           <Text style={styles.aboutSub}>
             Strokes gained benchmarks based on PGA Tour data (Mark Broadie methodology).
           </Text>

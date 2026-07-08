@@ -5,10 +5,9 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { addPutt, updatePutt, getPuttsForRound, completeRound, PuttResult } from '../../db/queries';
+import { addPutt, updatePutt, getPuttsForRound, completeRound, deletePuttsAfterOnHole, PuttResult } from '../../db/queries';
 import { useRoundStore } from '../../store/roundStore';
-import { CurvedSlopeSlider } from '../../components/CurvedSlopeSlider';
-import { HillSlider } from '../../components/HillSlider';
+import { SlopeGridPicker } from '../../components/SlopeGridPicker';
 import { DoubleBreakButtons } from '../../components/DoubleBreakButtons';
 import { DistancePicker } from '../../components/DistancePicker';
 import { DartboardMiss } from '../../components/DartboardMiss';
@@ -21,9 +20,9 @@ export default function InputScreen() {
   const store = useRoundStore();
   const {
     currentHole, allPutts, reviewIndex,
-    draft, setDraft, resetDraft,
-    addPutt: storePutt, updatePuttInStore,
-    goNextHole, setReviewIndex, setRound,
+    draft, setDraft, resetDraft, resetAfterMiss,
+    addPutt: storePutt, updatePuttInStore, removePuttsAfterOnHole,
+    goNextHole, setReviewIndex, setRound, setCurrentHole,
   } = store;
 
   const [saving, setSaving] = useState(false);
@@ -46,82 +45,213 @@ export default function InputScreen() {
     });
   }, [roundId]);
 
-  const puttsOnThisHole = allPutts.filter((p) => p.hole_number === currentHole);
+  const puttsOnCurrentHole = allPutts.filter((p) => p.hole_number === currentHole);
   const totalPutts      = allPutts.length;
 
   const isReviewing  = reviewIndex !== null;
   const reviewedPutt = isReviewing ? allPutts[reviewIndex!] : null;
+  const displayHole  = reviewedPutt?.hole_number ?? currentHole;
+  const puttsOnDisplayHole = allPutts.filter((p) => p.hole_number === displayHole);
 
-  const canRecord = draft.result !== null;
+  const canRecord = draft.result !== null || draft.lipOut;
+
+  const normalizeDistance = (distanceM: number) => (distanceM < 0.5 ? 0.3 : distanceM);
+
+  const savePutt = async (overrideDraft?: typeof draft) => {
+    const workingDraft = overrideDraft ?? draft;
+    const effectiveResult = (workingDraft.result ?? (workingDraft.lipOut ? 'hole_high' : null)) as PuttResult;
+    const effectiveDistance = normalizeDistance(workingDraft.distanceM);
+
+    if (isReviewing && reviewedPutt) {
+      const previousResult = reviewedPutt.result;
+
+      await updatePutt(reviewedPutt.id, {
+        distance_m:     effectiveDistance,
+        side_slope_pct: workingDraft.sideSlopePct,
+        hill_slope_pct: workingDraft.hillSlopePct,
+        double_break:   workingDraft.doubleBreak,
+        result:         effectiveResult,
+        lip_out:        workingDraft.lipOut,
+        miss_read:      workingDraft.missRead,
+        bad_strike:     workingDraft.badStrike,
+      });
+
+      if (effectiveResult === 'holed') {
+        await deletePuttsAfterOnHole(roundId, reviewedPutt.hole_number, reviewedPutt.putt_number);
+        removePuttsAfterOnHole(reviewedPutt.hole_number, reviewedPutt.putt_number);
+      }
+
+      updatePuttInStore({
+        ...reviewedPutt,
+        distance_m:     effectiveDistance,
+        side_slope_pct: workingDraft.sideSlopePct,
+        hill_slope_pct: workingDraft.hillSlopePct,
+        double_break:   workingDraft.doubleBreak,
+        result:         effectiveResult,
+        lip_out:        workingDraft.lipOut ? 1 : 0,
+        miss_read:      workingDraft.missRead ? 1 : 0,
+        bad_strike:     workingDraft.badStrike ? 1 : 0,
+      });
+
+      if (effectiveResult === 'holed' && reviewedPutt.hole_number === currentHole) {
+        if (currentHole === 18) {
+          Alert.alert(
+            '⛳ Hole 18 Complete!',
+            'Do you want to end the round?',
+            [
+              {
+                text: 'End Round',
+                onPress: async () => {
+                  await completeRound(roundId);
+                  router.replace(`/round/summary?roundId=${roundId}`);
+                },
+              },
+              {
+                text: 'Continue (Hole 1)',
+                onPress: () => store.restartFromHoleOne(),
+              },
+            ]
+          );
+        } else {
+          goNextHole();
+        }
+        setReviewIndex(null);
+        resetDraft();
+        return;
+      }
+
+      if (previousResult === 'holed' && effectiveResult !== 'holed') {
+        setCurrentHole(reviewedPutt.hole_number);
+        setReviewIndex(null);
+        resetAfterMiss();
+        return;
+      }
+
+      setReviewIndex(null);
+      resetDraft();
+      return;
+    }
+
+    const puttNum = puttsOnCurrentHole.length + 1;
+    const saved = await addPutt({
+      round_id:      roundId,
+      hole_number:   currentHole,
+      putt_number:   puttNum,
+      distance_m:    effectiveDistance,
+      side_slope_pct: workingDraft.sideSlopePct,
+      hill_slope_pct: workingDraft.hillSlopePct,
+      double_break:  workingDraft.doubleBreak,
+      result:        effectiveResult,
+      lip_out:       workingDraft.lipOut,
+      miss_read:     workingDraft.missRead,
+      bad_strike:    workingDraft.badStrike,
+    });
+    storePutt(saved);
+
+    Haptics.notificationAsync(
+      effectiveResult === 'holed'
+        ? Haptics.NotificationFeedbackType.Success
+        : Haptics.NotificationFeedbackType.Warning
+    ).catch(() => {});
+
+    if (effectiveResult === 'holed') {
+      if (currentHole === 18) {
+        Alert.alert(
+          '⛳ Hole 18 Complete!',
+          'Do you want to end the round?',
+          [
+            {
+              text: 'End Round',
+              onPress: async () => {
+                await completeRound(roundId);
+                router.replace(`/round/summary?roundId=${roundId}`);
+              },
+            },
+            {
+              text: 'Continue (Hole 1)',
+              onPress: () => store.restartFromHoleOne(),
+            },
+          ]
+        );
+      } else {
+        goNextHole();
+      }
+    } else {
+      resetAfterMiss();
+    }
+  };
 
   const handleRecord = async () => {
     if (!canRecord || saving) return;
     setSaving(true);
 
     try {
-      if (isReviewing && reviewedPutt) {
-        // Update existing putt
-        await updatePutt(reviewedPutt.id, {
-          distance_m:     draft.distanceM,
-          side_slope_pct: draft.sideSlopePct,
-          hill_slope_pct: draft.hillSlopePct,
-          double_break:   draft.doubleBreak,
-          result:         draft.result as PuttResult,
-        });
-        updatePuttInStore({
-          ...reviewedPutt,
-          distance_m:     draft.distanceM,
-          side_slope_pct: draft.sideSlopePct,
-          hill_slope_pct: draft.hillSlopePct,
-          double_break:   draft.doubleBreak,
-          result:         draft.result as PuttResult,
-        });
-        setReviewIndex(null);
-        resetDraft();
-      } else {
-        // New putt
-        const puttNum = puttsOnThisHole.length + 1;
-        const saved = await addPutt({
-          round_id:      roundId,
-          hole_number:   currentHole,
-          putt_number:   puttNum,
-          distance_m:    draft.distanceM,
-          side_slope_pct: draft.sideSlopePct,
-          hill_slope_pct: draft.hillSlopePct,
-          double_break:  draft.doubleBreak,
-          result:        draft.result as PuttResult,
-        });
-        storePutt(saved);
+      await savePutt();
+    } finally {
+      setSaving(false);
+    }
+  };
 
-        Haptics.notificationAsync(
-          draft.result === 'holed'
-            ? Haptics.NotificationFeedbackType.Success
-            : Haptics.NotificationFeedbackType.Warning
-        ).catch(() => {});
-
-        if (draft.result === 'holed') {
-          goNextHole();
-        } else {
-          resetDraft();
-        }
-      }
+  const handleTapIn = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await savePutt({
+        ...draft,
+        distanceM: 0.3,
+        result: 'holed',
+        lipOut: false,
+        missRead: false,
+        badStrike: false,
+      });
     } finally {
       setSaving(false);
     }
   };
 
   const handleEndRound = () => {
+    const playedHoles = new Set(allPutts.map((p) => p.hole_number)).size;
+    const defaultHoleCount = playedHoles === 9 ? 9 : 18;
+
+    const finishRound = async (holeCount: number) => {
+      await completeRound(roundId, holeCount);
+      router.replace(`/round/summary?roundId=${roundId}`);
+    };
+
     Alert.alert(
       'End Round',
-      `End round after ${totalPutts} putts across ${currentHole - 1 + (puttsOnThisHole.length > 0 ? 1 : 0)} hole(s)?`,
+      `End round after ${totalPutts} putts across ${playedHoles} hole(s)?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'End Round',
           style: 'destructive',
-          onPress: async () => {
-            await completeRound(roundId);
-            router.replace(`/round/summary?roundId=${roundId}`);
+          onPress: () => {
+            if (playedHoles === 9) {
+              Alert.alert(
+                'Save as 9-hole round?',
+                'Do you want to save this round as 9 holes or as a full 18-hole round?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Save 9 Holes',
+                    onPress: () => {
+                      finishRound(9).catch(() => {});
+                    },
+                  },
+                  {
+                    text: 'Save 18 Holes',
+                    style: 'destructive',
+                    onPress: () => {
+                      finishRound(18).catch(() => {});
+                    },
+                  },
+                ]
+              );
+              return;
+            }
+
+            finishRound(defaultHoleCount).catch(() => {});
           },
         },
       ]
@@ -136,12 +266,41 @@ export default function InputScreen() {
       <View style={styles.topBar}>
         <View style={styles.holeInfo}>
           <Text style={styles.holeLabel}>HOLE</Text>
-          <Text style={styles.holeNum}>{currentHole}</Text>
+          <Text style={styles.holeNum}>{displayHole}</Text>
         </View>
-        <View style={styles.puttCounters}>
-          <CountBadge label="This hole" value={puttsOnThisHole.length} />
-          <CountBadge label="Total" value={totalPutts} />
+
+        {/* Putt boxes for current hole */}
+        <View style={styles.puttBoxRow}>
+          {puttsOnDisplayHole.map((p, i) => {
+            const globalIdx = allPutts.indexOf(p);
+            const isActive = reviewIndex === globalIdx;
+            const isHoled  = p.result === 'holed';
+            return (
+              <TouchableOpacity
+                key={p.id}
+                style={[styles.puttBox, isActive && styles.puttBoxActive, isHoled && styles.puttBoxHoled]}
+                onPress={() => setReviewIndex(globalIdx)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.puttBoxText, isHoled && styles.puttBoxTextHoled]}>
+                  {isHoled ? '⛳' : String(i + 1)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+          {/* New putt indicator (not reviewing) */}
+          {!isReviewing && (
+            <View style={[styles.puttBox, styles.puttBoxNew]}>
+              <Text style={styles.puttBoxNewText}>{puttsOnDisplayHole.length + 1}</Text>
+            </View>
+          )}
         </View>
+
+        <View style={styles.totalBadge}>
+          <Text style={styles.totalNum}>{totalPutts}</Text>
+          <Text style={styles.totalLabel}>TOTAL</Text>
+        </View>
+
         <TouchableOpacity style={styles.endBtn} onPress={handleEndRound}>
           <Text style={styles.endBtnText}>End</Text>
         </TouchableOpacity>
@@ -149,12 +308,7 @@ export default function InputScreen() {
 
       {isReviewing && (
         <View style={styles.reviewBanner}>
-          <Text style={styles.reviewText}>
-            Editing · H{reviewedPutt?.hole_number} Putt {reviewedPutt?.putt_number}
-          </Text>
-          <TouchableOpacity onPress={() => { setReviewIndex(null); resetDraft(); }}>
-            <Text style={styles.reviewCancel}>Cancel edit</Text>
-          </TouchableOpacity>
+          <Text style={styles.reviewText}>BEARBEITUNG</Text>
         </View>
       )}
 
@@ -172,12 +326,12 @@ export default function InputScreen() {
           />
         </Section>
 
-        {/* Break slider */}
-        <Section label="SIDE SLOPE / BREAK">
-          <CurvedSlopeSlider
-            value={draft.sideSlopePct}
-            onChange={(v) => setDraft({ sideSlopePct: v })}
-            disabled={draft.doubleBreak !== null}
+        {/* Slope grid */}
+        <Section>
+          <SlopeGridPicker
+            sideValue={draft.sideSlopePct}
+            hillValue={draft.hillSlopePct}
+            onChange={({ sideSlopePct, hillSlopePct }) => setDraft({ sideSlopePct, hillSlopePct })}
           />
           <DoubleBreakButtons
             value={draft.doubleBreak as any}
@@ -185,20 +339,46 @@ export default function InputScreen() {
           />
         </Section>
 
-        {/* Hill slider */}
-        <Section label="UPHILL / DOWNHILL">
-          <HillSlider
-            value={draft.hillSlopePct}
-            onChange={(v) => setDraft({ hillSlopePct: v })}
-          />
-        </Section>
-
         {/* Dartboard */}
-        <Section label="RESULT">
+        <Section>
           <DartboardMiss
             value={draft.result as PuttResult | null}
+            lipOut={draft.lipOut}
             onChange={(r) => setDraft({ result: r })}
+            onLipOutChange={(v) => setDraft({ lipOut: v })}
           />
+          {/* Miss reason toggles */}
+          <View style={missStyles.row}>
+            <TouchableOpacity
+              style={[missStyles.btn, draft.missRead && missStyles.btnActive]}
+              onPress={() => setDraft({ missRead: !draft.missRead })}
+              activeOpacity={0.8}
+            >
+              <Text style={[missStyles.btnText, draft.missRead && missStyles.btnTextActive]}>
+                📖 Miss Read
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[missStyles.btn, draft.badStrike && missStyles.btnActive]}
+              onPress={() => setDraft({ badStrike: !draft.badStrike })}
+              activeOpacity={0.8}
+            >
+              <Text style={[missStyles.btnText, draft.badStrike && missStyles.btnTextActive]}>
+                🏌️ Bad Strike
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Section>
+
+        <Section>
+          <TouchableOpacity
+            style={[styles.tapInBtn, saving && styles.tapInBtnDisabled]}
+            onPress={handleTapIn}
+            disabled={saving}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.tapInText}>Tap-In (0.3 m)</Text>
+          </TouchableOpacity>
         </Section>
 
         <View style={{ height: 20 }} />
@@ -246,7 +426,7 @@ export default function InputScreen() {
           activeOpacity={0.85}
         >
           <Text style={styles.recordText}>
-            {isReviewing ? '✓  Save Edit' : draft.result === 'holed' ? '⛳  Holed! Next Hole' : '→  Record Putt'}
+            {isReviewing ? '✓  Save Edit' : (draft.result === 'holed') ? '⛳  Holed! Next Hole' : '→  Record Putt'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -278,6 +458,35 @@ const sectionStyles = StyleSheet.create({
   },
 });
 
+const missStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  btn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  },
+  btnActive: {
+    backgroundColor: colors.accent + '22',
+    borderColor: colors.accent,
+  },
+  btnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  btnTextActive: {
+    color: colors.accent,
+  },
+});
+
 function CountBadge({ label, value }: { label: string; value: number }) {
   return (
     <View style={badgeStyles.wrap}>
@@ -302,17 +511,35 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    gap: 12,
+    gap: 8,
   },
 
-  holeInfo:  { alignItems: 'center' },
+  holeInfo:  { alignItems: 'center', minWidth: 40 },
   holeLabel: { fontSize: 9, fontWeight: '700', color: colors.textMuted, letterSpacing: 1.2 },
-  holeNum:   { fontSize: 32, fontWeight: '900', color: colors.primary, lineHeight: 34 },
+  holeNum:   { fontSize: 30, fontWeight: '900', color: colors.primary, lineHeight: 32 },
+
+  puttBoxRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  puttBox: {
+    width: 32, height: 32, borderRadius: borderRadius.sm,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1.5, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  puttBoxActive:   { borderColor: colors.accent, backgroundColor: colors.accent + '22' },
+  puttBoxHoled:    { borderColor: colors.primary, backgroundColor: colors.primary + '33' },
+  puttBoxText:     { fontSize: 13, fontWeight: '700', color: colors.textSecondary },
+  puttBoxTextHoled:{ fontSize: 11 },
+  puttBoxNew:      { borderColor: colors.primary, borderStyle: 'dashed', backgroundColor: 'transparent' },
+  puttBoxNewText:  { fontSize: 13, fontWeight: '700', color: colors.primary },
+
+  totalBadge: { alignItems: 'center' },
+  totalNum:   { fontSize: 18, fontWeight: '800', color: colors.text },
+  totalLabel: { fontSize: 8, color: colors.textMuted, fontWeight: '600', letterSpacing: 0.8 },
 
   puttCounters: { flex: 1, flexDirection: 'row', justifyContent: 'center', gap: 24 },
 
-  endBtn:     { paddingHorizontal: 14, paddingVertical: 8, borderRadius: borderRadius.sm, borderWidth: 1.5, borderColor: colors.error },
-  endBtnText: { fontSize: 13, fontWeight: '700', color: colors.error },
+  endBtn:     { paddingHorizontal: 12, paddingVertical: 8, borderRadius: borderRadius.sm, borderWidth: 1.5, borderColor: colors.error },
+  endBtnText: { fontSize: 12, fontWeight: '700', color: colors.error },
 
   reviewBanner: {
     backgroundColor: colors.accent + '22',
@@ -320,15 +547,29 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.accent + '44',
     paddingHorizontal: spacing.lg,
     paddingVertical: 8,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   reviewText:   { fontSize: 13, fontWeight: '600', color: colors.accent },
-  reviewCancel: { fontSize: 12, color: colors.textSecondary },
 
   scroll:        { flex: 1 },
   scrollContent: { padding: spacing.md },
+
+  tapInBtn: {
+    borderRadius: borderRadius.md,
+    paddingVertical: 11,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '22',
+  },
+  tapInBtnDisabled: { opacity: 0.5 },
+  tapInText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
 
   bottomBar: {
     borderTopWidth: 1,

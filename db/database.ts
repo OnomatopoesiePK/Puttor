@@ -33,6 +33,7 @@ async function initSchema(db: SQLite.SQLiteDatabase): Promise<void> {
       weather     TEXT    NOT NULL DEFAULT 'warm',
       date        TEXT    DEFAULT (datetime('now')),
       is_complete INTEGER DEFAULT 0,
+      hole_count  INTEGER NOT NULL DEFAULT 18,
       notes       TEXT    DEFAULT ''
     );
 
@@ -46,6 +47,9 @@ async function initSchema(db: SQLite.SQLiteDatabase): Promise<void> {
       hill_slope_pct REAL    NOT NULL DEFAULT 0,
       double_break   TEXT,
       result         TEXT    NOT NULL DEFAULT 'holed',
+      lip_out        INTEGER NOT NULL DEFAULT 0,
+      miss_read      INTEGER NOT NULL DEFAULT 0,
+      bad_strike     INTEGER NOT NULL DEFAULT 0,
       sg_baseline    REAL    DEFAULT 0,
       sg_actual      REAL    DEFAULT 0,
       created_at     TEXT    DEFAULT (datetime('now'))
@@ -55,4 +59,33 @@ async function initSchema(db: SQLite.SQLiteDatabase): Promise<void> {
       ('units',   'metric'),
       ('haptics', 'true');
   `);
+
+  // Migrations — add new columns to existing databases
+  await runMigrations(db);
+}
+
+async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await db.getAllAsync<{ name: string }>(
+    `PRAGMA table_info(putts)`
+  );
+  const colNames = columns.map((c) => c.name);
+
+  if (!colNames.includes('lip_out')) {
+    await db.execAsync(`ALTER TABLE putts ADD COLUMN lip_out INTEGER NOT NULL DEFAULT 0`);
+  }
+  if (!colNames.includes('miss_read')) {
+    await db.execAsync(`ALTER TABLE putts ADD COLUMN miss_read INTEGER NOT NULL DEFAULT 0`);
+  }
+  if (!colNames.includes('bad_strike')) {
+    await db.execAsync(`ALTER TABLE putts ADD COLUMN bad_strike INTEGER NOT NULL DEFAULT 0`);
+  }
+
+  const roundColumns = await db.getAllAsync<{ name: string }>(
+    `PRAGMA table_info(rounds)`
+  );
+  const roundColNames = roundColumns.map((c) => c.name);
+
+  if (!roundColNames.includes('hole_count')) {
+    await db.execAsync(`ALTER TABLE rounds ADD COLUMN hole_count INTEGER NOT NULL DEFAULT 18`);
+  }
 }

@@ -8,11 +8,11 @@ export function feetToMetres(ft: number): number {
 
 export function formatDistance(metres: number, useFeet: boolean): string {
   if (useFeet) {
-    if (metres === 0) return '<1 ft';
+    if (metres < 0.5) return '<1 ft';
     const feet = metresToFeet(metres);
     return `${Math.round(feet)} ft`;
   }
-  if (metres === 0) return '<0.5 m';
+  if (metres < 0.5) return '<0.5 m';
   return `${metres % 1 === 0 ? metres.toFixed(0) : metres.toFixed(1)} m`;
 }
 
@@ -22,7 +22,7 @@ export function getDistanceList(
   useFeet: boolean
 ): Array<{ value: number; label: string }> {
   const items: Array<{ value: number; label: string }> = [
-    { value: 0, label: useFeet ? '<1 ft' : '<0.5 m' },
+    { value: 0.3, label: useFeet ? '<1 ft' : '<0.5 m' },
   ];
   // 0.5 m increments up to 7 m
   for (let m = 0.5; m <= 7.0; m = Math.round((m + 0.5) * 10) / 10) {

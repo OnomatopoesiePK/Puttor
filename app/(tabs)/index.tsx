@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, SafeAreaView, RefreshControl,
+  ScrollView, SafeAreaView, RefreshControl, Alert,
 } from 'react-native';
 import { router } from 'expo-router';
-import { getRounds, Round } from '../../db/queries';
+import { deleteRound, getRounds, Round, updateRound } from '../../db/queries';
 import { colors, spacing, borderRadius } from '../../constants/theme';
 import { useRoundStore } from '../../store/roundStore';
 
@@ -44,11 +44,39 @@ export default function OnCourseTab() {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
+  const handleRoundActions = (r: Round) => {
+    Alert.alert('Round Actions', r.course_name || 'Unnamed Course', [
+      {
+        text: 'Bearbeiten',
+        onPress: async () => {
+          if (r.is_complete) {
+            await updateRound(r.id, { is_complete: 0 });
+            await load();
+          }
+          router.push(`/round/input?roundId=${r.id}`);
+        },
+      },
+      {
+        text: r.is_complete ? 'Öffnen' : 'Weiterführen',
+        onPress: () => openRound(r),
+      },
+      {
+        text: 'Löschen',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteRound(r.id);
+          await load();
+        },
+      },
+      { text: 'Abbrechen', style: 'cancel' },
+    ]);
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.logo}>PuttTrack</Text>
+        <Text style={styles.logo}>Puttor</Text>
         <Text style={styles.subtitle}>On Course</Text>
       </View>
 
@@ -84,6 +112,13 @@ export default function OnCourseTab() {
               </Text>
             </View>
             <View style={styles.roundRight}>
+              <TouchableOpacity
+                style={styles.menuBtn}
+                onPress={() => handleRoundActions(r)}
+                hitSlop={10}
+              >
+                <Text style={styles.menuDots}>⋮</Text>
+              </TouchableOpacity>
               <View style={[styles.statusBadge, r.is_complete ? styles.badgeDone : styles.badgeLive]}>
                 <Text style={styles.statusText}>{r.is_complete ? 'Complete' : 'In Progress'}</Text>
               </View>
@@ -180,6 +215,18 @@ const styles = StyleSheet.create({
   roundMeta:  { fontSize: 13, color: colors.textSecondary },
 
   roundRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+
+  menuBtn: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  menuDots: { fontSize: 16, color: colors.textSecondary, fontWeight: '800' },
 
   statusBadge: {
     paddingHorizontal: 10,

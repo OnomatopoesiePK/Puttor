@@ -13,7 +13,7 @@ export const colors = {
   error: '#FF4757',
   warning: '#FFA502',
   success: '#3DBA6F',
-  border: '#2A4055',
+  border: '#3a622b',
   borderLight: '#1E3A4F',
 
   // Break colours
@@ -24,7 +24,7 @@ export const colors = {
 
   // Dartboard
   holed: '#3DBA6F',
-  lipOut: '#F9A826',
+  lipOut: '#f9a826',
   missRed: '#FF4757',
   missBlue: '#5B9BFF',
 };

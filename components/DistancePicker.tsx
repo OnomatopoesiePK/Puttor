@@ -1,17 +1,15 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, LayoutChangeEvent } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { colors, borderRadius } from '../constants/theme';
 import { getDistanceList } from '../utils/unitConverter';
 import { useSettingsStore } from '../store/settingsStore';
 
-const ITEM_W = 70;
-const ITEM_H = 52;
-const { width: SW } = Dimensions.get('window');
-const SIDE_PAD = SW / 2 - ITEM_W / 2;
+const VISIBLE = 5;
+const ITEM_H  = 56;
 
 interface Props {
-  value: number; // metres (0 = <0.5 m)
+  value: number;
   onChange: (metres: number) => void;
 }
 
@@ -19,102 +17,98 @@ export function DistancePicker({ value, onChange }: Props) {
   const { units } = useSettingsStore();
   const useFeet   = units === 'imperial';
   const items     = getDistanceList(useFeet);
+  const scrollRef = useRef<ScrollView>(null);
+  const syncingRef = useRef(false);
+  const lastSyncedIdxRef = useRef<number | null>(null);
 
-  // Simple horizontal scroll using ScrollView-like FlatList pattern
-  const listRef = useRef<any>(null);
-
-  const selectedIdx = items.findIndex((d) => d.value === value);
+  const selectedIdx = items.findIndex((d) => Math.abs(d.value - value) < 0.001);
   const safeIdx     = selectedIdx >= 0 ? selectedIdx : 0;
+  const [pickerWidth, setPickerWidth] = useState(300);
+  const [layoutReady, setLayoutReady] = useState(false);
 
-  const scrollTo = (idx: number) => {
-    listRef.current?.scrollToOffset({
-      offset: idx * ITEM_W,
-      animated: true,
-    });
+  const itemWidth = useMemo(
+    () => Math.max(52, Math.floor(pickerWidth / VISIBLE)),
+    [pickerWidth]
+  );
+  const sidePad = Math.floor(pickerWidth / 2) - Math.floor(itemWidth / 2);
+
+  const onWrapLayout = (e: LayoutChangeEvent) => {
+    const nextWidth = e.nativeEvent.layout.width;
+    if (Math.abs(nextWidth - pickerWidth) > 1) {
+      setPickerWidth(nextWidth);
+    }
+    if (!layoutReady) setLayoutReady(true);
   };
+
+  useEffect(() => {
+    // Keep the scroll position in sync with external value changes.
+    if (!layoutReady) return;
+    if (lastSyncedIdxRef.current === safeIdx) return;
+    lastSyncedIdxRef.current = safeIdx;
+    syncingRef.current = true;
+    const offset = Math.max(0, safeIdx * itemWidth);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ x: offset, animated: false });
+    });
+    setTimeout(() => {
+      syncingRef.current = false;
+    }, 20);
+  }, [safeIdx, itemWidth, layoutReady]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>DISTANCE TO HOLE</Text>
 
-      <View style={styles.wrapper}>
-        {/* Highlight box behind selected item */}
-        <View style={styles.highlight} pointerEvents="none" />
+      <View style={styles.wrapper} onLayout={onWrapLayout}>
+        {/* Highlight box behind centre item */}
+        <View
+          style={[styles.highlight, { width: itemWidth, marginLeft: -(itemWidth / 2) }]}
+          pointerEvents="none"
+        />
 
-        <View style={styles.listOuter}>
-          {/* Rendered as a simple ScrollView-backed flat list */}
-          <FlatListScroll
-            ref={listRef}
-            items={items}
-            itemWidth={ITEM_W}
-            itemHeight={ITEM_H}
-            sidePad={SIDE_PAD}
-            selectedValue={value}
-            onSelect={(v, idx) => {
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={itemWidth}
+          decelerationRate="fast"
+          contentContainerStyle={{ paddingHorizontal: sidePad }}
+          onMomentumScrollEnd={(e) => {
+            if (syncingRef.current) return;
+            const idx = Math.round(e.nativeEvent.contentOffset.x / itemWidth);
+            const item = items[Math.max(0, Math.min(items.length - 1, idx))];
+            if (item && Math.abs(item.value - value) >= 0.001) {
               Haptics.selectionAsync().catch(() => {});
-              onChange(v);
-              scrollTo(idx);
-            }}
-          />
-        </View>
+              onChange(item.value);
+            }
+          }}
+        >
+          {items.map((item) => {
+            const selected = Math.abs(item.value - value) < 0.001;
+            return (
+              <TouchableOpacity
+                key={item.value}
+                style={[styles.item, { width: itemWidth, height: ITEM_H }]}
+                onPress={() => {
+                  const idx = items.indexOf(item);
+                  lastSyncedIdxRef.current = idx;
+                  scrollRef.current?.scrollTo({ x: idx * itemWidth, animated: true });
+                  Haptics.selectionAsync().catch(() => {});
+                  onChange(item.value);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.itemText, selected && styles.itemTextSel]}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
     </View>
   );
 }
-
-// ─── Inner flat list ──────────────────────────────────────────────────────────
-
-import { ScrollView } from 'react-native';
-
-interface FlatListScrollProps {
-  items: Array<{ value: number; label: string }>;
-  itemWidth: number;
-  itemHeight: number;
-  sidePad: number;
-  selectedValue: number;
-  onSelect: (v: number, idx: number) => void;
-}
-
-const FlatListScroll = React.forwardRef<ScrollView, FlatListScrollProps>(
-  ({ items, itemWidth, itemHeight, sidePad, selectedValue, onSelect }, ref) => {
-    const selIdx = items.findIndex((d) => d.value === selectedValue);
-
-    return (
-      <ScrollView
-        ref={ref}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={itemWidth}
-        decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: sidePad }}
-        contentOffset={{ x: Math.max(0, selIdx * itemWidth), y: 0 }}
-        onMomentumScrollEnd={(e) => {
-          const idx = Math.round(e.nativeEvent.contentOffset.x / itemWidth);
-          if (items[idx] && items[idx].value !== selectedValue) {
-            Haptics.selectionAsync().catch(() => {});
-            onSelect(items[idx].value, idx);
-          }
-        }}
-      >
-        {items.map((item, idx) => {
-          const selected = item.value === selectedValue;
-          return (
-            <TouchableOpacity
-              key={item.value}
-              style={[styles.item, { width: itemWidth, height: itemHeight }]}
-              onPress={() => onSelect(item.value, idx)}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.itemText, selected && styles.itemTextSel]}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-    );
-  }
-);
 
 const styles = StyleSheet.create({
   container: { gap: 6 },
@@ -136,20 +130,13 @@ const styles = StyleSheet.create({
   highlight: {
     position: 'absolute',
     left: '50%',
-    marginLeft: -(ITEM_W / 2),
     top: 4,
     bottom: 4,
-    width: ITEM_W,
-    backgroundColor: colors.primary + '1A',
+    backgroundColor: colors.primary + '22',
     borderRadius: borderRadius.md,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.primary,
     zIndex: 0,
-  },
-
-  listOuter: {
-    flex: 1,
-    zIndex: 1,
   },
 
   item: {
@@ -158,14 +145,15 @@ const styles = StyleSheet.create({
   },
 
   itemText: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.textSecondary,
     fontWeight: '500',
   },
 
   itemTextSel: {
-    fontSize: 16,
+    fontSize: 17,
     color: colors.primary,
     fontWeight: '800',
   },
 });
+

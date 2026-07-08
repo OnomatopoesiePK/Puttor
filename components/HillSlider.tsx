@@ -3,26 +3,26 @@ import {
   View, Text, PanResponder, StyleSheet,
   LayoutChangeEvent,
 } from 'react-native';
-import Svg, { Path, Circle, Line, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import Svg, { Path, Circle, Line, Defs, LinearGradient, Stop, Rect, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../constants/theme';
 
-// Same snap range as break slider: -5 (">4% uphill"), -4…0…4, +5 (">4% downhill")
+// Snap values: -3.5 = ">3% uphill", 0 = flat, +3.5 = ">3% downhill"
 const SNAP_VALUES = [
-  -5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5,
+  -3.5, -3, -2.5, -2, -1.5, -1, -0.5,
   0,
-  0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5,
+  0.5, 1, 1.5, 2, 2.5, 3, 3.5,
 ];
 const N = SNAP_VALUES.length - 1;
 
-const SLOPE_H = 44;
-const PAD = 6;
+const SLOPE_H = 64;
+const PAD = 8;
 
-// Ski-slope (S-curve): uphill (left) is high, flat in middle, downhill (right) is low.
-// Uses smooth Hermite S-curve: y = H * (3t² − 2t³)
+// U-shape: both ends curve UP, middle is low — like \-/
+// y = PAD + (SLOPE_H - 2*PAD) * 4*(t-0.5)^2
 function slopeY(t: number): number {
-  const ease = 3 * t * t - 2 * t * t * t; // 0 at t=0, 0.5 at t=0.5, 1 at t=1
-  return PAD + (SLOPE_H - 2 * PAD) * ease;
+  const u = (t - 0.5) * 2; // -1 to 1
+  return PAD + (SLOPE_H - 2 * PAD) * u * u;
 }
 
 function valueToT(v: number): number {
@@ -36,8 +36,8 @@ function tToSnap(t: number): number {
 }
 
 function formatValue(v: number): string {
-  if (v === -5) return '>4% Uphill';
-  if (v ===  5) return '>4% Downhill';
+  if (v === -3.5) return '>3% Uphill';
+  if (v ===  3.5) return '>3% Downhill';
   if (v ===  0) return 'Flat';
   return `${Math.abs(v)}% ${v < 0 ? 'Uphill' : 'Downhill'}`;
 }
@@ -45,9 +45,11 @@ function formatValue(v: number): string {
 interface Props {
   value: number;
   onChange: (v: number) => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }
 
-export function HillSlider({ value, onChange }: Props) {
+export function HillSlider({ value, onChange, onDragStart, onDragEnd }: Props) {
   const [w, setW] = useState(300);
   const startT   = useRef(valueToT(value));
   const lastSnap = useRef(value);
@@ -59,6 +61,7 @@ export function HillSlider({ value, onChange }: Props) {
       onPanResponderGrant: () => {
         startT.current = valueToT(value);
         lastSnap.current = value;
+        onDragStart?.();
       },
       onPanResponderMove: (_, gs) => {
         const newT    = Math.max(0, Math.min(1, startT.current + gs.dx / w));
@@ -69,6 +72,8 @@ export function HillSlider({ value, onChange }: Props) {
           onChange(snapped);
         }
       },
+      onPanResponderRelease: () => onDragEnd?.(),
+      onPanResponderTerminate: () => onDragEnd?.(),
     })
   ).current;
 
@@ -115,32 +120,51 @@ export function HillSlider({ value, onChange }: Props) {
             strokeLinecap="round"
           />
 
-          {/* Tick marks */}
+          {/* Tick marks with labels for key values */}
           {SNAP_VALUES.map((sv, i) => {
             const ti   = i / N;
             const tx   = ti * w;
             const ty   = slopeY(ti);
-            const isBig = sv === 0 || Math.abs(sv) === 2 || Math.abs(sv) === 4 || Math.abs(sv) === 5;
-            const half = isBig ? 5 : 3;
+            const isBig = sv === 0 || Math.abs(sv) === 1 || Math.abs(sv) === 2 || Math.abs(sv) === 3 || Math.abs(sv) === 3.5;
+            const half = isBig ? 6 : 3;
             return (
-              <Line
-                key={sv}
-                x1={tx} y1={ty - half}
-                x2={tx} y2={ty + half}
-                stroke={sv === 0 ? '#FFFFFFAA' : '#FFFFFF44'}
-                strokeWidth={isBig ? 1.5 : 1}
-              />
+              <React.Fragment key={sv}>
+                <Line
+                  x1={tx} y1={ty - half}
+                  x2={tx} y2={ty + half}
+                  stroke={sv === 0 ? '#FFFFFFAA' : '#FFFFFF44'}
+                  strokeWidth={isBig ? 1.5 : 1}
+                />
+                {isBig && (
+                  <SvgText
+                    x={tx}
+                    y={4}
+                    textAnchor="middle"
+                    fill={sv === 0 ? '#FFFFFF99' : '#FFFFFF55'}
+                    fontSize={7}
+                  >
+                    {sv === 0 ? '0' : Math.abs(sv) === 3.5 ? '>3' : String(Math.abs(sv))}
+                  </SvgText>
+                )}
+              </React.Fragment>
             );
           })}
 
-          {/* Thumb */}
+          {/* Thumb — wider pill shape */}
+          <Path
+            d={`M ${thumbX - 18},${thumbY} L ${thumbX + 18},${thumbY}`}
+            stroke="#FFFFFF"
+            strokeWidth={4}
+            strokeLinecap="round"
+            opacity={0.3}
+          />
           <Circle
             cx={thumbX}
             cy={thumbY}
-            r={11}
+            r={13}
             fill={thumbFill}
             stroke="#FFFFFF"
-            strokeWidth={2}
+            strokeWidth={2.5}
           />
         </Svg>
 

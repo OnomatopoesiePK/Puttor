@@ -13,14 +13,15 @@ export function calculateSG(distanceM: number, holed: boolean): number {
   const baseline = getBaseline(distanceM);
 
   if (holed) {
-    // Used 1 putt; tour expected baseline.expectedPutts
-    return 1 - baseline.expectedPutts;
+    // SG = expected_putts_from_here - actual_putts_taken
+    // Positive = gained strokes vs tour average
+    return baseline.expectedPutts - 1;
   } else {
-    // Missed — you'll need at least one more putt from the leave distance
+    // Missed: used 1 putt and left the ball at typical leave distance
     const leave = getTypicalLeave(distanceM);
     const leaveBaseline = getBaseline(leave);
-    // SG = putts_used - expected_putts = (1 + leaveBaseline.expectedPutts) - baseline.expectedPutts
-    return -((1 + leaveBaseline.expectedPutts) - baseline.expectedPutts);
+    // SG = starting_expected - (1 putt used + remaining expected)
+    return baseline.expectedPutts - (1 + leaveBaseline.expectedPutts);
   }
 }
 

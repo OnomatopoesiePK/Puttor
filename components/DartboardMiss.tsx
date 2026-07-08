@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Svg, { Circle, Path, Text as SvgText, G } from 'react-native-svg';
+import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../constants/theme';
 import { PuttResult } from '../db/queries';
@@ -10,13 +10,12 @@ const CX    = SIZE / 2;
 const CY    = SIZE / 2;
 const R     = SIZE / 2 - 4;
 
-// Ring radii (as fraction of R)
-const R_HOLED    = 0.14;  // Centre = Holed
-const R_LIP      = 0.27;  // Lip-out / hole-high ring
-const R_INNER    = 0.27;  // inner sector boundary (= lip outer)
-const R_OUTER    = 1.0;   // outer boundary
+const R_HOLED = 0.20;
+const R_LIP   = 0.35;
+const R_INNER = 0.35;
+const R_OUTER = 1.0;
 
-// 8 directional sectors, each 45°, starting N (top) clockwise
+// Rotated -90° vs original so LONG is at top, SHORT is at bottom
 const SECTORS: Array<{
   result: PuttResult;
   label: string;
@@ -24,14 +23,14 @@ const SECTORS: Array<{
   fillA: string;
   fillB: string;
 }> = [
-  { result: 'long',        label: 'LONG',     startDeg: -22.5,  fillA: '#3A5060', fillB: '#2E3F50' },
-  { result: 'long_right',  label: '↗',        startDeg:  22.5,  fillA: '#3E3040', fillB: '#322635' },
-  { result: 'right',       label: 'RIGHT',    startDeg:  67.5,  fillA: '#3A2A20', fillB: '#2E201A' },
-  { result: 'short_right', label: '↘',        startDeg: 112.5,  fillA: '#3E3040', fillB: '#322635' },
-  { result: 'short',       label: 'SHORT',    startDeg: 157.5,  fillA: '#3A5060', fillB: '#2E3F50' },
-  { result: 'short_left',  label: '↙',        startDeg: 202.5,  fillA: '#3E3040', fillB: '#322635' },
-  { result: 'left',        label: 'LEFT',     startDeg: 247.5,  fillA: '#3A2A20', fillB: '#2E201A' },
-  { result: 'long_left',   label: '↖',        startDeg: 292.5,  fillA: '#3E3040', fillB: '#322635' },
+  { result: 'long',        label: 'LONG',  startDeg: -112.5, fillA: '#3A5060', fillB: '#2E3F50' },
+  { result: 'long_right',  label: '↗',     startDeg:  -67.5, fillA: '#3E3040', fillB: '#322635' },
+  { result: 'right',       label: 'RIGHT', startDeg:  -22.5, fillA: '#3A2A20', fillB: '#2E201A' },
+  { result: 'short_right', label: '↘',     startDeg:   22.5, fillA: '#3E3040', fillB: '#322635' },
+  { result: 'short',       label: 'SHORT', startDeg:   67.5, fillA: '#3A5060', fillB: '#2E3F50' },
+  { result: 'short_left',  label: '↙',     startDeg:  112.5, fillA: '#3E3040', fillB: '#322635' },
+  { result: 'left',        label: 'LEFT',  startDeg:  157.5, fillA: '#3A2A20', fillB: '#2E201A' },
+  { result: 'long_left',   label: '↖',     startDeg:  202.5, fillA: '#3E3040', fillB: '#322635' },
 ];
 
 // Convert degrees to radians
@@ -69,10 +68,12 @@ function labelPt(startDeg: number, endDeg: number, r: number) {
 
 interface Props {
   value: PuttResult | null;
+  lipOut: boolean;
   onChange: (result: PuttResult) => void;
+  onLipOutChange: (lipOut: boolean) => void;
 }
 
-export function DartboardMiss({ value, onChange }: Props) {
+export function DartboardMiss({ value, lipOut, onChange, onLipOutChange }: Props) {
   const outerR   = R;
   const lipOutR  = R * R_LIP;
   const holedR   = R * R_HOLED;
@@ -95,8 +96,7 @@ export function DartboardMiss({ value, onChange }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>RESULT</Text>
-
+      <Text style={styles.label}>MISS BOARD</Text>
       <View style={styles.board}>
         {/* SVG base layer — non-interactive, purely visual */}
         <Svg width={SIZE} height={SIZE} style={StyleSheet.absoluteFill}>
@@ -118,15 +118,15 @@ export function DartboardMiss({ value, onChange }: Props) {
             );
           })}
 
-          {/* Lip-out ring */}
-          <Path
-            d={sectorPath(-180, 180, holedR, lipOutR)}
-            fill={value === 'hole_high' ? colors.lipOut + 'DD' : '#2A3D2A'}
-            stroke={colors.border}
-            strokeWidth={0.5}
+          {/* Lip-out ring (drawn as circle to avoid seam at -180/180) */}
+          <Circle
+            cx={CX}
+            cy={CY}
+            r={lipOutR}
+            fill={lipOut ? colors.lipOut + 'DD' : '#2A3D2A'}
+            stroke={lipOut ? colors.lipOut : colors.border}
+            strokeWidth={lipOut ? 2 : 1}
           />
-          {/* Fix lip-out ring (full circle annulus) */}
-          <Circle cx={CX} cy={CY} r={lipOutR} fill="none" stroke={colors.border} strokeWidth={1} />
 
           {/* Holed centre */}
           <Circle
@@ -163,7 +163,7 @@ export function DartboardMiss({ value, onChange }: Props) {
             x={CX}
             y={CY - (holedR + lipOutR) / 2 + 3}
             textAnchor="middle"
-            fill={value === 'hole_high' ? '#FFF' : '#FFFFFF66'}
+            fill={lipOut ? '#FFF' : '#FFFFFF66'}
             fontSize={7}
             fontWeight="600"
           >
@@ -198,46 +198,53 @@ export function DartboardMiss({ value, onChange }: Props) {
               r2={sectorR2}
               cx={CX}
               cy={CY}
-              size={SIZE}
               onPress={handlePress}
             />
           ))}
 
-          {/* Lip-out / Hole-high ring touch */}
+          {/* Lip-out ring touch */}
           <CircleRingHit
-            result="hole_high"
             r1={holedR}
             r2={lipOutR}
             cx={CX}
             cy={CY}
-            size={SIZE}
-            onPress={handlePress}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+              onLipOutChange(!lipOut);
+            }}
           />
 
           {/* Holed centre touch */}
           <CircleRingHit
-            result="holed"
             r1={0}
             r2={holedR}
             cx={CX}
             cy={CY}
-            size={SIZE}
-            onPress={handlePress}
+            onPress={() => handlePress('holed')}
           />
         </View>
       </View>
 
-      {value && (
+      {(value || lipOut) && (
         <Text style={styles.resultText}>
-          {value === 'holed'      ? '✅ Holed!' :
-           value === 'hole_high'  ? '🕳 Lip Out' :
-           value === 'short'      ? '⬇ Short' :
-           value === 'long'       ? '⬆ Long' :
-           value === 'left'       ? '⬅ Left' :
-           value === 'right'      ? '➡ Right' :
-           value === 'short_left' ? '↙ Short Left' :
-           value === 'short_right'? '↘ Short Right' :
-           value === 'long_left'  ? '↖ Long Left' :
+          {lipOut && value && value !== 'holed' ? `🔄 Lip + ${
+            value === 'short'       ? 'Short' :
+            value === 'long'        ? 'Long' :
+            value === 'left'        ? 'Left' :
+            value === 'right'       ? 'Right' :
+            value === 'short_left'  ? 'Short Left' :
+            value === 'short_right' ? 'Short Right' :
+            value === 'long_left'   ? 'Long Left' : 'Long Right'
+          }` :
+           lipOut                ? '🕳 Lip Out' :
+           value === 'holed'     ? '✅ Holed!' :
+           value === 'short'     ? '⬇ Short' :
+           value === 'long'      ? '⬆ Long' :
+           value === 'left'      ? '⬅ Left' :
+           value === 'right'     ? '➡ Right' :
+           value === 'short_left'  ? '↙ Short Left' :
+           value === 'short_right' ? '↘ Short Right' :
+           value === 'long_left'   ? '↖ Long Left' :
                                     '↗ Long Right'}
         </Text>
       )}
@@ -250,10 +257,10 @@ export function DartboardMiss({ value, onChange }: Props) {
 // For simplicity we use the full SVG as one touchable and compute the angle.
 
 function SectorHitArea({
-  result, startDeg, r1, r2, cx, cy, size, onPress,
+  result, startDeg, r1, r2, cx, cy, onPress,
 }: {
   result: PuttResult; startDeg: number; r1: number; r2: number;
-  cx: number; cy: number; size: number;
+  cx: number; cy: number;
   onPress: (r: PuttResult) => void;
 }) {
   const endDeg = startDeg + 45;
@@ -272,17 +279,17 @@ function SectorHitArea({
 }
 
 function CircleRingHit({
-  result, r1, r2, cx, cy, size, onPress,
+  r1, r2, cx, cy, onPress,
 }: {
-  result: PuttResult; r1: number; r2: number;
-  cx: number; cy: number; size: number;
-  onPress: (r: PuttResult) => void;
+  r1: number; r2: number;
+  cx: number; cy: number;
+  onPress: () => void;
 }) {
   const d = r2 * 2;
   return (
     <TouchableOpacity
       style={[styles.hitArea, { left: cx - r2, top: cy - r2, width: d, height: d, borderRadius: r2 }]}
-      onPress={() => onPress(result)}
+      onPress={onPress}
       activeOpacity={0.5}
     />
   );

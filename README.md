@@ -1,4 +1,4 @@
-# PuttTrack
+# Puttor
 
 A React Native (Expo) iPhone-first putting statistics tracker.
 
