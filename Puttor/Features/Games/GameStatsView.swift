@@ -48,6 +48,20 @@ struct GameStatsView: View {
         .navigationTitle(L(gameType.titleKey))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
+        .toolbar {
+            if best != nil {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showResetConfirm = true
+                    } label: {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 15, weight: .bold))
+                    }
+                    .foregroundStyle(Theme.primary)
+                    .accessibilityLabel(L("game.stats.resetTitle"))
+                }
+            }
+        }
         .navigationDestination(item: $playingGame) { game in
             GameDestinationView(gameType: game) { playingGame = nil }
         }
@@ -84,31 +98,19 @@ struct GameStatsView: View {
             statBox(
                 value: best.map { GameScoreFormat.text($0.score, for: gameType) } ?? "–",
                 label: L("game.best"),
-                color: Theme.primary,
-                trailing: best != nil ? { showResetConfirm = true } : nil
+                color: Theme.primary
             )
             statBox(
                 value: average.map { GameScoreFormat.preciseText($0, for: gameType) } ?? "–",
                 label: L("game.stats.avgLast5"),
-                color: Theme.accent,
-                trailing: nil
+                color: Theme.accent
             )
         }
     }
 
-    private func statBox(value: String, label: String, color: Color, trailing: (() -> Void)?) -> some View {
+    private func statBox(value: String, label: String, color: Color) -> some View {
         VStack(spacing: 2) {
-            HStack(spacing: 4) {
-                Text(value).font(.system(size: 26, weight: .black)).foregroundStyle(color)
-                if let trailing {
-                    Button(action: trailing) {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(Theme.textMuted)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+            Text(value).font(.system(size: 26, weight: .black)).foregroundStyle(color)
             Text(label).font(.system(size: 10, weight: .bold)).tracking(0.8).foregroundStyle(Theme.textMuted)
             Text(L(gameType.scoreUnitKey)).font(.system(size: 9)).foregroundStyle(Theme.textMuted)
         }
