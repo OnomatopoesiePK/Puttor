@@ -489,14 +489,29 @@ final class RoundSession {
 
     // MARK: - Ending the round
 
-    /// Ends the round. Every hole of the chosen length that still has no putt
-    /// recorded becomes a 0-putt hole-out at this point — during play an empty
-    /// hole just means "not entered yet", and only finishing the round settles
-    /// it as "holed out without putting".
+    /// Ends the round, settling which still-empty holes were genuine 0-putt
+    /// hole-outs.
+    ///
+    /// A hole the player moved *past* — one with entries after it — was played
+    /// without putting, so it becomes a hole-out. Empty holes at the *end*
+    /// normally just mean the round was cut short and are left out of it
+    /// entirely, since counting them would drag the round's stats down for
+    /// holes that were never played. The exception is a round that is all but
+    /// complete (within two holes of its full length): there the trailing
+    /// blanks really are hole-outs, so they're filled in too.
     func endRound(holeCount: Int) {
-        for hole in holeSequence.prefix(holeCount) where puttsOnHole(hole).isEmpty {
+        let roundHoles = Array(holeSequence.prefix(holeCount))
+        let isPlayed: (Int) -> Bool = { !self.puttsOnHole($0).isEmpty }
+        let playedCount = roundHoles.filter(isPlayed).count
+        let fillTrailingBlanks = playedCount >= holeCount - 2
+        let lastPlayedIndex = roundHoles.lastIndex(where: isPlayed)
+
+        for (index, hole) in roundHoles.enumerated() where !isPlayed(hole) {
+            let wasSkippedOver = lastPlayedIndex.map { index < $0 } ?? false
+            guard wasSkippedOver || fillTrailingBlanks else { continue }
             insertHoleOutSentinel(forHole: hole)
         }
+
         round.holeCount = holeCount
         round.isComplete = true
         try? modelContext.save()

@@ -147,10 +147,11 @@ struct PuttorTests {
         #expect(session.displayHole == 2)
     }
 
-    /// A hole left empty during play only becomes a 0-putt hole-out when the
-    /// round is ended, and only within the chosen round length.
+    /// Ending a round turns *skipped* holes — empty ones the player moved past —
+    /// into 0-putt hole-outs, while empty holes at the end are left out of the
+    /// round entirely (the round was simply cut short there).
     @MainActor
-    @Test func endingRoundConvertsEmptyHolesToHoleOuts() async throws {
+    @Test func endingRoundConvertsOnlySkippedHolesToHoleOuts() async throws {
         Self.withUnits("metric")
         let context = try Self.makeInMemoryContext()
         let round = Round(courseName: "Test", startingHole: 1)
@@ -158,20 +159,46 @@ struct PuttorTests {
         try context.save()
 
         let session = RoundSession(round: round, modelContext: context)
-        session.jumpToHole(2)
-        session.draftResult = .holed
-        _ = session.recordDraft()
-        #expect(round.putts.count == 1) // nothing implicit yet
+        for hole in [2, 5] {
+            session.jumpToHole(hole)
+            session.draftResult = .holed
+            _ = session.recordDraft()
+        }
+        #expect(round.putts.count == 2) // nothing implicit yet
 
-        session.endRound(holeCount: 9)
+        session.endRound(holeCount: 18)
 
-        // Holes 1 and 3...9 become hole-outs; hole 2 keeps its real putt.
+        // Holes 1, 3 and 4 were skipped over -> hole-outs. Holes 6...18 come
+        // after the last entry, so they stay out of the round.
         let sentinels = round.putts.filter { $0.puttNumber == 0 }.map(\.holeNumber).sorted()
-        #expect(sentinels == [1, 3, 4, 5, 6, 7, 8, 9])
-        #expect(round.putts.filter { $0.holeNumber == 2 && $0.puttNumber > 0 }.count == 1)
-        // Holes beyond the chosen 9 are not part of the round at all.
-        #expect(round.putts.contains { $0.holeNumber > 9 } == false)
+        #expect(sentinels == [1, 3, 4])
+        #expect(round.putts.filter { $0.puttNumber > 0 }.count == 2)
         #expect(round.isComplete)
+    }
+
+    /// An all-but-complete round (within two holes of full length) does count
+    /// its trailing blanks as hole-outs — those last holes plausibly were.
+    @MainActor
+    @Test func endingNearlyFullRoundAlsoFillsTrailingHoleOuts() async throws {
+        Self.withUnits("metric")
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+        try context.save()
+
+        let session = RoundSession(round: round, modelContext: context)
+        for hole in 1...16 {
+            session.jumpToHole(hole)
+            session.draftResult = .holed
+            _ = session.recordDraft()
+        }
+
+        session.endRound(holeCount: 18)
+
+        // 16 of 18 entered -> holes 17 and 18 are treated as hole-outs.
+        let sentinels = round.putts.filter { $0.puttNumber == 0 }.map(\.holeNumber).sorted()
+        #expect(sentinels == [17, 18])
+        #expect(round.putts.filter { $0.puttNumber > 0 }.count == 16)
     }
 
     /// Landing on a hole that already has putts is browsing, not editing — the
