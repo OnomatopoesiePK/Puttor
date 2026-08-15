@@ -33,9 +33,9 @@ struct RoundSetupView: View {
     @State private var addingPutter = false
     @State private var newPutterName = ""
 
-    /// 7.0 and 12.5 are the open-ended "<7" / ">12" buckets, so the selectable
-    /// readings in between run 7.5, 8.0 … 12.0.
-    private static let stimpBounds: ClosedRange<Double> = 7.0...12.5
+    /// 6.5 and 12.5 are the open-ended "<7" / ">12" buckets, so the selectable
+    /// readings in between run 7.0, 7.5 … 12.0.
+    private static let stimpBounds: ClosedRange<Double> = 6.5...12.5
     static let defaultStimp: Double = 9
     private var stimpRange: ClosedRange<Double> { Self.stimpBounds }
 
