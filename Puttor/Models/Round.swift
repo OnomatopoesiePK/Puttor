@@ -12,7 +12,7 @@ final class Round {
     var courseName: String = ""
     var date: Date = Date()
     var putter: Putter?
-    var stimp: Double = 10
+    var stimp: Double = 9
     var windRaw: String = WindLevel.none.rawValue
     var weatherRaw: String = WeatherTemp.warm.rawValue
     var precipitationRaw: String = Precipitation.sun.rawValue
@@ -59,7 +59,7 @@ final class Round {
         courseName: String,
         date: Date = Date(),
         putter: Putter? = nil,
-        stimp: Double = 10,
+        stimp: Double = 9,
         wind: WindLevel = .none,
         weather: WeatherTemp = .warm,
         precipitation: Precipitation = .sun,

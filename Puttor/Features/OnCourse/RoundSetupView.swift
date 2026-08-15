@@ -33,7 +33,11 @@ struct RoundSetupView: View {
     @State private var addingPutter = false
     @State private var newPutterName = ""
 
-    private let stimpRange: ClosedRange<Double> = 6.5...13.5
+    /// 7.0 and 12.5 are the open-ended "<7" / ">12" buckets, so the selectable
+    /// readings in between run 7.5, 8.0 … 12.0.
+    private static let stimpBounds: ClosedRange<Double> = 7.0...12.5
+    static let defaultStimp: Double = 9
+    private var stimpRange: ClosedRange<Double> { Self.stimpBounds }
 
     init(existingRound: Round? = nil, onCreated: @escaping (Round) -> Void = { _ in }, onSaved: @escaping () -> Void = {}) {
         self.existingRound = existingRound
@@ -42,7 +46,10 @@ struct RoundSetupView: View {
         _courseName = State(initialValue: existingRound?.courseName ?? "")
         _date = State(initialValue: existingRound?.date ?? Date())
         _putterID = State(initialValue: existingRound?.putter?.persistentModelID)
-        _stimp = State(initialValue: existingRound?.stimp ?? 10)
+        // Rounds saved under the older, wider scale can sit outside the current
+        // bounds — clamp so the slider still shows a sensible position.
+        let storedStimp = existingRound?.stimp ?? Self.defaultStimp
+        _stimp = State(initialValue: min(max(storedStimp, Self.stimpBounds.lowerBound), Self.stimpBounds.upperBound))
         _wind = State(initialValue: existingRound?.wind ?? .none)
         _weather = State(initialValue: existingRound?.weather ?? .warm)
         _precipitation = State(initialValue: existingRound?.precipitation ?? .sun)
@@ -228,21 +235,29 @@ struct RoundSetupView: View {
                 .tint(Theme.primary)
 
             HStack {
-                Text("<7").font(.caption).foregroundStyle(Theme.textMuted)
+                Text(Self.stimpText(for: stimpRange.lowerBound)).font(.caption).foregroundStyle(Theme.textMuted)
                 Spacer()
-                Text(String(format: "%.1f", stimp))
+                Text(Self.stimpText(for: stimp))
                     .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(stimpLabelColor)
                 Text(stimpLabel)
                     .font(.system(size: 13, weight: .heavy))
                     .foregroundStyle(stimpLabelColor)
                 Spacer()
-                Text(">13").font(.caption).foregroundStyle(Theme.textMuted)
+                Text(Self.stimpText(for: stimpRange.upperBound)).font(.caption).foregroundStyle(Theme.textMuted)
             }
         }
         .padding(Theme.Spacing.md)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    /// The two ends of the slider are open-ended buckets rather than exact
+    /// readings — anything slower than 7 or faster than 12 lands there.
+    private static func stimpText(for value: Double) -> String {
+        if value <= stimpBounds.lowerBound { return "<7" }
+        if value >= stimpBounds.upperBound { return ">12" }
+        return String(format: "%.1f", value)
     }
 
     private var stimpLabel: String {
