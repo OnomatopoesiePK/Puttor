@@ -1,0 +1,361 @@
+/* Common */
+"common.add" = "Add";
+"common.cancel" = "Cancel";
+"common.done" = "Done";
+"common.edit" = "Edit";
+"common.back" = "Back";
+"common.save" = "Save";
+
+/* Tabs */
+"tab.course" = "Course";
+"tab.games" = "Games";
+"tab.stats" = "Stats";
+"tab.settings" = "Settings";
+
+/* On Course list */
+"onCourse.title" = "On Course";
+"onCourse.startNewRound" = "Start New Round";
+"onCourse.recentRounds" = "RECENT ROUNDS";
+"onCourse.unnamedCourse" = "Unnamed Course";
+"onCourse.complete" = "Complete";
+"onCourse.inProgress" = "In Progress";
+"onCourse.noRounds" = "No rounds yet.";
+"onCourse.noRoundsHint" = "Tap \"Start New Round\" to begin tracking.";
+"onCourse.edit" = "Edit";
+"onCourse.editSettings" = "Edit Round Settings";
+"onCourse.open" = "Open";
+"onCourse.resume" = "Resume";
+"onCourse.delete" = "Delete";
+
+/* Round setup */
+"setup.newRound" = "New Round";
+"setup.editRound" = "Edit Round";
+"setup.saveChanges" = "Save Changes";
+"setup.course" = "COURSE";
+"setup.courseNamePlaceholder" = "Course name (optional)";
+"setup.date" = "DATE & TIME";
+"setup.putter" = "PUTTER";
+"setup.noPutters" = "Add putters here or in Settings → My Putters";
+"setup.addPutter" = "Add Putter";
+"setup.putterNamePlaceholder" = "Putter name…";
+"setup.stimp" = "STIMPMETER";
+"setup.slow" = "SLOW";
+"setup.medium" = "MEDIUM";
+"setup.fast" = "FAST";
+"setup.wind" = "WIND";
+"setup.weather" = "WEATHER";
+"setup.precipitation" = "RAIN OR SUN";
+"setup.greens" = "GREENS";
+"setup.grainyGreens" = "Grainy greens";
+"setup.grainyGreens.desc" = "Greens have visible grain";
+"setup.startingHole" = "STARTING HOLE";
+"setup.inputMode" = "INPUT MODE";
+"setup.startRound" = "Start Round";
+
+/* Wind / weather / precipitation */
+"wind.none" = "None";
+"wind.medium" = "Medium";
+"wind.high" = "High";
+"weather.cold" = "Cold";
+"weather.warm" = "Warm";
+"weather.hot" = "Hot";
+"precipitation.sun" = "Sun";
+"precipitation.rain" = "Rain";
+
+/* Input mode */
+"inputMode.pro" = "Pro";
+"inputMode.pro.desc" = "Full detail: slope, dartboard miss, miss reasons";
+"inputMode.quick" = "Quick";
+"inputMode.quick.desc" = "Just distance, putt-for and made/missed";
+"inputMode.custom" = "Custom";
+"inputMode.custom.desc" = "Your own field selection, configured in Settings";
+
+/* Putt input */
+"input.result" = "RESULT";
+"input.hole" = "HOLE";
+"input.total" = "TOTAL";
+"input.end" = "End";
+"input.editing" = "EDITING";
+"input.saved" = "SAVED";
+"input.deleteHoleConfirm" = "Delete all putts on hole %ld?";
+"input.distanceLabel" = "DISTANCE TO HOLE";
+"input.puttFor" = "PUTT FOR";
+"input.slopeGrid" = "SLOPE GRID";
+"input.slopeGrid.info" = "Tap the cell that matches the putt's break and slope, as seen standing behind the ball looking toward the hole. Left/right = side break, top/bottom = uphill/downhill.";
+"input.uphill" = "UPHILL";
+"input.downhill" = "DOWNHILL";
+"input.left" = "LEFT";
+"input.straight" = "STRAIGHT";
+"input.right" = "RIGHT";
+"input.flat" = "Flat";
+"input.rl" = "R-L";
+"input.lr" = "L-R";
+"input.up" = "U";
+"input.down" = "D";
+"input.doubleBreak" = "DOUBLE BREAK";
+"input.missBoard" = "MISS BOARD";
+"input.missBoard.info" = "Tap the center for holed, the ring around it for a lip-out, or an outer sector for the direction and distance the putt missed relative to the hole.";
+"input.lip" = "LIP";
+"input.missRead" = "Miss Read";
+"input.badStroke" = "Bad Stroke";
+"input.wrongAim" = "Wrong Aim";
+"input.tapIn" = "Tap-In (0.3 m)";
+"input.tapInShort" = "Tap-In";
+"input.recordShort" = "Record";
+"input.saveEditShort" = "Save";
+"input.holedNextShort" = "Next Hole";
+"input.recorded" = "recorded";
+"input.saveEdit" = "Save Edit";
+"input.holedNext" = "Holed! Next Hole";
+"input.recordPutt" = "Record Putt";
+"input.holeCompleteTitle" = "⛳ Round Complete!";
+"input.holeCompleteMessage" = "Do you want to end the round?";
+"input.endRound" = "End Round";
+"input.continueFromStart" = "Continue (Hole 1)";
+"input.endRoundTitle" = "End Round";
+"input.endRoundMessage" = "End round after %ld putts across %ld hole(s)?";
+"input.save9Or18Title" = "Save as 9-hole round?";
+"input.save9" = "Save 9 Holes";
+"input.save18" = "Save 18 Holes";
+"input.save9Or18Message" = "Do you want to save this round as 9 holes or as a full 18-hole round?";
+"input.missed" = "Missed";
+"input.holedBtn" = "Holed";
+"input.jumpToHole" = "Jump to Hole";
+
+/* Score categories */
+"score.eagle" = "Eagle";
+"score.birdie" = "Birdie";
+"score.par" = "Par";
+"score.bogey" = "Bogey";
+"score.doubleOrWorse" = "Double+";
+"score.eagle.short" = "EAGLE";
+"score.birdie.short" = "BIRDIE";
+"score.par.short" = "PAR";
+"score.bogey.short" = "BOGEY";
+"score.doubleOrWorse.short" = "DB+";
+
+/* Putt results */
+"result.holed" = "Holed";
+"result.short" = "Short";
+"result.long" = "Long";
+"result.left" = "Left";
+"result.right" = "Right";
+"result.shortLeft" = "Short Left";
+"result.shortRight" = "Short Right";
+"result.longLeft" = "Long Left";
+"result.longRight" = "Long Right";
+"result.holeHigh" = "Hole High";
+"result.missedGeneric" = "Missed";
+"result.lipOut" = "Lip Out";
+
+/* Double break */
+"doubleBreak.rlLr" = "R→L then L→R";
+"doubleBreak.lrRl" = "L→R then R→L";
+
+/* Round summary */
+"summary.title" = "Round Summary";
+"summary.done" = "Done";
+"summary.putts" = "Putts";
+"summary.holes" = "Holes";
+"summary.avgPerHole" = "Avg/Hole";
+"summary.sg" = "SG";
+"summary.highlight" = "HIGHLIGHT";
+"summary.holeAbbr" = "Hole";
+"summary.puttAbbr" = "Putt";
+"summary.puttsAbbr" = "putts";
+"summary.onePutt" = "1 putt";
+"summary.twoPutts" = "2 putts";
+"summary.threePlusPutts" = "3+ putts";
+"summary.missTendency" = "MISS TENDENCY";
+"summary.mostCommonMiss" = "Most common miss";
+"summary.missReasons" = "MISS REASONS";
+"summary.multipleReasons" = "Multiple";
+"summary.leaveByMiss" = "LEAVE DISTANCE BY MISS";
+"summary.holedOut" = "Holed out from off the green — 0 putts";
+"summary.editHole" = "Edit";
+"summary.addPutts" = "Add Putts";
+"summary.notPlayed" = "Not played yet — tap Add Putts to record this hole.";
+
+/* GIR / Scramble */
+"stats.playingStats" = "PLAYING STATS";
+"stats.gir" = "GIR";
+"stats.girFull" = "Greens in Regulation";
+"stats.scramble" = "Scramble";
+"stats.scrambleFull" = "Scramble Rate";
+
+/* Charts */
+"chart.makeVsTour" = "MAKE % VS TOUR";
+"chart.tour" = "Tour";
+"chart.youAheadOfTour" = "You (≥ tour)";
+"chart.youBehindTour" = "You (< tour)";
+"chart.tourToYou" = "Tour → You";
+"chart.made" = "Made";
+"chart.you" = "You";
+"chart.tourAbbr" = "Tour";
+"chart.birdiePutts" = "BIRDIE PUTTS";
+"chart.parPutts" = "PAR PUTTS";
+"chart.bogeyPutts" = "BOGEY PUTTS";
+"stats.makeBySituation" = "MAKE % BY SITUATION";
+
+/* Statistics */
+"stats.title" = "Statistics";
+"stats.last1" = "Last 1";
+"stats.last3" = "Last 3";
+"stats.last5" = "Last 5";
+"stats.last10" = "Last 10";
+"stats.allRounds" = "All Rounds";
+"stats.byPutter" = "By Putter";
+"stats.noRounds" = "No completed rounds yet.";
+"stats.noMatch" = "No rounds match this filter.";
+"stats.rounds" = "ROUNDS";
+"stats.sgPutting" = "STROKES GAINED PUTTING";
+"stats.sgSubtitle" = "avg / round vs PGA Tour baseline";
+"stats.dispersion" = "MISS DISPERSION";
+
+/* Dispersion */
+"dispersion.all" = "All Slopes";
+"dispersion.rl" = "Right-Left";
+"dispersion.lr" = "Left-Right";
+"dispersion.up" = "Uphill";
+"dispersion.down" = "Downhill";
+"dispersion.left" = "LEFT";
+"dispersion.right" = "RIGHT";
+"dispersion.long" = "LONG";
+"dispersion.short" = "SHORT";
+"dispersion.noData" = "No miss data for this filter.";
+
+/* Games */
+"games.title" = "Games";
+"games.subtitle" = "Putting practice games coming soon.";
+"games.hint" = "• Clock\n• Gate game\n• 9-point game\n• Make X in a row";
+
+/* Settings */
+"settings.title" = "Settings";
+"settings.appearance" = "APPEARANCE";
+"settings.dark" = "Dark";
+"settings.light" = "Light";
+"settings.language" = "LANGUAGE";
+"settings.units" = "UNITS";
+"settings.metres" = "Metres";
+"settings.feet" = "Feet";
+"settings.defaultDistance" = "DEFAULT FIRST-PUTT DISTANCE";
+"settings.defaultDistance.value" = "Default distance: %.1f m";
+"settings.defaultDistance.value.ft" = "Default distance: %.0f ft";
+"settings.inputMode" = "INPUT MODE";
+"settings.customMode" = "Custom Mode Fields";
+"settings.customMode.desc" = "Choose which fields the Custom input mode shows";
+"settings.feedback" = "FEEDBACK";
+"settings.haptics" = "Haptic feedback";
+"settings.haptics.desc" = "Vibrate on slider snaps";
+"settings.myPutters" = "MY PUTTERS";
+"settings.about" = "ABOUT";
+"settings.about.desc" = "Strokes gained benchmarks based on PGA Tour data (Mark Broadie methodology).";
+"settings.deletePutterTitle" = "Delete Putter";
+"settings.deletePutterMessage" = "Remove \"%@\"?";
+
+/* Distance / units */
+"distance.lessThan0_5m" = "<0.5 m";
+"distance.lessThan1ft" = "<1 ft";
+"distance.moreThan60ft" = ">60 ft";
+"unit.m" = "m";
+"unit.ft" = "ft";
+
+/* Games — titles */
+"game.gate.title" = "Gate Drill";
+"game.clock.title" = "Clock Drill";
+"game.ninePutt.title" = "9-Putt Drill";
+"game.routine.title" = "Routine Putt Drill";
+"game.aroundTheWorld.title" = "Around the World";
+
+/* Games — goals */
+"game.gate.goal" = "Control your start line and a clean, straight stroke without twisting the putter face.";
+"game.clock.goal" = "Practice different breaks from the same distance without your feel for length changing.";
+"game.ninePutt.goal" = "Build consistency under light pressure and lock down short-to-mid putts.";
+"game.routine.goal" = "Simulates real on-course situations and trains your routine and focus on every single, different putt.";
+"game.aroundTheWorld.goal" = "Simulates a complete round and shows you where your weaknesses still are.";
+
+/* Games — full explanations */
+"game.gate.explanation" = "Push two tees into the ground just in front of the ball, spaced just wide enough for the putter head/ball to pass through (a \"gate\"). Then putt through this gate toward your target line.";
+"game.clock.explanation" = "Place balls in a circle around the hole, like numbers on a clock face (e.g. 12, 3, 6 and 9 o'clock), all at the same distance. Then putt each ball in turn — working your way around clockwise.";
+"game.ninePutt.explanation" = "Choose three positions at different distances (e.g. 1 m, 2 m, 3 m) and putt 3 balls from each — 9 putts total. All 9 must go in, or you start over from the beginning.";
+"game.routine.explanation" = "Randomly prescribed putts — choose which distances and break ranges should be possible. Play these putts one after another exactly as given, each with your full pre-shot routine, no practice putts or do-overs.";
+"game.aroundTheWorld.explanation" = "Build a course of 9 or 18 different putts on the green and play them like a mini round — each putt counts as a hole. Track your strokes per \"hole\" and add them up at the end.";
+
+/* Games — score units */
+"game.unit.percent" = "MAKE RATE";
+"game.unit.cycles" = "Rounds to clear";
+"game.unit.strokes" = "Strokes";
+
+/* Games — info sheet */
+"game.info.goal" = "GOAL";
+"game.info.howTo" = "HOW TO PLAY";
+
+/* Games — home / card */
+"game.best" = "Best";
+"game.noScoreYet" = "No score yet";
+
+/* Games — shared play chrome */
+"game.attempt" = "Attempt";
+"game.attempts" = "Attempts";
+"game.made" = "Made";
+"game.missed" = "Missed";
+"game.start" = "Start";
+"game.done" = "Done";
+"game.newBest" = "New best!";
+"game.giveUp" = "Give up";
+"game.distance" = "Distance";
+
+/* Gate Drill */
+"game.gate.reps" = "Reps";
+"game.gate.howMany" = "How many did you make?";
+"game.gate.outOf" = "out of %ld";
+/* Clock Drill */
+"game.clock.positions" = "Positions";
+"game.clock.laps" = "Laps";
+"game.clock.round" = "Round";
+"game.clock.oclock" = "o'clock";
+"game.clock.hardest" = "HARDEST POSITION";
+
+/* 9-Putt Drill */
+"game.ninePutt.distance" = "Distance";
+"game.ninePutt.ball" = "Ball";
+"game.ninePutt.cycle" = "Cycle";
+
+/* Routine Putt Drill */
+"game.routine.putts" = "Putts";
+"game.routine.putt" = "Putt";
+"game.routine.minDistance" = "Min distance";
+"game.routine.maxDistance" = "Max distance";
+"game.routine.maxBreak" = "Max break";
+"game.routine.rangeError" = "Max distance must be ≥ min distance";
+
+/* Around the World */
+"game.aroundTheWorld.holeCount" = "Number of holes";
+"game.aroundTheWorld.strokeCount" = "current stroke";
+"game.aroundTheWorld.missed" = "Missed";
+"game.aroundTheWorld.best" = "Best";
+"game.aroundTheWorld.worst" = "Worst";
+
+/* Custom mode field editor */
+"custom.title" = "Custom Mode";
+"custom.alwaysIncluded" = "ALWAYS INCLUDED";
+"custom.optionalFields" = "OPTIONAL FIELDS";
+"custom.reorderHint" = "Tap Edit to reorder or remove fields. They appear in this order between Distance and Result.";
+"custom.unsavedTitle" = "Save changes?";
+"custom.unsavedMessage" = "You added or removed a field but haven't saved yet.";
+"custom.discardChanges" = "Discard Changes";
+"custom.addField" = "Add Field";
+"custom.complexity.simple" = "Simple";
+"custom.complexity.complex" = "Complex";
+"custom.field.distance" = "Distance";
+"custom.field.distance.desc" = "How far the putt was, always shown first";
+"custom.field.result" = "Result";
+"custom.result.desc" = "Simple = made/missed only. Complex = dartboard with direction and lip-out, like Pro mode.";
+"custom.field.puttFor" = "Putt-For Category";
+"custom.field.puttFor.desc" = "Eagle/birdie/par/bogey/double-or-worse, with auto step-down after a miss";
+"custom.field.slope" = "Slope Grid";
+"custom.field.slope.desc" = "Simple = 9-point grid (uphill/downhill/flat x left/straight/right). Complex = the full professional grid.";
+"custom.field.doubleBreak" = "Double Break";
+"custom.field.doubleBreak.desc" = "Marks a putt that breaks one way then the other";
+"custom.field.missReasons" = "Miss Reasons";
+"custom.field.missReasons.desc" = "Misread, bad stroke, or wrong aim";

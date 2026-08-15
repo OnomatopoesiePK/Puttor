@@ -6,12 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct PuttorApp: App {
+    let container: ModelContainer = {
+        let schema = Schema([Putter.self, Round.self, Putt.self, GameSession.self, GameAttempt.self])
+        let config = ModelConfiguration(schema: schema)
+        return try! ModelContainer(for: schema, configurations: [config])
+    }()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView()
         }
+        .modelContainer(container)
     }
 }

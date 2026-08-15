@@ -1,0 +1,271 @@
+//
+//  RoundStats.swift
+//  Puttor
+//
+//  Ported from the PuttTrack prototype's db/queries.ts#getRoundStats and
+//  statistics.tsx#mergeStats. Miss-reason counting is extended from 2 flags
+//  (missRead/badStrike) to 3 (missRead/badStroke/wrongAim).
+//
+
+import Foundation
+
+struct DistanceBracket: Identifiable {
+    let id: String
+    let label: String
+    let min: Double
+    let max: Double
+    let made: Int
+    let total: Int
+    let tourMakePct: Double
+    let sgTotal: Double
+}
+
+struct MissReasonCounts {
+    var missRead: Int = 0
+    var badStroke: Int = 0
+    var wrongAim: Int = 0
+    var multiple: Int = 0
+
+    var total: Int { missRead + badStroke + wrongAim + multiple }
+
+    static func + (lhs: MissReasonCounts, rhs: MissReasonCounts) -> MissReasonCounts {
+        MissReasonCounts(
+            missRead: lhs.missRead + rhs.missRead,
+            badStroke: lhs.badStroke + rhs.badStroke,
+            wrongAim: lhs.wrongAim + rhs.wrongAim,
+            multiple: lhs.multiple + rhs.multiple
+        )
+    }
+}
+
+struct LeaveInfo {
+    var count: Int
+    var avgLeaveM: Double
+}
+
+struct RoundStats {
+    var totalPutts: Int = 0
+    var holes: Int = 0
+    var avgPuttsPerHole: Double = 0
+    var sgTotal: Double = 0
+    var makeByDistance: [DistanceBracket] = []
+    /// Make % by distance bracket, filtered to putts taken "for" a given score (birdie/par/bogey).
+    var makeByCategory: [ScoreCategory: [DistanceBracket]] = [:]
+    var missCounts: [PuttResult: Int] = [:]
+    var puttsByHole: [Int: Int] = [:]
+    var leaveByMissDirection: [PuttResult: LeaveInfo] = [:]
+    var missReasonCounts: MissReasonCounts = MissReasonCounts()
+
+    /// Holes where the first putt was "for birdie" — i.e. the green was hit in regulation.
+    var girCount: Int = 0
+    /// First putts "for par" (green missed, no birdie putt on this hole) — up-and-down attempts.
+    var scrambleAttempts: Int = 0
+    /// Of those, how many were saved with a single putt.
+    var scrambleSuccesses: Int = 0
+
+    var girPercent: Double { holes > 0 ? Double(girCount) / Double(holes) * 100 : 0 }
+    var scramblePercent: Double { scrambleAttempts > 0 ? Double(scrambleSuccesses) / Double(scrambleAttempts) * 100 : 0 }
+
+    static let situationCategories: [ScoreCategory] = [.birdie, .par, .bogey]
+
+    static let bracketsMetric: [(label: String, min: Double, max: Double)] = [
+        ("0–1m", 0, 1), ("1–2m", 1, 2), ("2–3m", 2, 3), ("3–4m", 3, 4),
+        ("4–5m", 4, 5), ("5–6m", 5, 6), ("6–7m", 6, 7), ("7–9m", 7, 9),
+        ("9–12m", 9, 12), ("12–15m", 12, 15), ("15–20m", 15, 20), ("20+m", 20, 999),
+    ]
+
+    /// Always in fixed 3 ft steps, per the user's preference — a straight
+    /// conversion of the metric brackets would produce uneven, non-round
+    /// foot boundaries.
+    static let bracketsFeet: [(label: String, min: Double, max: Double)] = {
+        var result: [(String, Double, Double)] = []
+        var ft = 0
+        while ft < 30 {
+            let next = ft + 3
+            result.append(("\(ft)–\(next)ft", UnitConverter.feetToMetres(Double(ft)), UnitConverter.feetToMetres(Double(next))))
+            ft = next
+        }
+        result.append(("30+ft", UnitConverter.feetToMetres(30), 999))
+        return result
+    }()
+
+    static func brackets(useFeet: Bool) -> [(label: String, min: Double, max: Double)] {
+        useFeet ? bracketsFeet : bracketsMetric
+    }
+
+    private static func averageTourMakePct(min: Double, max: Double) -> Double {
+        let baselineMax = StrokesGained.tourBaseline.last?.distanceM ?? 30
+        let effectiveMax = max >= 999 ? baselineMax : max
+        var samples: [Double] = []
+        var d = min
+        while d <= effectiveMax + 1e-9 {
+            samples.append(StrokesGained.baseline(at: (d * 10).rounded() / 10).makeProbability * 100)
+            d += 0.5
+        }
+        guard !samples.isEmpty else { return 0 }
+        return samples.reduce(0, +) / Double(samples.count)
+    }
+
+    static func compute(putts: [Putt], useFeet: Bool = false) -> RoundStats {
+        var stats = RoundStats()
+
+        // puttNumber == 0 is a sentinel for "holed out from off the green, 0 putts" —
+        // it marks the hole as played but isn't itself a putt for counting/SG/category purposes.
+        let realPutts = putts.filter { $0.puttNumber > 0 }
+        stats.totalPutts = realPutts.count
+
+        let holeSet = Set(putts.map { $0.holeNumber })
+        stats.holes = holeSet.count
+        stats.avgPuttsPerHole = stats.holes > 0 ? Double(stats.totalPutts) / Double(stats.holes) : 0
+        stats.sgTotal = realPutts.reduce(0) { $0 + $1.sgActual }
+
+        for hole in holeSet { stats.puttsByHole[hole] = 0 }
+        for p in realPutts {
+            stats.puttsByHole[p.holeNumber, default: 0] += 1
+            stats.missCounts[p.result, default: 0] += 1
+        }
+
+        stats.makeByDistance = computeDistanceBrackets(realPutts, useFeet: useFeet)
+
+        for category in situationCategories {
+            let categoryPutts = realPutts.filter { $0.puttFor == category }
+            stats.makeByCategory[category] = computeDistanceBrackets(categoryPutts, useFeet: useFeet)
+        }
+
+        stats.missReasonCounts = computeMissReasonCounts(realPutts)
+        stats.leaveByMissDirection = computeLeaveByMissDirection(realPutts)
+
+        let firstPutts = realPutts.filter { $0.puttNumber == 1 }
+        stats.girCount = firstPutts.filter { $0.puttFor == .birdie }.count
+        let scrambleFirstPutts = firstPutts.filter { $0.puttFor == .par }
+        stats.scrambleAttempts = scrambleFirstPutts.count
+        stats.scrambleSuccesses = scrambleFirstPutts.filter { $0.result == .holed }.count
+
+        return stats
+    }
+
+    private static func computeDistanceBrackets(_ putts: [Putt], useFeet: Bool) -> [DistanceBracket] {
+        brackets(useFeet: useFeet).map { b in
+            let dm = putts.filter { p in
+                let d = p.distanceM < 0.5 ? 0.3 : p.distanceM
+                return d >= b.min && d < b.max
+            }
+            let made = dm.filter { $0.result == .holed }.count
+            let sg = dm.reduce(0) { $0 + $1.sgActual }
+            return DistanceBracket(
+                id: b.label, label: b.label, min: b.min, max: b.max,
+                made: made, total: dm.count,
+                tourMakePct: averageTourMakePct(min: b.min, max: b.max),
+                sgTotal: sg
+            )
+        }
+    }
+
+    static func computeMissReasonCounts(_ putts: [Putt]) -> MissReasonCounts {
+        var result = MissReasonCounts()
+        for p in putts {
+            let flags = [p.missRead, p.badStroke, p.wrongAim]
+            let count = flags.filter { $0 }.count
+            if count == 0 { continue }
+            if count >= 2 { result.multiple += 1; continue }
+            if p.missRead { result.missRead += 1 }
+            else if p.badStroke { result.badStroke += 1 }
+            else if p.wrongAim { result.wrongAim += 1 }
+        }
+        return result
+    }
+
+    static func computeLeaveByMissDirection(_ putts: [Putt]) -> [PuttResult: LeaveInfo] {
+        var byHole: [String: [Putt]] = [:]
+        for p in putts {
+            let key = "\(p.round?.id.uuidString ?? "-")-\(p.holeNumber)"
+            byHole[key, default: []].append(p)
+        }
+
+        var leaveSamples: [PuttResult: [Double]] = [:]
+        for holePutts in byHole.values {
+            var byPuttNumber: [Int: Putt] = [:]
+            for p in holePutts {
+                if let existing = byPuttNumber[p.puttNumber] {
+                    if p.createdAt > existing.createdAt { byPuttNumber[p.puttNumber] = p }
+                } else {
+                    byPuttNumber[p.puttNumber] = p
+                }
+            }
+            let sorted = byPuttNumber.values.sorted {
+                $0.puttNumber != $1.puttNumber ? $0.puttNumber < $1.puttNumber : $0.createdAt < $1.createdAt
+            }
+            guard sorted.count > 1 else { continue }
+            for i in 0..<(sorted.count - 1) {
+                let p = sorted[i]
+                if p.result == .holed { continue }
+                let next = sorted[i + 1]
+                leaveSamples[p.result, default: []].append(Swift.max(0.3, next.distanceM))
+            }
+        }
+
+        var out: [PuttResult: LeaveInfo] = [:]
+        for (dir, samples) in leaveSamples where !samples.isEmpty {
+            let avg = samples.reduce(0, +) / Double(samples.count)
+            out[dir] = LeaveInfo(count: samples.count, avgLeaveM: avg)
+        }
+        return out
+    }
+
+    /// Combine several rounds' stats into one aggregate (statistics tab filters).
+    static func merge(_ list: [RoundStats], useFeet: Bool = false) -> RoundStats {
+        guard !list.isEmpty else { return RoundStats() }
+
+        var merged = RoundStats()
+        merged.totalPutts = list.reduce(0) { $0 + $1.totalPutts }
+        merged.holes = list.reduce(0) { $0 + $1.holes }
+        merged.sgTotal = list.reduce(0) { $0 + $1.sgTotal }
+        merged.avgPuttsPerHole = merged.holes > 0 ? Double(merged.totalPutts) / Double(merged.holes) : 0
+
+        merged.makeByDistance = mergeBracketLists(list.map { $0.makeByDistance }, useFeet: useFeet)
+
+        for category in situationCategories {
+            merged.makeByCategory[category] = mergeBracketLists(list.map { $0.makeByCategory[category] ?? [] }, useFeet: useFeet)
+        }
+
+        for r in list {
+            for (k, v) in r.missCounts { merged.missCounts[k, default: 0] += v }
+            merged.missReasonCounts = merged.missReasonCounts + r.missReasonCounts
+        }
+
+        merged.girCount = list.reduce(0) { $0 + $1.girCount }
+        merged.scrambleAttempts = list.reduce(0) { $0 + $1.scrambleAttempts }
+        merged.scrambleSuccesses = list.reduce(0) { $0 + $1.scrambleSuccesses }
+
+        var leaveAcc: [PuttResult: (totalDist: Double, count: Int)] = [:]
+        for r in list {
+            for (dir, info) in r.leaveByMissDirection {
+                var acc = leaveAcc[dir] ?? (0, 0)
+                acc.totalDist += info.avgLeaveM * Double(info.count)
+                acc.count += info.count
+                leaveAcc[dir] = acc
+            }
+        }
+        for (dir, acc) in leaveAcc where acc.count > 0 {
+            merged.leaveByMissDirection[dir] = LeaveInfo(count: acc.count, avgLeaveM: acc.totalDist / Double(acc.count))
+        }
+
+        return merged
+    }
+
+    private static func mergeBracketLists(_ lists: [[DistanceBracket]], useFeet: Bool) -> [DistanceBracket] {
+        brackets(useFeet: useFeet).enumerated().map { idx, b in
+            let made = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].made : 0) }
+            let total = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].total : 0) }
+            let sg = lists.reduce(0.0) { $0 + (idx < $1.count ? $1[idx].sgTotal : 0) }
+            let tourPct = lists.first?[safe: idx]?.tourMakePct ?? averageTourMakePct(min: b.min, max: b.max)
+            return DistanceBracket(id: b.label, label: b.label, min: b.min, max: b.max, made: made, total: total, tourMakePct: tourPct, sgTotal: sg)
+        }
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
+}

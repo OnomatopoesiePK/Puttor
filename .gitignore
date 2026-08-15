@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Xcode — user-specific state and build output
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+build/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Affinity Designer working files' lock files
+*~lock~
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
