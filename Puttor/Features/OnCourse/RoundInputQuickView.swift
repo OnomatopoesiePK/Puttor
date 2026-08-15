@@ -193,41 +193,7 @@ struct RoundInputQuickView: View {
             .buttonStyle(.plain)
             .frame(minWidth: 40)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach(Array(session.realPuttsOnHole(session.displayHole).enumerated()), id: \.element.id) { i, putt in
-                        let globalIdx = session.allPutts.firstIndex { $0.id == putt.id }
-                        let isActive = session.reviewIndex == globalIdx
-                        let isHoled = putt.result == .holed
-                        Button {
-                            if let g = globalIdx { session.loadDraft(fromReviewIndex: g) }
-                        } label: {
-                            Text(isHoled ? "⛳" : "\(i + 1)")
-                                .font(.system(size: isHoled ? 11 : 13, weight: .bold))
-                                .foregroundStyle(Theme.textSecondary)
-                                .frame(width: 32, height: 32)
-                                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(isHoled ? Theme.primary.opacity(0.2) : Theme.surfaceElevated))
-                                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(isActive ? Theme.accent : (isHoled ? Theme.primary : Theme.border), lineWidth: 1.5))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    // Blank slot for the hole's next putt — tappable, so you can
-                    // leave a shown putt and add another one on the same hole.
-                    if session.canStartNewPutt {
-                        Button {
-                            session.startNewPutt()
-                        } label: {
-                            Text("\(session.realPuttsOnHole(session.displayHole).count + 1)")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Theme.primary)
-                                .frame(width: 32, height: 32)
-                                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(session.isReviewing ? Color.clear : Theme.primary.opacity(0.15)))
-                                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).strokeBorder(Theme.primary, style: StrokeStyle(lineWidth: 1.5, dash: [3])))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            PuttChipsView(session: session)
 
             if !session.puttsOnHole(session.displayHole).isEmpty {
                 Button {
