@@ -359,3 +359,15 @@
 "custom.field.doubleBreak.desc" = "Markiert einen Putt, der erst in die eine, dann in die andere Richtung bricht";
 "custom.field.missReasons" = "Fehlgründe";
 "custom.field.missReasons.desc" = "Fehlgelesen, schlechter Schlag oder falsch gezielt";
+
+/* Spiel-Statistik */
+"game.stats.avgLast5" = "Ø letzte 5";
+"game.stats.lastRounds" = "LETZTE 10 RUNDEN";
+"game.stats.tapToDelete" = "Tippe auf eine Runde, um sie zu löschen.";
+"game.stats.noRounds" = "Noch keine Runden gespielt.";
+"game.stats.playAgain" = "Übung spielen";
+"game.stats.deleteRoundTitle" = "Diese Runde löschen?";
+"game.stats.resetTitle" = "Highscore zurücksetzen?";
+"game.stats.resetMessage" = "Nur die Rekord-Runde entfernen, damit die nächstbeste übernimmt — oder den ganzen Verlauf dieser Übung löschen.";
+"game.stats.deleteRecordOnly" = "Rekord-Runde löschen";
+"game.stats.deleteAll" = "Alle Runden löschen";

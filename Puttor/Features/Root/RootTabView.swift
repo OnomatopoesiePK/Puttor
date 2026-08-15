@@ -32,15 +32,15 @@ struct RootTabView: View {
                 }
                 .tag(0)
 
-            GamesHomeView()
-                .tabItem {
-                    Label(L("tab.games"), systemImage: "scope")
-                }
-                .tag(1)
-
             StatisticsView()
                 .tabItem {
                     Label(L("tab.stats"), systemImage: "chart.bar.fill")
+                }
+                .tag(1)
+
+            GamesHomeView()
+                .tabItem {
+                    Label(L("tab.games"), systemImage: "scope")
                 }
                 .tag(2)
 

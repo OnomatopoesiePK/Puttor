@@ -62,6 +62,49 @@ struct PuttorTests {
         #expect(GameScoring.isNewBest(newGateSession, among: [existingGate, existingClock, newGateSession]))
     }
 
+    @Test func historyReturnsOnlyCompletedSessionsOfThatGameNewestFirst() async throws {
+        let old = GameSession(gameType: .gate)
+        old.score = 40; old.isComplete = true
+        old.date = Date(timeIntervalSince1970: 1_000)
+        let new = GameSession(gameType: .gate)
+        new.score = 60; new.isComplete = true
+        new.date = Date(timeIntervalSince1970: 2_000)
+        let abandoned = GameSession(gameType: .gate)
+        abandoned.score = 99; abandoned.isComplete = false
+        let otherGame = GameSession(gameType: .clock)
+        otherGame.score = 99; otherGame.isComplete = true
+
+        let history = GameScoring.history(for: .gate, in: [old, new, abandoned, otherGame])
+
+        #expect(history.map(\.score) == [60, 40])
+    }
+
+    @Test func recentAverageUsesOnlyTheMostRecentSessions() async throws {
+        // Six completed gate rounds, newest last in construction order.
+        let scores: [Double] = [10, 20, 30, 40, 50, 60]
+        let sessions = scores.enumerated().map { index, score -> GameSession in
+            let s = GameSession(gameType: .gate)
+            s.score = score
+            s.isComplete = true
+            s.date = Date(timeIntervalSince1970: TimeInterval(index) * 100)
+            return s
+        }
+
+        // Newest five are 60, 50, 40, 30, 20 -> mean 40. The oldest (10) drops out.
+        let average = GameScoring.recentAverage(for: .gate, in: sessions, count: 5)
+        #expect(average == 40)
+
+        #expect(GameScoring.recentAverage(for: .clock, in: sessions) == nil)
+    }
+
+    @Test func scoreFormattingFollowsTheGamesUnit() async throws {
+        #expect(GameScoreFormat.text(72.4, for: .gate) == "72%")
+        #expect(GameScoreFormat.text(14, for: .aroundTheWorld) == "14")
+        #expect(GameScoreFormat.text(3, for: .ninePutt) == "3")
+        #expect(GameScoreFormat.preciseText(72.45, for: .gate) == "72.5%")
+        #expect(GameScoreFormat.preciseText(13.5, for: .aroundTheWorld) == "13.5")
+    }
+
     @Test func isNewBestIsTrueWhenNoPriorSessionsExist() async throws {
         let firstEver = GameSession(gameType: .routine)
         firstEver.isComplete = true

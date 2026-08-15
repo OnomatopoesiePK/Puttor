@@ -2,15 +2,30 @@
 //  GamesHomeView.swift
 //  Puttor
 //
-//  Tab 3 root: putting practice games & drills, each with its own high score.
+//  Tab root: putting practice games & drills, each with its own high score.
 //
 
 import SwiftUI
 import SwiftData
 
+/// A single destination type for the stack, so playing a game and viewing its
+/// statistics don't collide on two `navigationDestination(item:)` of the same
+/// underlying GameType.
+private enum GameRoute: Hashable, Identifiable {
+    case play(GameType)
+    case stats(GameType)
+
+    var id: String {
+        switch self {
+        case .play(let g): return "play-\(g.rawValue)"
+        case .stats(let g): return "stats-\(g.rawValue)"
+        }
+    }
+}
+
 struct GamesHomeView: View {
     @Query(sort: \GameSession.date, order: .reverse) private var allSessions: [GameSession]
-    @State private var activeGame: GameType?
+    @State private var route: GameRoute?
 
     var body: some View {
         NavigationStack {
@@ -19,10 +34,11 @@ struct GamesHomeView: View {
                     ForEach(GameType.allCases) { gameType in
                         GameCard(
                             gameType: gameType,
-                            bestSession: GameScoring.bestSession(for: gameType, in: allSessions)
-                        ) {
-                            activeGame = gameType
-                        }
+                            bestSession: GameScoring.bestSession(for: gameType, in: allSessions),
+                            recentAverage: GameScoring.recentAverage(for: gameType, in: allSessions),
+                            action: { route = .play(gameType) },
+                            onShowStats: { route = .stats(gameType) }
+                        )
                     }
                 }
                 .padding(Theme.Spacing.lg)
@@ -39,21 +55,14 @@ struct GamesHomeView: View {
                     .background(Theme.background)
             }
             .navigationBarHidden(true)
-            .navigationDestination(item: $activeGame) { gameType in
-                destination(for: gameType)
+            .navigationDestination(item: $route) { route in
+                switch route {
+                case .play(let gameType):
+                    GameDestinationView(gameType: gameType) { self.route = nil }
+                case .stats(let gameType):
+                    GameStatsView(gameType: gameType)
+                }
             }
-        }
-    }
-
-    @ViewBuilder
-    private func destination(for gameType: GameType) -> some View {
-        let onDone = { activeGame = nil }
-        switch gameType {
-        case .gate: GateDrillView(onDone: onDone)
-        case .clock: ClockDrillView(onDone: onDone)
-        case .ninePutt: NinePuttDrillView(onDone: onDone)
-        case .routine: RoutineDrillView(onDone: onDone)
-        case .aroundTheWorld: AroundTheWorldView(onDone: onDone)
         }
     }
 }

@@ -16,6 +16,22 @@ enum GameScoring {
         }
     }
 
+    /// Completed sessions for a game, newest first.
+    static func history(for gameType: GameType, in sessions: [GameSession]) -> [GameSession] {
+        sessions
+            .filter { $0.gameType == gameType && $0.isComplete }
+            .sorted { $0.date > $1.date }
+    }
+
+    /// Mean score over the most recent `count` sessions — the counterpart to the
+    /// all-time best, showing where the player currently sits rather than how
+    /// good their single luckiest round was. Nil when nothing has been played.
+    static func recentAverage(for gameType: GameType, in sessions: [GameSession], count: Int = 5) -> Double? {
+        let recent = history(for: gameType, in: sessions).prefix(count)
+        guard !recent.isEmpty else { return nil }
+        return recent.reduce(0) { $0 + $1.score } / Double(recent.count)
+    }
+
     static func isNewBest(_ session: GameSession, among sessions: [GameSession]) -> Bool {
         let others = sessions.filter { $0.isComplete && $0.id != session.id && $0.gameType == session.gameType }
         guard let best = bestSession(for: session.gameType, in: others) else { return true }

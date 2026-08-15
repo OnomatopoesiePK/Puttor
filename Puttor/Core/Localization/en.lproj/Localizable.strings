@@ -359,3 +359,15 @@
 "custom.field.doubleBreak.desc" = "Marks a putt that breaks one way then the other";
 "custom.field.missReasons" = "Miss Reasons";
 "custom.field.missReasons.desc" = "Misread, bad stroke, or wrong aim";
+
+/* Game statistics */
+"game.stats.avgLast5" = "Avg last 5";
+"game.stats.lastRounds" = "LAST 10 ROUNDS";
+"game.stats.tapToDelete" = "Tap a round to delete it.";
+"game.stats.noRounds" = "No rounds played yet.";
+"game.stats.playAgain" = "Play this drill";
+"game.stats.deleteRoundTitle" = "Delete this round?";
+"game.stats.resetTitle" = "Reset high score?";
+"game.stats.resetMessage" = "Remove just the record round, so the next best takes over â or clear this drill's whole history.";
+"game.stats.deleteRecordOnly" = "Delete record round";
+"game.stats.deleteAll" = "Delete all rounds";
