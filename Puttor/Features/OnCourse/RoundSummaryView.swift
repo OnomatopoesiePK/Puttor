@@ -218,10 +218,15 @@ struct RoundSummaryView: View {
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
     }
 
+    /// The holes this round actually consists of, in play order — a 9-hole
+    /// round started on 10 is holes 10...18, not 1...9.
+    private var roundHoles: [Int] { Array(round.holeSequence.prefix(holeCount)) }
+
     private var holeGrid: some View {
+        // 9 holes fill a 3x3 block; 18 use 3 rows of 6.
         let columns = holeCount == 9 ? 3 : 6
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: columns), spacing: 6) {
-            ForEach(1...holeCount, id: \.self) { hole in
+            ForEach(roundHoles, id: \.self) { hole in
                 holeCell(hole)
             }
         }

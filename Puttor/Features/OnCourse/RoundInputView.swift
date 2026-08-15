@@ -105,7 +105,7 @@ struct RoundInputView: View {
             bottomBar(session)
         }
         .alert(L("input.holeCompleteTitle"), isPresented: $showSequenceEndAlert) {
-            Button(L("input.endRound")) { session.endRound(holeCount: session.playedHoleCount == 9 ? 9 : 18); navigateToSummary = true }
+            Button(L("input.endRound")) { session.endRound(holeCount: session.playedHoleCount <= 9 ? 9 : 18); navigateToSummary = true }
             Button(L("input.continueFromStart")) { /* session already advanced internally on next putt entry */ }
         } message: {
             Text(L("input.holeCompleteMessage"))
@@ -113,7 +113,7 @@ struct RoundInputView: View {
         .alert(L("input.endRoundTitle"), isPresented: $showEndRoundAlert) {
             Button(L("common.cancel"), role: .cancel) {}
             Button(L("input.endRound"), role: .destructive) {
-                if session.playedHoleCount == 9 {
+                if session.playedHoleCount <= 9 {
                     showNineOrEighteenAlert = true
                 } else {
                     session.endRound(holeCount: 18)

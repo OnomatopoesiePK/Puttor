@@ -115,21 +115,26 @@ struct RoundInputQuickView: View {
                     }
                 }
 
-                Button {
-                    handleOutcome(session.recordTapIn(), session)
-                } label: {
-                    Text(L("input.tapIn"))
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(Theme.primary)
+                if !session.isReviewing || session.canStartNewPutt {
+                    Button {
+                        if session.isReviewing { session.startNewPutt() }
+                        handleOutcome(session.recordTapIn(), session)
+                    } label: {
+                        Text(L("input.tapIn"))
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(Theme.primary)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .padding(Theme.Spacing.lg)
 
             Spacer()
+
+            holeNavBar(session)
         }
         .alert(L("input.holeCompleteTitle"), isPresented: $showSequenceEndAlert) {
-            Button(L("input.endRound")) { session.endRound(holeCount: session.playedHoleCount == 9 ? 9 : 18); navigateToSummary = true }
+            Button(L("input.endRound")) { session.endRound(holeCount: session.playedHoleCount <= 9 ? 9 : 18); navigateToSummary = true }
             Button(L("input.continueFromStart")) {}
         } message: {
             Text(L("input.holeCompleteMessage"))
@@ -137,7 +142,7 @@ struct RoundInputQuickView: View {
         .alert(L("input.endRoundTitle"), isPresented: $showEndRoundAlert) {
             Button(L("common.cancel"), role: .cancel) {}
             Button(L("input.endRound"), role: .destructive) {
-                if session.playedHoleCount == 9 {
+                if session.playedHoleCount <= 9 {
                     showNineOrEighteenAlert = true
                 } else {
                     session.endRound(holeCount: 18)
@@ -173,7 +178,7 @@ struct RoundInputQuickView: View {
     }
 
     private func topBar(_ session: RoundSession) -> some View {
-        HStack {
+        HStack(spacing: 8) {
             Button {
                 showHolePicker = true
             } label: {
@@ -186,7 +191,44 @@ struct RoundInputQuickView: View {
                 }
             }
             .buttonStyle(.plain)
-            Spacer()
+            .frame(minWidth: 40)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(Array(session.realPuttsOnHole(session.displayHole).enumerated()), id: \.element.id) { i, putt in
+                        let globalIdx = session.allPutts.firstIndex { $0.id == putt.id }
+                        let isActive = session.reviewIndex == globalIdx
+                        let isHoled = putt.result == .holed
+                        Button {
+                            if let g = globalIdx { session.loadDraft(fromReviewIndex: g) }
+                        } label: {
+                            Text(isHoled ? "⛳" : "\(i + 1)")
+                                .font(.system(size: isHoled ? 11 : 13, weight: .bold))
+                                .foregroundStyle(Theme.textSecondary)
+                                .frame(width: 32, height: 32)
+                                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(isHoled ? Theme.primary.opacity(0.2) : Theme.surfaceElevated))
+                                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(isActive ? Theme.accent : (isHoled ? Theme.primary : Theme.border), lineWidth: 1.5))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    // Blank slot for the hole's next putt — tappable, so you can
+                    // leave a shown putt and add another one on the same hole.
+                    if session.canStartNewPutt {
+                        Button {
+                            session.startNewPutt()
+                        } label: {
+                            Text("\(session.realPuttsOnHole(session.displayHole).count + 1)")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(Theme.primary)
+                                .frame(width: 32, height: 32)
+                                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(session.isReviewing ? Color.clear : Theme.primary.opacity(0.15)))
+                                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).strokeBorder(Theme.primary, style: StrokeStyle(lineWidth: 1.5, dash: [3])))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
             if !session.puttsOnHole(session.displayHole).isEmpty {
                 Button {
                     showDeleteHoleConfirm = true
@@ -209,13 +251,11 @@ struct RoundInputQuickView: View {
                     }
                     Button(L("common.cancel"), role: .cancel) {}
                 }
-                Spacer()
             }
             VStack(spacing: 0) {
                 Text("\(session.totalRealPutts)").font(.system(size: 18, weight: .heavy)).foregroundStyle(Theme.text)
                 Text(L("input.total")).font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.textMuted)
             }
-            Spacer()
             Button {
                 if isPostRoundEdit {
                     round.isComplete = true
@@ -236,6 +276,42 @@ struct RoundInputQuickView: View {
         }
         .padding(Theme.Spacing.md)
         .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .bottom)
+    }
+
+    /// Hole navigation, matching Pro/Custom: the arrows step through the round's
+    /// play order and never record anything themselves.
+    private func holeNavBar(_ session: RoundSession) -> some View {
+        HStack(spacing: 8) {
+            navArrowButton(icon: "chevron.left", enabled: session.canGoPreviousHole) {
+                session.goToPreviousHole()
+            }
+            Spacer()
+            Text("\(L("input.hole")) \(session.displayHole)")
+                .font(.system(size: 12, weight: .bold))
+                .tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+            Spacer()
+            navArrowButton(icon: "chevron.right", enabled: session.canGoNextHole) {
+                session.goToNextHole()
+            }
+        }
+        .padding(Theme.Spacing.md)
+        .background(Theme.surface)
+        .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .top)
+    }
+
+    private func navArrowButton(icon: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(Theme.text)
+                .frame(width: 56, height: 48)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.surfaceElevated))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .opacity(enabled ? 1 : 0.3)
     }
 
     private func bigButton(title: String, color: Color, action: @escaping () -> Void) -> some View {

@@ -176,6 +176,18 @@ struct PuttorTests {
         #expect(round.isComplete)
     }
 
+    /// A 9-hole round started on the back nine consists of holes 10...18 — the
+    /// summary grid must show those, not 1...9.
+    @Test func nineHoleRoundStartedOnTenCoversTheBackNine() async throws {
+        let round = Round(courseName: "Test", startingHole: 10)
+        round.holeCount = 9
+        #expect(Array(round.holeSequence.prefix(9)) == [10, 11, 12, 13, 14, 15, 16, 17, 18])
+
+        let front = Round(courseName: "Test", startingHole: 1)
+        front.holeCount = 9
+        #expect(Array(front.holeSequence.prefix(9)) == [1, 2, 3, 4, 5, 6, 7, 8, 9])
+    }
+
     /// An all-but-complete round (within two holes of full length) does count
     /// its trailing blanks as hole-outs — those last holes plausibly were.
     @MainActor
