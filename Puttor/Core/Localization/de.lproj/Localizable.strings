@@ -371,3 +371,6 @@
 "game.stats.resetMessage" = "Nur die Rekord-Runde entfernen, damit die nächstbeste übernimmt — oder den ganzen Verlauf dieser Übung löschen.";
 "game.stats.deleteRecordOnly" = "Rekord-Runde löschen";
 "game.stats.deleteAll" = "Alle Runden löschen";
+
+"numpad.enter" = "Enter";
+"custom.distance.desc" = "Einfach = die Distanz-Auswahlliste. Komplex = ein Ziffernblock zum Eintippen einer genauen Distanz; mit Enter speichern.";

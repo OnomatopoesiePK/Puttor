@@ -71,6 +71,16 @@ struct CustomModeConfig: Codable, Equatable {
     var resultComplexity: FieldComplexity = .simple
     var fields: [CustomField] = []
 
+    /// Optional in storage so configs written before the distance field gained
+    /// a complexity setting still decode — a missing key would otherwise throw
+    /// and silently reset the user's whole field layout to the default.
+    private var distanceComplexityRaw: FieldComplexity?
+
+    var distanceComplexity: FieldComplexity {
+        get { distanceComplexityRaw ?? .simple }
+        set { distanceComplexityRaw = newValue }
+    }
+
     static let defaultConfig = CustomModeConfig(
         resultComplexity: .simple,
         fields: [CustomField(kind: .puttForCategory)]

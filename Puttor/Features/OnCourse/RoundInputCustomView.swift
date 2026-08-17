@@ -78,7 +78,12 @@ struct RoundInputCustomView: View {
             ScrollView {
                 VStack(spacing: Theme.Spacing.md) {
                     section {
-                        DistancePickerView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
+                        let distance = Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 })
+                        if config.distanceComplexity == .complex {
+                            DistanceNumpadView(value: distance, useFeet: useFeet)
+                        } else {
+                            DistancePickerView(value: distance, useFeet: useFeet)
+                        }
                     }
 
                     ForEach(config.fields) { field in

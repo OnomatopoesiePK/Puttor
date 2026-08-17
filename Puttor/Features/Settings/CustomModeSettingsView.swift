@@ -31,14 +31,25 @@ struct CustomModeSettingsView: View {
             Section {
                 HStack {
                     Image(systemName: "ruler").foregroundStyle(Theme.primary).frame(width: 24)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L("custom.field.distance")).foregroundStyle(Theme.text)
-                        Text(L("custom.field.distance.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
+                    Text(L("custom.field.distance")).foregroundStyle(Theme.text)
+                    Spacer()
+                    Picker("", selection: Binding(
+                        get: { draftConfig.distanceComplexity },
+                        set: { draftConfig.distanceComplexity = $0 }
+                    )) {
+                        ForEach(FieldComplexity.allCases, id: \.self) { c in
+                            Text(L(c.labelKey)).tag(c)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .frame(width: 160)
+                    .disabled(!isEditing)
                 }
                 .listRowBackground(Theme.surface)
             } header: {
                 Text(L("custom.alwaysIncluded"))
+            } footer: {
+                Text(L("custom.distance.desc"))
             }
 
             Section {

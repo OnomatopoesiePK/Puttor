@@ -120,9 +120,12 @@ struct RoundInputQuickView: View {
                         if session.isReviewing { session.startNewPutt() }
                         handleOutcome(session.recordTapIn(), session)
                     } label: {
-                        Text(L("input.tapIn"))
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(Theme.primary)
+                        Text(L("input.tapInShort"))
+                            .font(.system(size: 16, weight: .heavy))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primaryDark))
                     }
                     .buttonStyle(.plain)
                 }

@@ -371,3 +371,6 @@
 "game.stats.resetMessage" = "Remove just the record round, so the next best takes over â or clear this drill's whole history.";
 "game.stats.deleteRecordOnly" = "Delete record round";
 "game.stats.deleteAll" = "Delete all rounds";
+
+"numpad.enter" = "Enter";
+"custom.distance.desc" = "Simple = the scrolling distance list. Complex = a keypad for typing an exact distance; press Enter to store it.";

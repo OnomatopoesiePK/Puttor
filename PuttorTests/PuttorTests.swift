@@ -62,6 +62,37 @@ struct PuttorTests {
         #expect(GameScoring.isNewBest(newGateSession, among: [existingGate, existingClock, newGateSession]))
     }
 
+    // MARK: - Custom mode configuration
+
+    /// Configs stored before the distance field gained a simple/complex setting
+    /// must still decode — otherwise loading falls back to the default and the
+    /// player silently loses their whole field layout.
+    @Test func customModeConfigDecodesLayoutsSavedBeforeDistanceComplexity() async throws {
+        let legacy = Data("""
+        {"resultComplexity":"complex","fields":[{"id":"5E8B2A1C-0000-4000-8000-000000000001","kind":"slope","complexity":"complex"}]}
+        """.utf8)
+
+        let config = try JSONDecoder().decode(CustomModeConfig.self, from: legacy)
+
+        #expect(config.resultComplexity == .complex)
+        #expect(config.fields.map(\.kind) == [.slope])
+        #expect(config.fields[0].complexity == .complex)
+        #expect(config.distanceComplexity == .simple)
+    }
+
+    @Test func customModeConfigRoundTripsDistanceComplexity() async throws {
+        var config = CustomModeConfig.defaultConfig
+        config.distanceComplexity = .complex
+
+        let decoded = try JSONDecoder().decode(
+            CustomModeConfig.self,
+            from: JSONEncoder().encode(config)
+        )
+
+        #expect(decoded.distanceComplexity == .complex)
+        #expect(decoded == config)
+    }
+
     @Test func historyReturnsOnlyCompletedSessionsOfThatGameNewestFirst() async throws {
         let old = GameSession(gameType: .gate)
         old.score = 40; old.isComplete = true
