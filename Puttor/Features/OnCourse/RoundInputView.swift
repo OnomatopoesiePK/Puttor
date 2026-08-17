@@ -52,27 +52,6 @@ struct RoundInputView: View {
         VStack(spacing: 0) {
             topBar(session)
 
-            if showSavedFlash {
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text(L("input.saved"))
-                    Text("\(flashSG >= 0 ? "+" : "")\(String(format: "%.2f", flashSG)) SG")
-                }
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(flashSG > 0 ? Theme.primary : Theme.error)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background((flashSG > 0 ? Theme.primary : Theme.error).opacity(0.15))
-                .transition(.opacity)
-            } else if session.hasUnsavedEdits {
-                Text(L("input.editing"))
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Theme.accent)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(Theme.accent.opacity(0.13))
-            }
-
             ScrollView {
                 VStack(spacing: Theme.Spacing.md) {
                     section {
@@ -100,6 +79,13 @@ struct RoundInputView: View {
                     }
                 }
                 .padding(Theme.Spacing.md)
+            }
+            .overlay(alignment: .top) {
+                InputStatusBanner(
+                    savedSG: showSavedFlash ? flashSG : nil,
+                    isEditing: session.hasUnsavedEdits
+                )
+                .animation(.easeOut(duration: 0.2), value: showSavedFlash)
             }
 
             bottomBar(session)

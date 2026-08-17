@@ -141,6 +141,12 @@ struct OnCourseListView: View {
         .padding(.top, 60)
     }
 
+    /// Same total RoundStats reports, summed directly here rather than building
+    /// the full stats (brackets, dispersion, leaves) for every row of the list.
+    private func strokesGained(_ round: Round) -> Double {
+        round.putts.filter { $0.puttNumber > 0 }.reduce(0) { $0 + $1.sgActual }
+    }
+
     private func roundCard(_ round: Round) -> some View {
         Button {
             roundToOpen = round
@@ -173,12 +179,21 @@ struct OnCourseListView: View {
                 }
                 .buttonStyle(.plain)
 
-                Text(round.isComplete ? L("onCourse.complete") : L("onCourse.inProgress"))
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(Theme.textSecondary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill((round.isComplete ? Theme.primary : Theme.accent).opacity(0.13)))
+                VStack(spacing: 3) {
+                    Text(round.isComplete ? L("onCourse.complete") : L("onCourse.inProgress"))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill((round.isComplete ? Theme.primary : Theme.accent).opacity(0.13)))
+
+                    if round.isComplete {
+                        let sg = strokesGained(round)
+                        Text("\(sg > 0 ? "+" : "")\(String(format: "%.2f", sg)) \(L("summary.sg"))")
+                            .font(.system(size: 11, weight: .heavy))
+                            .foregroundStyle(sg >= 0 ? Theme.primary : Theme.error)
+                    }
+                }
 
                 Text("›").font(.system(size: 22)).foregroundStyle(Theme.textMuted)
             }
