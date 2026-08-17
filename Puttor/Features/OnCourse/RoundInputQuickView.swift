@@ -75,12 +75,7 @@ struct RoundInputQuickView: View {
 
             ScrollView {
                 VStack(spacing: Theme.Spacing.lg) {
-                    Text(L("inputMode.quick"))
-                    .font(.system(size: 11, weight: .bold))
-                    .tracking(1.4)
-                    .foregroundStyle(Theme.textMuted)
-
-                DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
+                    DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
 
                 VStack(spacing: 6) {
                     Text(L("input.puttFor")).font(.system(size: 10, weight: .semibold)).tracking(1.2).foregroundStyle(Theme.textMuted)
