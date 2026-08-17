@@ -362,9 +362,9 @@ struct RoundInputCustomView: View {
                 session.goToNextHole()
             }
 
-            // With the simple result the Missed/Holed buttons already record,
-            // so a separate save action would be a second way to do the same
-            // thing. The dartboard has no such action, so it keeps this one.
+            // With the simple result the Missed/Holed buttons already record, so
+            // a separate save action would be a second way to do the same thing.
+            // Tap-in then takes that space, keeping this row to one line.
             if config.resultComplexity == .complex {
                 Button {
                     handleOutcome(session.recordDraft(), session)
@@ -383,31 +383,46 @@ struct RoundInputCustomView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!session.canRecord)
+
+                if !session.isReviewing || session.canStartNewPutt {
+                    tapInButton(session, fillsRow: false)
+                }
+            } else if !session.isReviewing || session.canStartNewPutt {
+                tapInButton(session, fillsRow: true)
             } else {
                 Spacer(minLength: 0)
-            }
-
-            if !session.isReviewing || session.canStartNewPutt {
-                Button {
-                    if session.isReviewing { session.startNewPutt() }
-                    handleOutcome(session.recordTapIn(), session)
-                } label: {
-                    Text(L("input.tapInShort"))
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Theme.primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .padding(.horizontal, 12)
-                        .frame(height: 48)
-                        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary.opacity(0.13)))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.primary, lineWidth: 1.5))
-                }
-                .buttonStyle(.plain)
             }
         }
         .padding(Theme.Spacing.md)
         .background(Theme.surface)
         .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .top)
+    }
+
+    /// `fillsRow` stretches it across the space the record button would have
+    /// taken, for the simple result where that button isn't shown.
+    private func tapInButton(_ session: RoundSession, fillsRow: Bool) -> some View {
+        Button {
+            if session.isReviewing { session.startNewPutt() }
+            handleOutcome(session.recordTapIn(), session)
+        } label: {
+            Text(L("input.tapInShort"))
+                .font(.system(size: fillsRow ? 15 : 13, weight: .heavy))
+                .foregroundStyle(fillsRow ? .white : Theme.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .padding(.horizontal, fillsRow ? 0 : 12)
+                .frame(maxWidth: fillsRow ? .infinity : nil)
+                .frame(height: 48)
+                .background(
+                    RoundedRectangle(cornerRadius: Theme.Radius.lg)
+                        .fill(fillsRow ? Theme.primaryDark : Theme.primary.opacity(0.13))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: Theme.Radius.lg)
+                        .stroke(fillsRow ? .clear : Theme.primary, lineWidth: 1.5)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     private func navArrowButton(icon: String, enabled: Bool, action: @escaping () -> Void) -> some View {

@@ -109,20 +109,6 @@ struct RoundInputQuickView: View {
                     }
                 }
 
-                if !session.isReviewing || session.canStartNewPutt {
-                    Button {
-                        if session.isReviewing { session.startNewPutt() }
-                        handleOutcome(session.recordTapIn(), session)
-                    } label: {
-                        Text(L("input.tapInShort"))
-                            .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primaryDark))
-                    }
-                    .buttonStyle(.plain)
-                }
                 }
                 .padding(Theme.Spacing.lg)
             }
@@ -241,18 +227,34 @@ struct RoundInputQuickView: View {
     }
 
     /// Hole navigation, matching Pro/Custom: the arrows step through the round's
-    /// play order and never record anything themselves.
+    /// play order and never record anything themselves. Tap-in sits between
+    /// them rather than in the content above, which keeps the taller keypad
+    /// layout on one screen. The hole number is already in the top bar.
     private func holeNavBar(_ session: RoundSession) -> some View {
         HStack(spacing: 8) {
             navArrowButton(icon: "chevron.left", enabled: session.canGoPreviousHole) {
                 session.goToPreviousHole()
             }
-            Spacer()
-            Text("\(L("input.hole")) \(session.displayHole)")
-                .font(.system(size: 12, weight: .bold))
-                .tracking(1.2)
-                .foregroundStyle(Theme.textMuted)
-            Spacer()
+
+            if !session.isReviewing || session.canStartNewPutt {
+                Button {
+                    if session.isReviewing { session.startNewPutt() }
+                    handleOutcome(session.recordTapIn(), session)
+                } label: {
+                    Text(L("input.tapInShort"))
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.primaryDark))
+                }
+                .buttonStyle(.plain)
+            } else {
+                Spacer()
+            }
+
             navArrowButton(icon: "chevron.right", enabled: session.canGoNextHole) {
                 session.goToNextHole()
             }
