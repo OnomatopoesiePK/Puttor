@@ -39,6 +39,8 @@ struct RoundSummaryView: View {
     }
 
     var body: some View {
+        VStack(spacing: 0) {
+        topBar
         ScrollView {
             VStack(spacing: Theme.Spacing.md) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -129,28 +131,9 @@ struct RoundSummaryView: View {
             }
             .padding(Theme.Spacing.lg)
         }
-        .background(Theme.background.ignoresSafeArea())
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text(L("summary.title")).font(.system(size: 18, weight: .heavy)).foregroundStyle(Theme.text)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                // Same outlined shape as the End/Done button in the input
-                // screens, so the round's primary action looks the same
-                // whichever screen you're on.
-                Button { onDone() } label: {
-                    Text(L("summary.done"))
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(Theme.primary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.primary, lineWidth: 1.5))
-                }
-                .buttonStyle(.plain)
-            }
         }
-        .navigationBarBackButtonHidden(true)
-        .toolbarBackground(Theme.background, for: .navigationBar)
+        .background(Theme.background.ignoresSafeArea())
+        .navigationBarHidden(true)
         .navigationDestination(item: $editingHole) { hole in
             switch round.inputMode {
             case .quick:
@@ -161,6 +144,30 @@ struct RoundSummaryView: View {
                 RoundInputView(round: round, initialHole: hole, isPostRoundEdit: true, onDone: onDone)
             }
         }
+    }
+
+    /// Drawn in the content rather than the navigation bar, matching the input
+    /// screens — toolbar items carry their own capsule background, which an
+    /// outlined button shows through as a stray shape around it.
+    private var topBar: some View {
+        HStack {
+            Text(L("summary.title"))
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(Theme.text)
+            Spacer()
+            Button { onDone() } label: {
+                Text(L("summary.done"))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Theme.primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.primary, lineWidth: 1.5))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.vertical, Theme.Spacing.sm)
+        .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .bottom)
     }
 
     private func editHole(_ hole: Int) {
