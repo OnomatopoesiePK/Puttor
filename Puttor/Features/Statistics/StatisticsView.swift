@@ -159,15 +159,7 @@ struct StatisticsView: View {
                             if !aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
                                 card {
                                     Text(L("summary.missTendency")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-                                    let items = aggregated.missCounts.filter { $0.key != .holed }.sorted { $0.value > $1.value }
-                                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 72))], spacing: 10) {
-                                        ForEach(items, id: \.key) { key, value in
-                                            VStack(spacing: 2) {
-                                                Text("\(value)").font(.system(size: 22, weight: .heavy)).foregroundStyle(Theme.error)
-                                                Text(L(key.labelKey).uppercased()).font(.system(size: 9)).foregroundStyle(Theme.textMuted).multilineTextAlignment(.center)
-                                            }
-                                        }
-                                    }
+                                    MissDonutView(missCounts: aggregated.missCounts)
                                 }
                             }
 

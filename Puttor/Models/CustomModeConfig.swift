@@ -22,6 +22,19 @@ enum FieldComplexity: String, Codable, CaseIterable {
     }
 }
 
+/// How the distance is entered. Separate from FieldComplexity because "slider
+/// vs numpad" is a choice of control, not of detail level.
+enum DistanceInputStyle: String, Codable, CaseIterable {
+    case slider, numpad
+
+    var labelKey: String {
+        switch self {
+        case .slider: return "custom.distance.slider"
+        case .numpad: return "custom.distance.numpad"
+        }
+    }
+}
+
 enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
     case puttForCategory
     case slope
@@ -71,14 +84,14 @@ struct CustomModeConfig: Codable, Equatable {
     var resultComplexity: FieldComplexity = .simple
     var fields: [CustomField] = []
 
-    /// Optional in storage so configs written before the distance field gained
-    /// a complexity setting still decode — a missing key would otherwise throw
-    /// and silently reset the user's whole field layout to the default.
-    private var distanceComplexityRaw: FieldComplexity?
+    /// Optional in storage so configs written before the distance field became
+    /// switchable still decode — a missing key would otherwise throw and
+    /// silently reset the user's whole field layout to the default.
+    private var distanceStyleRaw: DistanceInputStyle?
 
-    var distanceComplexity: FieldComplexity {
-        get { distanceComplexityRaw ?? .simple }
-        set { distanceComplexityRaw = newValue }
+    var distanceStyle: DistanceInputStyle {
+        get { distanceStyleRaw ?? .slider }
+        set { distanceStyleRaw = newValue }
     }
 
     static let defaultConfig = CustomModeConfig(

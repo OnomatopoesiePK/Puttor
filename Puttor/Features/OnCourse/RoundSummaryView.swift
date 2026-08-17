@@ -308,15 +308,7 @@ struct RoundSummaryView: View {
     }
 
     private var missGrid: some View {
-        let items = stats.missCounts.filter { $0.key != .holed }.sorted { $0.value > $1.value }
-        return LazyVGrid(columns: [GridItem(.adaptive(minimum: 70))], spacing: 10) {
-            ForEach(items, id: \.key) { key, value in
-                VStack(spacing: 2) {
-                    Text("\(value)×").font(.system(size: 22, weight: .heavy)).foregroundStyle(Theme.error)
-                    Text(L(key.labelKey)).font(.system(size: 9)).foregroundStyle(Theme.textMuted).multilineTextAlignment(.center)
-                }
-            }
-        }
+        MissDonutView(missCounts: stats.missCounts)
     }
 
     private func reasonStat(_ value: String, _ label: String, color: Color = Theme.warning) -> some View {

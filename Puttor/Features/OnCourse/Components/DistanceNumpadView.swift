@@ -149,6 +149,12 @@ struct DistanceNumpadView: View {
     private func type(_ digit: String) {
         // First keypress after a commit replaces the value outright.
         guard draft.count < 6 else { return }
+        // Distances are only ever recorded to one decimal, so stop accepting
+        // digits once one has been typed after the separator.
+        if let separatorIndex = draft.firstIndex(of: Character(decimalSeparator)) {
+            let decimals = draft.distance(from: draft.index(after: separatorIndex), to: draft.endIndex)
+            guard decimals < 1 else { return }
+        }
         draft += digit
     }
 
@@ -167,7 +173,9 @@ struct DistanceNumpadView: View {
             draft = ""
             return
         }
-        let metres = useFeet ? UnitConverter.feetToMetres(typed) : typed
+        // Round in the unit that was typed, so 12,4 ft stores as exactly 12.4 ft.
+        let rounded = (typed * 10).rounded() / 10
+        let metres = useFeet ? UnitConverter.feetToMetres(rounded) : rounded
         value = min(max(metres, 0.1), maxMetres)
         draft = ""
     }

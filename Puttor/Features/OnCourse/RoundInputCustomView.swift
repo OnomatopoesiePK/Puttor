@@ -79,7 +79,7 @@ struct RoundInputCustomView: View {
                 VStack(spacing: Theme.Spacing.md) {
                     section {
                         let distance = Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 })
-                        if config.distanceComplexity == .complex {
+                        if config.distanceStyle == .numpad {
                             DistanceNumpadView(value: distance, useFeet: useFeet)
                         } else {
                             DistancePickerView(value: distance, useFeet: useFeet)
@@ -177,27 +177,31 @@ struct RoundInputCustomView: View {
                         FieldInfoButton(titleKey: "input.result", textKey: "custom.result.desc")
                     }
                 }
+                // Simple result doubles as the record action, exactly like Quick
+                // mode: missing shows the hole's next putt, holing moves on to
+                // the next hole. There is no separate save step.
                 HStack(spacing: 14) {
-                    simpleResultButton(title: L("input.missed"), color: Theme.error, selected: session.draftResult == .missedGeneric) {
+                    simpleResultButton(title: L("input.missed"), color: Theme.error) {
                         session.draftResult = .missedGeneric
+                        handleOutcome(session.recordDraft(), session)
                     }
-                    simpleResultButton(title: L("input.holedBtn"), color: Theme.primary, selected: session.draftResult == .holed) {
+                    simpleResultButton(title: L("input.holedBtn"), color: Theme.primary) {
                         session.draftResult = .holed
+                        handleOutcome(session.recordDraft(), session)
                     }
                 }
             }
         }
     }
 
-    private func simpleResultButton(title: String, color: Color, selected: Bool, action: @escaping () -> Void) -> some View {
+    private func simpleResultButton(title: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 16, weight: .heavy))
-                .foregroundStyle(selected ? .white : color)
+                .font(.system(size: 17, weight: .heavy))
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(color.opacity(selected ? 0.85 : 0.13)))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(color, lineWidth: selected ? 2 : 1.2))
+                .padding(.vertical, 18)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(color))
         }
         .buttonStyle(.plain)
     }
@@ -358,23 +362,30 @@ struct RoundInputCustomView: View {
                 session.goToNextHole()
             }
 
-            Button {
-                handleOutcome(session.recordDraft(), session)
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: recordIcon(session)).font(.system(size: 20, weight: .heavy))
-                    Text(recordLabel(session))
-                        .font(.system(size: 16, weight: .heavy))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+            // With the simple result the Missed/Holed buttons already record,
+            // so a separate save action would be a second way to do the same
+            // thing. The dartboard has no such action, so it keeps this one.
+            if config.resultComplexity == .complex {
+                Button {
+                    handleOutcome(session.recordDraft(), session)
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: recordIcon(session)).font(.system(size: 20, weight: .heavy))
+                        Text(recordLabel(session))
+                            .font(.system(size: 16, weight: .heavy))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(session.canRecord ? Theme.primary : Theme.border))
                 }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(session.canRecord ? Theme.primary : Theme.border))
+                .buttonStyle(.plain)
+                .disabled(!session.canRecord)
+            } else {
+                Spacer(minLength: 0)
             }
-            .buttonStyle(.plain)
-            .disabled(!session.canRecord)
 
             if !session.isReviewing || session.canStartNewPutt {
                 Button {

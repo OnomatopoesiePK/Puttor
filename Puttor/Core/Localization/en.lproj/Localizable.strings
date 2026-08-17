@@ -373,4 +373,9 @@
 "game.stats.deleteAll" = "Delete all rounds";
 
 "numpad.enter" = "Enter";
-"custom.distance.desc" = "Simple = the scrolling distance list. Complex = a keypad for typing an exact distance; press Enter to store it.";
+"custom.distance.desc" = "Slider = the scrolling distance list. Numpad = a keypad for typing an exact distance to one decimal; press Enter to store it.";
+
+"custom.distance.slider" = "Slider";
+"custom.distance.numpad" = "Numpad";
+"summary.missesLabel" = "MISSES";
+"summary.missNoDirection" = "%ld more without a recorded direction";

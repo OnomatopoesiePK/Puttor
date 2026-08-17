@@ -34,11 +34,11 @@ struct CustomModeSettingsView: View {
                     Text(L("custom.field.distance")).foregroundStyle(Theme.text)
                     Spacer()
                     Picker("", selection: Binding(
-                        get: { draftConfig.distanceComplexity },
-                        set: { draftConfig.distanceComplexity = $0 }
+                        get: { draftConfig.distanceStyle },
+                        set: { draftConfig.distanceStyle = $0 }
                     )) {
-                        ForEach(FieldComplexity.allCases, id: \.self) { c in
-                            Text(L(c.labelKey)).tag(c)
+                        ForEach(DistanceInputStyle.allCases, id: \.self) { style in
+                            Text(L(style.labelKey)).tag(style)
                         }
                     }
                     .pickerStyle(.segmented)

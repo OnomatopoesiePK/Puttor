@@ -77,19 +77,19 @@ struct PuttorTests {
         #expect(config.resultComplexity == .complex)
         #expect(config.fields.map(\.kind) == [.slope])
         #expect(config.fields[0].complexity == .complex)
-        #expect(config.distanceComplexity == .simple)
+        #expect(config.distanceStyle == .slider)
     }
 
-    @Test func customModeConfigRoundTripsDistanceComplexity() async throws {
+    @Test func customModeConfigRoundTripsDistanceStyle() async throws {
         var config = CustomModeConfig.defaultConfig
-        config.distanceComplexity = .complex
+        config.distanceStyle = .numpad
 
         let decoded = try JSONDecoder().decode(
             CustomModeConfig.self,
             from: JSONEncoder().encode(config)
         )
 
-        #expect(decoded.distanceComplexity == .complex)
+        #expect(decoded.distanceStyle == .numpad)
         #expect(decoded == config)
     }
 

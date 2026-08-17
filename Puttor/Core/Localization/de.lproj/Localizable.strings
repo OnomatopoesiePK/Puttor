@@ -373,4 +373,9 @@
 "game.stats.deleteAll" = "Alle Runden löschen";
 
 "numpad.enter" = "Enter";
-"custom.distance.desc" = "Einfach = die Distanz-Auswahlliste. Komplex = ein Ziffernblock zum Eintippen einer genauen Distanz; mit Enter speichern.";
+"custom.distance.desc" = "Slider = die Distanz-Auswahlliste. Numpad = ein Ziffernblock zum Eintippen einer genauen Distanz auf eine Nachkommastelle; mit Enter speichern.";
+
+"custom.distance.slider" = "Slider";
+"custom.distance.numpad" = "Numpad";
+"summary.missesLabel" = "MISSES";
+"summary.missNoDirection" = "%ld weitere ohne erfasste Richtung";

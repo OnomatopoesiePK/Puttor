@@ -30,33 +30,6 @@ private let dartSectors: [DartSector] = [
     DartSector(result: .longLeft, symbol: "↖", isWord: false, startDeg: 202.5, fillA: Color(hex: 0x3E3040), fillB: Color(hex: 0x322635)),
 ]
 
-private func polarPoint(_ deg: Double, _ r: CGFloat, _ center: CGPoint) -> CGPoint {
-    let rad = deg * .pi / 180
-    return CGPoint(x: center.x + r * CGFloat(cos(rad)), y: center.y + r * CGFloat(sin(rad)))
-}
-
-private func annularSectorPath(startDeg: Double, endDeg: Double, r1: CGFloat, r2: CGFloat, center: CGPoint) -> Path {
-    var path = Path()
-    let steps = 10
-    path.move(to: polarPoint(startDeg, r2, center))
-    for i in 1...steps {
-        let d = startDeg + (endDeg - startDeg) * Double(i) / Double(steps)
-        path.addLine(to: polarPoint(d, r2, center))
-    }
-    for i in 0...steps {
-        let d = endDeg - (endDeg - startDeg) * Double(i) / Double(steps)
-        path.addLine(to: polarPoint(d, r1, center))
-    }
-    path.closeSubpath()
-    return path
-}
-
-/// Is `angle` within [start, start+45) modulo 360?
-private func angleInSector(_ angle: Double, start: Double) -> Bool {
-    var diff = (angle - start).truncatingRemainder(dividingBy: 360)
-    if diff < 0 { diff += 360 }
-    return diff < 45
-}
 
 struct DartboardMissView: View {
     @Binding var result: PuttResult?
@@ -88,7 +61,7 @@ struct DartboardMissView: View {
 
                 for (i, s) in dartSectors.enumerated() {
                     let endDeg = s.startDeg + 45
-                    let path = annularSectorPath(startDeg: s.startDeg, endDeg: endDeg, r1: sectorR1, r2: sectorR2, center: center)
+                    let path = PolarGeometry.annularSector(startDeg: s.startDeg, endDeg: endDeg, r1: sectorR1, r2: sectorR2, center: center)
                     let selected = result == s.result
                     let fill = selected ? Theme.error.opacity(0.87) : (i % 2 == 0 ? s.fillA : s.fillB)
                     context.fill(path, with: .color(fill))
@@ -108,7 +81,7 @@ struct DartboardMissView: View {
                 for s in dartSectors {
                     let endDeg = s.startDeg + 45
                     let mid = (s.startDeg + endDeg) / 2
-                    let lp = polarPoint(mid, (sectorR1 + sectorR2) / 2, center)
+                    let lp = PolarGeometry.point(mid, (sectorR1 + sectorR2) / 2, center)
                     let selected = result == s.result
                     let text = s.isWord ? L(s.symbol).uppercased() : s.symbol
                     var resolved = context.resolve(
@@ -150,7 +123,7 @@ struct DartboardMissView: View {
                             lipOut.toggle()
                         } else if r <= outerR {
                             let angle = atan2(dy, dx) * 180 / .pi
-                            if let hit = dartSectors.first(where: { angleInSector(angle, start: $0.startDeg) }) {
+                            if let hit = dartSectors.first(where: { PolarGeometry.angleInSector(angle, start: $0.startDeg) }) {
                                 result = hit.result
                             }
                         }

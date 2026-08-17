@@ -73,15 +73,14 @@ struct RoundInputQuickView: View {
                     .background(Theme.accent.opacity(0.13))
             }
 
-            Spacer()
-
-            VStack(spacing: Theme.Spacing.lg) {
-                Text(L("inputMode.quick"))
+            ScrollView {
+                VStack(spacing: Theme.Spacing.lg) {
+                    Text(L("inputMode.quick"))
                     .font(.system(size: 11, weight: .bold))
                     .tracking(1.4)
                     .foregroundStyle(Theme.textMuted)
 
-                DistancePickerView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
+                DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
 
                 VStack(spacing: 6) {
                     Text(L("input.puttFor")).font(.system(size: 10, weight: .semibold)).tracking(1.2).foregroundStyle(Theme.textMuted)
@@ -129,10 +128,9 @@ struct RoundInputQuickView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                }
+                .padding(Theme.Spacing.lg)
             }
-            .padding(Theme.Spacing.lg)
-
-            Spacer()
 
             holeNavBar(session)
         }
