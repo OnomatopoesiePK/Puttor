@@ -379,3 +379,7 @@
 "custom.distance.numpad" = "Numpad";
 "summary.missesLabel" = "MISSES";
 "summary.missNoDirection" = "%ld more without a recorded direction";
+
+"stats.customCount" = "Custom";
+"stats.roundsCounted" = "ROUNDS";
+"stats.ofAvailable" = "of %ld available";

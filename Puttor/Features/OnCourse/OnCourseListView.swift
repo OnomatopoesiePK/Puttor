@@ -65,30 +65,6 @@ struct OnCourseListView: View {
                     RoundInputView(round: round, onDone: { roundToOpen = nil })
                 }
             }
-            .confirmationDialog(
-                roundForActionSheet?.courseName.isEmpty == false ? roundForActionSheet!.courseName : L("onCourse.unnamedCourse"),
-                isPresented: Binding(get: { roundForActionSheet != nil }, set: { if !$0 { roundForActionSheet = nil } }),
-                titleVisibility: .visible
-            ) {
-                if let r = roundForActionSheet {
-                    Button(L("onCourse.edit")) {
-                        r.isComplete = false
-                        try? modelContext.save()
-                        roundToOpen = r
-                    }
-                    Button(r.isComplete ? L("onCourse.open") : L("onCourse.resume")) {
-                        roundToOpen = r
-                    }
-                    Button(L("onCourse.editSettings")) {
-                        roundToEditSettings = r
-                    }
-                    Button(L("onCourse.delete"), role: .destructive) {
-                        modelContext.delete(r)
-                        try? modelContext.save()
-                    }
-                    Button(L("common.cancel"), role: .cancel) {}
-                }
-            }
             .fullScreenCover(item: $roundToEditSettings) { round in
                 RoundSetupView(existingRound: round, onSaved: { roundToEditSettings = nil })
             }
@@ -178,6 +154,33 @@ struct OnCourseListView: View {
                         .overlay(Circle().stroke(Theme.border, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
+                // Attached to this row's own button, and presented only for this
+                // row, so where the popover points is the round it acts on.
+                .confirmationDialog(
+                    round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName,
+                    isPresented: Binding(
+                        get: { roundForActionSheet?.persistentModelID == round.persistentModelID },
+                        set: { if !$0 { roundForActionSheet = nil } }
+                    ),
+                    titleVisibility: .visible
+                ) {
+                    Button(L("onCourse.edit")) {
+                        round.isComplete = false
+                        try? modelContext.save()
+                        roundToOpen = round
+                    }
+                    Button(round.isComplete ? L("onCourse.open") : L("onCourse.resume")) {
+                        roundToOpen = round
+                    }
+                    Button(L("onCourse.editSettings")) {
+                        roundToEditSettings = round
+                    }
+                    Button(L("onCourse.delete"), role: .destructive) {
+                        modelContext.delete(round)
+                        try? modelContext.save()
+                    }
+                    Button(L("common.cancel"), role: .cancel) {}
+                }
 
                 VStack(spacing: 3) {
                     Text(round.isComplete ? L("onCourse.complete") : L("onCourse.inProgress"))

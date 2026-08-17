@@ -59,34 +59,21 @@ struct GameStatsView: View {
                     }
                     .foregroundStyle(Theme.primary)
                     .accessibilityLabel(L("game.stats.resetTitle"))
+                    // On the button itself, so the popover points at it.
+                    .confirmationDialog(L("game.stats.resetTitle"), isPresented: $showResetConfirm, titleVisibility: .visible) {
+                        if let best {
+                            Button(L("game.stats.deleteRecordOnly"), role: .destructive) { delete(best) }
+                        }
+                        Button(L("game.stats.deleteAll"), role: .destructive) { deleteAll() }
+                        Button(L("common.cancel"), role: .cancel) {}
+                    } message: {
+                        Text(L("game.stats.resetMessage"))
+                    }
                 }
             }
         }
         .navigationDestination(item: $playingGame) { game in
             GameDestinationView(gameType: game) { playingGame = nil }
-        }
-        .confirmationDialog(
-            L("game.stats.deleteRoundTitle"),
-            isPresented: Binding(get: { sessionToDelete != nil }, set: { if !$0 { sessionToDelete = nil } }),
-            titleVisibility: .visible
-        ) {
-            Button(L("onCourse.delete"), role: .destructive) {
-                if let s = sessionToDelete { delete(s) }
-            }
-            Button(L("common.cancel"), role: .cancel) {}
-        } message: {
-            if let s = sessionToDelete {
-                Text("\(s.date.formatted(date: .abbreviated, time: .shortened)) · \(GameScoreFormat.text(s.score, for: gameType))")
-            }
-        }
-        .confirmationDialog(L("game.stats.resetTitle"), isPresented: $showResetConfirm, titleVisibility: .visible) {
-            if let best {
-                Button(L("game.stats.deleteRecordOnly"), role: .destructive) { delete(best) }
-            }
-            Button(L("game.stats.deleteAll"), role: .destructive) { deleteAll() }
-            Button(L("common.cancel"), role: .cancel) {}
-        } message: {
-            Text(L("game.stats.resetMessage"))
         }
         .preferredColorScheme(ThemeManager.shared.colorScheme)
     }
@@ -213,6 +200,22 @@ struct GameStatsView: View {
                     .padding(.vertical, 9)
                 }
                 .buttonStyle(.plain)
+                // Presented on the row for this round — including when the tap
+                // came from its bar in the chart above — so the popover points
+                // at the round being removed.
+                .confirmationDialog(
+                    L("game.stats.deleteRoundTitle"),
+                    isPresented: Binding(
+                        get: { sessionToDelete?.id == session.id },
+                        set: { if !$0 { sessionToDelete = nil } }
+                    ),
+                    titleVisibility: .visible
+                ) {
+                    Button(L("onCourse.delete"), role: .destructive) { delete(session) }
+                    Button(L("common.cancel"), role: .cancel) {}
+                } message: {
+                    Text("\(session.date.formatted(date: .abbreviated, time: .shortened)) · \(GameScoreFormat.text(session.score, for: gameType))")
+                }
 
                 if index < recent.count - 1 {
                     Rectangle().fill(Theme.borderLight).frame(height: 1)

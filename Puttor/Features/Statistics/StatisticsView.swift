@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 private enum FilterMode: String, CaseIterable, Identifiable {
-    case last1, last3, last5, last10, all, byPutter
+    case last1, last3, last5, last10, custom, all, byPutter
     var id: String { rawValue }
 
     var labelKey: String {
@@ -18,8 +18,21 @@ private enum FilterMode: String, CaseIterable, Identifiable {
         case .last3: return "stats.last3"
         case .last5: return "stats.last5"
         case .last10: return "stats.last10"
+        case .custom: return "stats.customCount"
         case .all: return "stats.allRounds"
         case .byPutter: return "stats.byPutter"
+        }
+    }
+
+    /// The fixed presets carry their own round count; the rest are handled
+    /// separately (a typed count, everything, or a putter filter).
+    var fixedCount: Int? {
+        switch self {
+        case .last1: return 1
+        case .last3: return 3
+        case .last5: return 5
+        case .last10: return 10
+        case .custom, .all, .byPutter: return nil
         }
     }
 }
@@ -30,6 +43,7 @@ struct StatisticsView: View {
 
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
     @State private var filterMode: FilterMode = .last5
+    @AppStorage(AppStorageKeys.statsCustomRoundCount) private var customCount: Int = 7
     @State private var selectedPutterID: PersistentIdentifier?
     @State private var dispersionFilter: DispersionFilter = .all
 
@@ -38,15 +52,15 @@ struct StatisticsView: View {
     private var completeRounds: [Round] { allRounds.filter { $0.isComplete } }
 
     private var filteredRounds: [Round] {
+        if let count = filterMode.fixedCount {
+            return Array(completeRounds.prefix(count))
+        }
         switch filterMode {
-        case .last1: return Array(completeRounds.prefix(1))
-        case .last3: return Array(completeRounds.prefix(3))
-        case .last5: return Array(completeRounds.prefix(5))
-        case .last10: return Array(completeRounds.prefix(10))
-        case .all: return completeRounds
+        case .custom: return Array(completeRounds.prefix(customCount))
         case .byPutter:
             guard let id = selectedPutterID else { return completeRounds }
             return completeRounds.filter { $0.putter?.persistentModelID == id }
+        default: return completeRounds
         }
     }
 
@@ -91,8 +105,15 @@ struct StatisticsView: View {
                         }
                     }
                     .padding(.horizontal, Theme.Spacing.lg)
+                    // Breathing room inside the scroll view, so the capsule
+                    // outlines aren't clipped by its bounds.
+                    .padding(.vertical, 6)
                 }
-                .frame(height: 46)
+                .fixedSize(horizontal: false, vertical: true)
+
+                if filterMode == .custom {
+                    customCountRow
+                }
 
                 if filterMode == .byPutter && !putters.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -104,8 +125,9 @@ struct StatisticsView: View {
                             }
                         }
                         .padding(.horizontal, Theme.Spacing.lg)
+                        .padding(.vertical, 6)
                     }
-                    .frame(height: 46)
+                    .fixedSize(horizontal: false, vertical: true)
                 }
 
                 ScrollView {
@@ -237,6 +259,54 @@ struct StatisticsView: View {
                 .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.border, lineWidth: 1))
             }
         }
+    }
+
+    /// Stepper for the "Custom" preset, mirroring how the putter filter reveals
+    /// a second row. Capped at the number of rounds that actually exist, since
+    /// asking for more than that would silently behave like "All".
+    private var customCountRow: some View {
+        let maxCount = max(completeRounds.count, 1)
+        return HStack(spacing: 10) {
+            stepperButton(systemImage: "minus", enabled: customCount > 1) {
+                customCount = max(1, customCount - 1)
+            }
+
+            VStack(spacing: 1) {
+                Text("\(min(customCount, maxCount))")
+                    .font(.system(size: 18, weight: .black))
+                    .foregroundStyle(Theme.primary)
+                Text(L("stats.roundsCounted"))
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(Theme.textMuted)
+            }
+            .frame(minWidth: 76)
+
+            stepperButton(systemImage: "plus", enabled: customCount < maxCount) {
+                customCount = min(maxCount, customCount + 1)
+            }
+
+            Spacer()
+
+            Text(String(format: L("stats.ofAvailable"), maxCount))
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.textMuted)
+        }
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.bottom, 6)
+    }
+
+    private func stepperButton(systemImage: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: 14, weight: .heavy))
+                .foregroundStyle(Theme.primary)
+                .frame(width: 40, height: 34)
+                .background(Capsule().fill(Theme.primary.opacity(0.13)))
+                .overlay(Capsule().stroke(Theme.primary, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .opacity(enabled ? 1 : 0.35)
     }
 
     private func filterChip(_ title: String, selected: Bool, color: Color = Theme.primary, action: @escaping () -> Void) -> some View {
