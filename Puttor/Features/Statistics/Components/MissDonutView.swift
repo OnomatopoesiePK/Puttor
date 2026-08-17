@@ -74,13 +74,23 @@ struct MissDonutView: View {
 
                 let mid = sector.startDeg + PolarGeometry.sectorSpan / 2
                 let labelPoint = PolarGeometry.point(mid, (innerR + outerR) / 2, center)
-                var label = context.resolve(
-                    Text("\(count)× \(L(sector.result.labelKey))")
-                        .font(.system(size: 10, weight: .bold))
-                )
                 // Once the fill is saturated, white reads better than the theme text.
-                label.shading = .color(intensity(for: count) > 0.55 ? .white : Theme.text)
-                context.draw(label, at: labelPoint, anchor: .center)
+                let onDarkFill = intensity(for: count) > 0.55
+                let tint: Color = onDarkFill ? .white : Theme.text
+
+                // Count large, direction small underneath — one dense line of
+                // "13x left" per sector made the ring hard to scan.
+                var countLabel = context.resolve(
+                    Text("\(count)").font(.system(size: 19, weight: .black))
+                )
+                countLabel.shading = .color(tint)
+                context.draw(countLabel, at: CGPoint(x: labelPoint.x, y: labelPoint.y - 7), anchor: .center)
+
+                var nameLabel = context.resolve(
+                    Text(L(sector.result.labelKey)).font(.system(size: 9, weight: .semibold))
+                )
+                nameLabel.shading = .color(onDarkFill ? .white.opacity(0.85) : Theme.textSecondary)
+                context.draw(nameLabel, at: CGPoint(x: labelPoint.x, y: labelPoint.y + 9), anchor: .center)
             }
 
             // Hollow centre: the total, so the ring still answers "how many".

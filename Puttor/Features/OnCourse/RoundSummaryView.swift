@@ -135,12 +135,18 @@ struct RoundSummaryView: View {
                 Text(L("summary.title")).font(.system(size: 18, weight: .heavy)).foregroundStyle(Theme.text)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(L("summary.done")) { onDone() }
-                    .font(.system(size: 14, weight: .heavy))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(Theme.primary))
+                // Same outlined shape as the End/Done button in the input
+                // screens, so the round's primary action looks the same
+                // whichever screen you're on.
+                Button { onDone() } label: {
+                    Text(L("summary.done"))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Theme.primary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.primary, lineWidth: 1.5))
+                }
+                .buttonStyle(.plain)
             }
         }
         .navigationBarBackButtonHidden(true)
