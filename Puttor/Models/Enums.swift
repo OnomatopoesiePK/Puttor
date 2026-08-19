@@ -54,6 +54,24 @@ enum PuttResult: String, Codable, CaseIterable {
     }
 }
 
+/// What went wrong in a bad stroke — offered as a follow-up once "bad stroke"
+/// is selected, since "bad stroke" alone doesn't say which way it went.
+enum BadStrokeType: String, Codable, CaseIterable, Identifiable {
+    case pull
+    case misshit
+    case push
+
+    var id: String { rawValue }
+
+    var labelKey: String {
+        switch self {
+        case .pull: return "input.badStroke.pull"
+        case .misshit: return "input.badStroke.misshit"
+        case .push: return "input.badStroke.push"
+        }
+    }
+}
+
 enum DoubleBreakType: String, Codable, CaseIterable {
     case rlThenLr // right-to-left, then left-to-right
     case lrThenRl // left-to-right, then right-to-left

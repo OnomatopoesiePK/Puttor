@@ -42,6 +42,7 @@ final class RoundSession {
     var draftLipOut = false
     var draftMissRead = false
     var draftBadStroke = false
+    var draftBadStrokeType: BadStrokeType?
     var draftWrongAim = false
 
     /// SG of the putt most recently saved by recordDraft()/recordTapIn() — used
@@ -129,6 +130,7 @@ final class RoundSession {
             || draftLipOut != p.lipOut
             || draftMissRead != p.missRead
             || draftBadStroke != p.badStroke
+            || draftBadStrokeType != p.badStrokeType
             || draftWrongAim != p.wrongAim
     }
 
@@ -228,6 +230,7 @@ final class RoundSession {
         draftLipOut = false
         draftMissRead = false
         draftBadStroke = false
+        draftBadStrokeType = nil
         draftWrongAim = false
         reviewIndex = nil
     }
@@ -242,6 +245,7 @@ final class RoundSession {
         draftLipOut = false
         draftMissRead = false
         draftBadStroke = false
+        draftBadStrokeType = nil
         draftWrongAim = false
         reviewIndex = nil
     }
@@ -259,6 +263,7 @@ final class RoundSession {
         draftLipOut = p.lipOut
         draftMissRead = p.missRead
         draftBadStroke = p.badStroke
+        draftBadStrokeType = p.badStrokeType
         draftWrongAim = p.wrongAim
     }
 
@@ -280,6 +285,7 @@ final class RoundSession {
             putt.lipOut = draftLipOut
             putt.missRead = draftMissRead
             putt.badStroke = draftBadStroke
+            putt.badStrokeType = draftBadStroke ? draftBadStrokeType : nil
             putt.wrongAim = draftWrongAim
             putt.recomputeSG()
             lastSavedSG = putt.sgActual
@@ -360,6 +366,7 @@ final class RoundSession {
             lipOut: draftLipOut,
             missRead: draftMissRead,
             badStroke: draftBadStroke,
+            badStrokeType: draftBadStroke ? draftBadStrokeType : nil,
             wrongAim: draftWrongAim
         )
         putt.round = round
@@ -398,6 +405,7 @@ final class RoundSession {
         draftLipOut = false
         draftMissRead = false
         draftBadStroke = false
+        draftBadStrokeType = nil
         draftWrongAim = false
         return recordDraft()
     }
@@ -406,8 +414,10 @@ final class RoundSession {
     /// During play this is never called directly: a hole simply stays empty
     /// while the round is live, and `endRound` converts whatever is still empty
     /// into hole-outs. Kept for the explicit case and used by that conversion.
-    private func insertHoleOutSentinel(forHole hole: Int) {
-        let sentinel = Putt(holeNumber: hole, puttNumber: 0, distanceM: 0, result: .holed)
+    /// `puttFor` on a sentinel is the score the hole was holed out for, which is
+    /// what the scoring, GIR and scramble stats read.
+    private func insertHoleOutSentinel(forHole hole: Int, puttFor: ScoreCategory = .par) {
+        let sentinel = Putt(holeNumber: hole, puttNumber: 0, distanceM: 0, puttFor: puttFor, result: .holed)
         sentinel.round = round
         round.putts.append(sentinel)
         modelContext.insert(sentinel)
@@ -415,18 +425,52 @@ final class RoundSession {
 
     /// Deletes every putt (including a hole-out sentinel) recorded for `hole` —
     /// for fixing a hole that was entered by mistake and never actually played.
+    ///
+    /// In a finished round every hole is either putts or a hole-out, so clearing
+    /// one there leaves a hole-out behind rather than a hole that is part of the
+    /// round but has no record at all.
     @discardableResult
     func deleteAllPuttsOnHole(_ hole: Int) -> Bool {
         let toDelete = round.putts.filter { $0.holeNumber == hole }
         guard !toDelete.isEmpty else { return false }
+        let previousCategory = toDelete.min { $0.puttNumber < $1.puttNumber }?.puttFor ?? .par
         for p in toDelete {
             round.putts.removeAll { $0.id == p.id }
             modelContext.delete(p)
+        }
+        if round.isComplete {
+            insertHoleOutSentinel(forHole: hole, puttFor: previousCategory)
         }
         try? modelContext.save()
         currentHole = hole
         resetDraft()
         return true
+    }
+
+    /// Saves a category change on a hole that has no real putts — the hole-out's
+    /// score, which drives whether it counts as a GIR or a scramble save. Used
+    /// when editing such a hole and only the putt-for was changed.
+    @discardableResult
+    func updateHoleOutCategory(_ hole: Int, to category: ScoreCategory) -> Bool {
+        guard realPuttsOnHole(hole).isEmpty else { return false }
+        let sentinels = round.putts.filter { $0.holeNumber == hole && $0.puttNumber == 0 }
+        guard !sentinels.isEmpty else { return false }
+        for sentinel in sentinels {
+            sentinel.puttFor = category
+        }
+        try? modelContext.save()
+        return true
+    }
+
+    /// True when the displayed hole is recorded as a hole-out with no real putts,
+    /// so the screen should offer the hole-out's category rather than putt entry.
+    var isDisplayingHoleOut: Bool {
+        realPuttsOnHole(displayHole).isEmpty && !puttsOnHole(displayHole).isEmpty
+    }
+
+    var displayedHoleOutCategory: ScoreCategory? {
+        guard isDisplayingHoleOut else { return nil }
+        return puttsOnHole(displayHole).first { $0.puttNumber == 0 }?.puttFor
     }
 
     private func advanceAfterHole() -> RoundOutcome {

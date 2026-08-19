@@ -164,15 +164,21 @@ struct StatisticsView: View {
                                 card { DistanceMakeChartView(data: aggregated.makeByDistance, sgDivisor: max(1, filteredRounds.count)) }
                             }
 
-                            if hasSituationData {
+                            // Score, GIR and scramble come from the holes, so a
+                            // round of nothing but hole-outs still has them —
+                            // only the per-category putt comparison needs putts.
+                            if aggregated.holes > 0 {
                                 card {
                                     Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
                                     HStack(spacing: Theme.Spacing.sm) {
-                                        playingStat(L("stats.gir"), aggregated.girPercent, "\(aggregated.girCount)/\(aggregated.holes)")
-                                        playingStat(L("stats.scramble"), aggregated.scramblePercent, "\(aggregated.scrambleSuccesses)/\(aggregated.scrambleAttempts)")
+                                        playingStat(L("stats.score"), aggregated.scoreRelativeToParText, subtitle: String(format: L("stats.overHoles"), aggregated.scoredHoles), color: scoreColor(aggregated.scoreRelativeToPar))
+                                        playingStat(L("stats.gir"), "\(Int(aggregated.girPercent.rounded()))%", subtitle: "\(aggregated.girCount)/\(aggregated.holes)")
+                                        playingStat(L("stats.scramble"), "\(Int(aggregated.scramblePercent.rounded()))%", subtitle: "\(aggregated.scrambleSuccesses)/\(aggregated.scrambleAttempts)")
                                     }
                                 }
+                            }
 
+                            if hasSituationData {
                                 card {
                                     SituationComparisonView(makeByCategory: aggregated.makeByCategory, useFeet: useFeet)
                                 }
@@ -322,11 +328,15 @@ struct StatisticsView: View {
         .buttonStyle(.plain)
     }
 
-    private func playingStat(_ label: String, _ percent: Double, _ fraction: String) -> some View {
+    private func scoreColor(_ score: Int) -> Color {
+        score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
+    }
+
+    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.primary) -> some View {
         VStack(spacing: 2) {
-            Text("\(Int(percent.rounded()))%").font(.system(size: 22, weight: .black)).foregroundStyle(Theme.primary)
+            Text(value).font(.system(size: 22, weight: .black)).foregroundStyle(color)
             Text(label).font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.text)
-            Text(fraction).font(.system(size: 10)).foregroundStyle(Theme.textMuted)
+            Text(subtitle).font(.system(size: 10)).foregroundStyle(Theme.textMuted)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Theme.Spacing.sm)

@@ -56,15 +56,49 @@ struct RoundStats {
     var leaveByMissDirection: [PuttResult: LeaveInfo] = [:]
     var missReasonCounts: MissReasonCounts = MissReasonCounts()
 
-    /// Holes where the first putt was "for birdie" — i.e. the green was hit in regulation.
+    /// Holes reached with a putt for eagle or birdie — the green was hit in
+    /// regulation. A hole-out for one of those counts too.
     var girCount: Int = 0
-    /// First putts "for par" (green missed, no birdie putt on this hole) — up-and-down attempts.
+    /// Holes played for par with the green missed — up-and-down attempts.
     var scrambleAttempts: Int = 0
-    /// Of those, how many were saved with a single putt.
+    /// Of those, how many were saved (one putt, or holed out from off the green).
     var scrambleSuccesses: Int = 0
+
+    /// Total strokes over/under par across the scored holes.
+    var scoreRelativeToPar: Int = 0
+    /// Holes the score could be derived for — the divisor behind any average.
+    var scoredHoles: Int = 0
 
     var girPercent: Double { holes > 0 ? Double(girCount) / Double(holes) * 100 : 0 }
     var scramblePercent: Double { scrambleAttempts > 0 ? Double(scrambleSuccesses) / Double(scrambleAttempts) * 100 : 0 }
+
+    /// "+3", "-2", "E" — the usual golf shorthand.
+    var scoreRelativeToParText: String {
+        if scoreRelativeToPar == 0 { return "E" }
+        return scoreRelativeToPar > 0 ? "+\(scoreRelativeToPar)" : "\(scoreRelativeToPar)"
+    }
+
+    /// Strokes over/under par for one hole.
+    ///
+    /// A putt is labelled with the score it would earn if holed, so the first
+    /// putt's category sets the baseline and every putt after it adds a stroke:
+    /// a birdie putt holed is -1, two-putted is level, three-putted is +1. A
+    /// hole-out has no putts, so its own category is the score outright.
+    static func holeScoreRelativeToPar(_ holePutts: [Putt]) -> Int? {
+        let realPutts = holePutts.filter { $0.puttNumber > 0 }.sorted { $0.puttNumber < $1.puttNumber }
+        if let first = realPutts.first {
+            return first.puttFor.strokesRelativeToPar + (realPutts.count - 1)
+        }
+        guard let sentinel = holePutts.first(where: { $0.puttNumber == 0 }) else { return nil }
+        return sentinel.puttFor.strokesRelativeToPar
+    }
+
+    /// The category a hole was played for: the first putt's, or the hole-out's.
+    static func holeCategory(_ holePutts: [Putt]) -> ScoreCategory? {
+        let realPutts = holePutts.filter { $0.puttNumber > 0 }.sorted { $0.puttNumber < $1.puttNumber }
+        if let first = realPutts.first { return first.puttFor }
+        return holePutts.first(where: { $0.puttNumber == 0 })?.puttFor
+    }
 
     static let situationCategories: [ScoreCategory] = [.birdie, .par, .bogey]
 
@@ -135,11 +169,31 @@ struct RoundStats {
         stats.missReasonCounts = computeMissReasonCounts(realPutts)
         stats.leaveByMissDirection = computeLeaveByMissDirection(realPutts)
 
-        let firstPutts = realPutts.filter { $0.puttNumber == 1 }
-        stats.girCount = firstPutts.filter { $0.puttFor == .birdie }.count
-        let scrambleFirstPutts = firstPutts.filter { $0.puttFor == .par }
-        stats.scrambleAttempts = scrambleFirstPutts.count
-        stats.scrambleSuccesses = scrambleFirstPutts.filter { $0.result == .holed }.count
+        // Scoring, GIR and scramble are per hole rather than per putt, so that a
+        // hole holed out from off the green counts under the category it was
+        // holed out for instead of being skipped for having no putts.
+        for hole in holeSet {
+            let holePutts = putts.filter { $0.holeNumber == hole }
+            guard let category = holeCategory(holePutts) else { continue }
+            let realOnHole = holePutts.filter { $0.puttNumber > 0 }
+            let isHoleOut = realOnHole.isEmpty
+
+            if let score = holeScoreRelativeToPar(holePutts) {
+                stats.scoreRelativeToPar += score
+                stats.scoredHoles += 1
+            }
+
+            if category.isGreenInRegulation {
+                stats.girCount += 1
+            } else if category.isScrambleAttempt {
+                stats.scrambleAttempts += 1
+                // Holing out from off the green is the up-and-down; with putts
+                // it takes exactly one to count as saved.
+                if isHoleOut || (realOnHole.count == 1 && realOnHole[0].result == .holed) {
+                    stats.scrambleSuccesses += 1
+                }
+            }
+        }
 
         return stats
     }
@@ -236,6 +290,8 @@ struct RoundStats {
         merged.girCount = list.reduce(0) { $0 + $1.girCount }
         merged.scrambleAttempts = list.reduce(0) { $0 + $1.scrambleAttempts }
         merged.scrambleSuccesses = list.reduce(0) { $0 + $1.scrambleSuccesses }
+        merged.scoreRelativeToPar = list.reduce(0) { $0 + $1.scoreRelativeToPar }
+        merged.scoredHoles = list.reduce(0) { $0 + $1.scoredHoles }
 
         var leaveAcc: [PuttResult: (totalDist: Double, count: Int)] = [:]
         for r in list {

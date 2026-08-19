@@ -68,6 +68,15 @@ struct RoundSummaryView: View {
                 }
 
                 card {
+                    Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                    HStack(spacing: Theme.Spacing.sm) {
+                        playingStat(L("stats.score"), stats.scoreRelativeToParText, subtitle: String(format: L("stats.overHoles"), stats.scoredHoles), color: scoreColor(stats.scoreRelativeToPar))
+                        playingStat(L("stats.gir"), "\(Int(stats.girPercent.rounded()))%", subtitle: "\(stats.girCount)/\(stats.holes)")
+                        playingStat(L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%", subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)")
+                    }
+                }
+
+                card {
                     Text(L("summary.holes").uppercased()).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
                     holeGrid
                     if let expandedHole {
@@ -85,14 +94,6 @@ struct RoundSummaryView: View {
                 }
 
                 if hasSituationData {
-                    card {
-                        Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-                        HStack(spacing: Theme.Spacing.sm) {
-                            playingStat(L("stats.gir"), stats.girPercent, "\(stats.girCount)/\(stats.holes)")
-                            playingStat(L("stats.scramble"), stats.scramblePercent, "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)")
-                        }
-                    }
-
                     card {
                         SituationComparisonView(makeByCategory: stats.makeByCategory, useFeet: useFeet)
                     }
@@ -211,11 +212,20 @@ struct RoundSummaryView: View {
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.accent.opacity(0.4), lineWidth: 1))
     }
 
-    private func playingStat(_ label: String, _ percent: Double, _ fraction: String) -> some View {
+    private func scoreText(_ score: Int) -> String {
+        if score == 0 { return "E" }
+        return score > 0 ? "+\(score)" : "\(score)"
+    }
+
+    private func scoreColor(_ score: Int) -> Color {
+        score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
+    }
+
+    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.primary) -> some View {
         VStack(spacing: 2) {
-            Text("\(Int(percent.rounded()))%").font(.system(size: 22, weight: .black)).foregroundStyle(Theme.primary)
+            Text(value).font(.system(size: 22, weight: .black)).foregroundStyle(color)
             Text(label).font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.text)
-            Text(fraction).font(.system(size: 10)).foregroundStyle(Theme.textMuted)
+            Text(subtitle).font(.system(size: 10)).foregroundStyle(Theme.textMuted)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
@@ -298,13 +308,28 @@ struct RoundSummaryView: View {
                     .foregroundStyle(Theme.textMuted)
             }
             if isHoleOut {
-                Text("🎯 \(L("summary.holedOut"))")
+                let category = putts.first { $0.holeNumber == hole && $0.puttNumber == 0 }?.puttFor ?? .par
+                // Naming the score it was holed out for matters: that's what
+                // decides the hole's score, its GIR and its scramble.
+                Text("🎯 \(String(format: L("summary.holedOutFor"), L(category.labelKey)))")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.accent)
             }
+            if let score = RoundStats.holeScoreRelativeToPar(putts.filter { $0.holeNumber == hole }) {
+                Text(String(format: L("summary.holeScore"), scoreText(score)))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(scoreColor(score))
+            }
             ForEach(holePutts) { p in
                 HStack(spacing: 8) {
-                    Text("\(L("summary.puttAbbr")) \(p.puttNumber)").font(.system(size: 11)).foregroundStyle(Theme.textMuted).frame(width: 50, alignment: .leading)
+                    // "Birdie putt" says more than "putt 1" — it's the score
+                    // that putt was for.
+                    Text(String(format: L("summary.puttForLabel"), L(p.puttFor.labelKey)))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(p.puttFor.color)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(width: 78, alignment: .leading)
                     Text(UnitConverter.formatDistance(p.distanceM, useFeet: useFeet)).font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.text).frame(width: 46, alignment: .leading)
                     Text(L(p.result.labelKey)).font(.system(size: 12, weight: .semibold)).foregroundStyle(p.result == .holed ? Theme.primary : Theme.error)
                     Spacer()

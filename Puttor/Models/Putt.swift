@@ -25,11 +25,18 @@ final class Putt {
     var lipOut: Bool = false
     var missRead: Bool = false
     var badStroke: Bool = false
+    var badStrokeTypeRaw: String?
     var wrongAim: Bool = false
 
     var sgBaseline: Double = 0
     var sgActual: Double = 0
     var createdAt: Date = Date()
+
+    /// Only meaningful while `badStroke` is set.
+    var badStrokeType: BadStrokeType? {
+        get { badStrokeTypeRaw.flatMap { BadStrokeType(rawValue: $0) } }
+        set { badStrokeTypeRaw = newValue?.rawValue }
+    }
 
     var doubleBreak: DoubleBreakType? {
         get { doubleBreakRaw.flatMap { DoubleBreakType(rawValue: $0) } }
@@ -62,6 +69,7 @@ final class Putt {
         lipOut: Bool = false,
         missRead: Bool = false,
         badStroke: Bool = false,
+        badStrokeType: BadStrokeType? = nil,
         wrongAim: Bool = false
     ) {
         self.id = UUID()
@@ -76,6 +84,7 @@ final class Putt {
         self.lipOut = lipOut
         self.missRead = missRead
         self.badStroke = badStroke
+        self.badStrokeTypeRaw = badStrokeType?.rawValue
         self.wrongAim = wrongAim
         let baseline = StrokesGained.baseline(at: distanceM)
         self.sgBaseline = baseline.makeProbability

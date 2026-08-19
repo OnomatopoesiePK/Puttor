@@ -56,6 +56,7 @@ enum Theme {
     static var categoryBirdie: Color { t(0xFF5C6C, 0xD62839) }
     static var categoryBogey: Color { t(0xC24A56, 0x8A2530) }
     static var categoryDoubleOrWorse: Color { t(0x7A2E38, 0x4A1219) }
+    static var categoryTripleOrWorse: Color { t(0x561E26, 0x2E0A0F) }
 
     enum Spacing {
         static let xs: CGFloat = 4

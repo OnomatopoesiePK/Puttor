@@ -383,3 +383,20 @@
 "stats.customCount" = "Custom";
 "stats.roundsCounted" = "ROUNDS";
 "stats.ofAvailable" = "of %ld available";
+
+"score.double" = "Double Bogey";
+"score.triple" = "Triple Bogey";
+"score.tripleOrWorse" = "Triple Bogey or worse";
+"score.double.short" = "DB";
+"score.triple.short" = "TB";
+"score.tripleOrWorse.short" = "TB+";
+"input.badStroke.pull" = "Pull";
+"input.badStroke.misshit" = "Misshit";
+"input.badStroke.push" = "Push";
+"input.holedOutFor" = "HOLED OUT FOR";
+"input.holeOutHint" = "No putt was recorded on this hole. The score chosen here is the hole's score, and decides whether it counts as a green in regulation or a scramble save. Recording a putt above replaces it.";
+"summary.holedOutFor" = "Holed out for %@ â 0 putts";
+"summary.puttForLabel" = "%@ putt";
+"summary.holeScore" = "Hole score: %@";
+"stats.score" = "Score";
+"stats.overHoles" = "over %ld holes";

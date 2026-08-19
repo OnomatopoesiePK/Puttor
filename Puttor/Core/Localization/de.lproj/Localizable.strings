@@ -383,3 +383,20 @@
 "stats.customCount" = "Eigene";
 "stats.roundsCounted" = "RUNDEN";
 "stats.ofAvailable" = "von %ld verfügbaren";
+
+"score.double" = "Doppelbogey";
+"score.triple" = "Triplebogey";
+"score.tripleOrWorse" = "Triplebogey oder schlechter";
+"score.double.short" = "DB";
+"score.triple.short" = "TB";
+"score.tripleOrWorse.short" = "TB+";
+"input.badStroke.pull" = "Pull";
+"input.badStroke.misshit" = "Misshit";
+"input.badStroke.push" = "Push";
+"input.holedOutFor" = "EINGELOCHT FÜR";
+"input.holeOutHint" = "Auf diesem Loch wurde kein Putt erfasst. Der hier gewählte Score ist der Score des Lochs und entscheidet, ob es als Grün in Regulation oder als Scramble-Save zählt. Ein Putt oben ersetzt ihn.";
+"summary.holedOutFor" = "Eingelocht für %@ — 0 Putts";
+"summary.puttForLabel" = "%@-Putt";
+"summary.holeScore" = "Loch-Score: %@";
+"stats.score" = "Score";
+"stats.overHoles" = "auf %ld Löchern";

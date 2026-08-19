@@ -54,6 +54,12 @@ struct RoundInputView: View {
 
             ScrollView {
                 VStack(spacing: Theme.Spacing.md) {
+                    if let holeOutCategory = session.displayedHoleOutCategory {
+                        HoleOutCategoryCard(category: holeOutCategory) { newCategory in
+                            session.updateHoleOutCategory(session.displayHole, to: newCategory)
+                        }
+                    }
+
                     section {
                         DistancePickerView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
                     }
@@ -224,49 +230,17 @@ struct RoundInputView: View {
     }
 
     private func scoreCategoryRow(_ session: RoundSession) -> some View {
-        VStack(spacing: 6) {
-            Text(L("input.puttFor")).font(.system(size: 10, weight: .semibold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-            HStack(spacing: 6) {
-                ForEach(ScoreCategory.allCases) { cat in
-                    let selected = session.draftPuttFor == cat
-                    Button {
-                        session.draftPuttFor = cat
-                    } label: {
-                        Text(L(cat.shortLabelKey))
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(selected ? .white : cat.color)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(cat.color.opacity(selected ? 0.85 : 0.18)))
-                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(cat.color, lineWidth: selected ? 2 : 1.2))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
+        ScoreCategoryRow(selection: Binding(get: { session.draftPuttFor }, set: { session.draftPuttFor = $0 }))
     }
 
     private func missReasonRow(_ session: RoundSession) -> some View {
-        HStack(spacing: 8) {
-            reasonButton(L("input.missRead"), icon: "📖", isOn: Binding(get: { session.draftMissRead }, set: { session.draftMissRead = $0 }))
-            reasonButton(L("input.badStroke"), icon: "🏌️", isOn: Binding(get: { session.draftBadStroke }, set: { session.draftBadStroke = $0 }))
-            reasonButton(L("input.wrongAim"), icon: "🎯", isOn: Binding(get: { session.draftWrongAim }, set: { session.draftWrongAim = $0 }))
-        }
-    }
-
-    private func reasonButton(_ title: String, icon: String, isOn: Binding<Bool>) -> some View {
-        Button {
-            isOn.wrappedValue.toggle()
-        } label: {
-            Text("\(icon) \(title)")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(isOn.wrappedValue ? Theme.accent : Theme.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(isOn.wrappedValue ? Theme.accent.opacity(0.13) : Theme.surfaceElevated))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(isOn.wrappedValue ? Theme.accent : Theme.border, lineWidth: 1.5))
-        }
-        .buttonStyle(.plain)
+        MissReasonRow(
+            missRead: Binding(get: { session.draftMissRead }, set: { session.draftMissRead = $0 }),
+            badStroke: Binding(get: { session.draftBadStroke }, set: { session.draftBadStroke = $0 }),
+            badStrokeType: Binding(get: { session.draftBadStrokeType }, set: { session.draftBadStrokeType = $0 }),
+            wrongAim: Binding(get: { session.draftWrongAim }, set: { session.draftWrongAim = $0 }),
+            showsTitle: false
+        )
     }
 
     private func bottomBar(_ session: RoundSession) -> some View {

@@ -62,6 +62,137 @@ struct PuttorTests {
         #expect(GameScoring.isNewBest(newGateSession, among: [existingGate, existingClock, newGateSession]))
     }
 
+    // MARK: - Scoring relative to par
+
+    @Test func holeScoreIsTheFirstPuttsCategoryPlusEveryExtraPutt() async throws {
+        // A birdie putt holed is one under.
+        let made = [Putt(holeNumber: 1, puttNumber: 1, distanceM: 3, puttFor: .birdie, result: .holed)]
+        #expect(RoundStats.holeScoreRelativeToPar(made) == -1)
+
+        // Two-putting from that same birdie putt is level par.
+        let twoPutt = [
+            Putt(holeNumber: 1, puttNumber: 1, distanceM: 8, puttFor: .birdie, result: .short),
+            Putt(holeNumber: 1, puttNumber: 2, distanceM: 1, puttFor: .par, result: .holed),
+        ]
+        #expect(RoundStats.holeScoreRelativeToPar(twoPutt) == 0)
+
+        // Three-putting it is a bogey.
+        let threePutt = twoPutt + [Putt(holeNumber: 1, puttNumber: 3, distanceM: 0.5, puttFor: .bogey, result: .holed)]
+        #expect(RoundStats.holeScoreRelativeToPar(threePutt) == 1)
+
+        // The new deeper categories carry through.
+        let triple = [Putt(holeNumber: 1, puttNumber: 1, distanceM: 2, puttFor: .triple, result: .holed)]
+        #expect(RoundStats.holeScoreRelativeToPar(triple) == 3)
+    }
+
+    /// A hole with no putts scores whatever it was holed out for, rather than
+    /// the putt formula, which would read one stroke too good.
+    @Test func holeOutScoresTheCategoryItWasHoledOutFor() async throws {
+        let parHoleOut = [Putt(holeNumber: 4, puttNumber: 0, distanceM: 0, puttFor: .par, result: .holed)]
+        #expect(RoundStats.holeScoreRelativeToPar(parHoleOut) == 0)
+
+        let birdieHoleOut = [Putt(holeNumber: 4, puttNumber: 0, distanceM: 0, puttFor: .birdie, result: .holed)]
+        #expect(RoundStats.holeScoreRelativeToPar(birdieHoleOut) == -1)
+
+        #expect(RoundStats.holeScoreRelativeToPar([]) == nil)
+    }
+
+    @MainActor
+    @Test func holeOutsCountTowardGirScrambleAndScore() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        func add(_ putt: Putt) {
+            putt.round = round
+            round.putts.append(putt)
+            context.insert(putt)
+        }
+
+        // Hole 1: chipped in for birdie -> GIR, -1.
+        add(Putt(holeNumber: 1, puttNumber: 0, distanceM: 0, puttFor: .birdie, result: .holed))
+        // Hole 2: chipped in for par -> scramble attempt and save, level.
+        add(Putt(holeNumber: 2, puttNumber: 0, distanceM: 0, puttFor: .par, result: .holed))
+        // Hole 3: one putt for par -> scramble attempt and save, level.
+        add(Putt(holeNumber: 3, puttNumber: 1, distanceM: 2, puttFor: .par, result: .holed))
+        // Hole 4: two putts from a par putt -> scramble attempt, missed, +1.
+        add(Putt(holeNumber: 4, puttNumber: 1, distanceM: 9, puttFor: .par, result: .short))
+        add(Putt(holeNumber: 4, puttNumber: 2, distanceM: 1, puttFor: .bogey, result: .holed))
+        try context.save()
+
+        let stats = RoundStats.compute(putts: round.putts)
+
+        #expect(stats.girCount == 1)                 // only the birdie hole-out
+        #expect(stats.scrambleAttempts == 3)         // holes 2, 3 and 4
+        #expect(stats.scrambleSuccesses == 2)        // holes 2 and 3
+        #expect(stats.scoreRelativeToPar == 0)       // -1 + 0 + 0 + 1
+        #expect(stats.scoredHoles == 4)
+    }
+
+    /// Reported bug: clearing a hole-out hole in a finished round left the hole
+    /// with no record at all, so it stopped counting as played.
+    @MainActor
+    @Test func clearingAHoleInAFinishedRoundLeavesAHoleOutBehind() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        round.isComplete = true
+        context.insert(round)
+        let putt = Putt(holeNumber: 3, puttNumber: 1, distanceM: 4, puttFor: .birdie, result: .holed)
+        putt.round = round
+        round.putts.append(putt)
+        context.insert(putt)
+        try context.save()
+
+        let session = RoundSession(round: round, modelContext: context, initialHole: 3, isPostRoundEdit: true)
+        session.deleteAllPuttsOnHole(3)
+
+        let remaining = round.putts.filter { $0.holeNumber == 3 }
+        #expect(remaining.count == 1)
+        #expect(remaining[0].puttNumber == 0)        // reverted to a hole-out
+        #expect(remaining[0].puttFor == .birdie)     // keeping the hole's category
+
+        // Editing that hole-out's category must move the stats with it.
+        session.updateHoleOutCategory(3, to: .par)
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.girCount == 0)
+        #expect(stats.scrambleAttempts == 1)
+        #expect(stats.scrambleSuccesses == 1)
+        #expect(stats.scoreRelativeToPar == 0)
+    }
+
+    /// An in-progress round is different: a hole cleared there is genuinely not
+    /// entered yet, and only becomes a hole-out when the round is ended.
+    @MainActor
+    @Test func clearingAHoleInALiveRoundLeavesItEmpty() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+        let putt = Putt(holeNumber: 3, puttNumber: 1, distanceM: 4, puttFor: .birdie, result: .holed)
+        putt.round = round
+        round.putts.append(putt)
+        context.insert(putt)
+        try context.save()
+
+        let session = RoundSession(round: round, modelContext: context)
+        session.deleteAllPuttsOnHole(3)
+
+        #expect(round.putts.filter { $0.holeNumber == 3 }.isEmpty)
+    }
+
+    @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {
+        #expect(ScoreCategory.bogey.next == .double)
+        #expect(ScoreCategory.double.next == .triple)
+        #expect(ScoreCategory.triple.next == .tripleOrWorse)
+        #expect(ScoreCategory.tripleOrWorse.next == .tripleOrWorse)
+    }
+
+    /// Putts stored before triple existed used "doubleOrWorse" as their raw
+    /// value; that must still decode to the double-bogey case.
+    @Test func doubleBogeyKeepsItsLegacyRawValue() async throws {
+        #expect(ScoreCategory(rawValue: "doubleOrWorse") == .double)
+        #expect(ScoreCategory.double.strokesRelativeToPar == 2)
+    }
+
     // MARK: - Custom mode configuration
 
     /// Configs stored before the distance field gained a simple/complex setting
@@ -553,8 +684,7 @@ struct PuttorTests {
         #expect(ScoreCategory.eagle.next == .birdie)
         #expect(ScoreCategory.birdie.next == .par)
         #expect(ScoreCategory.par.next == .bogey)
-        #expect(ScoreCategory.bogey.next == .doubleOrWorse)
-        #expect(ScoreCategory.doubleOrWorse.next == .doubleOrWorse) // clamps
+        #expect(ScoreCategory.bogey.next == .double)
     }
 
     // MARK: - Hole sequencing (starting hole 1 vs 10)
@@ -612,14 +742,21 @@ struct PuttorTests {
 
     // MARK: - GIR / Scramble
 
-    @Test func girCountsFirstPuttsForBirdie() async throws {
-        let girHole = Putt(holeNumber: 1, puttNumber: 1, distanceM: 3.0, puttFor: .birdie, result: .short)
-        let missedGirHole = Putt(holeNumber: 2, puttNumber: 1, distanceM: 4.0, puttFor: .par, result: .holed)
-        let secondPuttStillBirdie = Putt(holeNumber: 3, puttNumber: 2, distanceM: 1.0, puttFor: .birdie, result: .holed)
+    /// A green is in regulation when the hole was reached with an eagle or
+    /// birdie putt — it's the hole's opening category that decides, not any
+    /// later putt on it.
+    @Test func girCountsHolesReachedWithAnEagleOrBirdiePutt() async throws {
+        let birdieHole = Putt(holeNumber: 1, puttNumber: 1, distanceM: 3.0, puttFor: .birdie, result: .short)
+        let birdieHoleFollowUp = Putt(holeNumber: 1, puttNumber: 2, distanceM: 1.0, puttFor: .par, result: .holed)
+        let parHole = Putt(holeNumber: 2, puttNumber: 1, distanceM: 4.0, puttFor: .par, result: .holed)
+        let eagleHole = Putt(holeNumber: 3, puttNumber: 1, distanceM: 6.0, puttFor: .eagle, result: .short)
+        let eagleHoleFollowUp = Putt(holeNumber: 3, puttNumber: 2, distanceM: 1.0, puttFor: .birdie, result: .holed)
 
-        let stats = RoundStats.compute(putts: [girHole, missedGirHole, secondPuttStillBirdie])
+        let stats = RoundStats.compute(putts: [birdieHole, birdieHoleFollowUp, parHole, eagleHole, eagleHoleFollowUp])
 
-        #expect(stats.girCount == 1) // only the first-putt birdie attempt counts
+        // Holes 1 and 3; hole 2 was played for par, and hole 3's second putt
+        // being a birdie putt doesn't make it a second GIR.
+        #expect(stats.girCount == 2)
     }
 
     @Test func scrambleRateIsSinglePuttParSavesOverParAttempts() async throws {

@@ -55,28 +55,15 @@ struct RoundInputQuickView: View {
 
             ScrollView {
                 VStack(spacing: Theme.Spacing.lg) {
-                    DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
-
-                VStack(spacing: 6) {
-                    Text(L("input.puttFor")).font(.system(size: 10, weight: .semibold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-                    HStack(spacing: 6) {
-                        ForEach(ScoreCategory.allCases) { cat in
-                            let selected = session.draftPuttFor == cat
-                            Button {
-                                session.draftPuttFor = cat
-                            } label: {
-                                Text(L(cat.shortLabelKey))
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundStyle(selected ? .white : cat.color)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 8)
-                                    .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(cat.color.opacity(selected ? 0.85 : 0.18)))
-                                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(cat.color, lineWidth: selected ? 2 : 1.2))
-                            }
-                            .buttonStyle(.plain)
+                    if let holeOutCategory = session.displayedHoleOutCategory {
+                        HoleOutCategoryCard(category: holeOutCategory) { newCategory in
+                            session.updateHoleOutCategory(session.displayHole, to: newCategory)
                         }
                     }
-                }
+
+                    DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
+
+                ScoreCategoryRow(selection: Binding(get: { session.draftPuttFor }, set: { session.draftPuttFor = $0 }))
 
                 HStack(spacing: 14) {
                     bigButton(title: L("input.missed"), color: Theme.error) {
