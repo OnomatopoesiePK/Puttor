@@ -114,6 +114,27 @@ struct ScoreVsPuttingView: View {
             band(mean: proMean, sd: proSD, color: Theme.warning, dashed: true)
             band(mean: playedMean, sd: playedSD, color: Theme.textMuted, dashed: false)
 
+            // Hairlines through the markers so the eye can follow each series
+            // from round to round: solid for played, dashed for pro putting.
+            if rounds.count > 1 {
+                var playedPath = Path()
+                var proPath = Path()
+                for (index, round) in rounds.enumerated() {
+                    let played = CGPoint(x: x(index), y: y(round.score))
+                    let pro = CGPoint(x: x(index), y: y(round.scoreWithoutPutting))
+                    if index == 0 {
+                        playedPath.move(to: played)
+                        proPath.move(to: pro)
+                    } else {
+                        playedPath.addLine(to: played)
+                        proPath.addLine(to: pro)
+                    }
+                }
+                context.stroke(playedPath, with: .color(Theme.text.opacity(0.45)), lineWidth: 0.5)
+                context.stroke(proPath, with: .color(Theme.textMuted.opacity(0.55)),
+                               style: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
+            }
+
             // The gap between the two is what the putter did that round.
             for (index, round) in rounds.enumerated() {
                 let px = x(index)
