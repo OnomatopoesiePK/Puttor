@@ -218,12 +218,6 @@
 "stats.svp.avgScore" = "Ø SCORE";
 "stats.svp.avgWithout" = "Ø SCORE WITH PRO PUTTING";
 "stats.svp.perRound" = "per round";
-"stats.svp.share" = "SHARE OF THE SWING BETWEEN ROUNDS";
-"stats.svp.putting" = "putting";
-"stats.svp.rest" = "rest of the game";
-"stats.svp.verdictPutting" = "Your good and bad rounds are decided on the greens — the rest of your game holds steady.";
-"stats.svp.verdictMixed" = "Putting and the rest of your game move your scores about equally.";
-"stats.svp.verdictRest" = "Your scores swing mostly for reasons away from the green; putting is the steadier half.";
 "stats.svp.needMore" = "%ld finished rounds are needed before scores and putting can be compared.";
 "stats.svp.note" = "Everything scaled to 18 holes. \"Pro putting\" adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting. Each band covers one standard deviation either side of that series' average. A narrower pro-putting band means your putting is what pulls the rounds apart; a wider one means they would differ regardless of the putter.";
 "stats.svp.bandLegend" = "score average ± spread";

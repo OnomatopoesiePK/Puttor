@@ -20,14 +20,6 @@ struct ScoreVsPuttingView: View {
             chart
             legend
             summaryBoxes
-            shareBar
-            if let verdict = analysis.verdict {
-                Text(L(verdictKey(verdict)))
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
             Text(L("stats.svp.note"))
                 .font(.system(size: 10))
                 .foregroundStyle(Theme.textMuted)
@@ -211,7 +203,9 @@ struct ScoreVsPuttingView: View {
     // MARK: - Numbers
 
     private var summaryBoxes: some View {
-        HStack(spacing: Theme.Spacing.xs) {
+        // Every box stretches to the tallest of the three, so the row reads as
+        // one block rather than three different-sized cards.
+        HStack(alignment: .top, spacing: Theme.Spacing.xs) {
             box(
                 L("stats.svp.avgScore"),
                 signed(analysis.avgScore),
@@ -224,6 +218,7 @@ struct ScoreVsPuttingView: View {
             )
             spreadBox
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private func box(_ label: String, _ value: String, caption: String? = nil, color: Color) -> some View {
@@ -243,7 +238,7 @@ struct ScoreVsPuttingView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2).minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
         .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
@@ -269,50 +264,8 @@ struct ScoreVsPuttingView: View {
         }
     }
 
-    @ViewBuilder
-    private var shareBar: some View {
-        if let share = analysis.puttingShareForDisplay {
-            VStack(spacing: 6) {
-                HStack {
-                    Text(L("stats.svp.share"))
-                        .font(.system(size: 9, weight: .bold)).tracking(0.8)
-                        .foregroundStyle(Theme.textMuted)
-                    Spacer()
-                }
-                GeometryReader { geo in
-                    HStack(spacing: 2) {
-                        Rectangle()
-                            .fill(Theme.primary)
-                            .frame(width: max(0, (geo.size.width - 2) * share))
-                        Rectangle().fill(Theme.borderLight)
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.sm))
-                }
-                .frame(height: 14)
-
-                HStack {
-                    Text("\(Int((share * 100).rounded()))% \(L("stats.svp.putting"))")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Theme.primary)
-                    Spacer()
-                    Text("\(Int(((1 - share) * 100).rounded()))% \(L("stats.svp.rest"))")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Theme.textSecondary)
-                }
-            }
-        }
-    }
-
     private func signed(_ value: Double) -> String {
         if abs(value) < 0.05 { return "E" }
         return "\(value > 0 ? "+" : "")\(String(format: "%.1f", value))"
-    }
-
-    private func verdictKey(_ verdict: ScorePuttingAnalysis.Verdict) -> String {
-        switch verdict {
-        case .putting: return "stats.svp.verdictPutting"
-        case .mixed: return "stats.svp.verdictMixed"
-        case .rest: return "stats.svp.verdictRest"
-        }
     }
 }

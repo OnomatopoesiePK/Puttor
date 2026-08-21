@@ -95,12 +95,12 @@ struct StatisticsView: View {
         })
     }
 
-    /// Average strokes over par per round, scaled to 18 holes so a 9-hole card
-    /// doesn't drag the average down.
+    /// Average strokes over par per round, rounds taken as played. Same
+    /// figure the score-vs-putting section averages, so the two agree.
     private var avgScorePerRound: Double? {
         let scored = statsByRound.values.filter { $0.scoredHoles > 0 }
         guard !scored.isEmpty else { return nil }
-        let perRound = scored.map { Double($0.scoreRelativeToPar) * 18 / Double($0.scoredHoles) }
+        let perRound = scored.map { Double($0.scoreRelativeToPar) }
         return perRound.reduce(0, +) / Double(perRound.count)
     }
 
@@ -203,7 +203,7 @@ struct StatisticsView: View {
                                     HStack(spacing: Theme.Spacing.sm) {
                                         // An average per round compares across
                                         // filters; a running total only grows.
-                                        playingStat(L("stats.score"), avgScorePerRoundText, subtitle: L("stats.svp.perRound"), color: scoreColor(aggregated.scoreRelativeToPar))
+                                        playingStat(L("stats.score"), avgScorePerRoundText, subtitle: L("stats.svp.perRound"), color: Theme.primary)
                                         playingStat(L("stats.gir"), "\(Int(aggregated.girPercent.rounded()))%", subtitle: "\(aggregated.girCount)/\(aggregated.holes)")
                                         playingStat(L("stats.scramble"), "\(Int(aggregated.scramblePercent.rounded()))%", subtitle: "\(aggregated.scrambleSuccesses)/\(aggregated.scrambleAttempts)")
                                     }
