@@ -882,18 +882,39 @@ struct PuttorTests {
     }
 
     /// The chart's scale sticks to whole strokes and always draws par.
-    /// The typical-round band is the average give or take how far a round
-    /// usually strays from it.
-    @Test func typicalRangeBracketsTheAverage() async throws {
+    /// Putting that swings the scores about: take it out and the rounds land
+    /// on top of each other, which reads as a 100% narrower band.
+    @Test func spreadShrinksWhenPuttingCausedTheSwing() async throws {
         let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
-            Self.scoreRound(Self.day(1), score: 2, sg: 0),
-            Self.scoreRound(Self.day(2), score: 4, sg: 0),
-            Self.scoreRound(Self.day(3), score: 6, sg: 0),
+            Self.scoreRound(Self.day(1), score: 0, sg: 5),
+            Self.scoreRound(Self.day(2), score: 10, sg: -5),
+            Self.scoreRound(Self.day(3), score: 5, sg: 0),
         ]))
-        #expect(abs(analysis.avgScore - 4) < 0.0001)
-        #expect(abs(analysis.typicalDeviation - 4.0 / 3.0) < 0.0001)
-        #expect(analysis.typicalRange.low < analysis.avgScore)
-        #expect(analysis.typicalRange.high > analysis.avgScore)
+        let change = try #require(analysis.spreadChangePercent)
+        #expect(abs(change + 100) < 0.0001)
+        #expect(analysis.sdScoreWithoutPutting < 0.0001)
+    }
+
+    /// The other way round: steady putting was holding a wild long game
+    /// together, so removing it widens the band.
+    @Test func spreadGrowsWhenPuttingWasHoldingTheScoreTogether() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 4, sg: -2),
+            Self.scoreRound(Self.day(2), score: 5, sg: 0),
+            Self.scoreRound(Self.day(3), score: 6, sg: 2),
+        ]))
+        let change = try #require(analysis.spreadChangePercent)
+        #expect(abs(change - 200) < 0.0001)
+    }
+
+    /// Identical scores leave no spread to compare against.
+    @Test func spreadComparisonIsAbsentWithoutASwing() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 5, sg: 1),
+            Self.scoreRound(Self.day(2), score: 5, sg: -1),
+            Self.scoreRound(Self.day(3), score: 5, sg: 0),
+        ]))
+        #expect(analysis.spreadChangePercent == nil)
     }
 
     /// Wild early rounds followed by three near-identical ones: the score is

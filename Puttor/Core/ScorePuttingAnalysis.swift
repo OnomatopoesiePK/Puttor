@@ -63,16 +63,12 @@ struct ScorePuttingAnalysis {
         return .mixed
     }
 
-    /// How far a round typically strays from the average, in strokes. Plain
-    /// average distance rather than a standard deviation: it answers "how far
-    /// off is a normal round" without asking the reader to know what sigma is.
-    var typicalDeviation: Double { meanAbsoluteDeviation(rounds.map(\.score)) }
-
-    /// The band most rounds land in — the average give or take that deviation.
-    var typicalRange: (low: Double, high: Double) {
-        let m = avgScore
-        let d = typicalDeviation
-        return (m - d, m + d)
+    /// How the round-to-round swing would change with tour-average putting, in
+    /// percent of the swing actually played. Negative means the scores would
+    /// sit closer together — the putter is what makes the rounds differ.
+    var spreadChangePercent: Double? {
+        guard sdScore > 0.0001 else { return nil }
+        return (sdScoreWithoutPutting - sdScore) / sdScore * 100
     }
 
     enum StabilityTrend { case settling, steady, spreading }

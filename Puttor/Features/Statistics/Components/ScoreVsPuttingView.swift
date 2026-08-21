@@ -44,7 +44,14 @@ struct ScoreVsPuttingView: View {
             let rounds = analysis.rounds
             guard !rounds.isEmpty else { return }
 
-            let values: [Double] = rounds.flatMap { [$0.score, $0.scoreWithoutPutting] } + [0]
+            let playedMean = analysis.avgScore
+            let playedSD = analysis.sdScore
+            let proMean = analysis.avgScoreWithoutPutting
+            let proSD = analysis.sdScoreWithoutPutting
+
+            // The bands have to fit in the picture along with the markers.
+            let values: [Double] = rounds.flatMap { [$0.score, $0.scoreWithoutPutting] }
+                + [0, playedMean - playedSD, playedMean + playedSD, proMean - proSD, proMean + proSD]
             let rawMin = values.min() ?? 0
             let rawMax = values.max() ?? 0
             // A flat series would divide by zero; give it a stroke of room.
@@ -93,33 +100,28 @@ struct ScoreVsPuttingView: View {
                 )
             }
 
-            // The band a normal round lands in — points hugging it are the
-            // picture of a settled score.
-            let band = analysis.typicalRange
-            if band.high - band.low > 0.0001 {
-                let top = y(band.high)
-                let bottom = y(band.low)
-                let rect = CGRect(x: plotLeft, y: top, width: plotRight - plotLeft, height: bottom - top)
-                context.fill(Path(roundedRect: rect, cornerRadius: 4), with: .color(Theme.accent.opacity(0.10)))
+            // Each series gets its average and a band one standard deviation
+            // either side of it, so the two spreads can be compared by eye.
+            func band(mean: Double, sd: Double, color: Color, dashed: Bool) {
+                if sd > 0.0001 {
+                    let top = y(mean + sd)
+                    let bottom = y(mean - sd)
+                    let rect = CGRect(x: plotLeft, y: top, width: plotRight - plotLeft, height: bottom - top)
+                    context.fill(Path(roundedRect: rect, cornerRadius: 3), with: .color(color.opacity(0.18)))
+                }
+                var line = Path()
+                let meanY = y(mean)
+                line.move(to: CGPoint(x: plotLeft, y: meanY))
+                line.addLine(to: CGPoint(x: plotRight, y: meanY))
+                context.stroke(
+                    line,
+                    with: .color(color),
+                    style: dashed ? StrokeStyle(lineWidth: 1.5, dash: [5, 3]) : StrokeStyle(lineWidth: 2)
+                )
             }
 
-            // Trend lines behind the markers.
-            var withoutPath = Path()
-            var scorePath = Path()
-            for (index, round) in rounds.enumerated() {
-                let p1 = CGPoint(x: x(index), y: y(round.scoreWithoutPutting))
-                let p2 = CGPoint(x: x(index), y: y(round.score))
-                if index == 0 {
-                    withoutPath.move(to: p1)
-                    scorePath.move(to: p2)
-                } else {
-                    withoutPath.addLine(to: p1)
-                    scorePath.addLine(to: p2)
-                }
-            }
-            context.stroke(withoutPath, with: .color(Theme.textMuted.opacity(0.45)),
-                           style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
-            context.stroke(scorePath, with: .color(Theme.text.opacity(0.55)), lineWidth: 1.5)
+            band(mean: proMean, sd: proSD, color: Theme.warning, dashed: true)
+            band(mean: playedMean, sd: playedSD, color: Theme.textMuted, dashed: false)
 
             // The gap between the two is what the putter did that round.
             for (index, round) in rounds.enumerated() {
@@ -164,8 +166,14 @@ struct ScoreVsPuttingView: View {
                 legendItem(L("stats.svp.gapLegend")) {
                     Capsule().fill(Theme.primary).frame(width: 3, height: 10)
                 }
+                Spacer(minLength: 0)
+            }
+            HStack(spacing: 14) {
                 legendItem(L("stats.svp.bandLegend")) {
-                    RoundedRectangle(cornerRadius: 2).fill(Theme.accent.opacity(0.25)).frame(width: 12, height: 8)
+                    RoundedRectangle(cornerRadius: 2).fill(Theme.textMuted.opacity(0.28)).frame(width: 12, height: 8)
+                }
+                legendItem(L("stats.svp.bandLegendPro")) {
+                    RoundedRectangle(cornerRadius: 2).fill(Theme.warning.opacity(0.28)).frame(width: 12, height: 8)
                 }
                 Spacer(minLength: 0)
             }
@@ -194,11 +202,7 @@ struct ScoreVsPuttingView: View {
                 signed(analysis.avgScoreWithoutPutting),
                 color: Theme.textSecondary
             )
-            box(
-                L("stats.svp.range"),
-                "\(signed(analysis.typicalRange.low))…\(signed(analysis.typicalRange.high))",
-                color: Theme.accent
-            )
+            spreadBox
         }
     }
 
@@ -217,6 +221,23 @@ struct ScoreVsPuttingView: View {
         .padding(.vertical, Theme.Spacing.sm)
         .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+    }
+
+    /// How much steadier — or wilder — the rounds would be with tour-average
+    /// putting. Steadier means the putter is what moves the scores about.
+    @ViewBuilder
+    private var spreadBox: some View {
+        if let change = analysis.spreadChangePercent {
+            let better = change < 0
+            let color: Color = abs(change) < 1 ? Theme.textSecondary : (better ? Theme.primary : Theme.error)
+            box(
+                L(abs(change) < 1 ? "stats.svp.spreadSame" : (better ? "stats.svp.spreadBetter" : "stats.svp.spreadWorse")),
+                "\(Int(abs(change).rounded()))%",
+                color: color
+            )
+        } else {
+            box(L("stats.svp.spreadSame"), "—", color: Theme.textSecondary)
+        }
     }
 
     /// Is the score settling down? Rather than a spread figure to interpret,

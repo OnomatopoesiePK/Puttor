@@ -225,9 +225,12 @@
 "stats.svp.verdictMixed" = "Putting and the rest of your game move your scores about equally.";
 "stats.svp.verdictRest" = "Your scores swing mostly for reasons away from the green; putting is the steadier half.";
 "stats.svp.needMore" = "%ld finished rounds are needed before scores and putting can be compared.";
-"stats.svp.note" = "Everything scaled to 18 holes. \"Pro putting\" adds your strokes gained back onto the card: the score you would have shot with tour-average putting and the same long game.";
-"stats.svp.range" = "TYPICAL ROUND";
-"stats.svp.bandLegend" = "typical range";
+"stats.svp.note" = "Everything scaled to 18 holes. \"Pro putting\" adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting. Each band covers one standard deviation either side of that series' average, and the percentage is how much narrower or wider the pro-putting band is.";
+"stats.svp.bandLegend" = "played: average ± spread";
+"stats.svp.bandLegendPro" = "pro putting: average ± spread";
+"stats.svp.spreadBetter" = "LESS SWING";
+"stats.svp.spreadWorse" = "MORE SWING";
+"stats.svp.spreadSame" = "SAME SWING";
 "stats.svp.settling" = "Your recent rounds sit closer together than the earlier ones — the score is settling down.";
 "stats.svp.steady" = "Your rounds swing about as much as they did before — the score is holding its usual range.";
 "stats.svp.spreading" = "Your recent rounds are further apart than the earlier ones — the score is less settled than it was.";
