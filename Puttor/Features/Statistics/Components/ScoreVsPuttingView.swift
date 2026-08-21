@@ -230,11 +230,13 @@ struct ScoreVsPuttingView: View {
             box(
                 L("stats.svp.avgScore"),
                 signed(analysis.avgScore),
-                color: analysis.avgScore <= 0 ? Theme.primary : Theme.text
+                caption: L("stats.svp.perRound"),
+                color: Theme.text
             )
             box(
                 L("stats.svp.avgWithout"),
                 signed(analysis.avgScoreWithoutPutting),
+                caption: L("stats.svp.perRound"),
                 color: Theme.textSecondary
             )
             spreadBox
@@ -251,7 +253,8 @@ struct ScoreVsPuttingView: View {
             if let caption {
                 Text(caption)
                     .font(.system(size: 9))
-                    .foregroundStyle(color.opacity(0.9))
+                    .foregroundStyle(Theme.textMuted)
+                    .multilineTextAlignment(.center)
             }
             Text(label)
                 .font(.system(size: 9, weight: .semibold)).tracking(0.4)

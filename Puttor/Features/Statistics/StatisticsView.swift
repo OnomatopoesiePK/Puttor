@@ -203,7 +203,7 @@ struct StatisticsView: View {
                                     HStack(spacing: Theme.Spacing.sm) {
                                         // An average per round compares across
                                         // filters; a running total only grows.
-                                        playingStat(L("stats.score"), avgScorePerRoundText, subtitle: L("stats.svp.perRound"), color: Theme.primary)
+                                        playingStat(L("stats.svp.avgScore"), avgScorePerRoundText, subtitle: L("stats.svp.perRound"))
                                         playingStat(L("stats.gir"), "\(Int(aggregated.girPercent.rounded()))%", subtitle: "\(aggregated.girCount)/\(aggregated.holes)")
                                         playingStat(L("stats.scramble"), "\(Int(aggregated.scramblePercent.rounded()))%", subtitle: "\(aggregated.scrambleSuccesses)/\(aggregated.scrambleAttempts)")
                                     }
@@ -377,7 +377,7 @@ struct StatisticsView: View {
         score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
     }
 
-    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.primary) -> some View {
+    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.text) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.system(size: 22, weight: .black)).foregroundStyle(color)
             Text(label).font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.text)
