@@ -241,28 +241,32 @@ struct ScoreVsPuttingView: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
+    /// Laid out exactly like the playing-stats boxes above — same order, same
+    /// type sizes — so "Ø SCORE · per round" reads as one figure in two places.
     private func box(_ label: String, _ value: String, caption: String? = nil, color: Color) -> some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 2) {
             Text(value)
-                .font(.system(size: 19, weight: .black))
+                .font(.system(size: 22, weight: .black))
                 .foregroundStyle(color)
                 .lineLimit(1).minimumScaleFactor(0.6)
-            if let caption {
-                Text(caption)
-                    .font(.system(size: 9))
-                    .foregroundStyle(Theme.textMuted)
-                    .multilineTextAlignment(.center)
-            }
             Text(label)
-                .font(.system(size: 9, weight: .semibold)).tracking(0.4)
-                .foregroundStyle(Theme.textMuted)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Theme.text)
                 .multilineTextAlignment(.center)
                 .lineLimit(2).minimumScaleFactor(0.7)
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.textMuted)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
         .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
     /// What a narrower or wider pro-putting band actually tells you.
