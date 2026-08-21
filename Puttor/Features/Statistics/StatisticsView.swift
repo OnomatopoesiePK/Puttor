@@ -144,8 +144,7 @@ struct StatisticsView: View {
                         emptyState(L("stats.noMatch"), "🔍")
                     } else {
                         VStack(spacing: Theme.Spacing.md) {
-                            card {
-                                Text("\(L("stats.rounds")) (\(filteredRounds.count))").font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                            CollapsibleStatSection(title: "\(L("stats.rounds")) (\(filteredRounds.count))", storageKey: "rounds") {
                                 roundsGrid
                             }
 
@@ -155,35 +154,34 @@ struct StatisticsView: View {
                                 statBox(L("summary.avgPerHole"), String(format: "%.1f", aggregated.avgPuttsPerHole))
                             }
 
-                            VStack(spacing: 4) {
-                                Text(L("stats.sgPutting")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-                                Text("\(sgAverage > 0 ? "+" : "")\(String(format: "%.2f", sgAverage))")
-                                    .font(.system(size: 40, weight: .black))
-                                    .foregroundStyle(sgAverage > 0.5 ? Theme.primary : (sgAverage < -0.5 ? Theme.error : Theme.warning))
-                                Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
+                            CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained") {
+                                VStack(spacing: 4) {
+                                    Text("\(sgAverage > 0 ? "+" : "")\(String(format: "%.2f", sgAverage))")
+                                        .font(.system(size: 40, weight: .black))
+                                        .foregroundStyle(sgAverage > 0.5 ? Theme.primary : (sgAverage < -0.5 ? Theme.error : Theme.warning))
+                                    Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
 
-                                Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
+                                    Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
 
-                                Text("\(L("stats.gsd")) \(gsdAverage > 0 ? "+" : "")\(String(format: "%.2f", gsdAverage))")
-                                    .font(.system(size: 20, weight: .black))
-                                    .foregroundStyle(gsdAverage > 0 ? Theme.primary : (gsdAverage < 0 ? Theme.error : Theme.textSecondary))
-                                Text(L("stats.gsdSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
+                                    Text("\(L("stats.gsd")) \(gsdAverage > 0 ? "+" : "")\(String(format: "%.2f", gsdAverage))")
+                                        .font(.system(size: 20, weight: .black))
+                                        .foregroundStyle(gsdAverage > 0 ? Theme.primary : (gsdAverage < 0 ? Theme.error : Theme.textSecondary))
+                                    Text(L("stats.gsdSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
+                                }
+                                .frame(maxWidth: .infinity)
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(Theme.Spacing.lg)
-                            .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
-                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
 
                             if !aggregated.makeByDistance.isEmpty {
-                                card { DistanceMakeChartView(data: aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count)) }
+                                CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance") {
+                                    DistanceMakeChartView(data: aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count), showsTitle: false)
+                                }
                             }
 
                             // Score, GIR and scramble come from the holes, so a
                             // round of nothing but hole-outs still has them —
                             // only the per-category putt comparison needs putts.
                             if aggregated.holes > 0 {
-                                card {
-                                    Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                                CollapsibleStatSection(title: L("stats.playingStats"), storageKey: "playingStats") {
                                     HStack(spacing: Theme.Spacing.sm) {
                                         playingStat(L("stats.score"), aggregated.scoreRelativeToParText, subtitle: String(format: L("stats.overHoles"), aggregated.scoredHoles), color: scoreColor(aggregated.scoreRelativeToPar))
                                         playingStat(L("stats.gir"), "\(Int(aggregated.girPercent.rounded()))%", subtitle: "\(aggregated.girCount)/\(aggregated.holes)")
@@ -193,20 +191,18 @@ struct StatisticsView: View {
                             }
 
                             if hasSituationData {
-                                card {
-                                    SituationComparisonView(makeByCategory: aggregated.makeByCategory, useFeet: useFeet)
+                                CollapsibleStatSection(title: L("stats.makeBySituation"), storageKey: "situation") {
+                                    SituationComparisonView(makeByCategory: aggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
                                 }
                             }
 
                             if !aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
-                                card {
-                                    Text(L("summary.missTendency")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                                CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency") {
                                     MissDonutView(missCounts: aggregated.missCounts)
                                 }
                             }
 
-                            card {
-                                Text(L("stats.dispersion")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                            CollapsibleStatSection(title: L("stats.dispersion"), storageKey: "dispersion") {
                                 Picker(L(dispersionFilter.labelKey), selection: $dispersionFilter) {
                                     ForEach(DispersionFilter.allCases) { f in
                                         Text(L(f.labelKey)).tag(f)
@@ -218,8 +214,7 @@ struct StatisticsView: View {
                             }
 
                             if aggregated.missReasonCounts.total > 0 {
-                                card {
-                                    Text(L("summary.missReasons")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                                CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons") {
                                     HStack(spacing: Theme.Spacing.md) {
                                         if aggregated.missReasonCounts.missRead > 0 { reasonStat("\(aggregated.missReasonCounts.missRead)", L("input.missRead")) }
                                         if aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
@@ -231,8 +226,7 @@ struct StatisticsView: View {
 
                             let leave = RoundStats.computeLeaveByMissDirection(dispersionPutts)
                             if !leave.isEmpty {
-                                card {
-                                    Text(L("summary.leaveByMiss")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                                CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss") {
                                     ForEach(leave.sorted { $0.value.count > $1.value.count }, id: \.key) { dir, info in
                                         HStack(spacing: 8) {
                                             Text(L(dir.labelKey)).font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 76, alignment: .leading)
@@ -356,14 +350,6 @@ struct StatisticsView: View {
         .padding(.vertical, Theme.Spacing.sm)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-    }
-
-    private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        VStack(spacing: 10) { content() }
-            .frame(maxWidth: .infinity)
-            .padding(Theme.Spacing.md)
-            .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
     }
 
     private func statBox(_ label: String, _ value: String) -> some View {

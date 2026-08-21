@@ -13,6 +13,8 @@ import SwiftUI
 struct SituationComparisonView: View {
     let makeByCategory: [ScoreCategory: [DistanceBracket]]
     var useFeet: Bool = false
+    /// Off when the surrounding section header already names the table.
+    var showsTitle: Bool = true
 
     private let categories: [ScoreCategory] = [.birdie, .par, .bogey]
 
@@ -39,10 +41,12 @@ struct SituationComparisonView: View {
             EmptyView()
         } else {
             VStack(spacing: 6) {
-                Text(L("stats.makeBySituation"))
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(1.2)
-                    .foregroundStyle(Theme.textMuted)
+                if showsTitle {
+                    Text(L("stats.makeBySituation"))
+                        .font(.system(size: 10, weight: .bold))
+                        .tracking(1.2)
+                        .foregroundStyle(Theme.textMuted)
+                }
 
                 headerRow
 

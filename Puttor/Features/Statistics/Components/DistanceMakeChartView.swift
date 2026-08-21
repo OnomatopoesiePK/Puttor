@@ -12,6 +12,8 @@ struct DistanceMakeChartView: View {
     var gsdDivisor: Int = 1
     var title: String? = nil
     var showGSD: Bool = true
+    /// Off when the surrounding section header already names the chart.
+    var showsTitle: Bool = true
 
     private var visible: [DistanceBracket] { data.filter { $0.total > 0 } }
     private let barsWidth: CGFloat = 84
@@ -21,10 +23,12 @@ struct DistanceMakeChartView: View {
             EmptyView()
         } else {
             VStack(spacing: 4) {
-                Text(title ?? L("chart.makeVsTour"))
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(1.2)
-                    .foregroundStyle(Theme.textMuted)
+                if showsTitle {
+                    Text(title ?? L("chart.makeVsTour"))
+                        .font(.system(size: 10, weight: .bold))
+                        .tracking(1.2)
+                        .foregroundStyle(Theme.textMuted)
+                }
 
                 headerRow
 

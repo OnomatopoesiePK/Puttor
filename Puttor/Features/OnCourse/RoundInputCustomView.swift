@@ -211,7 +211,7 @@ struct RoundInputCustomView: View {
         flashGSD = gsd
         showSavedFlash = true
         Task {
-            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
             showSavedFlash = false
         }
     }
