@@ -656,22 +656,43 @@ struct PuttorTests {
     // MARK: - Strokes Gained (ported PGA Tour baseline math)
 
     @Test func holedPuttGainsExpectedPuttsMinusOne() async throws {
-        // 2m holed: baseline expectedPutts is 1.310 -> SG = 1.310 - 1 = 0.310
+        // 2m holed: baseline expectedPutts is 1.371 -> SG = 1.371 - 1 = 0.371
         let sg = StrokesGained.calculateSG(distanceM: 2.0, holed: true)
-        #expect(abs(sg - 0.310) < 0.001)
+        #expect(abs(sg - 0.371) < 0.001)
     }
 
     @Test func missedPuttFromSixMetresMatchesKnownValue() async throws {
-        // 6m baseline expectedPutts 1.847; miss leaves 0.7m, which interpolates between
-        // the 0.6m (1.025) and 0.9m (1.050) table points to expectedPutts 1.0333.
-        // SG = 1.847 - (1 + 1.0333) = -0.1863
+        // 6m baseline expectedPutts 1.864; miss leaves 0.7m, which interpolates
+        // between the 0.6m (1.010) and 0.8m (1.029) table points to 1.0195.
+        // SG = 1.864 - (1 + 1.0195) = -0.1555
         let sg = StrokesGained.calculateSG(distanceM: 6.0, holed: false)
-        #expect(abs(sg - (-0.1863)) < 0.001)
+        #expect(abs(sg - (-0.1555)) < 0.001)
+    }
+
+    /// The baseline must keep rising past two putts at long range. Capping it at
+    /// two would mean a lag from 20m is treated as a certain two-putt, so laying
+    /// it dead would earn nothing and leaving it miles away would cost nothing.
+    @Test func expectedPuttsRisePastTwoOnLongPutts() async throws {
+        #expect(StrokesGained.baseline(at: 8.0).expectedPutts < 2.0)
+        #expect(StrokesGained.baseline(at: 9.0).expectedPutts > 2.0)
+        #expect(StrokesGained.baseline(at: 30.0).expectedPutts > 2.4)
+
+        // Which makes a good lag from 20m a genuine gain rather than a loss.
+        #expect(StrokesGained.calculateSG(distanceM: 20.0, holed: false) > 0)
+    }
+
+    @Test func baselineStaysMonotonic() async throws {
+        let table = StrokesGained.tourBaseline
+        for (earlier, later) in zip(table, table.dropFirst()) {
+            #expect(later.distanceM > earlier.distanceM)
+            #expect(later.makeProbability < earlier.makeProbability)
+            #expect(later.expectedPutts > earlier.expectedPutts)
+        }
     }
 
     @Test func baselineInterpolatesBetweenKnownPoints() async throws {
-        let b = StrokesGained.baseline(at: 3.25) // halfway between 3.0 (0.470) and 3.5 (0.380)
-        #expect(abs(b.makeProbability - 0.425) < 0.001)
+        let b = StrokesGained.baseline(at: 3.25) // halfway between 3.0 (0.408) and 3.5 (0.348)
+        #expect(abs(b.makeProbability - 0.378) < 0.001)
     }
 
     @Test func baselineClampsBeyondTableRange() async throws {

@@ -13,4 +13,5 @@ enum AppStorageKeys {
     static let customModeConfig = "customModeConfigJSON"        // JSON-encoded CustomModeConfig
     static let lastInputMode = "lastInputMode"                  // InputMode rawValue, preselected for the next round
     static let statsCustomRoundCount = "statsCustomRoundCount"  // Int, rounds included by the Statistics "Custom" filter
+    static let sgBaselineVersion = "sgBaselineVersion"          // Int, which baseline table stored SG values were computed against
 }

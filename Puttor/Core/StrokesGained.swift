@@ -3,7 +3,9 @@
 //  Puttor
 //
 //  PGA Tour strokes-gained putting baseline (Mark Broadie methodology).
-//  Ported 1:1 from the PuttTrack prototype's data/strokesGained.ts + utils/sgCalculator.ts.
+//  The calculation follows the PuttTrack prototype's sgCalculator.ts; the
+//  baseline table itself has since been recalibrated against published Tour
+//  figures, so it no longer matches the prototype's numbers.
 //
 
 import Foundation
@@ -15,32 +17,40 @@ struct SGBaseline {
 }
 
 enum StrokesGained {
+    /// PGA Tour putting baseline, calibrated against published make-percentage
+    /// and putts-to-hole-out figures.
+    ///
+    /// `expectedPutts` deliberately rises past 2 beyond about 9 m: from that
+    /// range three-putts are common enough that the average is no longer two,
+    /// and capping it there would treat every long lag as a guaranteed
+    /// two-putt — crediting good lag putting with nothing and barely
+    /// penalising bad lag putting.
     static let tourBaseline: [SGBaseline] = [
-        SGBaseline(distanceM: 0.3, makeProbability: 0.990, expectedPutts: 1.010),
-        SGBaseline(distanceM: 0.5, makeProbability: 0.985, expectedPutts: 1.015),
-        SGBaseline(distanceM: 0.6, makeProbability: 0.975, expectedPutts: 1.025),
-        SGBaseline(distanceM: 0.9, makeProbability: 0.950, expectedPutts: 1.050),
-        SGBaseline(distanceM: 1.0, makeProbability: 0.930, expectedPutts: 1.075),
-        SGBaseline(distanceM: 1.2, makeProbability: 0.900, expectedPutts: 1.105),
-        SGBaseline(distanceM: 1.5, makeProbability: 0.840, expectedPutts: 1.170),
-        SGBaseline(distanceM: 1.8, makeProbability: 0.760, expectedPutts: 1.248),
-        SGBaseline(distanceM: 2.0, makeProbability: 0.700, expectedPutts: 1.310),
-        SGBaseline(distanceM: 2.5, makeProbability: 0.580, expectedPutts: 1.432),
-        SGBaseline(distanceM: 3.0, makeProbability: 0.470, expectedPutts: 1.545),
-        SGBaseline(distanceM: 3.5, makeProbability: 0.380, expectedPutts: 1.635),
-        SGBaseline(distanceM: 4.0, makeProbability: 0.310, expectedPutts: 1.705),
-        SGBaseline(distanceM: 4.5, makeProbability: 0.260, expectedPutts: 1.755),
-        SGBaseline(distanceM: 5.0, makeProbability: 0.220, expectedPutts: 1.795),
-        SGBaseline(distanceM: 6.0, makeProbability: 0.165, expectedPutts: 1.847),
-        SGBaseline(distanceM: 7.0, makeProbability: 0.125, expectedPutts: 1.884),
-        SGBaseline(distanceM: 8.0, makeProbability: 0.095, expectedPutts: 1.912),
-        SGBaseline(distanceM: 9.0, makeProbability: 0.075, expectedPutts: 1.930),
-        SGBaseline(distanceM: 10.0, makeProbability: 0.060, expectedPutts: 1.944),
-        SGBaseline(distanceM: 12.0, makeProbability: 0.045, expectedPutts: 1.957),
-        SGBaseline(distanceM: 15.0, makeProbability: 0.032, expectedPutts: 1.970),
-        SGBaseline(distanceM: 20.0, makeProbability: 0.022, expectedPutts: 1.980),
-        SGBaseline(distanceM: 25.0, makeProbability: 0.016, expectedPutts: 1.985),
-        SGBaseline(distanceM: 30.0, makeProbability: 0.012, expectedPutts: 1.990),
+        SGBaseline(distanceM: 0.3, makeProbability: 0.999, expectedPutts: 1.001),
+        SGBaseline(distanceM: 0.5, makeProbability: 0.994, expectedPutts: 1.006),
+        SGBaseline(distanceM: 0.6, makeProbability: 0.990, expectedPutts: 1.010),
+        SGBaseline(distanceM: 0.8, makeProbability: 0.971, expectedPutts: 1.029),
+        SGBaseline(distanceM: 1.0, makeProbability: 0.938, expectedPutts: 1.065),
+        SGBaseline(distanceM: 1.2, makeProbability: 0.885, expectedPutts: 1.124),
+        SGBaseline(distanceM: 1.5, makeProbability: 0.779, expectedPutts: 1.222),
+        SGBaseline(distanceM: 1.8, makeProbability: 0.698, expectedPutts: 1.311),
+        SGBaseline(distanceM: 2.0, makeProbability: 0.634, expectedPutts: 1.371),
+        SGBaseline(distanceM: 2.5, makeProbability: 0.490, expectedPutts: 1.512),
+        SGBaseline(distanceM: 3.0, makeProbability: 0.408, expectedPutts: 1.602),
+        SGBaseline(distanceM: 3.5, makeProbability: 0.348, expectedPutts: 1.669),
+        SGBaseline(distanceM: 4.0, makeProbability: 0.293, expectedPutts: 1.724),
+        SGBaseline(distanceM: 4.5, makeProbability: 0.238, expectedPutts: 1.773),
+        SGBaseline(distanceM: 5.0, makeProbability: 0.208, expectedPutts: 1.805),
+        SGBaseline(distanceM: 6.0, makeProbability: 0.155, expectedPutts: 1.864),
+        SGBaseline(distanceM: 7.0, makeProbability: 0.126, expectedPutts: 1.917),
+        SGBaseline(distanceM: 8.0, makeProbability: 0.105, expectedPutts: 1.965),
+        SGBaseline(distanceM: 9.0, makeProbability: 0.092, expectedPutts: 2.004),
+        SGBaseline(distanceM: 10.0, makeProbability: 0.079, expectedPutts: 2.032),
+        SGBaseline(distanceM: 12.0, makeProbability: 0.053, expectedPutts: 2.085),
+        SGBaseline(distanceM: 15.0, makeProbability: 0.041, expectedPutts: 2.164),
+        SGBaseline(distanceM: 20.0, makeProbability: 0.027, expectedPutts: 2.261),
+        SGBaseline(distanceM: 25.0, makeProbability: 0.019, expectedPutts: 2.350),
+        SGBaseline(distanceM: 30.0, makeProbability: 0.015, expectedPutts: 2.432),
     ]
 
     static func baseline(at distanceM: Double) -> SGBaseline {
