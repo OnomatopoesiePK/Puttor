@@ -27,7 +27,7 @@ struct RoundInputCustomView: View {
     @State private var navigateToSummary = false
     @State private var showHolePicker = false
     @State private var showSavedFlash = false
-    @State private var flashSG: Double = 0
+    @State private var flashGSD: Double = 0
     @State private var showDeleteHoleConfirm = false
 
     private var useFeet: Bool { unitsPref == "imperial" }
@@ -85,7 +85,7 @@ struct RoundInputCustomView: View {
             }
             .overlay(alignment: .top) {
                 InputStatusBanner(
-                    savedSG: showSavedFlash ? flashSG : nil,
+                    savedGSD: showSavedFlash ? flashGSD : nil,
                     isEditing: session.hasUnsavedEdits
                 )
                 .animation(.easeOut(duration: 0.2), value: showSavedFlash)
@@ -202,13 +202,13 @@ struct RoundInputCustomView: View {
         if outcome == .reachedSequenceEnd {
             showSequenceEndAlert = true
         }
-        if let sg = session.lastSavedSG {
-            flashSaved(sg: sg)
+        if let gsd = session.lastSavedGSD {
+            flashSaved(gsd: gsd)
         }
     }
 
-    private func flashSaved(sg: Double) {
-        flashSG = sg
+    private func flashSaved(gsd: Double) {
+        flashGSD = gsd
         showSavedFlash = true
         Task {
             try? await Task.sleep(nanoseconds: 1_200_000_000)

@@ -690,11 +690,10 @@ struct PuttorTests {
         }
     }
 
-    /// The defining property of strokes gained: chaining each putt against the
-    /// distance the previous one left makes the terms cancel, so a hole comes to
-    /// exactly "expected putts you started with, minus the putts you took".
+    /// Strokes gained is a whole-hole number: the putts the tour would expect
+    /// from where you first stood, minus the putts you actually took.
     @MainActor
-    @Test func chainedPuttsSumToExpectedPuttsMinusPuttsTaken() async throws {
+    @Test func holeStrokesGainedIsExpectedPuttsMinusPuttsTaken() async throws {
         let context = try Self.makeInMemoryContext()
         let round = Round(courseName: "Test", startingHole: 1)
         context.insert(round)
@@ -715,21 +714,19 @@ struct PuttorTests {
         }
         try context.save()
 
-        SGRecalculation.recomputeHole(round.putts)
-
-        let total = round.putts.reduce(0) { $0 + $1.sgActual }
+        let total = try #require(RoundStats.holeStrokesGained(round.putts))
         let expected = StrokesGained.baseline(at: 30.0).expectedPutts - Double(distances.count)
         #expect(abs(total - expected) < 0.0001)
 
-        // Three putts from 30m is a loss, not the small gain the assumed-leave
+        // Three putts from 30m is a loss, not the small gain the old per-putt
         // model used to report.
         #expect(total < -0.5)
     }
 
     /// Two-putting a long lag is roughly par for the course, and holing out
-    /// from range is a large gain — both fall out of the same chaining.
+    /// from range is a large gain — both fall out of the same per-hole formula.
     @MainActor
-    @Test func chainedTwoPuttAndOnePuttMatchTheirHoleTotals() async throws {
+    @Test func twoPuttAndOnePuttMatchTheirHoleTotals() async throws {
         let context = try Self.makeInMemoryContext()
         let round = Round(courseName: "Test", startingHole: 1)
         context.insert(round)
@@ -752,16 +749,52 @@ struct PuttorTests {
         addHole(2, distances: [8.0])        // holed from range
         try context.save()
 
-        for hole in [1, 2] {
-            SGRecalculation.recomputeHole(round.putts.filter { $0.holeNumber == hole })
-        }
-
-        let holeOne = round.putts.filter { $0.holeNumber == 1 }.reduce(0) { $0 + $1.sgActual }
-        let holeTwo = round.putts.filter { $0.holeNumber == 2 }.reduce(0) { $0 + $1.sgActual }
+        let holeOne = try #require(RoundStats.holeStrokesGained(round.putts.filter { $0.holeNumber == 1 }))
+        let holeTwo = try #require(RoundStats.holeStrokesGained(round.putts.filter { $0.holeNumber == 2 }))
 
         #expect(abs(holeOne - (StrokesGained.baseline(at: 20.0).expectedPutts - 2)) < 0.0001)
         #expect(abs(holeTwo - (StrokesGained.baseline(at: 8.0).expectedPutts - 1)) < 0.0001)
         #expect(holeTwo > 0.9)  // holing an 8m putt is worth close to a full stroke
+    }
+
+    /// Holing out from off the green isn't a putting result, so the hole has no
+    /// putting strokes gained at all.
+    @MainActor
+    @Test func holeOutHasNoStrokesGained() async throws {
+        let sentinel = Putt(holeNumber: 1, puttNumber: 0, distanceM: 0, puttFor: .birdie, result: .holed)
+        #expect(RoundStats.holeStrokesGained([sentinel]) == nil)
+    }
+
+    /// GSD scores a single putt against the odds of making it: holing a
+    /// coin-flip is +0.5, missing it -0.5.
+    @Test func gsdIsTheComplementOfTheMakeProbability() async throws {
+        let coinFlipDistance = 2.3
+        let p = StrokesGained.baseline(at: coinFlipDistance).makeProbability
+        #expect(abs(p - 0.5) < 0.06)  // the table really is near a coin flip here
+
+        let holed = Putt(holeNumber: 1, puttNumber: 1, distanceM: coinFlipDistance, puttFor: .par, result: .holed)
+        let missed = Putt(holeNumber: 1, puttNumber: 1, distanceM: coinFlipDistance, puttFor: .par, result: .short)
+        #expect(abs(holed.gsd - (1 - p)) < 0.0001)
+        #expect(abs(missed.gsd + p) < 0.0001)
+        #expect(abs(holed.gsd + missed.gsd - (1 - 2 * p)) < 0.0001)
+    }
+
+    /// The long putt nobody makes: holing it is worth nearly a full shot,
+    /// missing it costs almost nothing.
+    @Test func gsdRewardsHolingUnlikelyPutts() async throws {
+        let holed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 20, puttFor: .par, result: .holed)
+        let missed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 20, puttFor: .par, result: .short)
+        #expect(holed.gsd > 0.95)
+        #expect(missed.gsd > -0.05 && missed.gsd < 0)
+    }
+
+    /// A tap-in is the mirror image: expected, so holing it gains nothing and
+    /// missing it is a full-shot blunder.
+    @Test func gsdPunishesMissingGimmes() async throws {
+        let holed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 0.3, puttFor: .par, result: .holed)
+        let missed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 0.3, puttFor: .par, result: .short)
+        #expect(holed.gsd < 0.01)
+        #expect(missed.gsd < -0.95)
     }
 
     @Test func baselineInterpolatesBetweenKnownPoints() async throws {

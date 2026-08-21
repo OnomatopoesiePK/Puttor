@@ -28,6 +28,10 @@ final class Putt {
     var badStrokeTypeRaw: String?
     var wrongAim: Bool = false
 
+    // Legacy columns from when each putt carried its own strokes-gained value.
+    // Strokes gained is now a per-hole figure derived from the hole's putts, and
+    // the per-putt number is `gsd`, so nothing reads these. They stay declared
+    // only to leave the stored schema untouched.
     var sgBaseline: Double = 0
     var sgActual: Double = 0
     var createdAt: Date = Date()
@@ -51,6 +55,17 @@ final class Putt {
     var result: PuttResult {
         get { PuttResult(rawValue: resultRaw) ?? .holed }
         set { resultRaw = newValue.rawValue }
+    }
+
+    /// Gained Shots per Distance: how the result compares with the tour's odds
+    /// of making a putt from here. Holing a coin-flip is +0.5, missing it -0.5;
+    /// holing a 20m putt is nearly +1, missing one costs almost nothing.
+    ///
+    /// Unlike strokes gained it judges a single stroke rather than a hole, so it
+    /// never depends on what happened next.
+    var gsd: Double {
+        let makeProbability = StrokesGained.baseline(at: distanceM).makeProbability
+        return result.isHoled ? 1 - makeProbability : -makeProbability
     }
 
     var missReasonCount: Int {
@@ -86,25 +101,6 @@ final class Putt {
         self.badStroke = badStroke
         self.badStrokeTypeRaw = badStrokeType?.rawValue
         self.wrongAim = wrongAim
-        let baseline = StrokesGained.baseline(at: distanceM)
-        self.sgBaseline = baseline.makeProbability
-        self.sgActual = StrokesGained.calculateSG(distanceM: distanceM, holed: result.isHoled)
         self.createdAt = Date()
-    }
-
-    /// Recomputes sgBaseline/sgActual after editing distance/result, using the
-    /// typical-leave estimate. Prefer `applySG(nextDistanceM:)` wherever the
-    /// following putt on the hole is known.
-    func recomputeSG() {
-        let baseline = StrokesGained.baseline(at: distanceM)
-        sgBaseline = baseline.makeProbability
-        sgActual = StrokesGained.calculateSG(distanceM: distanceM, holed: result.isHoled)
-    }
-
-    /// Recomputes against the real distance left behind — nil when this putt was
-    /// holed, or when no follow-up has been recorded yet.
-    func applySG(nextDistanceM: Double?) {
-        sgBaseline = StrokesGained.baseline(at: distanceM).makeProbability
-        sgActual = StrokesGained.calculateSG(distanceM: distanceM, nextDistanceM: nextDistanceM)
     }
 }

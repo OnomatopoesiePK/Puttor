@@ -19,9 +19,6 @@ struct PuttorApp: App {
     var body: some Scene {
         WindowGroup {
             RootTabView()
-                .task {
-                    SGRecalculation.recomputeIfNeeded(in: container.mainContext)
-                }
         }
         .modelContainer(container)
     }

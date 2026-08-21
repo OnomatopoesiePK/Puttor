@@ -125,7 +125,10 @@ struct OnCourseListView: View {
     /// Same total RoundStats reports, summed directly here rather than building
     /// the full stats (brackets, dispersion, leaves) for every row of the list.
     private func strokesGained(_ round: Round) -> Double {
-        round.putts.filter { $0.puttNumber > 0 }.reduce(0) { $0 + $1.sgActual }
+        // Strokes gained is a per-hole measure, so it's summed over holes.
+        Set(round.putts.map(\.holeNumber)).compactMap { hole in
+            RoundStats.holeStrokesGained(round.putts.filter { $0.holeNumber == hole })
+        }.reduce(0, +)
     }
 
     private func roundCard(_ round: Round) -> some View {

@@ -154,6 +154,26 @@ struct SettingsView: View {
                     .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
                     .padding(.bottom, 8)
 
+                    sectionHeader(L("settings.reference"))
+                    NavigationLink {
+                        StatsReferenceView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "function").foregroundStyle(Theme.primary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(L("reference.title")).foregroundStyle(Theme.text)
+                                Text(L("settings.reference.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").foregroundStyle(Theme.textMuted)
+                        }
+                        .padding(Theme.Spacing.md)
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 8)
+
                     sectionHeader(L("settings.about"))
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Puttor v1.0").font(.system(size: 16, weight: .bold)).foregroundStyle(Theme.text)

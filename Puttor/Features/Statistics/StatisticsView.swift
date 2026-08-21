@@ -79,6 +79,13 @@ struct StatisticsView: View {
         return statsByRound.values.reduce(0) { $0 + $1.sgTotal } / Double(statsByRound.count)
     }
 
+    /// GSD summed over a round, averaged across the filtered rounds — the
+    /// make-rate companion to strokes gained.
+    private var gsdAverage: Double {
+        guard !statsByRound.isEmpty else { return 0 }
+        return statsByRound.values.reduce(0) { $0 + $1.gsdTotal } / Double(statsByRound.count)
+    }
+
     private var dispersionPutts: [Putt] { filteredRounds.flatMap { $0.putts } }
 
     private var hasSituationData: Bool {
@@ -154,6 +161,13 @@ struct StatisticsView: View {
                                     .font(.system(size: 40, weight: .black))
                                     .foregroundStyle(sgAverage > 0.5 ? Theme.primary : (sgAverage < -0.5 ? Theme.error : Theme.warning))
                                 Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
+
+                                Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
+
+                                Text("\(L("stats.gsd")) \(gsdAverage > 0 ? "+" : "")\(String(format: "%.2f", gsdAverage))")
+                                    .font(.system(size: 20, weight: .black))
+                                    .foregroundStyle(gsdAverage > 0 ? Theme.primary : (gsdAverage < 0 ? Theme.error : Theme.textSecondary))
+                                Text(L("stats.gsdSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(Theme.Spacing.lg)
@@ -161,7 +175,7 @@ struct StatisticsView: View {
                             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
 
                             if !aggregated.makeByDistance.isEmpty {
-                                card { DistanceMakeChartView(data: aggregated.makeByDistance, sgDivisor: max(1, filteredRounds.count)) }
+                                card { DistanceMakeChartView(data: aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count)) }
                             }
 
                             // Score, GIR and scramble come from the holes, so a

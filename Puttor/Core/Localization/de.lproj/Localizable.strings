@@ -210,6 +210,7 @@
 "stats.rounds" = "RUNDEN";
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.sgSubtitle" = "Ø / Runde vs. PGA-Tour-Baseline";
+"stats.gsdSubtitle" = "Ø / Runde aus den Tour-Trefferquoten";
 "stats.dispersion" = "MISS-STREUUNG";
 
 /* Dispersion */
@@ -403,3 +404,20 @@
 "score.plus6" = "+6";
 
 "onCourse.nineHoleRound" = "9-Loch-Runde";
+
+/* Statistik-Referenz */
+"stats.gsd" = "GSD";
+"summary.sgCaption" = "pro Loch";
+"summary.gsdCaption" = "pro Putt";
+"settings.reference" = "WIE DIE ZAHLEN FUNKTIONIEREN";
+"settings.reference.desc" = "Strokes Gained, GSD und die Tour-Baseline";
+"reference.title" = "Strokes Gained & GSD";
+"reference.expectedPutts" = "ERW. PUTTS";
+"reference.intro" = "Beide Zahlen vergleichen dich mit dem PGA-Tour-Schnitt. Strokes Gained bewertet ein ganzes Loch: die Putts, die die Tour ab deiner ersten Distanz bräuchte, minus die, die du gebraucht hast. Ein einzelner Putt hat kein eigenes SG — wie gut ein Lag war, zeigt sich erst am Ende des Lochs. GSD bewertet einen Schlag an der Trefferquote von dort: einen fast unmöglichen Putt zu lochen ist fast einen Punkt wert, ein Tap-in zu verfehlen kostet einen.";
+"reference.sgTitle" = "STROKES GAINED — PRO LOCH";
+"reference.sgLegend" = "E(d₁) = erwartete Putts ab der Distanz des ersten Putts · n = benötigte Putts";
+"reference.sgExample" = "Aus 6 m braucht die Tour im Schnitt 1,86 Putts. Zwei Putts: −0,14. Gelocht: +0,86.";
+"reference.gsdTitle" = "GSD — PRO PUTT";
+"reference.gsdLegend" = "p = Tour-Trefferquote auf dieser Distanz · erste Formel wenn gelocht, zweite wenn verfehlt";
+"reference.gsdExample" = "Ein 2,5-m-Putt fällt zu 49 %: gelocht +0,51, verfehlt −0,49. Aus 20 m: +0,97 oder −0,03.";
+"reference.tableNote" = "Die erwarteten Putts überschreiten ab etwa 9 m die 2. Werte dazwischen werden interpoliert.";

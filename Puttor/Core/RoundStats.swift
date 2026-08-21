@@ -17,7 +17,7 @@ struct DistanceBracket: Identifiable {
     let made: Int
     let total: Int
     let tourMakePct: Double
-    let sgTotal: Double
+    let gsdTotal: Double
 }
 
 struct MissReasonCounts {
@@ -48,6 +48,9 @@ struct RoundStats {
     var holes: Int = 0
     var avgPuttsPerHole: Double = 0
     var sgTotal: Double = 0
+    /// Gained shots per distance, summed over every putt — the make-rate view of
+    /// the round, alongside but separate from strokes gained.
+    var gsdTotal: Double = 0
     var makeByDistance: [DistanceBracket] = []
     /// Make % by distance bracket, filtered to putts taken "for" a given score (birdie/par/bogey).
     var makeByCategory: [ScoreCategory: [DistanceBracket]] = [:]
@@ -91,6 +94,18 @@ struct RoundStats {
         }
         guard let sentinel = holePutts.first(where: { $0.puttNumber == 0 }) else { return nil }
         return sentinel.puttFor.strokesRelativeToPar
+    }
+
+    /// Strokes gained for a whole hole: the putts the tour would expect from
+    /// where you first stood, less the putts you actually took. Holing a 2.0
+    /// expected-putts green in one is +1.0.
+    ///
+    /// Only holes that were putted have one — holing out from off the green
+    /// isn't a putting result, so it has no putting strokes gained.
+    static func holeStrokesGained(_ holePutts: [Putt]) -> Double? {
+        let realPutts = holePutts.filter { $0.puttNumber > 0 }.sorted { $0.puttNumber < $1.puttNumber }
+        guard let first = realPutts.first else { return nil }
+        return StrokesGained.baseline(at: first.distanceM).expectedPutts - Double(realPutts.count)
     }
 
     /// The category a hole was played for: the first putt's, or the hole-out's.
@@ -151,7 +166,10 @@ struct RoundStats {
         let holeSet = Set(putts.map { $0.holeNumber })
         stats.holes = holeSet.count
         stats.avgPuttsPerHole = stats.holes > 0 ? Double(stats.totalPutts) / Double(stats.holes) : 0
-        stats.sgTotal = realPutts.reduce(0) { $0 + $1.sgActual }
+        // Summed per hole rather than per putt — see holeStrokesGained.
+        stats.sgTotal = holeSet.compactMap { hole in
+            holeStrokesGained(putts.filter { $0.holeNumber == hole })
+        }.reduce(0, +)
 
         for hole in holeSet { stats.puttsByHole[hole] = 0 }
         for p in realPutts {
@@ -159,6 +177,7 @@ struct RoundStats {
             stats.missCounts[p.result, default: 0] += 1
         }
 
+        stats.gsdTotal = realPutts.reduce(0.0) { $0 + $1.gsd }
         stats.makeByDistance = computeDistanceBrackets(realPutts, useFeet: useFeet)
 
         for category in situationCategories {
@@ -205,12 +224,12 @@ struct RoundStats {
                 return d >= b.min && d < b.max
             }
             let made = dm.filter { $0.result == .holed }.count
-            let sg = dm.reduce(0) { $0 + $1.sgActual }
+            let gsd = dm.reduce(0.0) { $0 + $1.gsd }
             return DistanceBracket(
                 id: b.label, label: b.label, min: b.min, max: b.max,
                 made: made, total: dm.count,
                 tourMakePct: averageTourMakePct(min: b.min, max: b.max),
-                sgTotal: sg
+                gsdTotal: gsd
             )
         }
     }
@@ -313,9 +332,9 @@ struct RoundStats {
         brackets(useFeet: useFeet).enumerated().map { idx, b in
             let made = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].made : 0) }
             let total = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].total : 0) }
-            let sg = lists.reduce(0.0) { $0 + (idx < $1.count ? $1[idx].sgTotal : 0) }
+            let gsd = lists.reduce(0.0) { $0 + (idx < $1.count ? $1[idx].gsdTotal : 0) }
             let tourPct = lists.first?[safe: idx]?.tourMakePct ?? averageTourMakePct(min: b.min, max: b.max)
-            return DistanceBracket(id: b.label, label: b.label, min: b.min, max: b.max, made: made, total: total, tourMakePct: tourPct, sgTotal: sg)
+            return DistanceBracket(id: b.label, label: b.label, min: b.min, max: b.max, made: made, total: total, tourMakePct: tourPct, gsdTotal: gsd)
         }
     }
 }

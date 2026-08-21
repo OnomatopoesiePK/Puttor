@@ -29,7 +29,7 @@ struct RoundSummaryView: View {
     private var holeCount: Int { round.holeCount == 9 ? 9 : 18 }
 
     private var highlight: Putt? {
-        putts.filter { $0.result == .holed && $0.distanceM >= 1.5 }.max { $0.sgActual < $1.sgActual }
+        putts.filter { $0.result == .holed && $0.distanceM >= 1.5 }.max { $0.gsd < $1.gsd }
     }
 
     private var hasSituationData: Bool {
@@ -60,7 +60,19 @@ struct RoundSummaryView: View {
                     bigStat(L("summary.putts"), "\(stats.totalPutts)")
                     bigStat(L("summary.holes"), "\(stats.holes)")
                     bigStat(L("summary.avgPerHole"), String(format: "%.1f", stats.avgPuttsPerHole))
-                    bigStat(L("summary.sg"), "\(stats.sgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.sgTotal))", color: sgColor(stats.sgTotal))
+                }
+
+                // Two different questions, so they get their own row: strokes
+                // gained scores whole holes, GSD scores single putts.
+                HStack(spacing: Theme.Spacing.xs) {
+                    bigStat(L("summary.sg"),
+                            "\(stats.sgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.sgTotal))",
+                            caption: L("summary.sgCaption"),
+                            color: sgColor(stats.sgTotal))
+                    bigStat(L("stats.gsd"),
+                            "\(stats.gsdTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.gsdTotal))",
+                            caption: L("summary.gsdCaption"),
+                            color: sgColor(stats.gsdTotal))
                 }
 
                 if let highlight {
@@ -185,10 +197,14 @@ struct RoundSummaryView: View {
         sg > 0.5 ? Theme.primary : (sg < -0.5 ? Theme.error : Theme.warning)
     }
 
-    private func bigStat(_ label: String, _ value: String, color: Color = Theme.text) -> some View {
+    private func bigStat(_ label: String, _ value: String, caption: String? = nil, color: Color = Theme.text) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.system(size: 20, weight: .black)).foregroundStyle(color)
+                .lineLimit(1).minimumScaleFactor(0.7)
             Text(label).font(.system(size: 9, weight: .semibold)).tracking(0.6).foregroundStyle(Theme.textMuted)
+            if let caption {
+                Text(caption).font(.system(size: 9)).foregroundStyle(Theme.textMuted.opacity(0.8))
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
@@ -202,7 +218,7 @@ struct RoundSummaryView: View {
             Text("\(L("summary.holeAbbr")) \(putt.holeNumber) · \(UnitConverter.formatDistance(putt.distanceM, useFeet: useFeet)) \(L("result.holed"))")
                 .font(.system(size: 16, weight: .heavy))
                 .foregroundStyle(Theme.text)
-            Text("+\(String(format: "%.2f", putt.sgActual)) SG")
+            Text("+\(String(format: "%.2f", putt.gsd)) \(L("stats.gsd"))")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(Theme.primary)
         }
@@ -322,6 +338,11 @@ struct RoundSummaryView: View {
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(scoreColor(score))
                     Spacer(minLength: 0)
+                    if let holeSG = RoundStats.holeStrokesGained(holeRecords) {
+                        Text("\(L("summary.sg")) \(holeSG > 0 ? "+" : "")\(String(format: "%.2f", holeSG))")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(holeSG > 0 ? Theme.primary : (holeSG < 0 ? Theme.error : Theme.textSecondary))
+                    }
                     if RoundStats.holeCategory(holeRecords)?.isGreenInRegulation == true {
                         Text(L("stats.gir"))
                             .font(.system(size: 10, weight: .heavy))
@@ -346,9 +367,9 @@ struct RoundSummaryView: View {
                     Text(UnitConverter.formatDistance(p.distanceM, useFeet: useFeet)).font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.text).frame(width: 46, alignment: .leading)
                     Text(L(p.result.labelKey)).font(.system(size: 12, weight: .semibold)).foregroundStyle(p.result == .holed ? Theme.primary : Theme.error)
                     Spacer()
-                    Text("\(p.sgActual > 0 ? "+" : "")\(String(format: "%.2f", p.sgActual))")
+                    Text("\(p.gsd > 0 ? "+" : "")\(String(format: "%.2f", p.gsd))")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(p.sgActual > 0 ? Theme.primary : (p.sgActual < 0 ? Theme.error : Theme.textSecondary))
+                        .foregroundStyle(p.gsd > 0 ? Theme.primary : (p.gsd < 0 ? Theme.error : Theme.textSecondary))
                 }
             }
         }

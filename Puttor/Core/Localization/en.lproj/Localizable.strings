@@ -210,6 +210,7 @@
 "stats.rounds" = "ROUNDS";
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.sgSubtitle" = "avg / round vs PGA Tour baseline";
+"stats.gsdSubtitle" = "avg / round from the tour make rates";
 "stats.dispersion" = "MISS DISPERSION";
 
 /* Dispersion */
@@ -403,3 +404,20 @@
 "score.plus6" = "+6";
 
 "onCourse.nineHoleRound" = "Nine-hole round";
+
+/* Stats reference */
+"stats.gsd" = "GSD";
+"summary.sgCaption" = "per hole";
+"summary.gsdCaption" = "per putt";
+"settings.reference" = "HOW THE NUMBERS WORK";
+"settings.reference.desc" = "Strokes gained, GSD and the tour baseline";
+"reference.title" = "Strokes Gained & GSD";
+"reference.expectedPutts" = "EXP. PUTTS";
+"reference.intro" = "Both numbers compare you with the PGA Tour average. Strokes gained judges a whole hole: the putts the tour would need from your first distance, minus the putts you took. A single putt has none of its own — how good a lag was only shows once the hole is over. GSD judges one stroke against the odds of holing from there: sinking a putt nobody makes is worth nearly a point, missing a tap-in costs one.";
+"reference.sgTitle" = "STROKES GAINED â PER HOLE";
+"reference.sgLegend" = "E(dâ) = expected putts from the first putt's distance Â· n = putts taken";
+"reference.sgExample" = "From 6 m the tour averages 1.86 putts. Two-putt it: −0.14. Hole it: +0.86.";
+"reference.gsdTitle" = "GSD â PER PUTT";
+"reference.gsdLegend" = "p = tour make probability at that distance Â· first formula if holed, second if missed";
+"reference.gsdExample" = "A 2.5 m putt falls 49% of the time: making it is +0.51, missing it −0.49. From 20 m: +0.97 or −0.03.";
+"reference.tableNote" = "Expected putts pass 2 beyond about 9 m. Values between rows are interpolated.";

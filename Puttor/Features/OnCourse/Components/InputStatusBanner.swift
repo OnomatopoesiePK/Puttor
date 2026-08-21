@@ -15,18 +15,18 @@ import SwiftUI
 
 struct InputStatusBanner: View {
     /// Strokes gained by the putt just saved; nil when the flash isn't showing.
-    let savedSG: Double?
+    let savedGSD: Double?
     let isEditing: Bool
 
     var body: some View {
-        if let savedSG {
-            let gained = savedSG > 0
+        if let savedGSD {
+            let gained = savedGSD > 0
             let tint = gained ? Theme.primary : Theme.error
             strip(tint: tint) {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
                     Text(L("input.saved"))
-                    Text("\(savedSG >= 0 ? "+" : "")\(String(format: "%.2f", savedSG)) \(L("summary.sg"))")
+                    Text("\(savedGSD >= 0 ? "+" : "")\(String(format: "%.2f", savedGSD)) \(L("stats.gsd"))")
                 }
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(tint)
