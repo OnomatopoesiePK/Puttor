@@ -1,0 +1,110 @@
+//
+//  ScorePuttingAnalysis.swift
+//  Puttor
+//
+//  Ties the scorecard to the putter. A round's score is what putting did to it
+//  plus everything else, so taking the putting result back out leaves the score
+//  the rest of the game produced — and comparing how much the two swing from
+//  round to round says which half decides your good and bad days.
+//
+
+import Foundation
+
+struct ScorePuttingAnalysis {
+    struct Round: Identifiable {
+        let id: Int
+        let date: Date
+        let courseName: String
+        /// Strokes over par, scaled to 18 holes.
+        let score: Double
+        /// Strokes gained putting, scaled to 18 holes.
+        let sg: Double
+        /// The score without the putting result: `score + sg`. Gaining strokes
+        /// on the greens made the card better, so removing putting adds them
+        /// back on.
+        var scoreWithoutPutting: Double { score + sg }
+    }
+
+    let rounds: [Round]
+
+    var avgScore: Double { mean(rounds.map(\.score)) }
+    var avgScoreWithoutPutting: Double { mean(rounds.map(\.scoreWithoutPutting)) }
+    var avgSG: Double { mean(rounds.map(\.sg)) }
+
+    var sdScore: Double { standardDeviation(rounds.map(\.score)) }
+    var sdScoreWithoutPutting: Double { standardDeviation(rounds.map(\.scoreWithoutPutting)) }
+
+    /// How much of the swing between good and bad rounds putting accounts for.
+    ///
+    /// A score is its non-putting half minus what putting gained, so the two
+    /// covariances with the score add up to the score's own variance. Dividing
+    /// through gives two shares that sum to exactly 1 — no leftover term to
+    /// explain away. Nil when every round scored the same, which leaves no
+    /// swing to attribute.
+    var puttingShareOfVariance: Double? {
+        let scores = rounds.map(\.score)
+        let variance = covariance(scores, scores)
+        guard variance > 1e-9 else { return nil }
+        return covariance(scores, rounds.map { -$0.sg }) / variance
+    }
+
+    /// Squeezed into 0…1 for drawing: a share can overshoot when putting and
+    /// the long game pull against each other, and a bar can't show that.
+    var puttingShareForDisplay: Double? {
+        puttingShareOfVariance.map { min(1, max(0, $0)) }
+    }
+
+    enum Verdict { case putting, mixed, rest }
+
+    var verdict: Verdict? {
+        guard let share = puttingShareOfVariance else { return nil }
+        if share >= 0.6 { return .putting }
+        if share <= 0.4 { return .rest }
+        return .mixed
+    }
+
+    /// Below this there is no spread worth decomposing.
+    static let minimumRounds = 3
+
+    /// Rounds arrive newest-first; the chart reads left to right in time.
+    static func make(rounds: [(date: Date, courseName: String, stats: RoundStats)]) -> ScorePuttingAnalysis? {
+        let usable = rounds
+            .filter { $0.stats.scoredHoles > 0 && $0.stats.holes > 0 }
+            .sorted { $0.date < $1.date }
+        guard usable.count >= minimumRounds else { return nil }
+
+        // 9- and 18-hole rounds have to be put on one scale before their
+        // scores can be averaged together.
+        let mapped = usable.enumerated().map { index, r in
+            Round(
+                id: index,
+                date: r.date,
+                courseName: r.courseName,
+                score: Double(r.stats.scoreRelativeToPar) * 18 / Double(r.stats.scoredHoles),
+                sg: r.stats.sgTotal * 18 / Double(r.stats.holes)
+            )
+        }
+        return ScorePuttingAnalysis(rounds: mapped)
+    }
+}
+
+private func mean(_ values: [Double]) -> Double {
+    guard !values.isEmpty else { return 0 }
+    return values.reduce(0, +) / Double(values.count)
+}
+
+/// Sample standard deviation — these are a handful of rounds out of many that
+/// could have been played, not the whole population.
+private func standardDeviation(_ values: [Double]) -> Double {
+    guard values.count > 1 else { return 0 }
+    let m = mean(values)
+    let sumSquares = values.reduce(0) { $0 + ($1 - m) * ($1 - m) }
+    return (sumSquares / Double(values.count - 1)).squareRoot()
+}
+
+private func covariance(_ a: [Double], _ b: [Double]) -> Double {
+    guard a.count == b.count, a.count > 1 else { return 0 }
+    let ma = mean(a), mb = mean(b)
+    let sum = zip(a, b).reduce(0.0) { $0 + ($1.0 - ma) * ($1.1 - mb) }
+    return sum / Double(a.count - 1)
+}

@@ -211,6 +211,21 @@
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.sgSubtitle" = "avg / round vs PGA Tour baseline";
 "stats.gsdSubtitle" = "avg / round from the tour make rates";
+"stats.scoreVsPutting" = "SCORE VS PUTTING";
+"stats.svp.scoreLegend" = "score played";
+"stats.svp.withoutLegend" = "without putting";
+"stats.svp.gapLegend" = "what putting did";
+"stats.svp.avgScore" = "Ø SCORE";
+"stats.svp.avgWithout" = "Ø WITHOUT PUTTING";
+"stats.svp.perRound" = "per round";
+"stats.svp.share" = "SHARE OF THE SWING BETWEEN ROUNDS";
+"stats.svp.putting" = "putting";
+"stats.svp.rest" = "rest of the game";
+"stats.svp.verdictPutting" = "Your good and bad rounds are decided on the greens — the rest of your game holds steady.";
+"stats.svp.verdictMixed" = "Putting and the rest of your game move your scores about equally.";
+"stats.svp.verdictRest" = "Your scores swing mostly for reasons away from the green; putting is the steadier half.";
+"stats.svp.needMore" = "%ld finished rounds are needed before scores and putting can be compared.";
+"stats.svp.note" = "Everything scaled to 18 holes. \"Without putting\" adds your strokes gained back onto the card, leaving the score the rest of your game produced. σ is how far a round typically strays from that average.";
 "stats.dispersion" = "MISS DISPERSION";
 
 /* Dispersion */

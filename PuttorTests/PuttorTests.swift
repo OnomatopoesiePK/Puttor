@@ -797,6 +797,108 @@ struct PuttorTests {
         #expect(missed.gsd < -0.95)
     }
 
+    // MARK: - Score vs putting
+
+    private static func scoreRound(_ date: Date, score: Int, sg: Double, holes: Int = 18) -> (date: Date, courseName: String, stats: RoundStats) {
+        var stats = RoundStats()
+        stats.scoreRelativeToPar = score
+        stats.scoredHoles = holes
+        stats.holes = holes
+        stats.sgTotal = sg
+        return (date: date, courseName: "Test", stats: stats)
+    }
+
+    private static func day(_ offset: Int) -> Date {
+        Date(timeIntervalSince1970: 86_400 * Double(offset))
+    }
+
+    /// Gaining strokes on the greens made the card better, so taking putting
+    /// back out has to put them on again.
+    @Test func scoreWithoutPuttingAddsTheStrokesGainedBackOn() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 5, sg: 2),
+            Self.scoreRound(Self.day(2), score: 3, sg: -1),
+            Self.scoreRound(Self.day(3), score: 4, sg: 0),
+        ]))
+        #expect(abs(analysis.rounds[0].scoreWithoutPutting - 7) < 0.0001)
+        #expect(abs(analysis.rounds[1].scoreWithoutPutting - 2) < 0.0001)
+        #expect(abs(analysis.rounds[2].scoreWithoutPutting - 4) < 0.0001)
+    }
+
+    /// A 9-hole card can't be averaged with an 18-hole one until both are on
+    /// the same scale.
+    @Test func nineHoleRoundsAreScaledToEighteen() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 3, sg: 1, holes: 9),
+            Self.scoreRound(Self.day(2), score: 6, sg: 2),
+            Self.scoreRound(Self.day(3), score: 6, sg: 2),
+        ]))
+        #expect(abs(analysis.rounds[0].score - 6) < 0.0001)
+        #expect(abs(analysis.rounds[0].sg - 2) < 0.0001)
+    }
+
+    /// Same long game every time, putting all over the place: the swing is the
+    /// putter's doing, all of it.
+    @Test func puttingOwnsTheSwingWhenNothingElseMoves() async throws {
+        // Non-putting score fixed at +6; strokes gained does the moving.
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 4, sg: 2),
+            Self.scoreRound(Self.day(2), score: 6, sg: 0),
+            Self.scoreRound(Self.day(3), score: 9, sg: -3),
+        ]))
+        let share = try #require(analysis.puttingShareOfVariance)
+        #expect(abs(share - 1) < 0.0001)
+        #expect(analysis.sdScoreWithoutPutting < 0.0001)
+        #expect(analysis.verdict == .putting)
+    }
+
+    /// The mirror image: putting identical every round, so none of the swing
+    /// belongs to it.
+    @Test func puttingOwnsNoneOfTheSwingWhenItIsConstant() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 2, sg: 1),
+            Self.scoreRound(Self.day(2), score: 6, sg: 1),
+            Self.scoreRound(Self.day(3), score: 10, sg: 1),
+        ]))
+        let share = try #require(analysis.puttingShareOfVariance)
+        #expect(abs(share) < 0.0001)
+        #expect(analysis.verdict == .rest)
+        // Removing a constant shifts the average but not the spread.
+        #expect(abs(analysis.sdScore - analysis.sdScoreWithoutPutting) < 0.0001)
+    }
+
+    /// The two shares are defined so they always account for the whole swing.
+    @Test func puttingAndTheRestSplitTheWholeSwing() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 1, sg: 1.4),
+            Self.scoreRound(Self.day(2), score: 7, sg: -0.8),
+            Self.scoreRound(Self.day(3), score: 4, sg: 0.3),
+            Self.scoreRound(Self.day(4), score: 9, sg: -2.1),
+        ]))
+        let share = try #require(analysis.puttingShareOfVariance)
+        #expect(share > 0 && share < 1)
+        // Averages have to line up too: score = without putting, less SG.
+        #expect(abs(analysis.avgScore - (analysis.avgScoreWithoutPutting - analysis.avgSG)) < 0.0001)
+    }
+
+    @Test func scorePuttingComparisonNeedsThreeRounds() async throws {
+        #expect(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 4, sg: 1),
+            Self.scoreRound(Self.day(2), score: 5, sg: 0),
+        ]) == nil)
+    }
+
+    /// Rounds come out of the query newest first; the chart has to read
+    /// oldest to newest.
+    @Test func scorePuttingRoundsAreOrderedOldestFirst() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(9), score: 4, sg: 1),
+            Self.scoreRound(Self.day(2), score: 5, sg: 0),
+            Self.scoreRound(Self.day(5), score: 6, sg: -1),
+        ]))
+        #expect(analysis.rounds.map(\.date) == [Self.day(2), Self.day(5), Self.day(9)])
+    }
+
     @Test func baselineInterpolatesBetweenKnownPoints() async throws {
         let b = StrokesGained.baseline(at: 3.25) // halfway between 3.0 (0.408) and 3.5 (0.348)
         #expect(abs(b.makeProbability - 0.378) < 0.001)

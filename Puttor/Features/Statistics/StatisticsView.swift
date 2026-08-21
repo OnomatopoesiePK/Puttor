@@ -86,6 +86,15 @@ struct StatisticsView: View {
         return statsByRound.values.reduce(0) { $0 + $1.gsdTotal } / Double(statsByRound.count)
     }
 
+    /// Score against putting for the filtered rounds — nil until there are
+    /// enough finished rounds for a spread to mean anything.
+    private var scorePuttingAnalysis: ScorePuttingAnalysis? {
+        ScorePuttingAnalysis.make(rounds: filteredRounds.compactMap { r in
+            guard let stats = statsByRound[r.persistentModelID] else { return nil }
+            return (date: r.date, courseName: r.courseName, stats: stats)
+        })
+    }
+
     private var dispersionPutts: [Putt] { filteredRounds.flatMap { $0.putts } }
 
     private var hasSituationData: Bool {
@@ -169,6 +178,17 @@ struct StatisticsView: View {
                                     Text(L("stats.gsdSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
                                 }
                                 .frame(maxWidth: .infinity)
+                            }
+
+                            CollapsibleStatSection(title: L("stats.scoreVsPutting"), storageKey: "scoreVsPutting") {
+                                if let analysis = scorePuttingAnalysis {
+                                    ScoreVsPuttingView(analysis: analysis)
+                                } else {
+                                    Text(String(format: L("stats.svp.needMore"), ScorePuttingAnalysis.minimumRounds))
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Theme.textMuted)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
                             }
 
                             if !aggregated.makeByDistance.isEmpty {

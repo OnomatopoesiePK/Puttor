@@ -211,6 +211,21 @@
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.sgSubtitle" = "Ø / Runde vs. PGA-Tour-Baseline";
 "stats.gsdSubtitle" = "Ø / Runde aus den Tour-Trefferquoten";
+"stats.scoreVsPutting" = "SCORE VS. PUTTEN";
+"stats.svp.scoreLegend" = "gespielter Score";
+"stats.svp.withoutLegend" = "ohne Putten";
+"stats.svp.gapLegend" = "Anteil des Puttens";
+"stats.svp.avgScore" = "Ø SCORE";
+"stats.svp.avgWithout" = "Ø OHNE PUTTEN";
+"stats.svp.perRound" = "pro Runde";
+"stats.svp.share" = "ANTEIL AN DEN SCHWANKUNGEN";
+"stats.svp.putting" = "Putten";
+"stats.svp.rest" = "restliches Spiel";
+"stats.svp.verdictPutting" = "Deine guten und schlechten Runden entscheiden sich auf dem Grün — der Rest deines Spiels bleibt konstant.";
+"stats.svp.verdictMixed" = "Putten und der Rest deines Spiels bewegen deinen Score etwa gleich stark.";
+"stats.svp.verdictRest" = "Deine Schwankungen kommen vor allem von außerhalb des Grüns; das Putten ist die stabilere Hälfte.";
+"stats.svp.needMore" = "Für den Vergleich von Score und Putten braucht es %ld beendete Runden.";
+"stats.svp.note" = "Alles auf 18 Löcher hochgerechnet. „Ohne Putten\" rechnet deine Shots Gained wieder auf die Karte und lässt den Score übrig, den der Rest deines Spiels erzeugt hat. σ ist die übliche Abweichung einer Runde von diesem Schnitt.";
 "stats.dispersion" = "MISS-STREUUNG";
 
 /* Dispersion */
