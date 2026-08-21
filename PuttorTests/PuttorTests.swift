@@ -882,6 +882,46 @@ struct PuttorTests {
     }
 
     /// The chart's scale sticks to whole strokes and always draws par.
+    /// The typical-round band is the average give or take how far a round
+    /// usually strays from it.
+    @Test func typicalRangeBracketsTheAverage() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 2, sg: 0),
+            Self.scoreRound(Self.day(2), score: 4, sg: 0),
+            Self.scoreRound(Self.day(3), score: 6, sg: 0),
+        ]))
+        #expect(abs(analysis.avgScore - 4) < 0.0001)
+        #expect(abs(analysis.typicalDeviation - 4.0 / 3.0) < 0.0001)
+        #expect(analysis.typicalRange.low < analysis.avgScore)
+        #expect(analysis.typicalRange.high > analysis.avgScore)
+    }
+
+    /// Wild early rounds followed by three near-identical ones: the score is
+    /// settling down, and the reverse order says the opposite.
+    @Test func stabilityTrendComparesRecentRoundsWithEarlierOnes() async throws {
+        let wild = [0, 10, 5]
+        let tight = [6, 7, 7]
+
+        func analysis(_ scores: [Int]) throws -> ScorePuttingAnalysis {
+            try #require(ScorePuttingAnalysis.make(rounds: scores.enumerated().map { index, score in
+                Self.scoreRound(Self.day(index + 1), score: score, sg: 0)
+            }))
+        }
+
+        #expect(try analysis(wild + tight).stabilityTrend == .settling)
+        #expect(try analysis(tight + wild).stabilityTrend == .spreading)
+        #expect(try analysis(tight + tight).stabilityTrend == .steady)
+    }
+
+    /// Under six rounds each half is too thin to compare, so the app says so
+    /// instead of guessing.
+    @Test func stabilityTrendNeedsSixRounds() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: (1...5).map {
+            Self.scoreRound(Self.day($0), score: $0, sg: 0)
+        }))
+        #expect(analysis.stabilityTrend == nil)
+    }
+
     @Test func scaleTicksAreWholeStrokesAroundPar() async throws {
         let ticks = ScorePuttingAnalysis.scaleTicks(low: -3.4, high: 8.2)
         #expect(ticks.contains { abs($0) < 0.0001 })

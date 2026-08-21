@@ -20,6 +20,7 @@ struct ScoreVsPuttingView: View {
             chart
             legend
             summaryBoxes
+            stabilityRow
             shareBar
             if let verdict = analysis.verdict {
                 Text(L(verdictKey(verdict)))
@@ -92,6 +93,16 @@ struct ScoreVsPuttingView: View {
                 )
             }
 
+            // The band a normal round lands in — points hugging it are the
+            // picture of a settled score.
+            let band = analysis.typicalRange
+            if band.high - band.low > 0.0001 {
+                let top = y(band.high)
+                let bottom = y(band.low)
+                let rect = CGRect(x: plotLeft, y: top, width: plotRight - plotLeft, height: bottom - top)
+                context.fill(Path(roundedRect: rect, cornerRadius: 4), with: .color(Theme.accent.opacity(0.10)))
+            }
+
             // Trend lines behind the markers.
             var withoutPath = Path()
             var scorePath = Path()
@@ -138,21 +149,35 @@ struct ScoreVsPuttingView: View {
     }
 
     private var legend: some View {
-        HStack(spacing: 14) {
-            HStack(spacing: 5) {
-                Circle().fill(Theme.text).frame(width: 8, height: 8)
-                Text(L("stats.svp.scoreLegend")).font(.system(size: 10)).foregroundStyle(Theme.textSecondary)
+        // Two rows: four keys on one line would squeeze on a small phone.
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 14) {
+                legendItem(L("stats.svp.scoreLegend")) {
+                    Circle().fill(Theme.text).frame(width: 8, height: 8)
+                }
+                legendItem(L("stats.svp.withoutLegend")) {
+                    Circle().stroke(Theme.textMuted, lineWidth: 1.5).frame(width: 8, height: 8)
+                }
+                Spacer(minLength: 0)
             }
-            HStack(spacing: 5) {
-                Circle().stroke(Theme.textMuted, lineWidth: 1.5).frame(width: 8, height: 8)
-                Text(L("stats.svp.withoutLegend")).font(.system(size: 10)).foregroundStyle(Theme.textSecondary)
-            }
-            HStack(spacing: 5) {
-                Capsule().fill(Theme.primary).frame(width: 3, height: 10)
-                Text(L("stats.svp.gapLegend")).font(.system(size: 10)).foregroundStyle(Theme.textSecondary)
+            HStack(spacing: 14) {
+                legendItem(L("stats.svp.gapLegend")) {
+                    Capsule().fill(Theme.primary).frame(width: 3, height: 10)
+                }
+                legendItem(L("stats.svp.bandLegend")) {
+                    RoundedRectangle(cornerRadius: 2).fill(Theme.accent.opacity(0.25)).frame(width: 12, height: 8)
+                }
+                Spacer(minLength: 0)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func legendItem<Marker: View>(_ label: String, @ViewBuilder marker: () -> Marker) -> some View {
+        HStack(spacing: 5) {
+            marker()
+            Text(label).font(.system(size: 10)).foregroundStyle(Theme.textSecondary)
+        }
     }
 
     // MARK: - Numbers
@@ -162,41 +187,83 @@ struct ScoreVsPuttingView: View {
             box(
                 L("stats.svp.avgScore"),
                 signed(analysis.avgScore),
-                subtitle: "σ \(String(format: "%.1f", analysis.sdScore))",
                 color: analysis.avgScore <= 0 ? Theme.primary : Theme.text
             )
             box(
                 L("stats.svp.avgWithout"),
                 signed(analysis.avgScoreWithoutPutting),
-                subtitle: "σ \(String(format: "%.1f", analysis.sdScoreWithoutPutting))",
                 color: Theme.textSecondary
             )
             box(
-                L("summary.sg"),
-                "\(analysis.avgSG > 0 ? "+" : "")\(String(format: "%.2f", analysis.avgSG))",
-                subtitle: L("stats.svp.perRound"),
-                color: analysis.avgSG > 0 ? Theme.primary : (analysis.avgSG < 0 ? Theme.error : Theme.textSecondary)
+                L("stats.svp.range"),
+                "\(signed(analysis.typicalRange.low))…\(signed(analysis.typicalRange.high))",
+                color: Theme.accent
             )
         }
     }
 
-    private func box(_ label: String, _ value: String, subtitle: String, color: Color) -> some View {
-        VStack(spacing: 2) {
+    private func box(_ label: String, _ value: String, color: Color) -> some View {
+        VStack(spacing: 3) {
             Text(value)
-                .font(.system(size: 20, weight: .black))
+                .font(.system(size: 19, weight: .black))
                 .foregroundStyle(color)
-                .lineLimit(1).minimumScaleFactor(0.7)
+                .lineLimit(1).minimumScaleFactor(0.6)
             Text(label)
                 .font(.system(size: 9, weight: .semibold)).tracking(0.4)
                 .foregroundStyle(Theme.textMuted)
                 .lineLimit(1).minimumScaleFactor(0.7)
-            Text(subtitle)
-                .font(.system(size: 9))
-                .foregroundStyle(Theme.textMuted.opacity(0.8))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
+        .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+    }
+
+    /// Is the score settling down? Rather than a spread figure to interpret,
+    /// this says outright whether the recent rounds sit closer together than
+    /// the earlier ones.
+    private var stabilityRow: some View {
+        HStack(spacing: 8) {
+            Image(systemName: stabilityIcon)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(stabilityColor)
+            Text(L(stabilityKey))
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(stabilityColor.opacity(0.12)))
+    }
+
+    private var stabilityKey: String {
+        switch analysis.stabilityTrend {
+        case .settling: return "stats.svp.settling"
+        case .steady: return "stats.svp.steady"
+        case .spreading: return "stats.svp.spreading"
+        case nil: return "stats.svp.trendNeedsMore"
+        }
+    }
+
+    private var stabilityIcon: String {
+        switch analysis.stabilityTrend {
+        case .settling: return "arrow.down.right.and.arrow.up.left"
+        case .steady: return "equal.circle"
+        case .spreading: return "arrow.up.left.and.arrow.down.right"
+        case nil: return "hourglass"
+        }
+    }
+
+    private var stabilityColor: Color {
+        switch analysis.stabilityTrend {
+        case .settling: return Theme.primary
+        case .steady: return Theme.accent
+        case .spreading: return Theme.error
+        case nil: return Theme.textMuted
+        }
     }
 
     @ViewBuilder

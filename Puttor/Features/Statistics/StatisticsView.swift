@@ -95,6 +95,21 @@ struct StatisticsView: View {
         })
     }
 
+    /// Average strokes over par per round, scaled to 18 holes so a 9-hole card
+    /// doesn't drag the average down.
+    private var avgScorePerRound: Double? {
+        let scored = statsByRound.values.filter { $0.scoredHoles > 0 }
+        guard !scored.isEmpty else { return nil }
+        let perRound = scored.map { Double($0.scoreRelativeToPar) * 18 / Double($0.scoredHoles) }
+        return perRound.reduce(0, +) / Double(perRound.count)
+    }
+
+    private var avgScorePerRoundText: String {
+        guard let avg = avgScorePerRound else { return "—" }
+        if abs(avg) < 0.05 { return "E" }
+        return "\(avg > 0 ? "+" : "")\(String(format: "%.1f", avg))"
+    }
+
     private var dispersionPutts: [Putt] { filteredRounds.flatMap { $0.putts } }
 
     private var hasSituationData: Bool {
@@ -180,6 +195,21 @@ struct StatisticsView: View {
                                 .frame(maxWidth: .infinity)
                             }
 
+                            // Score, GIR and scramble come from the holes, so a
+                            // round of nothing but hole-outs still has them —
+                            // only the per-category putt comparison needs putts.
+                            if aggregated.holes > 0 {
+                                CollapsibleStatSection(title: L("stats.playingStats"), storageKey: "playingStats") {
+                                    HStack(spacing: Theme.Spacing.sm) {
+                                        // An average per round compares across
+                                        // filters; a running total only grows.
+                                        playingStat(L("stats.score"), avgScorePerRoundText, subtitle: L("stats.svp.perRound"), color: scoreColor(aggregated.scoreRelativeToPar))
+                                        playingStat(L("stats.gir"), "\(Int(aggregated.girPercent.rounded()))%", subtitle: "\(aggregated.girCount)/\(aggregated.holes)")
+                                        playingStat(L("stats.scramble"), "\(Int(aggregated.scramblePercent.rounded()))%", subtitle: "\(aggregated.scrambleSuccesses)/\(aggregated.scrambleAttempts)")
+                                    }
+                                }
+                            }
+
                             CollapsibleStatSection(title: L("stats.scoreVsPutting"), storageKey: "scoreVsPutting") {
                                 if let analysis = scorePuttingAnalysis {
                                     ScoreVsPuttingView(analysis: analysis)
@@ -194,19 +224,6 @@ struct StatisticsView: View {
                             if !aggregated.makeByDistance.isEmpty {
                                 CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance") {
                                     DistanceMakeChartView(data: aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count), showsTitle: false)
-                                }
-                            }
-
-                            // Score, GIR and scramble come from the holes, so a
-                            // round of nothing but hole-outs still has them —
-                            // only the per-category putt comparison needs putts.
-                            if aggregated.holes > 0 {
-                                CollapsibleStatSection(title: L("stats.playingStats"), storageKey: "playingStats") {
-                                    HStack(spacing: Theme.Spacing.sm) {
-                                        playingStat(L("stats.score"), aggregated.scoreRelativeToParText, subtitle: String(format: L("stats.overHoles"), aggregated.scoredHoles), color: scoreColor(aggregated.scoreRelativeToPar))
-                                        playingStat(L("stats.gir"), "\(Int(aggregated.girPercent.rounded()))%", subtitle: "\(aggregated.girCount)/\(aggregated.holes)")
-                                        playingStat(L("stats.scramble"), "\(Int(aggregated.scramblePercent.rounded()))%", subtitle: "\(aggregated.scrambleSuccesses)/\(aggregated.scrambleAttempts)")
-                                    }
                                 }
                             }
 

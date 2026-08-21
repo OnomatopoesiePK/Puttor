@@ -213,10 +213,10 @@
 "stats.gsdSubtitle" = "avg / round from the tour make rates";
 "stats.scoreVsPutting" = "SCORE VS PUTTING";
 "stats.svp.scoreLegend" = "score played";
-"stats.svp.withoutLegend" = "without putting";
+"stats.svp.withoutLegend" = "with pro putting";
 "stats.svp.gapLegend" = "what putting did";
 "stats.svp.avgScore" = "Ø SCORE";
-"stats.svp.avgWithout" = "Ø WITHOUT PUTTING";
+"stats.svp.avgWithout" = "Ø PRO PUTTING";
 "stats.svp.perRound" = "per round";
 "stats.svp.share" = "SHARE OF THE SWING BETWEEN ROUNDS";
 "stats.svp.putting" = "putting";
@@ -225,7 +225,13 @@
 "stats.svp.verdictMixed" = "Putting and the rest of your game move your scores about equally.";
 "stats.svp.verdictRest" = "Your scores swing mostly for reasons away from the green; putting is the steadier half.";
 "stats.svp.needMore" = "%ld finished rounds are needed before scores and putting can be compared.";
-"stats.svp.note" = "Everything scaled to 18 holes. \"Without putting\" adds your strokes gained back onto the card, leaving the score the rest of your game produced. σ is how far a round typically strays from that average.";
+"stats.svp.note" = "Everything scaled to 18 holes. \"Pro putting\" adds your strokes gained back onto the card: the score you would have shot with tour-average putting and the same long game.";
+"stats.svp.range" = "TYPICAL ROUND";
+"stats.svp.bandLegend" = "typical range";
+"stats.svp.settling" = "Your recent rounds sit closer together than the earlier ones — the score is settling down.";
+"stats.svp.steady" = "Your rounds swing about as much as they did before — the score is holding its usual range.";
+"stats.svp.spreading" = "Your recent rounds are further apart than the earlier ones — the score is less settled than it was.";
+"stats.svp.trendNeedsMore" = "Six finished rounds show whether the score is settling down.";
 "stats.dispersion" = "MISS DISPERSION";
 
 /* Dispersion */

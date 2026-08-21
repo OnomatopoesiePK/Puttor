@@ -213,10 +213,10 @@
 "stats.gsdSubtitle" = "Ø / Runde aus den Tour-Trefferquoten";
 "stats.scoreVsPutting" = "SCORE VS. PUTTEN";
 "stats.svp.scoreLegend" = "gespielter Score";
-"stats.svp.withoutLegend" = "ohne Putten";
+"stats.svp.withoutLegend" = "mit Profi-Putten";
 "stats.svp.gapLegend" = "Anteil des Puttens";
 "stats.svp.avgScore" = "Ø SCORE";
-"stats.svp.avgWithout" = "Ø OHNE PUTTEN";
+"stats.svp.avgWithout" = "Ø PROFI-PUTTEN";
 "stats.svp.perRound" = "pro Runde";
 "stats.svp.share" = "ANTEIL AN DEN SCHWANKUNGEN";
 "stats.svp.putting" = "Putten";
@@ -225,7 +225,13 @@
 "stats.svp.verdictMixed" = "Putten und der Rest deines Spiels bewegen deinen Score etwa gleich stark.";
 "stats.svp.verdictRest" = "Deine Schwankungen kommen vor allem von außerhalb des Grüns; das Putten ist die stabilere Hälfte.";
 "stats.svp.needMore" = "Für den Vergleich von Score und Putten braucht es %ld beendete Runden.";
-"stats.svp.note" = "Alles auf 18 Löcher hochgerechnet. „Ohne Putten\" rechnet deine Shots Gained wieder auf die Karte und lässt den Score übrig, den der Rest deines Spiels erzeugt hat. σ ist die übliche Abweichung einer Runde von diesem Schnitt.";
+"stats.svp.note" = "Alles auf 18 Löcher hochgerechnet. „Profi-Putten\" rechnet deine Shots Gained wieder auf die Karte: der Score, den du mit Tour-Durchschnitt beim Putten und demselben langen Spiel geschossen hättest.";
+"stats.svp.range" = "ÜBLICHE RUNDE";
+"stats.svp.bandLegend" = "übliche Spanne";
+"stats.svp.settling" = "Deine letzten Runden liegen enger beieinander als die früheren — der Score stabilisiert sich.";
+"stats.svp.steady" = "Deine Runden schwanken etwa so stark wie vorher — der Score hält seine gewohnte Spanne.";
+"stats.svp.spreading" = "Deine letzten Runden liegen weiter auseinander als die früheren — der Score ist unruhiger geworden.";
+"stats.svp.trendNeedsMore" = "Ab sechs beendeten Runden zeigt sich, ob sich der Score stabilisiert.";
 "stats.dispersion" = "MISS-STREUUNG";
 
 /* Dispersion */
