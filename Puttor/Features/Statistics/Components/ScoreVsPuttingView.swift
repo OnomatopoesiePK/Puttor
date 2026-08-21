@@ -20,7 +20,6 @@ struct ScoreVsPuttingView: View {
             chart
             legend
             summaryBoxes
-            stabilityRow
             shareBar
             if let verdict = analysis.verdict {
                 Text(L(verdictKey(verdict)))
@@ -160,7 +159,12 @@ struct ScoreVsPuttingView: View {
                     Circle().stroke(Theme.textMuted, lineWidth: 1.5).frame(width: 8, height: 8)
                 }
                 legendItem(L("stats.svp.gapLegend")) {
-                    Capsule().fill(Theme.primary).frame(width: 3, height: 10)
+                    // Green where putting gained, red where it cost — both
+                    // appear in the chart, so both belong in the key.
+                    HStack(spacing: 2) {
+                        Capsule().fill(Theme.primary).frame(width: 3, height: 10)
+                        Capsule().fill(Theme.error).frame(width: 3, height: 10)
+                    }
                 }
                 Spacer(minLength: 0)
             }
@@ -262,53 +266,6 @@ struct ScoreVsPuttingView: View {
             )
         } else {
             box(L("stats.svp.impactNone"), "—", color: Theme.textSecondary)
-        }
-    }
-
-    /// Is the score settling down? Rather than a spread figure to interpret,
-    /// this says outright whether the recent rounds sit closer together than
-    /// the earlier ones.
-    private var stabilityRow: some View {
-        HStack(spacing: 8) {
-            Image(systemName: stabilityIcon)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(stabilityColor)
-            Text(L(stabilityKey))
-                .font(.system(size: 12))
-                .foregroundStyle(Theme.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(stabilityColor.opacity(0.12)))
-    }
-
-    private var stabilityKey: String {
-        switch analysis.stabilityTrend {
-        case .settling: return "stats.svp.settling"
-        case .steady: return "stats.svp.steady"
-        case .spreading: return "stats.svp.spreading"
-        case nil: return "stats.svp.trendNeedsMore"
-        }
-    }
-
-    private var stabilityIcon: String {
-        switch analysis.stabilityTrend {
-        case .settling: return "arrow.down.right.and.arrow.up.left"
-        case .steady: return "equal.circle"
-        case .spreading: return "arrow.up.left.and.arrow.down.right"
-        case nil: return "hourglass"
-        }
-    }
-
-    private var stabilityColor: Color {
-        switch analysis.stabilityTrend {
-        case .settling: return Theme.primary
-        case .steady: return Theme.accent
-        case .spreading: return Theme.error
-        case nil: return Theme.textMuted
         }
     }
 

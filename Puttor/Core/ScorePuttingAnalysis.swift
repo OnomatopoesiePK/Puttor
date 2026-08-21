@@ -71,35 +71,8 @@ struct ScorePuttingAnalysis {
         return (sdScoreWithoutPutting - sdScore) / sdScore * 100
     }
 
-    enum StabilityTrend { case settling, steady, spreading }
-
-    /// Whether the recent half of the rounds sits closer together than the
-    /// earlier half. Needs enough rounds that each half is more than a pair.
-    var stabilityTrend: StabilityTrend? {
-        guard rounds.count >= Self.minimumRoundsForTrend else { return nil }
-        let scores = rounds.map(\.score)
-        let split = scores.count / 2
-        let earlier = Array(scores.prefix(split))
-        let recent = Array(scores.suffix(scores.count - split))
-
-        let earlierSpread = meanAbsoluteDeviation(earlier)
-        let recentSpread = meanAbsoluteDeviation(recent)
-
-        // Both halves flat means the score is as settled as it gets.
-        if earlierSpread < 0.25 && recentSpread < 0.25 { return .steady }
-        guard earlierSpread > 0.0001 else { return .spreading }
-
-        let ratio = recentSpread / earlierSpread
-        if ratio <= 0.7 { return .settling }
-        if ratio >= 1.4 { return .spreading }
-        return .steady
-    }
-
     /// Below this there is no spread worth decomposing.
     static let minimumRounds = 3
-    /// Below this, splitting the rounds in half leaves too little on each side
-    /// to compare.
-    static let minimumRoundsForTrend = 6
 
     /// Grid values for the chart's scale: a round step that lands on whole
     /// strokes and leaves four or five lines, however wide the spread is. Par
@@ -155,14 +128,6 @@ private func standardDeviation(_ values: [Double]) -> Double {
     let m = mean(values)
     let sumSquares = values.reduce(0) { $0 + ($1 - m) * ($1 - m) }
     return (sumSquares / Double(values.count - 1)).squareRoot()
-}
-
-/// Average distance from the mean — the readable cousin of a standard
-/// deviation, and less thrown off by one blow-up round.
-private func meanAbsoluteDeviation(_ values: [Double]) -> Double {
-    guard values.count > 1 else { return 0 }
-    let m = mean(values)
-    return mean(values.map { abs($0 - m) })
 }
 
 private func covariance(_ a: [Double], _ b: [Double]) -> Double {

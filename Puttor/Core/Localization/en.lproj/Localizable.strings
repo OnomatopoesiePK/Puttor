@@ -233,10 +233,6 @@
 "stats.svp.impactNone" = "NO CLEAR EFFECT";
 "stats.svp.tighter" = "tighter with pro putting";
 "stats.svp.wider" = "wider with pro putting";
-"stats.svp.settling" = "Your recent rounds sit closer together than the earlier ones — the score is settling down.";
-"stats.svp.steady" = "Your rounds swing about as much as they did before — the score is holding its usual range.";
-"stats.svp.spreading" = "Your recent rounds are further apart than the earlier ones — the score is less settled than it was.";
-"stats.svp.trendNeedsMore" = "Six finished rounds show whether the score is settling down.";
 "stats.dispersion" = "MISS DISPERSION";
 
 /* Dispersion */

@@ -233,10 +233,6 @@
 "stats.svp.impactNone" = "KEIN KLARER EFFEKT";
 "stats.svp.tighter" = "enger mit Profi-Putten";
 "stats.svp.wider" = "breiter mit Profi-Putten";
-"stats.svp.settling" = "Deine letzten Runden liegen enger beieinander als die früheren — der Score stabilisiert sich.";
-"stats.svp.steady" = "Deine Runden schwanken etwa so stark wie vorher — der Score hält seine gewohnte Spanne.";
-"stats.svp.spreading" = "Deine letzten Runden liegen weiter auseinander als die früheren — der Score ist unruhiger geworden.";
-"stats.svp.trendNeedsMore" = "Ab sechs beendeten Runden zeigt sich, ob sich der Score stabilisiert.";
 "stats.dispersion" = "MISS-STREUUNG";
 
 /* Dispersion */
