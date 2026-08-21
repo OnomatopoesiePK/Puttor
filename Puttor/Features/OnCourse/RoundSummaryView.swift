@@ -302,9 +302,18 @@ struct RoundSummaryView: View {
         let isHoleOut = holePutts.isEmpty && !neverPlayed
 
         return VStack(alignment: .leading, spacing: 6) {
+            let holeRecords = putts.filter { $0.holeNumber == hole }
             HStack {
                 Text("\(L("summary.holeAbbr")) \(hole)").font(.system(size: 13, weight: .heavy)).foregroundStyle(Theme.accent)
                 Spacer()
+                // Strokes gained belongs to the hole, so it sits in the hole's
+                // own header rather than among the per-putt numbers.
+                if let holeSG = RoundStats.holeStrokesGained(holeRecords) {
+                    Text("\(L("summary.sg")) \(holeSG > 0 ? "+" : "")\(String(format: "%.2f", holeSG))")
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(holeSG > 0 ? Theme.primary : (holeSG < 0 ? Theme.error : Theme.textSecondary))
+                        .padding(.trailing, 4)
+                }
                 Button {
                     editHole(hole)
                 } label: {
@@ -331,26 +340,27 @@ struct RoundSummaryView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.accent)
             }
-            let holeRecords = putts.filter { $0.holeNumber == hole }
-            if let score = RoundStats.holeScoreRelativeToPar(holeRecords) {
+            let holeScore = RoundStats.holeScoreRelativeToPar(holeRecords)
+            if holeScore != nil || !holePutts.isEmpty {
                 HStack(spacing: 8) {
-                    Text(String(format: L("summary.holeScore"), scoreText(score)))
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(scoreColor(score))
-                    Spacer(minLength: 0)
-                    if let holeSG = RoundStats.holeStrokesGained(holeRecords) {
-                        Text("\(L("summary.sg")) \(holeSG > 0 ? "+" : "")\(String(format: "%.2f", holeSG))")
+                    if let holeScore {
+                        Text(String(format: L("summary.holeScore"), scoreText(holeScore)))
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(holeSG > 0 ? Theme.primary : (holeSG < 0 ? Theme.error : Theme.textSecondary))
+                            .foregroundStyle(scoreColor(holeScore))
+                        // Same weight and size as the score — it reads as part
+                        // of the same sentence about the hole.
+                        if RoundStats.holeCategory(holeRecords)?.isGreenInRegulation == true {
+                            Text(L("stats.gir"))
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(Theme.primary)
+                        }
                     }
-                    if RoundStats.holeCategory(holeRecords)?.isGreenInRegulation == true {
-                        Text(L("stats.gir"))
-                            .font(.system(size: 10, weight: .heavy))
-                            .foregroundStyle(Theme.primary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Capsule().fill(Theme.primary.opacity(0.15)))
-                            .overlay(Capsule().stroke(Theme.primary, lineWidth: 1))
+                    Spacer(minLength: 0)
+                    // Column heading for the per-putt numbers listed below.
+                    if !holePutts.isEmpty {
+                        Text(L("stats.gsd"))
+                            .font(.system(size: 9, weight: .bold)).tracking(0.8)
+                            .foregroundStyle(Theme.textMuted)
                     }
                 }
             }
