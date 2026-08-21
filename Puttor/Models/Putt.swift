@@ -92,10 +92,19 @@ final class Putt {
         self.createdAt = Date()
     }
 
-    /// Recomputes sgBaseline/sgActual after editing distance/result.
+    /// Recomputes sgBaseline/sgActual after editing distance/result, using the
+    /// typical-leave estimate. Prefer `applySG(nextDistanceM:)` wherever the
+    /// following putt on the hole is known.
     func recomputeSG() {
         let baseline = StrokesGained.baseline(at: distanceM)
         sgBaseline = baseline.makeProbability
         sgActual = StrokesGained.calculateSG(distanceM: distanceM, holed: result.isHoled)
+    }
+
+    /// Recomputes against the real distance left behind — nil when this putt was
+    /// holed, or when no follow-up has been recorded yet.
+    func applySG(nextDistanceM: Double?) {
+        sgBaseline = StrokesGained.baseline(at: distanceM).makeProbability
+        sgActual = StrokesGained.calculateSG(distanceM: distanceM, nextDistanceM: nextDistanceM)
     }
 }

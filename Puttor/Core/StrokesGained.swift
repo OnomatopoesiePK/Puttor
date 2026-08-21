@@ -75,8 +75,9 @@ enum StrokesGained {
         return last
     }
 
-    /// Typical leave distance after a miss (the remaining putt you're left with).
-    private static func typicalLeave(_ distanceM: Double) -> Double {
+    /// Typical leave distance after a miss, used only while the follow-up putt
+    /// hasn't been recorded yet — once it exists, its real distance is used.
+    static func typicalLeave(_ distanceM: Double) -> Double {
         if distanceM <= 1.5 { return 0.3 }
         if distanceM <= 3.0 { return 0.5 }
         if distanceM <= 6.0 { return 0.7 }
@@ -84,16 +85,25 @@ enum StrokesGained {
         return 1.2
     }
 
+    /// Strokes gained for a single putt: the expected putts you faced, less the
+    /// one you used, less the expected putts you left behind.
+    ///
+    /// `nextDistanceM` is the distance of the following putt on the hole, or nil
+    /// if this one went in. Chaining putts on their real distances is what makes
+    /// a hole add up: the terms cancel, so the whole hole comes to
+    /// `expectedPutts(first distance) - number of putts`. Guessing the leave
+    /// instead breaks that — a three-putt from 30m came out slightly positive,
+    /// because the guess credited a tidy lag that never happened.
+    static func calculateSG(distanceM: Double, nextDistanceM: Double?) -> Double {
+        let faced = baseline(at: distanceM).expectedPutts
+        let left = nextDistanceM.map { baseline(at: $0).expectedPutts } ?? 0
+        return faced - 1 - left
+    }
+
+    /// Provisional value for a putt whose follow-up hasn't been entered yet, so
+    /// the save confirmation can show something immediately. Replaced with the
+    /// chained value as soon as the next putt is recorded.
     static func calculateSG(distanceM: Double, holed: Bool) -> Double {
-        let base = baseline(at: distanceM)
-        if holed {
-            // SG = expected_putts_from_here - actual_putts_taken (1). Positive = gained vs tour average.
-            return base.expectedPutts - 1
-        } else {
-            let leave = typicalLeave(distanceM)
-            let leaveBaseline = baseline(at: leave)
-            // SG = starting_expected - (1 putt used + remaining expected)
-            return base.expectedPutts - (1 + leaveBaseline.expectedPutts)
-        }
+        calculateSG(distanceM: distanceM, nextDistanceM: holed ? nil : typicalLeave(distanceM))
     }
 }

@@ -690,6 +690,80 @@ struct PuttorTests {
         }
     }
 
+    /// The defining property of strokes gained: chaining each putt against the
+    /// distance the previous one left makes the terms cancel, so a hole comes to
+    /// exactly "expected putts you started with, minus the putts you took".
+    @MainActor
+    @Test func chainedPuttsSumToExpectedPuttsMinusPuttsTaken() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        // Three-putt from 30m: lagged to 4m, missed to 0.5m, holed.
+        let distances = [30.0, 4.0, 0.5]
+        for (index, distance) in distances.enumerated() {
+            let putt = Putt(
+                holeNumber: 1,
+                puttNumber: index + 1,
+                distanceM: distance,
+                puttFor: .par,
+                result: index == distances.count - 1 ? .holed : .short
+            )
+            putt.round = round
+            round.putts.append(putt)
+            context.insert(putt)
+        }
+        try context.save()
+
+        SGRecalculation.recomputeHole(round.putts)
+
+        let total = round.putts.reduce(0) { $0 + $1.sgActual }
+        let expected = StrokesGained.baseline(at: 30.0).expectedPutts - Double(distances.count)
+        #expect(abs(total - expected) < 0.0001)
+
+        // Three putts from 30m is a loss, not the small gain the assumed-leave
+        // model used to report.
+        #expect(total < -0.5)
+    }
+
+    /// Two-putting a long lag is roughly par for the course, and holing out
+    /// from range is a large gain — both fall out of the same chaining.
+    @MainActor
+    @Test func chainedTwoPuttAndOnePuttMatchTheirHoleTotals() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        func addHole(_ hole: Int, distances: [Double]) {
+            for (index, distance) in distances.enumerated() {
+                let putt = Putt(
+                    holeNumber: hole,
+                    puttNumber: index + 1,
+                    distanceM: distance,
+                    puttFor: .par,
+                    result: index == distances.count - 1 ? .holed : .short
+                )
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+            }
+        }
+        addHole(1, distances: [20.0, 1.0])  // solid lag, two putts
+        addHole(2, distances: [8.0])        // holed from range
+        try context.save()
+
+        for hole in [1, 2] {
+            SGRecalculation.recomputeHole(round.putts.filter { $0.holeNumber == hole })
+        }
+
+        let holeOne = round.putts.filter { $0.holeNumber == 1 }.reduce(0) { $0 + $1.sgActual }
+        let holeTwo = round.putts.filter { $0.holeNumber == 2 }.reduce(0) { $0 + $1.sgActual }
+
+        #expect(abs(holeOne - (StrokesGained.baseline(at: 20.0).expectedPutts - 2)) < 0.0001)
+        #expect(abs(holeTwo - (StrokesGained.baseline(at: 8.0).expectedPutts - 1)) < 0.0001)
+        #expect(holeTwo > 0.9)  // holing an 8m putt is worth close to a full stroke
+    }
+
     @Test func baselineInterpolatesBetweenKnownPoints() async throws {
         let b = StrokesGained.baseline(at: 3.25) // halfway between 3.0 (0.408) and 3.5 (0.348)
         #expect(abs(b.makeProbability - 0.378) < 0.001)

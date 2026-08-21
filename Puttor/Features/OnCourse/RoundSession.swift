@@ -287,7 +287,7 @@ final class RoundSession {
             putt.badStroke = draftBadStroke
             putt.badStrokeType = draftBadStroke ? draftBadStrokeType : nil
             putt.wrongAim = draftWrongAim
-            putt.recomputeSG()
+            recomputeSG(forHole: putt.holeNumber)
             lastSavedSG = putt.sgActual
 
             if effectiveResult == .holed {
@@ -317,6 +317,7 @@ final class RoundSession {
                 followUp.round = round
                 round.putts.append(followUp)
                 modelContext.insert(followUp)
+                recomputeSG(forHole: putt.holeNumber)
                 try? modelContext.save()
 
                 if let idx = allPutts.firstIndex(where: { $0.id == followUp.id }) {
@@ -372,6 +373,9 @@ final class RoundSession {
         putt.round = round
         round.putts.append(putt)
         modelContext.insert(putt)
+        // Also corrects the preceding putt, which until now only had an
+        // estimate of what it left behind.
+        recomputeSG(forHole: currentHole)
         try? modelContext.save()
         lastSavedSG = putt.sgActual
 
@@ -482,6 +486,13 @@ final class RoundSession {
         return .advancedToNextHole
     }
 
+    /// Re-chains strokes gained for a hole. A putt's value depends on the
+    /// distance the one before it left, so touching any putt on a hole means
+    /// the whole hole has to be measured again.
+    private func recomputeSG(forHole hole: Int) {
+        SGRecalculation.recomputeHole(round.putts.filter { $0.holeNumber == hole })
+    }
+
     private func deleteSentinel(forHole hole: Int) {
         let sentinels = round.putts.filter { $0.holeNumber == hole && $0.puttNumber == 0 }
         for s in sentinels {
@@ -496,6 +507,7 @@ final class RoundSession {
             round.putts.removeAll { $0.id == p.id }
             modelContext.delete(p)
         }
+        recomputeSG(forHole: putt.holeNumber)
     }
 
     /// Re-chains every later putt on the same hole's "putt for" category off of
