@@ -2,10 +2,10 @@
 //  ScoreCategory.swift
 //  Puttor
 //
-//  "Putt for eagle/birdie/par/bogey/double/triple/triple-or-worse" — new vs.
-//  the prototype. First putt of a hole is chosen by the player; each
-//  subsequent putt on the same hole automatically steps one category worse,
-//  but stays user-overridable.
+//  "Putt for eagle/birdie/par/bogey/DB", then +3 through +6 — new vs. the
+//  prototype. First putt of a hole is chosen by the player; each subsequent
+//  putt on the same hole automatically steps one category worse, but stays
+//  user-overridable.
 //
 
 import SwiftUI
@@ -16,13 +16,18 @@ enum ScoreCategory: String, CaseIterable, Codable, Identifiable {
     case par
     case bogey
     /// Raw value kept from when this was the catch-all "double or worse", so
-    /// putts recorded before triple existed keep their meaning.
+    /// putts recorded before the deeper categories existed keep their meaning.
     case double = "doubleOrWorse"
-    case triple
-    case tripleOrWorse
+    /// Likewise: these two were briefly "triple" and "triple or worse".
+    case plus3 = "triple"
+    case plus4 = "tripleOrWorse"
+    case plus5
+    case plus6
 
     var id: String { rawValue }
 
+    /// Beyond double bogey the names stop being familiar, so those read as the
+    /// plain stroke count over par instead.
     var labelKey: String {
         switch self {
         case .eagle: return "score.eagle"
@@ -30,8 +35,10 @@ enum ScoreCategory: String, CaseIterable, Codable, Identifiable {
         case .par: return "score.par"
         case .bogey: return "score.bogey"
         case .double: return "score.double"
-        case .triple: return "score.triple"
-        case .tripleOrWorse: return "score.tripleOrWorse"
+        case .plus3: return "score.plus3"
+        case .plus4: return "score.plus4"
+        case .plus5: return "score.plus5"
+        case .plus6: return "score.plus6"
         }
     }
 
@@ -42,8 +49,10 @@ enum ScoreCategory: String, CaseIterable, Codable, Identifiable {
         case .par: return "score.par.short"
         case .bogey: return "score.bogey.short"
         case .double: return "score.double.short"
-        case .triple: return "score.triple.short"
-        case .tripleOrWorse: return "score.tripleOrWorse.short"
+        case .plus3: return "score.plus3"
+        case .plus4: return "score.plus4"
+        case .plus5: return "score.plus5"
+        case .plus6: return "score.plus6"
         }
     }
 
@@ -56,8 +65,10 @@ enum ScoreCategory: String, CaseIterable, Codable, Identifiable {
         case .par: return 0
         case .bogey: return 1
         case .double: return 2
-        case .triple: return 3
-        case .tripleOrWorse: return 4
+        case .plus3: return 3
+        case .plus4: return 4
+        case .plus5: return 5
+        case .plus6: return 6
         }
     }
 
@@ -73,19 +84,21 @@ enum ScoreCategory: String, CaseIterable, Codable, Identifiable {
         case .par: return Theme.primary
         case .bogey: return Theme.categoryBogey
         case .double: return Theme.categoryDoubleOrWorse
-        case .triple, .tripleOrWorse: return Theme.categoryTripleOrWorse
+        case .plus3, .plus4, .plus5, .plus6: return Theme.categoryTripleOrWorse
         }
     }
 
-    /// One category worse than `self`, clamped at the open-ended worst case.
+    /// One category worse than `self`, clamped at the deepest one.
     var next: ScoreCategory {
         switch self {
         case .eagle: return .birdie
         case .birdie: return .par
         case .par: return .bogey
         case .bogey: return .double
-        case .double: return .triple
-        case .triple, .tripleOrWorse: return .tripleOrWorse
+        case .double: return .plus3
+        case .plus3: return .plus4
+        case .plus4: return .plus5
+        case .plus5, .plus6: return .plus6
         }
     }
 }

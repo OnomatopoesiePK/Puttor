@@ -19,16 +19,42 @@ private struct DartSector {
     let fillB: Color
 }
 
-private let dartSectors: [DartSector] = [
-    DartSector(result: .long, symbol: "result.long", isWord: true, startDeg: -112.5, fillA: Color(hex: 0x3A5060), fillB: Color(hex: 0x2E3F50)),
-    DartSector(result: .longRight, symbol: "↗", isWord: false, startDeg: -67.5, fillA: Color(hex: 0x3E3040), fillB: Color(hex: 0x322635)),
-    DartSector(result: .right, symbol: "result.right", isWord: true, startDeg: -22.5, fillA: Color(hex: 0x3A2A20), fillB: Color(hex: 0x2E201A)),
-    DartSector(result: .shortRight, symbol: "↘", isWord: false, startDeg: 22.5, fillA: Color(hex: 0x3E3040), fillB: Color(hex: 0x322635)),
-    DartSector(result: .short, symbol: "result.short", isWord: true, startDeg: 67.5, fillA: Color(hex: 0x3A5060), fillB: Color(hex: 0x2E3F50)),
-    DartSector(result: .shortLeft, symbol: "↙", isWord: false, startDeg: 112.5, fillA: Color(hex: 0x3E3040), fillB: Color(hex: 0x322635)),
-    DartSector(result: .left, symbol: "result.left", isWord: true, startDeg: 157.5, fillA: Color(hex: 0x3A2A20), fillB: Color(hex: 0x2E201A)),
-    DartSector(result: .longLeft, symbol: "↖", isWord: false, startDeg: 202.5, fillA: Color(hex: 0x3E3040), fillB: Color(hex: 0x322635)),
+/// Long/short share the blue family, the diagonals the plum one and
+/// left/right the rust one — the same three the slope grid artwork uses.
+private struct DartSectorSpec {
+    let result: PuttResult
+    let symbol: String
+    let isWord: Bool
+    let startDeg: Double
+    let family: KeyPath<DartFamily, (a: Color, b: Color)>
+}
+
+private struct DartFamily {
+    var blue: (a: Color, b: Color) { (Theme.missSectorBlueA, Theme.missSectorBlueB) }
+    var plum: (a: Color, b: Color) { (Theme.missSectorPlumA, Theme.missSectorPlumB) }
+    var rust: (a: Color, b: Color) { (Theme.missSectorRustA, Theme.missSectorRustB) }
+}
+
+private let dartSectorSpecs: [DartSectorSpec] = [
+    DartSectorSpec(result: .long, symbol: "result.long", isWord: true, startDeg: -112.5, family: \.blue),
+    DartSectorSpec(result: .longRight, symbol: "↗", isWord: false, startDeg: -67.5, family: \.plum),
+    DartSectorSpec(result: .right, symbol: "result.right", isWord: true, startDeg: -22.5, family: \.rust),
+    DartSectorSpec(result: .shortRight, symbol: "↘", isWord: false, startDeg: 22.5, family: \.plum),
+    DartSectorSpec(result: .short, symbol: "result.short", isWord: true, startDeg: 67.5, family: \.blue),
+    DartSectorSpec(result: .shortLeft, symbol: "↙", isWord: false, startDeg: 112.5, family: \.plum),
+    DartSectorSpec(result: .left, symbol: "result.left", isWord: true, startDeg: 157.5, family: \.rust),
+    DartSectorSpec(result: .longLeft, symbol: "↖", isWord: false, startDeg: 202.5, family: \.plum),
 ]
+
+/// Resolved against the current theme each time the board draws.
+private var dartSectors: [DartSector] {
+    let families = DartFamily()
+    return dartSectorSpecs.map { spec in
+        let colors = families[keyPath: spec.family]
+        return DartSector(result: spec.result, symbol: spec.symbol, isWord: spec.isWord,
+                          startDeg: spec.startDeg, fillA: colors.a, fillB: colors.b)
+    }
+}
 
 
 struct DartboardMissView: View {
@@ -70,12 +96,12 @@ struct DartboardMissView: View {
 
                 // Lip-out ring (drawn as a full circle, then covered by the smaller holed circle).
                 let lipRect = CGRect(x: center.x - lipOutR, y: center.y - lipOutR, width: lipOutR * 2, height: lipOutR * 2)
-                context.fill(Path(ellipseIn: lipRect), with: .color(lipOut ? Theme.lipOut.opacity(0.87) : Color(hex: 0x2A3D2A)))
+                context.fill(Path(ellipseIn: lipRect), with: .color(lipOut ? Theme.lipOut.opacity(0.87) : Theme.missLipIdle))
                 context.stroke(Path(ellipseIn: lipRect), with: .color(lipOut ? Theme.lipOut : Theme.border), lineWidth: lipOut ? 2 : 1)
 
                 let holedRect = CGRect(x: center.x - holedR, y: center.y - holedR, width: holedR * 2, height: holedR * 2)
                 let isHoled = result == .holed
-                context.fill(Path(ellipseIn: holedRect), with: .color(isHoled ? Theme.holed : Color(hex: 0x1E3A28)))
+                context.fill(Path(ellipseIn: holedRect), with: .color(isHoled ? Theme.holed : Theme.missHoledIdle))
                 context.stroke(Path(ellipseIn: holedRect), with: .color(isHoled ? Theme.primaryLight : Theme.primary.opacity(0.53)), lineWidth: 2)
 
                 for s in dartSectors {

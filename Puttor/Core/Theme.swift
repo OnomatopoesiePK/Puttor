@@ -51,6 +51,19 @@ enum Theme {
     static var missRed: Color { t(0xFF5C6C, 0xD62839) }
     static var missBlue: Color { t(0x6FA8FF, 0x1D5FCC) }
 
+    // Miss-board sectors. Light mode borrows the slope grid artwork's own
+    // palette — steel blue, plum and rust — so the two controls read as one
+    // system on a light card; dark mode keeps its deeper, flatter tones.
+    // Each pair alternates around the ring.
+    static var missSectorBlueA: Color { t(0x3A5060, 0x50748F) }
+    static var missSectorBlueB: Color { t(0x2E3F50, 0x446780) }
+    static var missSectorPlumA: Color { t(0x3E3040, 0x59395D) }
+    static var missSectorPlumB: Color { t(0x322635, 0x4B3050) }
+    static var missSectorRustA: Color { t(0x3A2A20, 0x79411E) }
+    static var missSectorRustB: Color { t(0x2E201A, 0x673619) }
+    static var missLipIdle: Color { t(0x2A3D2A, 0x3F6B45) }
+    static var missHoledIdle: Color { t(0x1E3A28, 0x2C6440) }
+
     // Putt-for score category (eagle -> double+, best to worst)
     static var categoryEagle: Color { t(0xF5D26B, 0x9A7A0A) }
     static var categoryBirdie: Color { t(0xFF5C6C, 0xD62839) }

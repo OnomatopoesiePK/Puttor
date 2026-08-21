@@ -385,11 +385,7 @@
 "stats.ofAvailable" = "of %ld available";
 
 "score.double" = "Double Bogey";
-"score.triple" = "Triple Bogey";
-"score.tripleOrWorse" = "Triple Bogey or worse";
 "score.double.short" = "DB";
-"score.triple.short" = "TB";
-"score.tripleOrWorse.short" = "TB+";
 "input.badStroke.pull" = "Pull";
 "input.badStroke.misshit" = "Misshit";
 "input.badStroke.push" = "Push";
@@ -400,3 +396,10 @@
 "summary.holeScore" = "Hole score: %@";
 "stats.score" = "Score";
 "stats.overHoles" = "over %ld holes";
+
+"score.plus3" = "+3";
+"score.plus4" = "+4";
+"score.plus5" = "+5";
+"score.plus6" = "+6";
+
+"onCourse.nineHoleRound" = "Nine-hole round";

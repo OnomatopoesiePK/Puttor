@@ -80,9 +80,11 @@ struct PuttorTests {
         let threePutt = twoPutt + [Putt(holeNumber: 1, puttNumber: 3, distanceM: 0.5, puttFor: .bogey, result: .holed)]
         #expect(RoundStats.holeScoreRelativeToPar(threePutt) == 1)
 
-        // The new deeper categories carry through.
-        let triple = [Putt(holeNumber: 1, puttNumber: 1, distanceM: 2, puttFor: .triple, result: .holed)]
-        #expect(RoundStats.holeScoreRelativeToPar(triple) == 3)
+        // The deeper numeric categories carry through.
+        let plus3 = [Putt(holeNumber: 1, puttNumber: 1, distanceM: 2, puttFor: .plus3, result: .holed)]
+        #expect(RoundStats.holeScoreRelativeToPar(plus3) == 3)
+        let plus6 = [Putt(holeNumber: 1, puttNumber: 1, distanceM: 2, puttFor: .plus6, result: .holed)]
+        #expect(RoundStats.holeScoreRelativeToPar(plus6) == 6)
     }
 
     /// A hole with no putts scores whatever it was holed out for, rather than
@@ -181,9 +183,10 @@ struct PuttorTests {
 
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {
         #expect(ScoreCategory.bogey.next == .double)
-        #expect(ScoreCategory.double.next == .triple)
-        #expect(ScoreCategory.triple.next == .tripleOrWorse)
-        #expect(ScoreCategory.tripleOrWorse.next == .tripleOrWorse)
+        #expect(ScoreCategory.double.next == .plus3)
+        #expect(ScoreCategory.plus3.next == .plus4)
+        #expect(ScoreCategory.plus5.next == .plus6)
+        #expect(ScoreCategory.plus6.next == .plus6) // clamps at the deepest
     }
 
     /// Putts stored before triple existed used "doubleOrWorse" as their raw

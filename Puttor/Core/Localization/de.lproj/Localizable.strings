@@ -385,11 +385,7 @@
 "stats.ofAvailable" = "von %ld verfügbaren";
 
 "score.double" = "Doppelbogey";
-"score.triple" = "Triplebogey";
-"score.tripleOrWorse" = "Triplebogey oder schlechter";
 "score.double.short" = "DB";
-"score.triple.short" = "TB";
-"score.tripleOrWorse.short" = "TB+";
 "input.badStroke.pull" = "Pull";
 "input.badStroke.misshit" = "Misshit";
 "input.badStroke.push" = "Push";
@@ -400,3 +396,10 @@
 "summary.holeScore" = "Loch-Score: %@";
 "stats.score" = "Score";
 "stats.overHoles" = "auf %ld Löchern";
+
+"score.plus3" = "+3";
+"score.plus4" = "+4";
+"score.plus5" = "+5";
+"score.plus6" = "+6";
+
+"onCourse.nineHoleRound" = "9-Loch-Runde";

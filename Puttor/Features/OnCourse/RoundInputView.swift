@@ -61,7 +61,7 @@ struct RoundInputView: View {
                     }
 
                     section {
-                        DistancePickerView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
+                        DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
                     }
 
                     section {

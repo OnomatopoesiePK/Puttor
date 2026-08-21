@@ -40,6 +40,11 @@ struct OnCourseListView: View {
                                 .font(.system(size: 11, weight: .bold))
                                 .tracking(1.4)
                                 .foregroundStyle(Theme.textMuted)
+                                // Headers carry their own default insets, which
+                                // don't match the ones set on the rows — without
+                                // this the heading sits left of the cards.
+                                .listRowInsets(EdgeInsets(top: 10, leading: Theme.Spacing.lg, bottom: 6, trailing: Theme.Spacing.lg))
+                                .textCase(nil)
                         }
                     }
                     .listStyle(.plain)
@@ -129,9 +134,19 @@ struct OnCourseListView: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Theme.text)
+                    HStack(spacing: 1) {
+                        Text(round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Theme.text)
+                        // Marks a round scored over nine holes, so its totals
+                        // aren't mistaken for a full round's.
+                        if round.isComplete && round.holeCount == 9 {
+                            Text("*")
+                                .font(.system(size: 16, weight: .heavy))
+                                .foregroundStyle(Theme.accent)
+                                .accessibilityLabel(L("onCourse.nineHoleRound"))
+                        }
+                    }
                     HStack(spacing: 6) {
                         Text(round.date.formatted(date: .abbreviated, time: .omitted))
                         if let putter = round.putter {

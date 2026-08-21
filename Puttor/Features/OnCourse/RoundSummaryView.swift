@@ -315,10 +315,23 @@ struct RoundSummaryView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.accent)
             }
-            if let score = RoundStats.holeScoreRelativeToPar(putts.filter { $0.holeNumber == hole }) {
-                Text(String(format: L("summary.holeScore"), scoreText(score)))
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(scoreColor(score))
+            let holeRecords = putts.filter { $0.holeNumber == hole }
+            if let score = RoundStats.holeScoreRelativeToPar(holeRecords) {
+                HStack(spacing: 8) {
+                    Text(String(format: L("summary.holeScore"), scoreText(score)))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(scoreColor(score))
+                    Spacer(minLength: 0)
+                    if RoundStats.holeCategory(holeRecords)?.isGreenInRegulation == true {
+                        Text(L("stats.gir"))
+                            .font(.system(size: 10, weight: .heavy))
+                            .foregroundStyle(Theme.primary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(Theme.primary.opacity(0.15)))
+                            .overlay(Capsule().stroke(Theme.primary, lineWidth: 1))
+                    }
+                }
             }
             ForEach(holePutts) { p in
                 HStack(spacing: 8) {
