@@ -51,30 +51,46 @@ struct ScoreVsPuttingView: View {
             let low = rawMin - padding
             let high = rawMax + padding
 
-            let inset: CGFloat = 14
-            let plotWidth = size.width - inset * 2
+            // Left gutter carries the scale; the plot starts after it.
+            let gutter: CGFloat = 30
+            let inset: CGFloat = 12
+            let plotLeft = gutter
+            let plotRight = size.width - 4
+            let plotWidth = plotRight - plotLeft - inset * 2
             let step = rounds.count > 1 ? plotWidth / CGFloat(rounds.count - 1) : 0
 
             func x(_ index: Int) -> CGFloat {
-                rounds.count > 1 ? inset + CGFloat(index) * step : size.width / 2
+                rounds.count > 1 ? plotLeft + inset + CGFloat(index) * step : (plotLeft + plotRight) / 2
             }
-            // Scores run the golfer's way round: under par sits at the top.
+            // Over par upwards, under par downwards — the way a scorecard reads.
             func y(_ value: Double) -> CGFloat {
                 let t = (value - low) / (high - low)
                 return size.height - CGFloat(t) * size.height
             }
 
-            // Par line.
-            let parY = y(0)
-            var par = Path()
-            par.move(to: CGPoint(x: 0, y: parY))
-            par.addLine(to: CGPoint(x: size.width, y: parY))
-            context.stroke(par, with: .color(Theme.textMuted.opacity(0.5)),
-                           style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
-            context.draw(
-                Text("PAR").font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.textMuted),
-                at: CGPoint(x: 12, y: parY - 7)
-            )
+            // Scale: round numbers either side of par, as few as read cleanly.
+            for tick in ScorePuttingAnalysis.scaleTicks(low: low, high: high) {
+                let ty = y(tick)
+                let isPar = abs(tick) < 0.0001
+
+                var line = Path()
+                line.move(to: CGPoint(x: plotLeft, y: ty))
+                line.addLine(to: CGPoint(x: plotRight, y: ty))
+                if isPar {
+                    context.stroke(line, with: .color(Theme.textMuted.opacity(0.6)),
+                                   style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                } else {
+                    context.stroke(line, with: .color(Theme.borderLight), lineWidth: 1)
+                }
+
+                context.draw(
+                    Text(isPar ? "PAR" : tickLabel(tick))
+                        .font(.system(size: 8, weight: isPar ? .bold : .semibold))
+                        .foregroundStyle(Theme.textMuted),
+                    at: CGPoint(x: gutter - 5, y: ty),
+                    anchor: .trailing
+                )
+            }
 
             // Trend lines behind the markers.
             var withoutPath = Path()
@@ -115,6 +131,10 @@ struct ScoreVsPuttingView: View {
             }
         }
         .frame(height: chartHeight)
+    }
+
+    private func tickLabel(_ value: Double) -> String {
+        "\(value > 0 ? "+" : "")\(String(format: "%.0f", value))"
     }
 
     private var legend: some View {

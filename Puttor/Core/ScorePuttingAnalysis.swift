@@ -66,6 +66,26 @@ struct ScorePuttingAnalysis {
     /// Below this there is no spread worth decomposing.
     static let minimumRounds = 3
 
+    /// Grid values for the chart's scale: a round step that lands on whole
+    /// strokes and leaves four or five lines, however wide the spread is. Par
+    /// is always among them, since it's the line every score is read against.
+    static func scaleTicks(low: Double, high: Double) -> [Double] {
+        guard high > low else { return [0] }
+        let candidates: [Double] = [1, 2, 3, 4, 5, 10, 15, 20, 25, 50]
+        let rough = (high - low) / 4
+        let step = candidates.first { $0 >= rough } ?? candidates.last!
+        var ticks: [Double] = []
+        var value = (low / step).rounded(.up) * step
+        while value <= high, ticks.count < 12 {
+            ticks.append(value)
+            value += step
+        }
+        if low <= 0, high >= 0, !ticks.contains(where: { abs($0) < 0.0001 }) {
+            ticks.append(0)
+        }
+        return ticks.sorted()
+    }
+
     /// Rounds arrive newest-first; the chart reads left to right in time.
     static func make(rounds: [(date: Date, courseName: String, stats: RoundStats)]) -> ScorePuttingAnalysis? {
         let usable = rounds

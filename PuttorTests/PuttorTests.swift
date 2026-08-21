@@ -881,6 +881,20 @@ struct PuttorTests {
         #expect(abs(analysis.avgScore - (analysis.avgScoreWithoutPutting - analysis.avgSG)) < 0.0001)
     }
 
+    /// The chart's scale sticks to whole strokes and always draws par.
+    @Test func scaleTicksAreWholeStrokesAroundPar() async throws {
+        let ticks = ScorePuttingAnalysis.scaleTicks(low: -3.4, high: 8.2)
+        #expect(ticks.contains { abs($0) < 0.0001 })
+        #expect(ticks.allSatisfy { $0 == $0.rounded() })
+        #expect(ticks.count >= 3 && ticks.count <= 8)
+        #expect(ticks == ticks.sorted())
+        #expect(ticks.allSatisfy { $0 >= -3.4 && $0 <= 8.2 })
+
+        // A wide spread steps up rather than drawing a line per stroke.
+        let wide = ScorePuttingAnalysis.scaleTicks(low: -20, high: 40)
+        #expect(wide.count <= 8)
+    }
+
     @Test func scorePuttingComparisonNeedsThreeRounds() async throws {
         #expect(ScorePuttingAnalysis.make(rounds: [
             Self.scoreRound(Self.day(1), score: 4, sg: 1),
