@@ -64,62 +64,68 @@ struct StatisticsView: View {
         }
     }
 
-    private var statsByRound: [PersistentIdentifier: RoundStats] {
-        var map: [PersistentIdentifier: RoundStats] = [:]
-        for r in filteredRounds {
-            map[r.persistentModelID] = RoundStats.compute(putts: r.putts, useFeet: useFeet)
+    /// Everything the tab derives from the filtered rounds, worked out in one
+    /// pass.
+    ///
+    /// These used to be separate computed properties, and the body reads
+    /// `aggregated` a dozen times — which recomputed every round's statistics
+    /// a dozen times per redraw and made the controls feel sticky.
+    private struct StatsBundle {
+        var byRound: [PersistentIdentifier: RoundStats] = [:]
+        var aggregated = RoundStats()
+        var sgAverage: Double = 0
+        var gsdAverage: Double = 0
+        var avgScorePerRound: Double?
+        var scorePutting: ScorePuttingAnalysis?
+        var allPutts: [Putt] = []
+        var leaveByMiss: [PuttResult: LeaveInfo] = [:]
+
+        var hasSituationData: Bool {
+            RoundStats.situationCategories.contains {
+                aggregated.makeByCategory[$0]?.contains { $0.total > 0 } ?? false
+            }
         }
-        return map
-    }
 
-    private var aggregated: RoundStats { RoundStats.merge(Array(statsByRound.values), useFeet: useFeet) }
+        init(rounds: [Round], useFeet: Bool) {
+            var perRound: [RoundStats] = []
+            for r in rounds {
+                let stats = RoundStats.compute(putts: r.putts, useFeet: useFeet)
+                byRound[r.persistentModelID] = stats
+                perRound.append(stats)
+            }
 
-    private var sgAverage: Double {
-        guard !statsByRound.isEmpty else { return 0 }
-        return statsByRound.values.reduce(0) { $0 + $1.sgTotal } / Double(statsByRound.count)
-    }
+            aggregated = RoundStats.merge(perRound, useFeet: useFeet)
 
-    /// GSD summed over a round, averaged across the filtered rounds — the
-    /// make-rate companion to strokes gained.
-    private var gsdAverage: Double {
-        guard !statsByRound.isEmpty else { return 0 }
-        return statsByRound.values.reduce(0) { $0 + $1.gsdTotal } / Double(statsByRound.count)
-    }
+            if !perRound.isEmpty {
+                sgAverage = perRound.reduce(0) { $0 + $1.sgTotal } / Double(perRound.count)
+                gsdAverage = perRound.reduce(0) { $0 + $1.gsdTotal } / Double(perRound.count)
+            }
 
-    /// Score against putting for the filtered rounds — nil until there are
-    /// enough finished rounds for a spread to mean anything.
-    private var scorePuttingAnalysis: ScorePuttingAnalysis? {
-        ScorePuttingAnalysis.make(rounds: filteredRounds.compactMap { r in
-            guard let stats = statsByRound[r.persistentModelID] else { return nil }
-            return (date: r.date, courseName: r.courseName, stats: stats)
-        })
-    }
+            let scored = perRound.filter { $0.scoredHoles > 0 }
+            if !scored.isEmpty {
+                avgScorePerRound = scored.reduce(0.0) { $0 + Double($1.scoreRelativeToPar) } / Double(scored.count)
+            }
 
-    /// Average strokes over par per round, rounds taken as played. Same
-    /// figure the score-vs-putting section averages, so the two agree.
-    private var avgScorePerRound: Double? {
-        let scored = statsByRound.values.filter { $0.scoredHoles > 0 }
-        guard !scored.isEmpty else { return nil }
-        let perRound = scored.map { Double($0.scoreRelativeToPar) }
-        return perRound.reduce(0, +) / Double(perRound.count)
-    }
+            scorePutting = ScorePuttingAnalysis.make(rounds: rounds.compactMap { r in
+                guard let stats = byRound[r.persistentModelID] else { return nil }
+                return (date: r.date, courseName: r.courseName, stats: stats)
+            })
 
-    private var avgScorePerRoundText: String {
-        guard let avg = avgScorePerRound else { return "—" }
-        if abs(avg) < 0.05 { return "E" }
-        return "\(avg > 0 ? "+" : "")\(String(format: "%.1f", avg))"
-    }
-
-    private var dispersionPutts: [Putt] { filteredRounds.flatMap { $0.putts } }
-
-    private var hasSituationData: Bool {
-        RoundStats.situationCategories.contains {
-            aggregated.makeByCategory[$0]?.contains { $0.total > 0 } ?? false
+            allPutts = rounds.flatMap { $0.putts }
+            leaveByMiss = RoundStats.computeLeaveByMissDirection(allPutts)
         }
+    }
+
+    private func avgScorePerRoundText(_ average: Double?) -> String {
+        guard let average else { return "—" }
+        if abs(average) < 0.05 { return "E" }
+        return "\(average > 0 ? "+" : "")\(String(format: "%.1f", average))"
     }
 
     var body: some View {
-        NavigationStack {
+        let data = StatsBundle(rounds: filteredRounds, useFeet: useFeet)
+
+        return NavigationStack {
             VStack(spacing: 0) {
                 Text(L("stats.title"))
                     .font(.system(size: 28, weight: .heavy))
@@ -169,27 +175,27 @@ struct StatisticsView: View {
                     } else {
                         VStack(spacing: Theme.Spacing.md) {
                             CollapsibleStatSection(title: "\(L("stats.rounds")) (\(filteredRounds.count))", storageKey: "rounds") {
-                                roundsGrid
+                                roundsGrid(data.byRound)
                             }
 
                             HStack(spacing: Theme.Spacing.sm) {
-                                statBox(L("summary.putts"), "\(aggregated.totalPutts)")
-                                statBox(L("summary.holes"), "\(aggregated.holes)")
-                                statBox(L("summary.avgPerHole"), String(format: "%.1f", aggregated.avgPuttsPerHole))
+                                statBox(L("summary.putts"), "\(data.aggregated.totalPutts)")
+                                statBox(L("summary.holes"), "\(data.aggregated.holes)")
+                                statBox(L("summary.avgPerHole"), String(format: "%.1f", data.aggregated.avgPuttsPerHole))
                             }
 
                             CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained") {
                                 VStack(spacing: 4) {
-                                    Text("\(sgAverage > 0 ? "+" : "")\(String(format: "%.2f", sgAverage))")
+                                    Text("\(data.sgAverage > 0 ? "+" : "")\(String(format: "%.2f", data.sgAverage))")
                                         .font(.system(size: 40, weight: .black))
-                                        .foregroundStyle(sgAverage > 0.5 ? Theme.primary : (sgAverage < -0.5 ? Theme.error : Theme.warning))
+                                        .foregroundStyle(data.sgAverage > 0.5 ? Theme.primary : (data.sgAverage < -0.5 ? Theme.error : Theme.warning))
                                     Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
 
                                     Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
 
-                                    Text("\(L("stats.gsd")) \(gsdAverage > 0 ? "+" : "")\(String(format: "%.2f", gsdAverage))")
+                                    Text("\(L("stats.gsd")) \(data.gsdAverage > 0 ? "+" : "")\(String(format: "%.2f", data.gsdAverage))")
                                         .font(.system(size: 20, weight: .black))
-                                        .foregroundStyle(gsdAverage > 0 ? Theme.primary : (gsdAverage < 0 ? Theme.error : Theme.textSecondary))
+                                        .foregroundStyle(data.gsdAverage > 0 ? Theme.primary : (data.gsdAverage < 0 ? Theme.error : Theme.textSecondary))
                                     Text(L("stats.gsdSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
                                 }
                                 .frame(maxWidth: .infinity)
@@ -198,20 +204,20 @@ struct StatisticsView: View {
                             // Score, GIR and scramble come from the holes, so a
                             // round of nothing but hole-outs still has them —
                             // only the per-category putt comparison needs putts.
-                            if aggregated.holes > 0 {
+                            if data.aggregated.holes > 0 {
                                 CollapsibleStatSection(title: L("stats.playingStats"), storageKey: "playingStats") {
                                     HStack(spacing: Theme.Spacing.sm) {
                                         // An average per round compares across
                                         // filters; a running total only grows.
-                                        playingStat(L("stats.svp.avgScore"), avgScorePerRoundText, subtitle: L("stats.svp.perRound"))
-                                        playingStat(L("stats.gir"), "\(Int(aggregated.girPercent.rounded()))%", subtitle: "\(aggregated.girCount)/\(aggregated.holes)")
-                                        playingStat(L("stats.scramble"), "\(Int(aggregated.scramblePercent.rounded()))%", subtitle: "\(aggregated.scrambleSuccesses)/\(aggregated.scrambleAttempts)")
+                                        playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: L("stats.svp.perRound"))
+                                        playingStat(L("stats.gir"), "\(Int(data.aggregated.girPercent.rounded()))%", subtitle: "\(data.aggregated.girCount)/\(data.aggregated.holes)")
+                                        playingStat(L("stats.scramble"), "\(Int(data.aggregated.scramblePercent.rounded()))%", subtitle: "\(data.aggregated.scrambleSuccesses)/\(data.aggregated.scrambleAttempts)")
                                     }
                                 }
                             }
 
                             CollapsibleStatSection(title: L("stats.scoreVsPutting"), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
-                                if let analysis = scorePuttingAnalysis {
+                                if let analysis = data.scorePutting {
                                     ScoreVsPuttingView(analysis: analysis)
                                 } else {
                                     Text(String(format: L("stats.svp.needMore"), ScorePuttingAnalysis.minimumRounds))
@@ -221,21 +227,21 @@ struct StatisticsView: View {
                                 }
                             }
 
-                            if !aggregated.makeByDistance.isEmpty {
+                            if !data.aggregated.makeByDistance.isEmpty {
                                 CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance") {
-                                    DistanceMakeChartView(data: aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count), showsTitle: false)
+                                    DistanceMakeChartView(data: data.aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count), showsTitle: false)
                                 }
                             }
 
-                            if hasSituationData {
+                            if data.hasSituationData {
                                 CollapsibleStatSection(title: L("stats.makeBySituation"), storageKey: "situation") {
-                                    SituationComparisonView(makeByCategory: aggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
+                                    SituationComparisonView(makeByCategory: data.aggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
                                 }
                             }
 
-                            if !aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
+                            if !data.aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
                                 CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency") {
-                                    MissDonutView(missCounts: aggregated.missCounts)
+                                    MissDonutView(missCounts: data.aggregated.missCounts)
                                 }
                             }
 
@@ -247,21 +253,21 @@ struct StatisticsView: View {
                                 }
                                 .pickerStyle(.menu)
                                 .tint(Theme.text)
-                                MissDispersionPlotView(putts: dispersionPutts, filter: dispersionFilter)
+                                MissDispersionPlotView(putts: data.allPutts, filter: dispersionFilter)
                             }
 
-                            if aggregated.missReasonCounts.total > 0 {
+                            if data.aggregated.missReasonCounts.total > 0 {
                                 CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons") {
                                     HStack(spacing: Theme.Spacing.md) {
-                                        if aggregated.missReasonCounts.missRead > 0 { reasonStat("\(aggregated.missReasonCounts.missRead)", L("input.missRead")) }
-                                        if aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
-                                        if aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
-                                        if aggregated.missReasonCounts.multiple > 0 { reasonStat("\(aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
+                                        if data.aggregated.missReasonCounts.missRead > 0 { reasonStat("\(data.aggregated.missReasonCounts.missRead)", L("input.missRead")) }
+                                        if data.aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(data.aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
+                                        if data.aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(data.aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
+                                        if data.aggregated.missReasonCounts.multiple > 0 { reasonStat("\(data.aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
                                     }
                                 }
                             }
 
-                            let leave = RoundStats.computeLeaveByMissDirection(dispersionPutts)
+                            let leave = data.leaveByMiss
                             if !leave.isEmpty {
                                 CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss") {
                                     ForEach(leave.sorted { $0.value.count > $1.value.count }, id: \.key) { dir, info in
@@ -294,7 +300,7 @@ struct StatisticsView: View {
         }
     }
 
-    private var roundsGrid: some View {
+    private func roundsGrid(_ statsByRound: [PersistentIdentifier: RoundStats]) -> some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: 6)], spacing: 6) {
             ForEach(filteredRounds.prefix(18)) { r in
                 let sg = statsByRound[r.persistentModelID]?.sgTotal

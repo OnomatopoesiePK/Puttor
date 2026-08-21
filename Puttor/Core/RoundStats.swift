@@ -142,7 +142,21 @@ struct RoundStats {
         useFeet ? bracketsFeet : bracketsMetric
     }
 
-    private static func averageTourMakePct(min: Double, max: Double) -> Double {
+    /// The tour's make % for a bracket depends only on the bracket, so it is
+    /// worked out once per table rather than for every round on every redraw.
+    private static let metricTourMakePct: [Double] = bracketsMetric.map {
+        computeAverageTourMakePct(min: $0.min, max: $0.max)
+    }
+    private static let feetTourMakePct: [Double] = bracketsFeet.map {
+        computeAverageTourMakePct(min: $0.min, max: $0.max)
+    }
+
+    private static func tourMakePct(index: Int, useFeet: Bool) -> Double {
+        let table = useFeet ? feetTourMakePct : metricTourMakePct
+        return index < table.count ? table[index] : 0
+    }
+
+    private static func computeAverageTourMakePct(min: Double, max: Double) -> Double {
         let baselineMax = StrokesGained.tourBaseline.last?.distanceM ?? 30
         let effectiveMax = max >= 999 ? baselineMax : max
         var samples: [Double] = []
@@ -218,7 +232,7 @@ struct RoundStats {
     }
 
     private static func computeDistanceBrackets(_ putts: [Putt], useFeet: Bool) -> [DistanceBracket] {
-        brackets(useFeet: useFeet).map { b in
+        brackets(useFeet: useFeet).enumerated().map { index, b in
             let dm = putts.filter { p in
                 let d = p.distanceM < 0.5 ? 0.3 : p.distanceM
                 return d >= b.min && d < b.max
@@ -228,7 +242,7 @@ struct RoundStats {
             return DistanceBracket(
                 id: b.label, label: b.label, min: b.min, max: b.max,
                 made: made, total: dm.count,
-                tourMakePct: averageTourMakePct(min: b.min, max: b.max),
+                tourMakePct: tourMakePct(index: index, useFeet: useFeet),
                 gsdTotal: gsd
             )
         }
@@ -333,7 +347,7 @@ struct RoundStats {
             let made = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].made : 0) }
             let total = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].total : 0) }
             let gsd = lists.reduce(0.0) { $0 + (idx < $1.count ? $1[idx].gsdTotal : 0) }
-            let tourPct = lists.first?[safe: idx]?.tourMakePct ?? averageTourMakePct(min: b.min, max: b.max)
+            let tourPct = lists.first?[safe: idx]?.tourMakePct ?? tourMakePct(index: idx, useFeet: useFeet)
             return DistanceBracket(id: b.label, label: b.label, min: b.min, max: b.max, made: made, total: total, tourMakePct: tourPct, gsdTotal: gsd)
         }
     }

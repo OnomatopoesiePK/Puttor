@@ -243,23 +243,30 @@ struct ScoreVsPuttingView: View {
 
     /// Laid out exactly like the playing-stats boxes above — same order, same
     /// type sizes — so "Ø SCORE · per round" reads as one figure in two places.
-    private func box(_ label: String, _ value: String, caption: String? = nil, color: Color) -> some View {
-        VStack(spacing: 2) {
+    private func box(_ label: String, _ value: String, caption: String? = nil, captionAbove: Bool = false, color: Color) -> some View {
+        let name = Text(label)
+            .font(.system(size: 11, weight: .bold))
+            .foregroundStyle(Theme.text)
+        let note = caption.map {
+            Text($0)
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.textMuted)
+        }
+
+        return VStack(spacing: 2) {
             Text(value)
                 .font(.system(size: 22, weight: .black))
                 .foregroundStyle(color)
                 .lineLimit(1).minimumScaleFactor(0.6)
-            Text(label)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(Theme.text)
-                .multilineTextAlignment(.center)
-                .lineLimit(2).minimumScaleFactor(0.7)
-            if let caption {
-                Text(caption)
-                    .font(.system(size: 10))
-                    .foregroundStyle(Theme.textMuted)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2).minimumScaleFactor(0.8)
+            // The score boxes name the figure and then qualify it; the impact
+            // box reads the other way round — what the number is, then what it
+            // means.
+            if captionAbove {
+                note?.multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
+                name.multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.7)
+            } else {
+                name.multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.7)
+                note?.multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -282,6 +289,7 @@ struct ScoreVsPuttingView: View {
                 L(tighter ? "stats.svp.impactHigh" : "stats.svp.impactLow"),
                 "\(Int(abs(change).rounded()))%",
                 caption: L(tighter ? "stats.svp.tighter" : "stats.svp.wider"),
+                captionAbove: true,
                 color: tighter ? Theme.primary : Theme.textSecondary
             )
         } else {
