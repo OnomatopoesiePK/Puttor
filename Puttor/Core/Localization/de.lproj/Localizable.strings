@@ -441,3 +441,7 @@
 "reference.gsdLegend" = "p = Tour-Trefferquote auf dieser Distanz · erste Formel wenn gelocht, zweite wenn verfehlt";
 "reference.gsdExample" = "Ein 2,5-m-Putt fällt zu 49 %: gelocht +0,51, verfehlt −0,49. Aus 20 m: +0,97 oder −0,03.";
 "reference.tableNote" = "Die erwarteten Putts überschreiten ab etwa 9 m die 2. Die Zeilen stammen aus zwei angepassten Kurven, jede Distanz dazwischen hat also ihren eigenen Wert.";
+"reference.curvesTitle" = "DIE KURVEN HINTER DER TABELLE";
+"reference.curvesText" = "Beide Spalten stammen aus angepassten Kurven, mit x = ln(Distanz in Metern), von 0,3 m bis 40 m.";
+"reference.curvesMake" = "TREFFERWAHRSCHEINLICHKEIT";
+"reference.curvesExpected" = "ERWARTETE PUTTS";

@@ -27,6 +27,7 @@ struct StatsReferenceView: View {
                     legend: L("reference.gsdLegend"),
                     example: L("reference.gsdExample")
                 )
+                curvesCard
                 baselineTable
                 footer
             }
@@ -106,6 +107,58 @@ struct StatsReferenceView: View {
         .padding(Theme.Spacing.md)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
+    }
+
+    /// The two fitted curves the whole table is read off. Written out because
+    /// "calibrated against Tour figures" is a claim, and this is the claim in
+    /// full.
+    private var curvesCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L("reference.curvesTitle"))
+                .font(.system(size: 11, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.primary)
+
+            Text(L("reference.curvesText"))
+                .font(.system(size: 14))
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(5)
+                .fixedSize(horizontal: false, vertical: true)
+
+            curve(
+                label: L("reference.curvesMake"),
+                formula: "p(d) = 1 / (1 + e^−f(x))",
+                polynomial: "f(x) = 0.017441x⁵ − 0.128716x⁴ + 0.206577x³ + 0.520123x² − 3.449886x + 2.664622"
+            )
+            curve(
+                label: L("reference.curvesExpected"),
+                formula: "E(d) = 1 + e^g(x)",
+                polynomial: "g(x) = 0.011685x⁵ − 0.166096x⁴ + 0.942073x³ − 2.665428x² + 4.064010x − 2.785208"
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Theme.Spacing.md)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
+    }
+
+    private func curve(label: String, formula: String, polynomial: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.system(size: 9, weight: .bold)).tracking(1.0)
+                .foregroundStyle(Theme.textMuted)
+            Text(formula)
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(Theme.text)
+            Text(polynomial)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
     }
 
     private var baselineTable: some View {
