@@ -369,7 +369,7 @@
 "game.stats.playAgain" = "Play this drill";
 "game.stats.deleteRoundTitle" = "Delete this round?";
 "game.stats.resetTitle" = "Reset high score?";
-"game.stats.resetMessage" = "Remove just the record round, so the next best takes over â or clear this drill's whole history.";
+"game.stats.resetMessage" = "Remove just the record round, so the next best takes over. Or clear this drill's whole history.";
 "game.stats.deleteRecordOnly" = "Delete record round";
 "game.stats.deleteAll" = "Delete all rounds";
 
@@ -392,7 +392,7 @@
 "input.badStroke.push" = "Push";
 "input.holedOutFor" = "HOLED OUT FOR";
 "input.holeOutHint" = "No putt was recorded on this hole. The score chosen here is the hole's score, and decides whether it counts as a green in regulation or a scramble save. Recording a putt above replaces it.";
-"summary.holedOutFor" = "Holed out for %@ â 0 putts";
+"summary.holedOutFor" = "Holed out for %@ (0 putts)";
 "summary.puttForLabel" = "%@ putt";
 "summary.holeScore" = "Hole score: %@";
 "stats.score" = "Score";
@@ -413,11 +413,15 @@
 "settings.reference.desc" = "Strokes gained, GSD and the tour baseline";
 "reference.title" = "Strokes Gained & GSD";
 "reference.expectedPutts" = "EXP. PUTTS";
-"reference.intro" = "Both numbers compare you with the PGA Tour average. Strokes gained judges a whole hole: the putts the tour would need from your first distance, minus the putts you took. A single putt has none of its own — how good a lag was only shows once the hole is over. GSD judges one stroke against the odds of holing from there: sinking a putt nobody makes is worth nearly a point, missing a tap-in costs one.";
-"reference.sgTitle" = "STROKES GAINED â PER HOLE";
-"reference.sgLegend" = "E(dâ) = expected putts from the first putt's distance Â· n = putts taken";
+"reference.intro" = "Two numbers, both measured against the PGA Tour average — but they answer different questions.";
+"reference.sgText" = "Strokes gained judges a whole hole: the putts the tour would need from your first distance, minus the putts you actually took. A single putt has none of its own, because how good a lag was only shows once the hole is over.";
+"reference.gsdText" = "GSD judges one stroke against the odds of holing from that distance. Sinking a putt nobody makes is worth nearly a full point; missing a tap-in costs nearly one.";
+"reference.example" = "EXAMPLE";
+"reference.version" = "Puttor v1.0";
+"reference.sgTitle" = "STROKES GAINED PER HOLE";
+"reference.sgLegend" = "E(d₁) = expected putts from the first putt's distance · n = putts taken";
 "reference.sgExample" = "From 6 m the tour averages 1.86 putts. Two-putt it: −0.14. Hole it: +0.86.";
-"reference.gsdTitle" = "GSD â PER PUTT";
-"reference.gsdLegend" = "p = tour make probability at that distance Â· first formula if holed, second if missed";
+"reference.gsdTitle" = "GSD PER PUTT";
+"reference.gsdLegend" = "p = tour make probability at that distance · first formula if holed, second if missed";
 "reference.gsdExample" = "A 2.5 m putt falls 49% of the time: making it is +0.51, missing it −0.49. From 20 m: +0.97 or −0.03.";
 "reference.tableNote" = "Expected putts pass 2 beyond about 9 m. Values between rows are interpolated.";

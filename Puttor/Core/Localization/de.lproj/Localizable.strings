@@ -369,7 +369,7 @@
 "game.stats.playAgain" = "Übung spielen";
 "game.stats.deleteRoundTitle" = "Diese Runde löschen?";
 "game.stats.resetTitle" = "Highscore zurücksetzen?";
-"game.stats.resetMessage" = "Nur die Rekord-Runde entfernen, damit die nächstbeste übernimmt — oder den ganzen Verlauf dieser Übung löschen.";
+"game.stats.resetMessage" = "Nur die Rekord-Runde entfernen, damit die nächstbeste übernimmt. Oder den ganzen Verlauf dieser Übung löschen.";
 "game.stats.deleteRecordOnly" = "Rekord-Runde löschen";
 "game.stats.deleteAll" = "Alle Runden löschen";
 
@@ -392,7 +392,7 @@
 "input.badStroke.push" = "Push";
 "input.holedOutFor" = "EINGELOCHT FÜR";
 "input.holeOutHint" = "Auf diesem Loch wurde kein Putt erfasst. Der hier gewählte Score ist der Score des Lochs und entscheidet, ob es als Grün in Regulation oder als Scramble-Save zählt. Ein Putt oben ersetzt ihn.";
-"summary.holedOutFor" = "Eingelocht für %@ — 0 Putts";
+"summary.holedOutFor" = "Eingelocht für %@ (0 Putts)";
 "summary.puttForLabel" = "%@-Putt";
 "summary.holeScore" = "Loch-Score: %@";
 "stats.score" = "Score";
@@ -413,11 +413,15 @@
 "settings.reference.desc" = "Strokes Gained, GSD und die Tour-Baseline";
 "reference.title" = "Strokes Gained & GSD";
 "reference.expectedPutts" = "ERW. PUTTS";
-"reference.intro" = "Beide Zahlen vergleichen dich mit dem PGA-Tour-Schnitt. Strokes Gained bewertet ein ganzes Loch: die Putts, die die Tour ab deiner ersten Distanz bräuchte, minus die, die du gebraucht hast. Ein einzelner Putt hat kein eigenes SG — wie gut ein Lag war, zeigt sich erst am Ende des Lochs. GSD bewertet einen Schlag an der Trefferquote von dort: einen fast unmöglichen Putt zu lochen ist fast einen Punkt wert, ein Tap-in zu verfehlen kostet einen.";
-"reference.sgTitle" = "STROKES GAINED — PRO LOCH";
+"reference.intro" = "Zwei Zahlen, beide am PGA-Tour-Schnitt gemessen — sie beantworten aber verschiedene Fragen.";
+"reference.sgText" = "Strokes Gained bewertet ein ganzes Loch: die Putts, die die Tour ab deiner ersten Distanz bräuchte, minus die, die du gebraucht hast. Ein einzelner Putt hat kein eigenes SG, denn wie gut ein Lag war, zeigt sich erst am Ende des Lochs.";
+"reference.gsdText" = "GSD bewertet einen einzelnen Schlag an der Trefferquote von dieser Distanz. Einen fast unmöglichen Putt zu lochen ist fast einen ganzen Punkt wert; ein Tap-in zu verfehlen kostet fast einen.";
+"reference.example" = "BEISPIEL";
+"reference.version" = "Puttor v1.0";
+"reference.sgTitle" = "STROKES GAINED PRO LOCH";
 "reference.sgLegend" = "E(d₁) = erwartete Putts ab der Distanz des ersten Putts · n = benötigte Putts";
 "reference.sgExample" = "Aus 6 m braucht die Tour im Schnitt 1,86 Putts. Zwei Putts: −0,14. Gelocht: +0,86.";
-"reference.gsdTitle" = "GSD — PRO PUTT";
+"reference.gsdTitle" = "GSD PRO PUTT";
 "reference.gsdLegend" = "p = Tour-Trefferquote auf dieser Distanz · erste Formel wenn gelocht, zweite wenn verfehlt";
 "reference.gsdExample" = "Ein 2,5-m-Putt fällt zu 49 %: gelocht +0,51, verfehlt −0,49. Aus 20 m: +0,97 oder −0,03.";
 "reference.tableNote" = "Die erwarteten Putts überschreiten ab etwa 9 m die 2. Werte dazwischen werden interpoliert.";

@@ -11,21 +11,24 @@ import SwiftUI
 struct StatsReferenceView: View {
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 explanation
                 formulaCard(
                     title: L("reference.sgTitle"),
                     formula: "SG = E(d₁) − n",
+                    prose: L("reference.sgText"),
                     legend: L("reference.sgLegend"),
                     example: L("reference.sgExample")
                 )
                 formulaCard(
                     title: L("reference.gsdTitle"),
                     formula: "GSD = 1 − p   ·   GSD = −p",
+                    prose: L("reference.gsdText"),
                     legend: L("reference.gsdLegend"),
                     example: L("reference.gsdExample")
                 )
                 baselineTable
+                footer
             }
             .padding(Theme.Spacing.lg)
         }
@@ -37,35 +40,67 @@ struct StatsReferenceView: View {
 
     private var explanation: some View {
         Text(L("reference.intro"))
-            .font(.system(size: 14))
-            .foregroundStyle(Theme.textSecondary)
-            .lineSpacing(4)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(Theme.text)
+            .lineSpacing(5)
             .fixedSize(horizontal: false, vertical: true)
+            .padding(.bottom, 2)
     }
 
-    private func formulaCard(title: String, formula: String, legend: String, example: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    /// Was its own settings block; it belongs with the numbers it explains.
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(L("reference.version"))
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Theme.text)
+            Text(L("settings.about.desc"))
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 4)
+    }
+
+    private func formulaCard(title: String, formula: String, prose: String, legend: String, example: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.system(size: 11, weight: .bold)).tracking(1.2)
                 .foregroundStyle(Theme.primary)
 
-            Text(formula)
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .foregroundStyle(Theme.text)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 10)
-                .padding(.horizontal, 12)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
-
-            Text(legend)
-                .font(.system(size: 12))
-                .foregroundStyle(Theme.textMuted)
+            Text(prose)
+                .font(.system(size: 14))
+                .foregroundStyle(Theme.textSecondary)
+                .lineSpacing(5)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text(example)
-                .font(.system(size: 13))
-                .foregroundStyle(Theme.text)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(formula)
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Theme.text)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Text(legend)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Theme.textMuted)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L("reference.example"))
+                    .font(.system(size: 9, weight: .bold)).tracking(1.0)
+                    .foregroundStyle(Theme.textMuted)
+                Text(example)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Theme.text)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Theme.Spacing.md)
