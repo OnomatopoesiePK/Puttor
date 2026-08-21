@@ -102,7 +102,7 @@ struct ScoreVsPuttingView: View {
                 context.stroke(
                     line,
                     with: .color(color),
-                    style: dashed ? StrokeStyle(lineWidth: 1.5, dash: [5, 3]) : StrokeStyle(lineWidth: 2)
+                    style: dashed ? StrokeStyle(lineWidth: 2, dash: [5, 3]) : StrokeStyle(lineWidth: 2)
                 )
             }
 
@@ -126,8 +126,10 @@ struct ScoreVsPuttingView: View {
                     }
                 }
                 context.stroke(playedPath, with: .color(Theme.text.opacity(0.45)), lineWidth: 0.5)
-                context.stroke(proPath, with: .color(Theme.textMuted.opacity(0.55)),
-                               style: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
+                // Dashes read thinner than a solid line of the same width, so
+                // this one carries a little more weight to match.
+                context.stroke(proPath, with: .color(Theme.textMuted.opacity(0.65)),
+                               style: StrokeStyle(lineWidth: 0.9, dash: [3, 3]))
             }
 
             // The gap between the two is what the putter did that round.
