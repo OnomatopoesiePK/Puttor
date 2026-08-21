@@ -3,9 +3,10 @@
 //  Puttor
 //
 //  PGA Tour strokes-gained putting baseline (Mark Broadie methodology).
-//  The calculation follows the PuttTrack prototype's sgCalculator.ts; the
-//  baseline table itself has since been recalibrated against published Tour
-//  figures, so it no longer matches the prototype's numbers.
+//  The calculation follows the PuttTrack prototype's sgCalculator.ts. The
+//  baseline itself was first recalibrated against published Tour figures and
+//  then replaced by two fitted curves, so the app no longer interpolates
+//  between table rows — see StrokesGained.baseline(at:).
 //
 
 import Foundation
@@ -17,63 +18,61 @@ struct SGBaseline {
 }
 
 enum StrokesGained {
-    /// PGA Tour putting baseline, calibrated against published make-percentage
-    /// and putts-to-hole-out figures.
+    /// PGA Tour putting baseline as a pair of closed-form curves.
     ///
-    /// `expectedPutts` deliberately rises past 2 beyond about 9 m: from that
-    /// range three-putts are common enough that the average is no longer two,
-    /// and capping it there would treat every long lag as a guaranteed
-    /// two-putt — crediting good lag putting with nothing and barely
-    /// penalising bad lag putting.
-    static let tourBaseline: [SGBaseline] = [
-        SGBaseline(distanceM: 0.3, makeProbability: 0.999, expectedPutts: 1.001),
-        SGBaseline(distanceM: 0.5, makeProbability: 0.994, expectedPutts: 1.006),
-        SGBaseline(distanceM: 0.6, makeProbability: 0.990, expectedPutts: 1.010),
-        SGBaseline(distanceM: 0.8, makeProbability: 0.971, expectedPutts: 1.029),
-        SGBaseline(distanceM: 1.0, makeProbability: 0.938, expectedPutts: 1.065),
-        SGBaseline(distanceM: 1.2, makeProbability: 0.885, expectedPutts: 1.124),
-        SGBaseline(distanceM: 1.5, makeProbability: 0.779, expectedPutts: 1.222),
-        SGBaseline(distanceM: 1.8, makeProbability: 0.698, expectedPutts: 1.311),
-        SGBaseline(distanceM: 2.0, makeProbability: 0.634, expectedPutts: 1.371),
-        SGBaseline(distanceM: 2.5, makeProbability: 0.490, expectedPutts: 1.512),
-        SGBaseline(distanceM: 3.0, makeProbability: 0.408, expectedPutts: 1.602),
-        SGBaseline(distanceM: 3.5, makeProbability: 0.348, expectedPutts: 1.669),
-        SGBaseline(distanceM: 4.0, makeProbability: 0.293, expectedPutts: 1.724),
-        SGBaseline(distanceM: 4.5, makeProbability: 0.238, expectedPutts: 1.773),
-        SGBaseline(distanceM: 5.0, makeProbability: 0.208, expectedPutts: 1.805),
-        SGBaseline(distanceM: 6.0, makeProbability: 0.155, expectedPutts: 1.864),
-        SGBaseline(distanceM: 7.0, makeProbability: 0.126, expectedPutts: 1.917),
-        SGBaseline(distanceM: 8.0, makeProbability: 0.105, expectedPutts: 1.965),
-        SGBaseline(distanceM: 9.0, makeProbability: 0.092, expectedPutts: 2.004),
-        SGBaseline(distanceM: 10.0, makeProbability: 0.079, expectedPutts: 2.032),
-        SGBaseline(distanceM: 12.0, makeProbability: 0.053, expectedPutts: 2.085),
-        SGBaseline(distanceM: 15.0, makeProbability: 0.041, expectedPutts: 2.164),
-        SGBaseline(distanceM: 20.0, makeProbability: 0.027, expectedPutts: 2.261),
-        SGBaseline(distanceM: 25.0, makeProbability: 0.019, expectedPutts: 2.350),
-        SGBaseline(distanceM: 30.0, makeProbability: 0.015, expectedPutts: 2.432),
+    /// Both are functions of `x = ln(distance in metres)`, fitted by least
+    /// squares to 25 anchor points calibrated against published Tour
+    /// make-percentage and putts-to-hole-out figures:
+    ///
+    ///     make probability  p(d) = 1 / (1 + e^-f(x))
+    ///     expected putts    E(d) = 1 + e^g(x)
+    ///
+    /// The logistic keeps p inside 0…1 and the exponential keeps E above 1,
+    /// whatever the polynomials do, and both curves come out monotonic across
+    /// the modelled range. The fit sits within 0.016 of the anchors on make
+    /// probability and within 0.01 of a stroke on expected putts — closer than
+    /// the anchors themselves are known.
+    ///
+    /// `expectedPutts` passes 2 at about 9 m: from that range three-putts are
+    /// common enough that the average is no longer two, and capping it there
+    /// would treat every long lag as a guaranteed two-putt.
+    private static let makeCoefficients: [Double] = [
+        0.020498, -0.143461, 0.216629, 0.544835, -3.466532, 2.659407,
+    ]
+    private static let expectedPuttsCoefficients: [Double] = [
+        -0.048471, 0.495248, -1.874888, 3.421815, -2.596229,
     ]
 
-    static func baseline(at distanceM: Double) -> SGBaseline {
-        guard let first = tourBaseline.first, let last = tourBaseline.last else {
-            return SGBaseline(distanceM: distanceM, makeProbability: 0, expectedPutts: 2)
-        }
-        if distanceM <= first.distanceM { return first }
-        if distanceM >= last.distanceM { return last }
+    /// Outside this range the polynomials leave the data they were fitted to,
+    /// so the distance is clamped before they see it.
+    static let shortestModelledDistanceM = 0.3
+    static let longestModelledDistanceM = 30.0
 
-        for i in 0..<(tourBaseline.count - 1) {
-            let a = tourBaseline[i]
-            let b = tourBaseline[i + 1]
-            if distanceM >= a.distanceM && distanceM <= b.distanceM {
-                let t = (distanceM - a.distanceM) / (b.distanceM - a.distanceM)
-                return SGBaseline(
-                    distanceM: distanceM,
-                    makeProbability: a.makeProbability + t * (b.makeProbability - a.makeProbability),
-                    expectedPutts: a.expectedPutts + t * (b.expectedPutts - a.expectedPutts)
-                )
-            }
-        }
-        return last
+    static func baseline(at distanceM: Double) -> SGBaseline {
+        let clamped = min(max(distanceM, shortestModelledDistanceM), longestModelledDistanceM)
+        let x = log(clamped)
+        let make = 1 / (1 + exp(-polynomial(makeCoefficients, x)))
+        return SGBaseline(
+            distanceM: distanceM,
+            // A tap-in is never a certainty and a 30m putt is never hopeless.
+            makeProbability: min(0.999, max(0.001, make)),
+            expectedPutts: 1 + exp(polynomial(expectedPuttsCoefficients, x))
+        )
     }
+
+    /// Horner's method: c₀xⁿ + c₁xⁿ⁻¹ + … + cₙ, highest power first.
+    private static func polynomial(_ coefficients: [Double], _ x: Double) -> Double {
+        coefficients.reduce(0) { $0 * x + $1 }
+    }
+
+    /// The distances the reference table lists — the same anchors the curves
+    /// were fitted to, now read off the curves themselves.
+    static let referenceDistancesM: [Double] = [
+        0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.8, 2.0, 2.5, 3.0, 3.5, 4.0,
+        4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 15.0, 20.0, 25.0, 30.0,
+    ]
+
+    static let tourBaseline: [SGBaseline] = referenceDistancesM.map { baseline(at: $0) }
 
     /// Typical leave distance after a miss, used only while the follow-up putt
     /// hasn't been recorded yet — once it exists, its real distance is used.

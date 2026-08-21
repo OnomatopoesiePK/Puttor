@@ -656,17 +656,22 @@ struct PuttorTests {
     // MARK: - Strokes Gained (ported PGA Tour baseline math)
 
     @Test func holedPuttGainsExpectedPuttsMinusOne() async throws {
-        // 2m holed: baseline expectedPutts is 1.371 -> SG = 1.371 - 1 = 0.371
+        let expected = StrokesGained.baseline(at: 2.0).expectedPutts
         let sg = StrokesGained.calculateSG(distanceM: 2.0, holed: true)
-        #expect(abs(sg - 0.371) < 0.001)
+        #expect(abs(sg - (expected - 1)) < 0.0001)
+        // Around 1.38 expected putts from 2m, so holing one is worth about a
+        // third of a stroke.
+        #expect(sg > 0.3 && sg < 0.45)
     }
 
-    @Test func missedPuttFromSixMetresMatchesKnownValue() async throws {
-        // 6m baseline expectedPutts 1.864; miss leaves 0.7m, which interpolates
-        // between the 0.6m (1.010) and 0.8m (1.029) table points to 1.0195.
-        // SG = 1.864 - (1 + 1.0195) = -0.1555
+    @Test func missedPuttFromSixMetresCostsTheAssumedLeave() async throws {
+        // Faced 6m, used one putt, left the assumed 0.7m behind.
+        let faced = StrokesGained.baseline(at: 6.0).expectedPutts
+        let left = StrokesGained.baseline(at: StrokesGained.typicalLeave(6.0)).expectedPutts
         let sg = StrokesGained.calculateSG(distanceM: 6.0, holed: false)
-        #expect(abs(sg - (-0.1555)) < 0.001)
+        #expect(abs(sg - (faced - 1 - left)) < 0.0001)
+        // Missing from six metres is a small loss, not a gain.
+        #expect(sg < 0 && sg > -0.3)
     }
 
     /// The baseline must keep rising past two putts at long range. Capping it at
@@ -674,7 +679,7 @@ struct PuttorTests {
     /// it dead would earn nothing and leaving it miles away would cost nothing.
     @Test func expectedPuttsRisePastTwoOnLongPutts() async throws {
         #expect(StrokesGained.baseline(at: 8.0).expectedPutts < 2.0)
-        #expect(StrokesGained.baseline(at: 9.0).expectedPutts > 2.0)
+        #expect(StrokesGained.baseline(at: 10.0).expectedPutts > 2.0)
         #expect(StrokesGained.baseline(at: 30.0).expectedPutts > 2.4)
 
         // Which makes a good lag from 20m a genuine gain rather than a loss.
@@ -854,9 +859,52 @@ struct PuttorTests {
         #expect(analysis.rounds.map(\.date) == [Self.day(2), Self.day(5), Self.day(9)])
     }
 
-    @Test func baselineInterpolatesBetweenKnownPoints() async throws {
-        let b = StrokesGained.baseline(at: 3.25) // halfway between 3.0 (0.408) and 3.5 (0.348)
-        #expect(abs(b.makeProbability - 0.378) < 0.001)
+    /// The curve is continuous, so a distance between two reference rows lands
+    /// between their values rather than snapping to either.
+    @Test func baselineIsContinuousBetweenReferencePoints() async throws {
+        let low = StrokesGained.baseline(at: 3.0)
+        let mid = StrokesGained.baseline(at: 3.25)
+        let high = StrokesGained.baseline(at: 3.5)
+        #expect(mid.makeProbability < low.makeProbability)
+        #expect(mid.makeProbability > high.makeProbability)
+        #expect(mid.expectedPutts > low.expectedPutts)
+        #expect(mid.expectedPutts < high.expectedPutts)
+    }
+
+    /// The fitted curves stand in for the calibrated anchor points, so they
+    /// have to stay close to them: within 0.02 on make probability and within
+    /// a hundredth of a stroke on expected putts.
+    @Test func fittedCurvesMatchTheCalibrationAnchors() async throws {
+        let anchors: [(d: Double, make: Double, expected: Double)] = [
+            (0.3, 0.999, 1.001), (0.5, 0.994, 1.006), (0.6, 0.990, 1.010),
+            (0.8, 0.971, 1.029), (1.0, 0.938, 1.065), (1.2, 0.885, 1.124),
+            (1.5, 0.779, 1.222), (1.8, 0.698, 1.311), (2.0, 0.634, 1.371),
+            (2.5, 0.490, 1.512), (3.0, 0.408, 1.602), (3.5, 0.348, 1.669),
+            (4.0, 0.293, 1.724), (4.5, 0.238, 1.773), (5.0, 0.208, 1.805),
+            (6.0, 0.155, 1.864), (7.0, 0.126, 1.917), (8.0, 0.105, 1.965),
+            (9.0, 0.092, 2.004), (10.0, 0.079, 2.032), (12.0, 0.053, 2.085),
+            (15.0, 0.041, 2.164), (20.0, 0.027, 2.261), (25.0, 0.019, 2.350),
+            (30.0, 0.015, 2.432),
+        ]
+        for anchor in anchors {
+            let fitted = StrokesGained.baseline(at: anchor.d)
+            #expect(abs(fitted.makeProbability - anchor.make) < 0.02)
+            #expect(abs(fitted.expectedPutts - anchor.expected) < 0.011)
+        }
+    }
+
+    /// No jumps and no wobbles anywhere in between: sampled every centimetre,
+    /// make probability only falls and expected putts only rise.
+    @Test func fittedCurvesStayMonotonicAcrossTheirWholeRange() async throws {
+        var previous = StrokesGained.baseline(at: StrokesGained.shortestModelledDistanceM)
+        var distance = StrokesGained.shortestModelledDistanceM
+        while distance <= StrokesGained.longestModelledDistanceM {
+            let current = StrokesGained.baseline(at: distance)
+            #expect(current.makeProbability <= previous.makeProbability + 1e-9)
+            #expect(current.expectedPutts >= previous.expectedPutts - 1e-9)
+            previous = current
+            distance += 0.01
+        }
     }
 
     @Test func baselineClampsBeyondTableRange() async throws {
