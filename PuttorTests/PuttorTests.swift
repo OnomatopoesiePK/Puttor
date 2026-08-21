@@ -885,11 +885,13 @@ struct PuttorTests {
             (9.0, 0.092, 2.004), (10.0, 0.079, 2.032), (12.0, 0.053, 2.085),
             (15.0, 0.041, 2.164), (20.0, 0.027, 2.261), (25.0, 0.019, 2.350),
             (30.0, 0.015, 2.432),
+            // Beyond the published range, continuing its trend.
+            (35.0, 0.0123, 2.507), (40.0, 0.0103, 2.577),
         ]
         for anchor in anchors {
             let fitted = StrokesGained.baseline(at: anchor.d)
             #expect(abs(fitted.makeProbability - anchor.make) < 0.02)
-            #expect(abs(fitted.expectedPutts - anchor.expected) < 0.011)
+            #expect(abs(fitted.expectedPutts - anchor.expected) < 0.009)
         }
     }
 

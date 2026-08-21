@@ -21,32 +21,35 @@ enum StrokesGained {
     /// PGA Tour putting baseline as a pair of closed-form curves.
     ///
     /// Both are functions of `x = ln(distance in metres)`, fitted by least
-    /// squares to 25 anchor points calibrated against published Tour
-    /// make-percentage and putts-to-hole-out figures:
+    /// squares to anchor points calibrated against published Tour
+    /// make-percentage and putts-to-hole-out figures. The published figures
+    /// stop at 30 m; the 35 m and 40 m anchors continue their trend (make rate
+    /// decaying like d^-1.3, expected putts rising about 0.07 per 5 m) so the
+    /// curves cover everything the numpad accepts:
     ///
     ///     make probability  p(d) = 1 / (1 + e^-f(x))
     ///     expected putts    E(d) = 1 + e^g(x)
     ///
     /// The logistic keeps p inside 0…1 and the exponential keeps E above 1,
     /// whatever the polynomials do, and both curves come out monotonic across
-    /// the modelled range. The fit sits within 0.016 of the anchors on make
-    /// probability and within 0.01 of a stroke on expected putts — closer than
+    /// the modelled range. The fit sits within 0.018 of the anchors on make
+    /// probability and within 0.009 of a stroke on expected putts — closer than
     /// the anchors themselves are known.
     ///
     /// `expectedPutts` passes 2 at about 9 m: from that range three-putts are
     /// common enough that the average is no longer two, and capping it there
     /// would treat every long lag as a guaranteed two-putt.
     private static let makeCoefficients: [Double] = [
-        0.020498, -0.143461, 0.216629, 0.544835, -3.466532, 2.659407,
+        0.017441, -0.128716, 0.206577, 0.520123, -3.449886, 2.664622,
     ]
     private static let expectedPuttsCoefficients: [Double] = [
-        -0.048471, 0.495248, -1.874888, 3.421815, -2.596229,
+        0.011685, -0.166096, 0.942073, -2.665428, 4.064010, -2.785208,
     ]
 
     /// Outside this range the polynomials leave the data they were fitted to,
     /// so the distance is clamped before they see it.
     static let shortestModelledDistanceM = 0.3
-    static let longestModelledDistanceM = 30.0
+    static let longestModelledDistanceM = 40.0
 
     static func baseline(at distanceM: Double) -> SGBaseline {
         let clamped = min(max(distanceM, shortestModelledDistanceM), longestModelledDistanceM)
@@ -70,6 +73,7 @@ enum StrokesGained {
     static let referenceDistancesM: [Double] = [
         0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.8, 2.0, 2.5, 3.0, 3.5, 4.0,
         4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 15.0, 20.0, 25.0, 30.0,
+        35.0, 40.0,
     ]
 
     static let tourBaseline: [SGBaseline] = referenceDistancesM.map { baseline(at: $0) }
