@@ -24,7 +24,7 @@ struct DistanceNumpadView: View {
     private let keyHeight: CGFloat = 54
     private let keySpacing: CGFloat = 8
     /// Guard rails so a slipped keypress can't store a 500 m putt.
-    private let maxMetres: Double = 60
+    private let maxMetres: Double = 40
 
     private var isTyping: Bool { !draft.isEmpty }
 
