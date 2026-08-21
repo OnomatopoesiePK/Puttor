@@ -151,7 +151,6 @@ struct ScoreVsPuttingView: View {
     }
 
     private var legend: some View {
-        // Two rows: four keys on one line would squeeze on a small phone.
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 14) {
                 legendItem(L("stats.svp.scoreLegend")) {
@@ -160,25 +159,42 @@ struct ScoreVsPuttingView: View {
                 legendItem(L("stats.svp.withoutLegend")) {
                     Circle().stroke(Theme.textMuted, lineWidth: 1.5).frame(width: 8, height: 8)
                 }
-                Spacer(minLength: 0)
-            }
-            HStack(spacing: 14) {
                 legendItem(L("stats.svp.gapLegend")) {
                     Capsule().fill(Theme.primary).frame(width: 3, height: 10)
                 }
                 Spacer(minLength: 0)
             }
-            HStack(spacing: 14) {
-                legendItem(L("stats.svp.bandLegend")) {
-                    RoundedRectangle(cornerRadius: 2).fill(Theme.textMuted.opacity(0.28)).frame(width: 12, height: 8)
-                }
-                legendItem(L("stats.svp.bandLegendPro")) {
-                    RoundedRectangle(cornerRadius: 2).fill(Theme.warning.opacity(0.28)).frame(width: 12, height: 8)
-                }
-                Spacer(minLength: 0)
+            // The average line and its band belong to one another, so one key
+            // covers both.
+            legendItem(L("stats.svp.bandLegend")) {
+                bandMarker(color: Theme.textMuted, dashed: false)
+            }
+            legendItem(L("stats.svp.bandLegendPro")) {
+                bandMarker(color: Theme.warning, dashed: true)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// A slice of the chart in miniature: the band with its average through it.
+    private func bandMarker(color: Color, dashed: Bool) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 2).fill(color.opacity(0.28))
+            Rectangle()
+                .fill(color)
+                .frame(height: 1.5)
+                .mask(alignment: .leading) {
+                    if dashed {
+                        HStack(spacing: 2) {
+                            ForEach(0..<4, id: \.self) { _ in Rectangle().frame(width: 3) }
+                            Spacer(minLength: 0)
+                        }
+                    } else {
+                        Rectangle()
+                    }
+                }
+        }
+        .frame(width: 20, height: 12)
     }
 
     private func legendItem<Marker: View>(_ label: String, @ViewBuilder marker: () -> Marker) -> some View {
@@ -206,16 +222,22 @@ struct ScoreVsPuttingView: View {
         }
     }
 
-    private func box(_ label: String, _ value: String, color: Color) -> some View {
+    private func box(_ label: String, _ value: String, caption: String? = nil, color: Color) -> some View {
         VStack(spacing: 3) {
             Text(value)
                 .font(.system(size: 19, weight: .black))
                 .foregroundStyle(color)
                 .lineLimit(1).minimumScaleFactor(0.6)
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 9))
+                    .foregroundStyle(color.opacity(0.9))
+            }
             Text(label)
                 .font(.system(size: 9, weight: .semibold)).tracking(0.4)
                 .foregroundStyle(Theme.textMuted)
-                .lineLimit(1).minimumScaleFactor(0.7)
+                .multilineTextAlignment(.center)
+                .lineLimit(2).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
@@ -223,20 +245,23 @@ struct ScoreVsPuttingView: View {
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
     }
 
-    /// How much steadier — or wilder — the rounds would be with tour-average
-    /// putting. Steadier means the putter is what moves the scores about.
+    /// What a narrower or wider pro-putting band actually tells you.
+    ///
+    /// Tighter with tour putting means your own putting is what pulls the
+    /// rounds apart — fix that and the scores converge. Wider means the rounds
+    /// would differ regardless, so the cause lies elsewhere.
     @ViewBuilder
     private var spreadBox: some View {
-        if let change = analysis.spreadChangePercent {
-            let better = change < 0
-            let color: Color = abs(change) < 1 ? Theme.textSecondary : (better ? Theme.primary : Theme.error)
+        if let change = analysis.spreadChangePercent, abs(change) >= 1 {
+            let tighter = change < 0
             box(
-                L(abs(change) < 1 ? "stats.svp.spreadSame" : (better ? "stats.svp.spreadBetter" : "stats.svp.spreadWorse")),
+                L(tighter ? "stats.svp.impactHigh" : "stats.svp.impactLow"),
                 "\(Int(abs(change).rounded()))%",
-                color: color
+                caption: L(tighter ? "stats.svp.tighter" : "stats.svp.wider"),
+                color: tighter ? Theme.primary : Theme.textSecondary
             )
         } else {
-            box(L("stats.svp.spreadSame"), "—", color: Theme.textSecondary)
+            box(L("stats.svp.impactNone"), "—", color: Theme.textSecondary)
         }
     }
 
