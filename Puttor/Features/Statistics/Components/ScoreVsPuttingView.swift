@@ -20,11 +20,6 @@ struct ScoreVsPuttingView: View {
             chart
             legend
             summaryBoxes
-            Text(L("stats.svp.note"))
-                .font(.system(size: 10))
-                .foregroundStyle(Theme.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

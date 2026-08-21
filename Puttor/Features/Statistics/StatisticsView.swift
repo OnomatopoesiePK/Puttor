@@ -210,7 +210,7 @@ struct StatisticsView: View {
                                 }
                             }
 
-                            CollapsibleStatSection(title: L("stats.scoreVsPutting"), storageKey: "scoreVsPutting") {
+                            CollapsibleStatSection(title: L("stats.scoreVsPutting"), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
                                 if let analysis = scorePuttingAnalysis {
                                     ScoreVsPuttingView(analysis: analysis)
                                 } else {

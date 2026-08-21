@@ -10,6 +10,8 @@ import SwiftUI
 
 struct CollapsibleStatSection<Content: View>: View {
     let title: String
+    /// Localisation key for an explanation, shown behind an (ⓘ) in the corner.
+    var infoKey: String?
     private let content: () -> Content
 
     @AppStorage private var isExpanded: Bool
@@ -18,9 +20,11 @@ struct CollapsibleStatSection<Content: View>: View {
         title: String,
         storageKey: String,
         defaultExpanded: Bool = true,
+        infoKey: String? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.title = title
+        self.infoKey = infoKey
         self.content = content
         _isExpanded = AppStorage(wrappedValue: defaultExpanded, AppStorageKeys.statsSection(storageKey))
     }
@@ -44,10 +48,19 @@ struct CollapsibleStatSection<Content: View>: View {
                         .minimumScaleFactor(0.8)
                     Spacer(minLength: 0)
                 }
+                // Keep the title clear of the (ⓘ) sitting in the corner.
+                .padding(.trailing, infoKey == nil ? 0 : 24)
                 // The whole header row is the hit target, not just the glyph.
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            // Sits outside the toggle button so tapping (ⓘ) doesn't fold the
+            // section away underneath the popover.
+            .overlay(alignment: .trailing) {
+                if let infoKey {
+                    FieldInfoButton(titleKey: title, textKey: infoKey)
+                }
+            }
 
             if isExpanded {
                 content()
