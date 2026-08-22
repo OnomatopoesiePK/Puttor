@@ -22,6 +22,16 @@ final class Round {
     var holeCount: Int = 18
     var isComplete: Bool = false
     var notes: String = ""
+    /// Whether the score reference ("putt for birdie/par/…") was actually asked
+    /// for while this round was entered. Custom mode can leave that field out,
+    /// and then every putt silently carries the default par — which would make
+    /// up a scorecard that was never played. Stored so the score statistics can
+    /// leave those rounds out instead of inventing numbers for them.
+    ///
+    /// Defaults to true so rounds recorded before the flag existed keep
+    /// counting; `init` starts a new round at false and the session raises it
+    /// on the first putt entered from a surface that shows the field.
+    var tracksScoreCategory: Bool = true
 
     @Relationship(deleteRule: .cascade, inverse: \Putt.round)
     var putts: [Putt] = []
@@ -81,5 +91,8 @@ final class Round {
         self.holeCount = 18
         self.isComplete = false
         self.notes = ""
+        // Raised by the session as soon as a putt is entered from a surface
+        // that asks for the score reference.
+        self.tracksScoreCategory = false
     }
 }

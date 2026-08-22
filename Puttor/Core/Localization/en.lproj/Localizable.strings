@@ -178,6 +178,7 @@
 
 /* GIR / Scramble */
 "stats.playingStats" = "PLAYING STATS";
+"stats.scoreCoverage" = "* Only %1$ld of the %2$ld rounds in this selection were recorded with a score reference. Everything score-related counts those rounds alone; the putting statistics still use all of them.";
 "stats.gir" = "GIR";
 "stats.girFull" = "Greens in Regulation";
 "stats.scramble" = "Scramble";

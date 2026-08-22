@@ -178,6 +178,7 @@
 
 /* GIR / Scramble */
 "stats.playingStats" = "SPIEL-STATISTIK";
+"stats.scoreCoverage" = "* Nur %1$ld von %2$ld Runden dieser Auswahl wurden mit Score-Bezug erfasst. Alle Score-Werte zählen nur diese Runden; die Putt-Statistiken nutzen weiterhin alle.";
 "stats.gir" = "GIR";
 "stats.girFull" = "Grüns in Regulation";
 "stats.scramble" = "Scramble";

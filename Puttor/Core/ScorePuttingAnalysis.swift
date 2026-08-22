@@ -13,6 +13,9 @@ import Foundation
 struct ScorePuttingAnalysis {
     struct Round: Identifiable {
         let id: Int
+        /// Position on the chart's time axis, counting every filtered round —
+        /// including the ones with no score reference, whose slots stay empty.
+        let slot: Int
         let date: Date
         let courseName: String
         /// Strokes over par for the round as it was played.
@@ -25,7 +28,14 @@ struct ScorePuttingAnalysis {
         var scoreWithoutPutting: Double { score + sg }
     }
 
+    /// Only the rounds that carry a score reference; the rest are counted but
+    /// not plotted.
     let rounds: [Round]
+    /// Every filtered round, plotted or not — the width of the time axis.
+    let slotCount: Int
+    /// How many of those had no score reference to draw.
+    var roundsWithoutScore: Int { slotCount - rounds.count }
+    var hasRoundsWithoutScore: Bool { roundsWithoutScore > 0 }
 
     var avgScore: Double { mean(rounds.map(\.score)) }
     var avgScoreWithoutPutting: Double { mean(rounds.map(\.scoreWithoutPutting)) }
@@ -65,24 +75,30 @@ struct ScorePuttingAnalysis {
     }
 
     /// Rounds arrive newest-first; the chart reads left to right in time.
-    static func make(rounds: [(date: Date, courseName: String, stats: RoundStats)]) -> ScorePuttingAnalysis? {
-        let usable = rounds
-            .filter { $0.stats.scoredHoles > 0 && $0.stats.holes > 0 }
+    ///
+    /// A round entered without the score reference keeps its place on the time
+    /// axis but contributes nothing — the gap in the line is the honest picture
+    /// of a round whose scorecard was never entered.
+    static func make(rounds: [(date: Date, courseName: String, stats: RoundStats, tracksScore: Bool)]) -> ScorePuttingAnalysis? {
+        let played = rounds
+            .filter { $0.stats.holes > 0 }
             .sorted { $0.date < $1.date }
-        guard usable.count >= minimumRounds else { return nil }
+        let scored = played.enumerated().filter { $0.element.tracksScore && $0.element.stats.scoredHoles > 0 }
+        guard scored.count >= minimumRounds else { return nil }
 
         // Rounds count as played — a 9-hole card is the 9 holes it was, not
         // half of an imagined 18.
-        let mapped = usable.enumerated().map { index, r in
+        let mapped = scored.enumerated().map { position, entry in
             Round(
-                id: index,
-                date: r.date,
-                courseName: r.courseName,
-                score: Double(r.stats.scoreRelativeToPar),
-                sg: r.stats.sgTotal
+                id: position,
+                slot: entry.offset,
+                date: entry.element.date,
+                courseName: entry.element.courseName,
+                score: Double(entry.element.stats.scoreRelativeToPar),
+                sg: entry.element.stats.sgTotal
             )
         }
-        return ScorePuttingAnalysis(rounds: mapped)
+        return ScorePuttingAnalysis(rounds: mapped, slotCount: played.count)
     }
 }
 

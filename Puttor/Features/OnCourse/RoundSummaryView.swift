@@ -79,6 +79,9 @@ struct RoundSummaryView: View {
                     highlightCard(highlight)
                 }
 
+                // A round entered without the score reference has no scorecard
+                // to report — every putt would carry the default par.
+                if round.tracksScoreCategory {
                 card {
                     Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
                     HStack(spacing: Theme.Spacing.sm) {
@@ -86,6 +89,7 @@ struct RoundSummaryView: View {
                         playingStat(L("stats.gir"), "\(Int(stats.girPercent.rounded()))%", subtitle: "\(stats.girCount)/\(stats.holes)")
                         playingStat(L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%", subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)")
                     }
+                }
                 }
 
                 card {
@@ -340,7 +344,7 @@ struct RoundSummaryView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.accent)
             }
-            let holeScore = RoundStats.holeScoreRelativeToPar(holeRecords)
+            let holeScore = round.tracksScoreCategory ? RoundStats.holeScoreRelativeToPar(holeRecords) : nil
             if holeScore != nil || !holePutts.isEmpty {
                 HStack(spacing: 8) {
                     if let holeScore {

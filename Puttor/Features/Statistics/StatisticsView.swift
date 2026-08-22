@@ -73,6 +73,13 @@ struct StatisticsView: View {
     private struct StatsBundle {
         var byRound: [PersistentIdentifier: RoundStats] = [:]
         var aggregated = RoundStats()
+        /// The same merge over only the rounds entered with a score reference.
+        /// Score, GIR and scramble all read the "putt for" field, so a round
+        /// recorded without it would contribute a scorecard nobody played.
+        var scoreAggregated = RoundStats()
+        var roundCount: Int = 0
+        var scoredRoundCount: Int = 0
+        var hasRoundsWithoutScore: Bool { scoredRoundCount < roundCount }
         var sgAverage: Double = 0
         var gsdAverage: Double = 0
         var avgScorePerRound: Double?
@@ -80,39 +87,62 @@ struct StatisticsView: View {
         var allPutts: [Putt] = []
         var leaveByMiss: [PuttResult: LeaveInfo] = [:]
 
-        var hasSituationData: Bool {
+        var hasScoreSituationData: Bool {
             RoundStats.situationCategories.contains {
-                aggregated.makeByCategory[$0]?.contains { $0.total > 0 } ?? false
+                scoreAggregated.makeByCategory[$0]?.contains { $0.total > 0 } ?? false
             }
         }
 
         init(rounds: [Round], useFeet: Bool) {
             var perRound: [RoundStats] = []
+            var scoreBearing: [RoundStats] = []
             for r in rounds {
                 let stats = RoundStats.compute(putts: r.putts, useFeet: useFeet)
                 byRound[r.persistentModelID] = stats
                 perRound.append(stats)
+                if r.tracksScoreCategory && stats.scoredHoles > 0 {
+                    scoreBearing.append(stats)
+                }
             }
 
             aggregated = RoundStats.merge(perRound, useFeet: useFeet)
+            scoreAggregated = RoundStats.merge(scoreBearing, useFeet: useFeet)
+            roundCount = perRound.filter { $0.holes > 0 }.count
+            scoredRoundCount = scoreBearing.count
 
             if !perRound.isEmpty {
                 sgAverage = perRound.reduce(0) { $0 + $1.sgTotal } / Double(perRound.count)
                 gsdAverage = perRound.reduce(0) { $0 + $1.gsdTotal } / Double(perRound.count)
             }
 
-            let scored = perRound.filter { $0.scoredHoles > 0 }
-            if !scored.isEmpty {
-                avgScorePerRound = scored.reduce(0.0) { $0 + Double($1.scoreRelativeToPar) } / Double(scored.count)
+            if !scoreBearing.isEmpty {
+                avgScorePerRound = scoreBearing.reduce(0.0) { $0 + Double($1.scoreRelativeToPar) } / Double(scoreBearing.count)
             }
 
             scorePutting = ScorePuttingAnalysis.make(rounds: rounds.compactMap { r in
                 guard let stats = byRound[r.persistentModelID] else { return nil }
-                return (date: r.date, courseName: r.courseName, stats: stats)
+                return (date: r.date, courseName: r.courseName, stats: stats, tracksScore: r.tracksScoreCategory)
             })
 
             allPutts = rounds.flatMap { $0.putts }
             leaveByMiss = RoundStats.computeLeaveByMissDirection(allPutts)
+        }
+    }
+
+    /// Marks a section whose numbers rest on the score reference when some of
+    /// the filtered rounds were entered without one.
+    private func sectionTitle(_ title: String, marked: Bool) -> String {
+        marked ? "\(title) *" : title
+    }
+
+    @ViewBuilder
+    private func scoreCoverageNote(_ data: StatsBundle) -> some View {
+        if data.hasRoundsWithoutScore {
+            Text(String(format: L("stats.scoreCoverage"), data.scoredRoundCount, data.roundCount))
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -204,19 +234,20 @@ struct StatisticsView: View {
                             // Score, GIR and scramble come from the holes, so a
                             // round of nothing but hole-outs still has them —
                             // only the per-category putt comparison needs putts.
-                            if data.aggregated.holes > 0 {
-                                CollapsibleStatSection(title: L("stats.playingStats"), storageKey: "playingStats") {
+                            if data.scoreAggregated.holes > 0 {
+                                CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats") {
                                     HStack(spacing: Theme.Spacing.sm) {
                                         // An average per round compares across
                                         // filters; a running total only grows.
                                         playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: L("stats.svp.perRound"))
-                                        playingStat(L("stats.gir"), "\(Int(data.aggregated.girPercent.rounded()))%", subtitle: "\(data.aggregated.girCount)/\(data.aggregated.holes)")
-                                        playingStat(L("stats.scramble"), "\(Int(data.aggregated.scramblePercent.rounded()))%", subtitle: "\(data.aggregated.scrambleSuccesses)/\(data.aggregated.scrambleAttempts)")
+                                        playingStat(L("stats.gir"), "\(Int(data.scoreAggregated.girPercent.rounded()))%", subtitle: "\(data.scoreAggregated.girCount)/\(data.scoreAggregated.holes)")
+                                        playingStat(L("stats.scramble"), "\(Int(data.scoreAggregated.scramblePercent.rounded()))%", subtitle: "\(data.scoreAggregated.scrambleSuccesses)/\(data.scoreAggregated.scrambleAttempts)")
                                     }
+                                    scoreCoverageNote(data)
                                 }
                             }
 
-                            CollapsibleStatSection(title: L("stats.scoreVsPutting"), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
+                            CollapsibleStatSection(title: sectionTitle(L("stats.scoreVsPutting"), marked: data.hasRoundsWithoutScore), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
                                 if let analysis = data.scorePutting {
                                     ScoreVsPuttingView(analysis: analysis)
                                 } else {
@@ -233,9 +264,10 @@ struct StatisticsView: View {
                                 }
                             }
 
-                            if data.hasSituationData {
-                                CollapsibleStatSection(title: L("stats.makeBySituation"), storageKey: "situation") {
-                                    SituationComparisonView(makeByCategory: data.aggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
+                            if data.hasScoreSituationData {
+                                CollapsibleStatSection(title: sectionTitle(L("stats.makeBySituation"), marked: data.hasRoundsWithoutScore), storageKey: "situation") {
+                                    SituationComparisonView(makeByCategory: data.scoreAggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
+                                    scoreCoverageNote(data)
                                 }
                             }
 

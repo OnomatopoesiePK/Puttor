@@ -38,7 +38,11 @@ struct RoundInputCustomView: View {
                 content(session)
             } else {
                 Color.clear.onAppear {
-                    session = RoundSession(round: round, modelContext: modelContext, initialHole: initialHole, isPostRoundEdit: isPostRoundEdit)
+                    let new = RoundSession(round: round, modelContext: modelContext, initialHole: initialHole, isPostRoundEdit: isPostRoundEdit)
+                    // Without that field every putt would carry the default par
+                    // and the round would report a scorecard nobody entered.
+                    new.asksForScoreCategory = config.fields.contains { $0.kind == .puttForCategory }
+                    session = new
                 }
             }
         }

@@ -804,13 +804,13 @@ struct PuttorTests {
 
     // MARK: - Score vs putting
 
-    private static func scoreRound(_ date: Date, score: Int, sg: Double, holes: Int = 18) -> (date: Date, courseName: String, stats: RoundStats) {
+    private static func scoreRound(_ date: Date, score: Int, sg: Double, holes: Int = 18, tracksScore: Bool = true) -> (date: Date, courseName: String, stats: RoundStats, tracksScore: Bool) {
         var stats = RoundStats()
         stats.scoreRelativeToPar = score
         stats.scoredHoles = holes
         stats.holes = holes
         stats.sgTotal = sg
-        return (date: date, courseName: "Test", stats: stats)
+        return (date: date, courseName: "Test", stats: stats, tracksScore: tracksScore)
     }
 
     private static func day(_ offset: Int) -> Date {
@@ -839,6 +839,34 @@ struct PuttorTests {
         ]))
         #expect(abs(analysis.rounds[0].score - 3) < 0.0001)
         #expect(abs(analysis.rounds[0].sg - 1) < 0.0001)
+    }
+
+    /// A round entered without the score reference keeps its place on the time
+    /// axis but is left out of the numbers, so the chart shows a gap instead of
+    /// closing ranks over a round it knows nothing about.
+    @Test func roundsWithoutAScoreReferenceLeaveTheirSlotEmpty() async throws {
+        let analysis = try #require(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 4, sg: 1),
+            Self.scoreRound(Self.day(2), score: 9, sg: -2, tracksScore: false),
+            Self.scoreRound(Self.day(3), score: 6, sg: 0),
+            Self.scoreRound(Self.day(4), score: 2, sg: 3, tracksScore: false),
+            Self.scoreRound(Self.day(5), score: 5, sg: 1),
+        ]))
+        #expect(analysis.rounds.count == 3)
+        #expect(analysis.slotCount == 5)
+        #expect(analysis.roundsWithoutScore == 2)
+        #expect(analysis.rounds.map(\.slot) == [0, 2, 4])
+        // The skipped rounds must not move the averages either.
+        #expect(abs(analysis.avgScore - 5) < 0.0001)
+    }
+
+    /// Three rounds on file but only two with a scorecard is still too few.
+    @Test func scoreComparisonCountsOnlyRoundsWithAScoreReference() async throws {
+        #expect(ScorePuttingAnalysis.make(rounds: [
+            Self.scoreRound(Self.day(1), score: 4, sg: 1),
+            Self.scoreRound(Self.day(2), score: 5, sg: 0, tracksScore: false),
+            Self.scoreRound(Self.day(3), score: 6, sg: -1),
+        ]) == nil)
     }
 
     @Test func scorePuttingComparisonNeedsThreeRounds() async throws {

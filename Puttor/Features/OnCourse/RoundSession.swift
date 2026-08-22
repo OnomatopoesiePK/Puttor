@@ -49,6 +49,10 @@ final class RoundSession {
     /// to show the "Saved +0.34" / "Saved -0.18" flash after every save.
     var lastSavedGSD: Double?
 
+    /// Set by the input view: does the surface the player is using actually ask
+    /// which score the putt is for? Custom mode can leave that field out.
+    var asksForScoreCategory: Bool = true
+
     private let defaultFirstPuttDistance: Double
     private let useFeet: Bool
     /// Distance a putt defaults to after a miss (2ft in imperial, 1m in metric).
@@ -371,6 +375,7 @@ final class RoundSession {
         putt.round = round
         round.putts.append(putt)
         modelContext.insert(putt)
+        if asksForScoreCategory { round.tracksScoreCategory = true }
         try? modelContext.save()
         lastSavedGSD = putt.gsd
 

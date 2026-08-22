@@ -20,6 +20,14 @@ struct ScoreVsPuttingView: View {
             chart
             legend
             summaryBoxes
+            if analysis.hasRoundsWithoutScore {
+                // The gaps in the line need saying out loud.
+                Text(String(format: L("stats.scoreCoverage"), analysis.rounds.count, analysis.slotCount))
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
 
@@ -51,10 +59,13 @@ struct ScoreVsPuttingView: View {
             let plotLeft = gutter
             let plotRight = size.width - 4
             let plotWidth = plotRight - plotLeft - inset * 2
-            let step = rounds.count > 1 ? plotWidth / CGFloat(rounds.count - 1) : 0
+            // Positions come from the slot on the time axis, not from the
+            // running index, so a round without a score leaves a gap.
+            let slots = analysis.slotCount
+            let step = slots > 1 ? plotWidth / CGFloat(slots - 1) : 0
 
-            func x(_ index: Int) -> CGFloat {
-                rounds.count > 1 ? plotLeft + inset + CGFloat(index) * step : (plotLeft + plotRight) / 2
+            func x(_ slot: Int) -> CGFloat {
+                slots > 1 ? plotLeft + inset + CGFloat(slot) * step : (plotLeft + plotRight) / 2
             }
             // Over par upwards, under par downwards — the way a scorecard reads.
             func y(_ value: Double) -> CGFloat {
@@ -114,16 +125,20 @@ struct ScoreVsPuttingView: View {
             if rounds.count > 1 {
                 var playedPath = Path()
                 var proPath = Path()
-                for (index, round) in rounds.enumerated() {
-                    let played = CGPoint(x: x(index), y: y(round.score))
-                    let pro = CGPoint(x: x(index), y: y(round.scoreWithoutPutting))
-                    if index == 0 {
+                var previousSlot: Int?
+                for round in rounds {
+                    let played = CGPoint(x: x(round.slot), y: y(round.score))
+                    let pro = CGPoint(x: x(round.slot), y: y(round.scoreWithoutPutting))
+                    // Break the line across a skipped round rather than drawing
+                    // through a gap there is no data for.
+                    if previousSlot == nil || previousSlot! + 1 != round.slot {
                         playedPath.move(to: played)
                         proPath.move(to: pro)
                     } else {
                         playedPath.addLine(to: played)
                         proPath.addLine(to: pro)
                     }
+                    previousSlot = round.slot
                 }
                 context.stroke(playedPath, with: .color(Theme.text.opacity(0.45)), lineWidth: 0.5)
                 // Dashes read thinner than a solid line of the same width, so
@@ -133,8 +148,8 @@ struct ScoreVsPuttingView: View {
             }
 
             // The gap between the two is what the putter did that round.
-            for (index, round) in rounds.enumerated() {
-                let px = x(index)
+            for round in rounds {
+                let px = x(round.slot)
                 let scoreY = y(round.score)
                 let withoutY = y(round.scoreWithoutPutting)
                 let helped = round.sg > 0
