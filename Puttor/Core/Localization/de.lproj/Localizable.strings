@@ -407,6 +407,19 @@
 "summary.missNoDirection" = "%ld weitere ohne erfasste Richtung";
 
 "stats.customCount" = "Eigene";
+"stats.thisMonth" = "Dieser Monat";
+"stats.dateRange" = "Zeitraum";
+"stats.choose" = "Runden Wählen";
+"stats.chooseOpen" = "Auswählen";
+"stats.chooseCount" = "%1$ld Von %2$ld Runden Gewählt";
+"stats.selectAll" = "Alle";
+"stats.selectNone" = "Keine";
+"stats.sort" = "Sortierung";
+"stats.sortNewest" = "Neueste Zuerst";
+"stats.sortOldest" = "Älteste Zuerst";
+"stats.rangeFrom" = "VON";
+"stats.rangeTo" = "BIS";
+"stats.noneSelected" = "Noch keine Runden gewählt. Öffne „Auswählen\" und tippe die Runden an, mit denen die Statistik rechnen soll.";
 "stats.roundsCounted" = "RUNDEN";
 "stats.ofAvailable" = "von %ld verfügbaren";
 

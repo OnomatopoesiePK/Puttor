@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 private enum FilterMode: String, CaseIterable, Identifiable {
-    case last1, last3, last5, last10, custom, all, byPutter
+    case last1, last3, last5, last10, custom, thisMonth, dateRange, choose, all, byPutter
     var id: String { rawValue }
 
     var labelKey: String {
@@ -19,6 +19,9 @@ private enum FilterMode: String, CaseIterable, Identifiable {
         case .last5: return "stats.last5"
         case .last10: return "stats.last10"
         case .custom: return "stats.customCount"
+        case .thisMonth: return "stats.thisMonth"
+        case .dateRange: return "stats.dateRange"
+        case .choose: return "stats.choose"
         case .all: return "stats.allRounds"
         case .byPutter: return "stats.byPutter"
         }
@@ -32,7 +35,7 @@ private enum FilterMode: String, CaseIterable, Identifiable {
         case .last3: return 3
         case .last5: return 5
         case .last10: return 10
-        case .custom, .all, .byPutter: return nil
+        case .custom, .thisMonth, .dateRange, .choose, .all, .byPutter: return nil
         }
     }
 }
@@ -45,10 +48,36 @@ struct StatisticsView: View {
     @State private var filterMode: FilterMode = .last5
     @AppStorage(AppStorageKeys.statsCustomRoundCount) private var customCount: Int = 7
     @State private var selectedPutterID: PersistentIdentifier?
+    @AppStorage(AppStorageKeys.statsSelectedRoundIDs) private var selectedRoundIDsRaw: String = ""
+    @AppStorage(AppStorageKeys.statsRangeStart) private var rangeStartStamp: Double = 0
+    @AppStorage(AppStorageKeys.statsRangeEnd) private var rangeEndStamp: Double = 0
+    @AppStorage(AppStorageKeys.statsRoundSort) private var roundSortRaw: String = RoundSort.newest.rawValue
+    @State private var showRoundPicker = false
     @State private var dispersionFilter: DispersionFilter = .all
     @State private var dispersionShading: DispersionShading = .none
 
     private var useFeet: Bool { unitsPref == "imperial" }
+
+    private var roundSort: RoundSort {
+        get { RoundSort(rawValue: roundSortRaw) ?? .newest }
+        nonmutating set { roundSortRaw = newValue.rawValue }
+    }
+
+    private var selectedRoundIDs: Set<String> {
+        get { Set(selectedRoundIDsRaw.split(separator: ",").map(String.init)) }
+        nonmutating set { selectedRoundIDsRaw = newValue.sorted().joined(separator: ",") }
+    }
+
+    /// Defaults to the last month when the window has never been set.
+    private var rangeStart: Date {
+        get { rangeStartStamp > 0 ? Date(timeIntervalSince1970: rangeStartStamp) : Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date() }
+        nonmutating set { rangeStartStamp = newValue.timeIntervalSince1970 }
+    }
+
+    private var rangeEnd: Date {
+        get { rangeEndStamp > 0 ? Date(timeIntervalSince1970: rangeEndStamp) : Date() }
+        nonmutating set { rangeEndStamp = newValue.timeIntervalSince1970 }
+    }
 
     private var completeRounds: [Round] { allRounds.filter { $0.isComplete } }
 
@@ -58,6 +87,20 @@ struct StatisticsView: View {
         }
         switch filterMode {
         case .custom: return Array(completeRounds.prefix(customCount))
+        case .thisMonth:
+            return completeRounds.filter {
+                Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month)
+            }
+        case .dateRange:
+            // Whole days at both ends, whichever way round the pickers are set.
+            let calendar = Calendar.current
+            let first = min(rangeStart, rangeEnd), last = max(rangeStart, rangeEnd)
+            let from = calendar.startOfDay(for: first)
+            let to = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: last)) ?? last
+            return completeRounds.filter { $0.date >= from && $0.date < to }
+        case .choose:
+            let picked = selectedRoundIDs
+            return completeRounds.filter { picked.contains($0.id.uuidString) }
         case .byPutter:
             guard let id = selectedPutterID else { return completeRounds }
             return completeRounds.filter { $0.putter?.persistentModelID == id }
@@ -195,6 +238,14 @@ struct StatisticsView: View {
                     customCountRow
                 }
 
+                if filterMode == .dateRange {
+                    dateRangeRow
+                }
+
+                if filterMode == .choose {
+                    chooseRoundsRow
+                }
+
                 if filterMode == .byPutter && !putters.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
@@ -214,7 +265,7 @@ struct StatisticsView: View {
                     if completeRounds.isEmpty {
                         emptyState(L("stats.noRounds"), "📊")
                     } else if filteredRounds.isEmpty {
-                        emptyState(L("stats.noMatch"), "🔍")
+                        emptyState(L(filterMode == .choose ? "stats.noneSelected" : "stats.noMatch"), "🔍")
                     } else {
                         VStack(spacing: Theme.Spacing.md) {
                             CollapsibleStatSection(title: "\(L("stats.rounds")) (\(filteredRounds.count))", storageKey: "rounds") {
@@ -372,6 +423,13 @@ struct StatisticsView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
+            .sheet(isPresented: $showRoundPicker) {
+                RoundSelectionSheet(
+                    rounds: completeRounds,
+                    selectedIDs: Binding(get: { selectedRoundIDs }, set: { selectedRoundIDs = $0 }),
+                    sort: Binding(get: { roundSort }, set: { roundSort = $0 })
+                )
+            }
             .onAppear {
                 if selectedPutterID == nil { selectedPutterID = putters.first?.persistentModelID }
             }
@@ -379,8 +437,11 @@ struct StatisticsView: View {
     }
 
     private func roundsGrid(_ statsByRound: [PersistentIdentifier: RoundStats]) -> some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: 6)], spacing: 6) {
-            ForEach(filteredRounds.prefix(18)) { r in
+        let ordered = roundSort == .newest
+            ? filteredRounds.sorted { $0.date > $1.date }
+            : filteredRounds.sorted { $0.date < $1.date }
+        return LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: 6)], spacing: 6) {
+            ForEach(ordered.prefix(18)) { r in
                 let sg = statsByRound[r.persistentModelID]?.sgTotal
                 let color: Color = sg == nil ? Theme.textMuted : (sg! > 0.5 ? Theme.primary : (sg! < -0.5 ? Theme.error : Theme.warning))
                 VStack(spacing: 2) {
@@ -394,6 +455,58 @@ struct StatisticsView: View {
                 .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.border, lineWidth: 1))
             }
         }
+    }
+
+    /// From/to pickers for the "Date Range" preset.
+    private var dateRangeRow: some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L("stats.rangeFrom"))
+                    .font(.system(size: 9, weight: .bold)).tracking(0.6)
+                    .foregroundStyle(Theme.textMuted)
+                DatePicker("", selection: Binding(get: { rangeStart }, set: { rangeStart = $0 }), displayedComponents: .date)
+                    .labelsHidden()
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L("stats.rangeTo"))
+                    .font(.system(size: 9, weight: .bold)).tracking(0.6)
+                    .foregroundStyle(Theme.textMuted)
+                DatePicker("", selection: Binding(get: { rangeEnd }, set: { rangeEnd = $0 }), displayedComponents: .date)
+                    .labelsHidden()
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.bottom, 6)
+    }
+
+    /// How many rounds are hand-picked, and the way into picking them.
+    private var chooseRoundsRow: some View {
+        HStack(spacing: 10) {
+            Text(String(format: L("stats.chooseCount"), filteredRounds.count, completeRounds.count))
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.textMuted)
+
+            Spacer(minLength: 0)
+
+            Button {
+                showRoundPicker = true
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "checklist")
+                    Text(L("stats.chooseOpen"))
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(Theme.primary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(Capsule().fill(Theme.primary.opacity(0.12)))
+                .overlay(Capsule().stroke(Theme.primary.opacity(0.4), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.bottom, 6)
     }
 
     /// Stepper for the "Custom" preset, mirroring how the putter filter reveals

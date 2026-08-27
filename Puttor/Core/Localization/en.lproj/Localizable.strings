@@ -407,6 +407,19 @@
 "summary.missNoDirection" = "%ld more without a recorded direction";
 
 "stats.customCount" = "Custom";
+"stats.thisMonth" = "This Month";
+"stats.dateRange" = "Date Range";
+"stats.choose" = "Choose Rounds";
+"stats.chooseOpen" = "Choose";
+"stats.chooseCount" = "%1$ld of %2$ld Rounds Selected";
+"stats.selectAll" = "All";
+"stats.selectNone" = "None";
+"stats.sort" = "Sort";
+"stats.sortNewest" = "Newest First";
+"stats.sortOldest" = "Oldest First";
+"stats.rangeFrom" = "FROM";
+"stats.rangeTo" = "TO";
+"stats.noneSelected" = "No rounds picked yet. Open \"Choose\" and tap the rounds the statistics should use.";
 "stats.roundsCounted" = "ROUNDS";
 "stats.ofAvailable" = "of %ld available";
 
