@@ -272,7 +272,7 @@ struct StatisticsView: View {
                         emptyState(L(filterMode == .choose ? "stats.noneSelected" : "stats.noMatch"), "🔍")
                     } else {
                         VStack(spacing: Theme.Spacing.md) {
-                            CollapsibleStatSection(title: "\(L("stats.rounds")) (\(filteredRounds.count))", storageKey: "rounds") {
+                            CollapsibleStatSection(title: "\(L("stats.rounds")) (\(filteredRounds.count))", storageKey: "rounds", infoKey: "stats.rounds.info") {
                                 roundsGrid(data.byRound)
                             }
 
@@ -282,7 +282,7 @@ struct StatisticsView: View {
                                 statBox(L("summary.avgPerHole"), String(format: "%.1f", data.aggregated.avgPuttsPerHole))
                             }
 
-                            CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained") {
+                            CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained", infoKey: "stats.sgPutting.info") {
                                 VStack(spacing: 4) {
                                     Text("\(data.sgAverage > 0 ? "+" : "")\(String(format: "%.2f", data.sgAverage))")
                                         .font(.system(size: 40, weight: .black))
@@ -303,7 +303,7 @@ struct StatisticsView: View {
                             // round of nothing but hole-outs still has them —
                             // only the per-category putt comparison needs putts.
                             if data.scoreAggregated.holes > 0 {
-                                CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats") {
+                                CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats", infoKey: "stats.playingStats.info") {
                                     HStack(spacing: Theme.Spacing.sm) {
                                         // An average per round compares across
                                         // filters; a running total only grows.
@@ -345,7 +345,7 @@ struct StatisticsView: View {
                                 }
                             }
 
-                            CollapsibleStatSection(title: L("stats.dispersion"), storageKey: "dispersion") {
+                            CollapsibleStatSection(title: L("stats.dispersion"), storageKey: "dispersion", infoKey: "stats.dispersion.info") {
                                 // Which putts to plot, and what their colour
                                 // should say about them.
                                 HStack(spacing: Theme.Spacing.sm) {
@@ -375,26 +375,26 @@ struct StatisticsView: View {
                             }
 
                             if !data.aggregated.makeByDistance.isEmpty {
-                                CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance") {
+                                CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance", infoKey: "chart.makeVsTour.info") {
                                     DistanceMakeChartView(data: data.aggregated.makeByDistance, pcgDivisor: max(1, filteredRounds.count), showsTitle: false)
                                 }
                             }
 
                             if data.hasScoreSituationData {
-                                CollapsibleStatSection(title: sectionTitle(L("stats.makeBySituation"), marked: data.hasRoundsWithoutScore), storageKey: "situation") {
+                                CollapsibleStatSection(title: sectionTitle(L("stats.makeBySituation"), marked: data.hasRoundsWithoutScore), storageKey: "situation", infoKey: "stats.makeBySituation.info") {
                                     SituationComparisonView(makeByCategory: data.scoreAggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
                                     scoreCoverageNote(data)
                                 }
                             }
 
                             if !data.aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
-                                CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency") {
+                                CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency", infoKey: "summary.missTendency.info") {
                                     MissDonutView(missCounts: data.aggregated.missCounts)
                                 }
                             }
 
                             if data.aggregated.missReasonCounts.total > 0 {
-                                CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons") {
+                                CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons", infoKey: "summary.missReasons.info") {
                                     HStack(spacing: Theme.Spacing.md) {
                                         if data.aggregated.missReasonCounts.missRead > 0 { reasonStat("\(data.aggregated.missReasonCounts.missRead)", L("input.missRead")) }
                                         if data.aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(data.aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
@@ -406,7 +406,7 @@ struct StatisticsView: View {
 
                             let leave = data.leaveByMiss
                             if !leave.isEmpty {
-                                CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss") {
+                                CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss", infoKey: "summary.leaveByMiss.info") {
                                     // Bars are scaled to the longest leave in
                                     // view, rounded up, so the widest one fills
                                     // the track and the labels keep their room.

@@ -234,6 +234,15 @@
 "stats.svp.tighter" = "tighter with standardized putting";
 "stats.svp.wider" = "wider with standardized putting";
 "stats.dispersion" = "MISS DISPERSION";
+"stats.rounds.info" = "One tile per round in the current filter, showing that round's strokes gained putting: for each hole, the putts the tour would expect from where the first putt stood, less the putts actually taken.";
+"stats.sgPutting.info" = "Strokes gained per hole, summed over a round and then averaged across the filtered rounds. PCG underneath is the same rounds' per-putt figure: how each result compares with the tour's odds of holing from that distance.";
+"stats.playingStats.info" = "Score is the average strokes over par per round. GIR counts holes played for eagle or birdie, scramble the par saves among holes played for par with the green missed. The three putt figures count only holes that were actually putted.";
+"stats.dispersion.info" = "Every miss sits in the direction it was entered, at the distance it left behind — taken from the next putt on that hole, or estimated where the hole ended there. The rings mark 1, 2 and 3 metres; a longer leave is drawn outside them. The first menu narrows the putts by slope, the second colours them: break strength in the entry grid's five classes, putt length by opacity, or uphill against downhill. Harder putts print darker and sit behind the pale ones. Where several putts share a spot the dot becomes a pie and grows with their number.";
+"chart.makeVsTour.info" = "One row per distance bracket: the putts you holed over the putts you took from there, against the tour's average make rate across the same bracket. The right-hand column totals PCG for that bracket, divided by the number of rounds.";
+"stats.makeBySituation.info" = "The same distance brackets, split by the score each putt was for, so a birdie putt and a par putt from the same range can be compared.";
+"summary.missTendency.info" = "Every miss placed in the direction it was entered. A sector reddens with how often that direction came up, and the middle holds the total.";
+"summary.missReasons.info" = "How often each reason was ticked on a missed putt. A putt with more than one reason is counted once, under \"several\".";
+"summary.leaveByMiss.info" = "Average distance left after a miss, grouped by the direction it went — measured from the distance of the next putt on that hole. Bars are scaled to the longest of those averages.";
 
 /* Dispersion */
 "dispersion.all" = "All Slopes";
