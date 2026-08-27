@@ -99,7 +99,10 @@ struct MissDispersionPlotView: View {
     var useFeet: Bool = false
 
     private let size: CGFloat = 268
-    private let maxR: CGFloat = 108
+    /// The outer ring, and how far a dot may stray beyond it before the plot
+    /// runs out of room.
+    private let maxR: CGFloat = 100
+    private let plotLimit: CGFloat = 110
 
     /// Largest shading value in view, which the colour ramp stretches over.
     /// Zero means the putts carry nothing to shade by — slope left unrecorded,
@@ -108,9 +111,22 @@ struct MissDispersionPlotView: View {
         dots.flatMap(\.values).map { abs($0) }.max() ?? 0
     }
 
-    /// The radial mapping the dots use, read backwards: what leave distance a
-    /// ring of this radius stands for.
-    static func leaveAt(radius: CGFloat) -> Double { Double((radius - 18) / 24) }
+    /// Ring distances, marked on the scale line. The outer one — 3 m, or 10 ft
+    /// in imperial — is what the plot is normalised to; a longer leave than
+    /// that is drawn outside the rings rather than pinned to them.
+    private var ringDistances: [Double] {
+        useFeet
+            ? [3, 6, 10].map { UnitConverter.feetToMetres($0) }
+            : [1, 2, 3]
+    }
+
+    private var outerDistance: Double { ringDistances.last ?? 3 }
+
+    /// Where a leave of this length sits, in points from the centre.
+    private func radius(forLeave leave: Double) -> CGFloat {
+        let scaled = maxR * CGFloat(leave / outerDistance)
+        return min(plotLimit, max(12, scaled))
+    }
 
     private var dots: [DispersionDot] {
         var byHole: [String: [Putt]] = [:]
@@ -128,7 +144,7 @@ struct MissDispersionPlotView: View {
                 guard p.result != .holed, includeByFilter(p, filter) else { continue }
                 let next = i + 1 < sorted.count ? sorted[i + 1] : nil
                 let leave = next.map { max(0.3, $0.distanceM) } ?? max(0.3, p.distanceM * 0.35)
-                let radial = min(maxR, 18 + CGFloat(leave) * 24)
+                let radial = radius(forLeave: Double(leave))
                 let vec = missVector(p.result)
                 let x = (vec.x * radial * 10).rounded() / 10
                 let y = (vec.y * radial * 10).rounded() / 10
@@ -295,22 +311,41 @@ struct MissDispersionPlotView: View {
     private var plot: some View {
         Canvas { context, canvasSize in
             let c = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
-            for r in [maxR, maxR * 0.66, maxR * 0.33] {
-                context.stroke(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)), with: .color(Theme.borderLight), lineWidth: 1)
-                // Each ring is a leave distance — the radius is what the miss
-                // left behind, so say so on the ring itself.
-                context.draw(
-                    Text(UnitConverter.formatDistance(Self.leaveAt(radius: r), useFeet: useFeet))
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(Theme.textMuted),
-                    at: CGPoint(x: c.x + 7, y: c.y - r + 8),
-                    anchor: .leading
+            // The scale reads outwards from the hole along one line to the
+            // right, and each ring opens where its label sits rather than
+            // running through it.
+            for distance in ringDistances {
+                let r = radius(forLeave: distance)
+                let gapHalfWidth: CGFloat = 15
+                let gap = Angle.radians(Double(atan(gapHalfWidth / r)))
+
+                var ring = Path()
+                ring.addArc(
+                    center: c, radius: r,
+                    startAngle: .degrees(0) + gap,
+                    endAngle: .degrees(360) - gap,
+                    clockwise: false
                 )
+                context.stroke(ring, with: .color(Theme.borderLight), lineWidth: 1)
             }
             var crosshair = Path()
             crosshair.move(to: CGPoint(x: c.x - maxR, y: c.y)); crosshair.addLine(to: CGPoint(x: c.x + maxR, y: c.y))
             crosshair.move(to: CGPoint(x: c.x, y: c.y - maxR)); crosshair.addLine(to: CGPoint(x: c.x, y: c.y + maxR))
             context.stroke(crosshair, with: .color(.white.opacity(0.18)), lineWidth: 1)
+
+            // Clear the crosshair behind each number, then set the scale on it.
+            for distance in ringDistances {
+                let r = radius(forLeave: distance)
+                let plate = CGRect(x: c.x + r - 15, y: c.y - 7, width: 30, height: 14)
+                context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
+                context.draw(
+                    Text(UnitConverter.formatDistance(distance, useFeet: useFeet))
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(Theme.textMuted),
+                    at: CGPoint(x: c.x + r, y: c.y),
+                    anchor: .center
+                )
+            }
 
             context.fill(Path(ellipseIn: CGRect(x: c.x - 7, y: c.y - 7, width: 14, height: 14)), with: .color(Theme.primary))
             context.stroke(Path(ellipseIn: CGRect(x: c.x - 7, y: c.y - 7, width: 14, height: 14)), with: .color(.white), lineWidth: 2)
