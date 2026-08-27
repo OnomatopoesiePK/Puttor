@@ -157,7 +157,7 @@
 "summary.done" = "Fertig";
 "summary.putts" = "Putts";
 "summary.holes" = "Löcher";
-"summary.avgPerHole" = "Ø/Loch";
+"summary.avgPerHole" = "Ø Putts/Loch";
 "summary.sg" = "SG";
 "summary.highlight" = "HIGHLIGHT";
 "summary.holeAbbr" = "Loch";
@@ -266,8 +266,6 @@
 "settings.haptics" = "Haptisches Feedback";
 "settings.haptics.desc" = "Vibrieren beim Einrasten";
 "settings.myPutters" = "MEINE PUTTER";
-"settings.about" = "ÜBER";
-"settings.about.desc" = "Strokes-Gained-Werte basieren auf PGA-Tour-Daten (Mark-Broadie-Methodik).";
 "settings.deletePutterTitle" = "Putter löschen";
 "settings.deletePutterMessage" = "\"%@\" entfernen?";
 
@@ -442,6 +440,10 @@
 "reference.gsdLegend" = "p = Tour-Trefferquote auf dieser Distanz · erste Formel wenn gelocht, zweite wenn verfehlt";
 "reference.gsdExample" = "Ein 2,5-m-Putt fällt zu 49 %: gelocht +0,51, verfehlt −0,49. Aus 20 m: +0,97 oder −0,03.";
 "reference.tableNote" = "Die erwarteten Putts überschreiten ab etwa 9 m die 2. Die Zeilen stammen aus zwei angepassten Kurven, jede Distanz dazwischen hat also ihren eigenen Wert.";
+"reference.tableTitle" = "TOUR-BASISWERTE";
+"reference.sourceTitle" = "WORAUF DIESE ZAHLEN BERUHEN";
+"reference.sourceText" = "Jede Zahl in Puttor wird am PGA-Tour-Schnitt gemessen, und dieser Maßstab stammt aus der Arbeit von Mark Broadie an der Columbia University. Sein Putts-Gained-Paper stützt sich auf ShotLink, das Erfassungssystem der Tour, das die Position jedes Putts auf etwa einen Zoll genau festhält — Millionen Putts, keine Stichprobe. Daraus veröffentlicht er, wie viele Putts ein Tour-Spieler aus jeder Distanz im Schnitt braucht: 1,61 aus 10 Fuß, genau 2,0 aus 33 Fuß. An diesen Werten und den veröffentlichten Trefferquoten sind die beiden Kurven oben angepasst; Puttor bleibt ihnen bis auf rund einen Hundertstel Schlag treu. Strokes Gained folgt unverändert seiner Definition: die Putts, die die Tour von deiner Position gebraucht hätte, minus die, die du gebraucht hast. GSD stammt nicht von ihm — das ist Puttors eigene Lesart derselben Trefferquoten, die einen einzelnen Schlag an seiner Lochwahrscheinlichkeit misst.";
+"reference.sourceLink" = "Broadie: Putts Gained — Measuring Putting on the PGA TOUR (PDF)";
 "reference.curvesTitle" = "DIE KURVEN HINTER DER TABELLE";
 "reference.curvesText" = "Beide Spalten stammen aus angepassten Kurven, mit x = ln(Distanz in Metern), von 0,3 m bis 40 m.";
 "reference.curvesMake" = "TREFFERWAHRSCHEINLICHKEIT";

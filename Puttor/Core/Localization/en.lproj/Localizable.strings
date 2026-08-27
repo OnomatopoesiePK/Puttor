@@ -157,7 +157,7 @@
 "summary.done" = "Done";
 "summary.putts" = "Putts";
 "summary.holes" = "Holes";
-"summary.avgPerHole" = "Avg/Hole";
+"summary.avgPerHole" = "Avg putts/hole";
 "summary.sg" = "SG";
 "summary.highlight" = "HIGHLIGHT";
 "summary.holeAbbr" = "Hole";
@@ -266,8 +266,6 @@
 "settings.haptics" = "Haptic feedback";
 "settings.haptics.desc" = "Vibrate on slider snaps";
 "settings.myPutters" = "MY PUTTERS";
-"settings.about" = "ABOUT";
-"settings.about.desc" = "Strokes gained benchmarks based on PGA Tour data (Mark Broadie methodology).";
 "settings.deletePutterTitle" = "Delete Putter";
 "settings.deletePutterMessage" = "Remove \"%@\"?";
 
@@ -442,6 +440,10 @@
 "reference.gsdLegend" = "p = tour make probability at that distance · first formula if holed, second if missed";
 "reference.gsdExample" = "A 2.5 m putt falls 49% of the time: making it is +0.51, missing it −0.49. From 20 m: +0.97 or −0.03.";
 "reference.tableNote" = "Expected putts pass 2 beyond about 9 m. The rows are read off two fitted curves, so every distance in between has its own value.";
+"reference.tableTitle" = "TOUR BASELINE";
+"reference.sourceTitle" = "WHERE THESE NUMBERS COME FROM";
+"reference.sourceText" = "Every figure in Puttor is measured against the PGA Tour, and that yardstick is Mark Broadie's work at Columbia University. His putts-gained paper is built on ShotLink, the tour's tracking system, which records the position of every putt to within an inch — millions of putts, not a sample. From that he publishes how many putts a tour player needs on average from each distance: 1.61 from 10 feet, exactly 2.0 from 33 feet. Those figures and the tour's published make rates are what the two curves above were fitted to, and Puttor stays within about a hundredth of a stroke of them. Strokes gained follows his definition unchanged: the putts the tour would have needed from where you stood, less the putts you actually took. GSD is not his — it is Puttor's own reading of the same make rates, scoring one stroke against the odds of holing it.";
+"reference.sourceLink" = "Broadie: Putts Gained — Measuring Putting on the PGA TOUR (PDF)";
 "reference.curvesTitle" = "THE CURVES BEHIND THE TABLE";
 "reference.curvesText" = "Both columns are read off fitted curves, with x = ln(distance in metres), from 0.3 m to 40 m.";
 "reference.curvesMake" = "MAKE PROBABILITY";
