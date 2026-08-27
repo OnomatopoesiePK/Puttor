@@ -358,6 +358,9 @@ struct StatisticsView: View {
                                 }
                                 .pickerStyle(.menu)
                                 .tint(Theme.text)
+                                // Clear of the header's tap area, so reaching
+                                // for a menu can't fold the section away.
+                                .padding(.top, 10)
 
                                 MissDispersionPlotView(
                                     putts: data.allPutts,

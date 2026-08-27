@@ -113,13 +113,17 @@ struct MissDispersionPlotView: View {
 
     /// Ring distances, marked on the scale line. The outer one — 3 m, or 10 ft
     /// in imperial — is what the plot is normalised to; a longer leave than
-    /// that is drawn outside the rings rather than pinned to them. Nothing is
-    /// marked closer in: a ring that near the hole sits among the dots it is
-    /// meant to measure without telling them apart.
+    /// that is drawn outside the rings rather than pinned to them.
     private var ringDistances: [Double] {
         useFeet
-            ? [6, 10].map { UnitConverter.feetToMetres($0) }
-            : [2, 3]
+            ? [3, 6, 10].map { UnitConverter.feetToMetres($0) }
+            : [1, 2, 3]
+    }
+
+    /// The innermost ring is drawn but not numbered — that close to the hole
+    /// the label would sit among the dots it is meant to measure.
+    private var labelledRingDistances: [Double] {
+        Array(ringDistances.dropFirst())
     }
 
     private var outerDistance: Double { ringDistances.last ?? 3 }
@@ -227,7 +231,7 @@ struct MissDispersionPlotView: View {
 
     /// Dots sit a little back from full strength so a crowded board stays
     /// readable and overlapping markers still show what is underneath.
-    private let dotOpacity: Double = 0.75
+    private let dotOpacity: Double = 0.6
 
     private var rampEnds: (low: Color, high: Color) {
         switch shading {
@@ -256,7 +260,7 @@ struct MissDispersionPlotView: View {
         if shading == .puttLength {
             // One colour, carried from barely there to nearly solid — a longer
             // reach than any hue shift over this small a dot.
-            return ends.high.opacity(0.15 + (dotOpacity - 0.15) * t)
+            return ends.high.opacity(0.12 + (dotOpacity - 0.12) * t)
         }
         return mix(ends.low, ends.high, t).opacity(dotOpacity)
     }
@@ -268,7 +272,7 @@ struct MissDispersionPlotView: View {
                 colors: shading.isSigned
                     ? [ends.low.opacity(dotOpacity), Theme.textMuted.opacity(dotOpacity), ends.high.opacity(dotOpacity)]
                     : (shading == .puttLength
-                        ? [ends.high.opacity(0.15), ends.high.opacity(dotOpacity)]
+                        ? [ends.high.opacity(0.12), ends.high.opacity(dotOpacity)]
                         : [ends.low.opacity(dotOpacity), ends.high.opacity(dotOpacity)]),
                 startPoint: .leading, endPoint: .trailing
             )
@@ -323,8 +327,9 @@ struct MissDispersionPlotView: View {
             // running through it.
             for distance in ringDistances {
                 let r = radius(forLeave: distance)
+                let labelled = labelledRingDistances.contains(distance)
                 let gapHalfWidth: CGFloat = 15
-                let gap = Angle.radians(Double(atan(gapHalfWidth / r)))
+                let gap: Angle = labelled ? .radians(Double(atan(gapHalfWidth / r))) : .degrees(0)
 
                 var ring = Path()
                 ring.addArc(
@@ -341,7 +346,7 @@ struct MissDispersionPlotView: View {
             context.stroke(crosshair, with: .color(.white.opacity(0.18)), lineWidth: 1)
 
             // Clear the crosshair behind each number, then set the scale on it.
-            for distance in ringDistances {
+            for distance in labelledRingDistances {
                 let r = radius(forLeave: distance)
                 let plate = CGRect(x: c.x + r - 15, y: c.y - 7, width: 30, height: 14)
                 context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
@@ -385,7 +390,7 @@ struct MissDispersionPlotView: View {
                     context.fill(Path(ellipseIn: rect), with: .color(shadingColor(value)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Theme.background.opacity(0.8)), lineWidth: 1)
                 } else {
-                    let alpha = min(dotOpacity, 0.35 + Double(dot.count) * 0.07)
+                    let alpha = min(dotOpacity, 0.28 + Double(dot.count) * 0.06)
                     context.fill(Path(ellipseIn: rect), with: .color(Theme.error.opacity(alpha)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111).opacity(0.6)), lineWidth: 1)
                 }
