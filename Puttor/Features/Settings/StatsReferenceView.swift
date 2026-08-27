@@ -3,7 +3,7 @@
 //  Puttor
 //
 //  Explains the two numbers the app reports — strokes gained per hole, and
-//  GSD per putt — the curves they are read off, and the tour data behind them.
+//  PCG per putt — the curves they are read off, and the tour data behind them.
 //  Each part folds away like the sections on the statistics tab.
 //
 
@@ -26,12 +26,12 @@ struct StatsReferenceView: View {
                     )
                 }
 
-                CollapsibleStatSection(title: L("reference.gsdTitle"), storageKey: "referenceGSD") {
+                CollapsibleStatSection(title: L("reference.pcgTitle"), storageKey: "referencePCG") {
                     formulaBody(
-                        formula: "GSD = 1 − p   ·   GSD = −p",
-                        prose: L("reference.gsdText"),
-                        legend: L("reference.gsdLegend"),
-                        example: L("reference.gsdExample")
+                        formula: "PCG = 1 − p   ·   PCG = −p",
+                        prose: L("reference.pcgText"),
+                        legend: L("reference.pcgLegend"),
+                        example: L("reference.pcgExample")
                     )
                 }
 

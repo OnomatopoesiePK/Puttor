@@ -17,7 +17,7 @@ struct DistanceBracket: Identifiable {
     let made: Int
     let total: Int
     let tourMakePct: Double
-    let gsdTotal: Double
+    let pcgTotal: Double
 }
 
 struct MissReasonCounts {
@@ -50,7 +50,7 @@ struct RoundStats {
     var sgTotal: Double = 0
     /// Gained shots per distance, summed over every putt — the make-rate view of
     /// the round, alongside but separate from strokes gained.
-    var gsdTotal: Double = 0
+    var pcgTotal: Double = 0
     var makeByDistance: [DistanceBracket] = []
     /// Make % by distance bracket, filtered to putts taken "for" a given score (birdie/par/bogey).
     var makeByCategory: [ScoreCategory: [DistanceBracket]] = [:]
@@ -58,6 +58,8 @@ struct RoundStats {
     var puttsByHole: [Int: Int] = [:]
     var leaveByMissDirection: [PuttResult: LeaveInfo] = [:]
     var missReasonCounts: MissReasonCounts = MissReasonCounts()
+    /// Putts that caught the lip and stayed out — misses that were nearly in.
+    var lipOutCount: Int = 0
 
     /// Holes reached with a putt for eagle or birdie — the green was hit in
     /// regulation. A hole-out for one of those counts too.
@@ -205,9 +207,10 @@ struct RoundStats {
         for p in realPutts {
             stats.puttsByHole[p.holeNumber, default: 0] += 1
             stats.missCounts[p.result, default: 0] += 1
+            if p.lipOut && !p.result.isHoled { stats.lipOutCount += 1 }
         }
 
-        stats.gsdTotal = realPutts.reduce(0.0) { $0 + $1.gsd }
+        stats.pcgTotal = realPutts.reduce(0.0) { $0 + $1.pcg }
         stats.makeByDistance = computeDistanceBrackets(realPutts, useFeet: useFeet)
 
         for category in situationCategories {
@@ -269,12 +272,12 @@ struct RoundStats {
                 return d >= b.min && d < b.max
             }
             let made = dm.filter { $0.result == .holed }.count
-            let gsd = dm.reduce(0.0) { $0 + $1.gsd }
+            let pcg = dm.reduce(0.0) { $0 + $1.pcg }
             return DistanceBracket(
                 id: b.label, label: b.label, min: b.min, max: b.max,
                 made: made, total: dm.count,
                 tourMakePct: tourMakePct(index: index, useFeet: useFeet),
-                gsdTotal: gsd
+                pcgTotal: pcg
             )
         }
     }
@@ -351,6 +354,7 @@ struct RoundStats {
             merged.missReasonCounts = merged.missReasonCounts + r.missReasonCounts
         }
 
+        merged.lipOutCount = list.reduce(0) { $0 + $1.lipOutCount }
         merged.girCount = list.reduce(0) { $0 + $1.girCount }
         merged.girPutts = list.reduce(0) { $0 + $1.girPutts }
         merged.girPuttedHoles = list.reduce(0) { $0 + $1.girPuttedHoles }
@@ -383,9 +387,9 @@ struct RoundStats {
         brackets(useFeet: useFeet).enumerated().map { idx, b in
             let made = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].made : 0) }
             let total = lists.reduce(0) { $0 + (idx < $1.count ? $1[idx].total : 0) }
-            let gsd = lists.reduce(0.0) { $0 + (idx < $1.count ? $1[idx].gsdTotal : 0) }
+            let pcg = lists.reduce(0.0) { $0 + (idx < $1.count ? $1[idx].pcgTotal : 0) }
             let tourPct = lists.first?[safe: idx]?.tourMakePct ?? tourMakePct(index: idx, useFeet: useFeet)
-            return DistanceBracket(id: b.label, label: b.label, min: b.min, max: b.max, made: made, total: total, tourMakePct: tourPct, gsdTotal: gsd)
+            return DistanceBracket(id: b.label, label: b.label, min: b.min, max: b.max, made: made, total: total, tourMakePct: tourPct, pcgTotal: pcg)
         }
     }
 }

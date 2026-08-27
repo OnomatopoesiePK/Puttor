@@ -125,7 +125,7 @@ struct StatisticsView: View {
         var scoredRoundCount: Int = 0
         var hasRoundsWithoutScore: Bool { scoredRoundCount < roundCount }
         var sgAverage: Double = 0
-        var gsdAverage: Double = 0
+        var pcgAverage: Double = 0
         var avgScorePerRound: Double?
         var scorePutting: ScorePuttingAnalysis?
         var allPutts: [Putt] = []
@@ -156,7 +156,7 @@ struct StatisticsView: View {
 
             if !perRound.isEmpty {
                 sgAverage = perRound.reduce(0) { $0 + $1.sgTotal } / Double(perRound.count)
-                gsdAverage = perRound.reduce(0) { $0 + $1.gsdTotal } / Double(perRound.count)
+                pcgAverage = perRound.reduce(0) { $0 + $1.pcgTotal } / Double(perRound.count)
             }
 
             if !scoreBearing.isEmpty {
@@ -291,10 +291,10 @@ struct StatisticsView: View {
 
                                     Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
 
-                                    Text("\(L("stats.gsd")) \(data.gsdAverage > 0 ? "+" : "")\(String(format: "%.2f", data.gsdAverage))")
+                                    Text("\(L("stats.pcg")) \(data.pcgAverage > 0 ? "+" : "")\(String(format: "%.2f", data.pcgAverage))")
                                         .font(.system(size: 20, weight: .black))
-                                        .foregroundStyle(data.gsdAverage > 0 ? Theme.primary : (data.gsdAverage < 0 ? Theme.error : Theme.textSecondary))
-                                    Text(L("stats.gsdSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
+                                        .foregroundStyle(data.pcgAverage > 0 ? Theme.primary : (data.pcgAverage < 0 ? Theme.error : Theme.textSecondary))
+                                    Text(L("stats.pcgSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
                                 }
                                 .frame(maxWidth: .infinity)
                             }
@@ -376,7 +376,7 @@ struct StatisticsView: View {
 
                             if !data.aggregated.makeByDistance.isEmpty {
                                 CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance") {
-                                    DistanceMakeChartView(data: data.aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count), showsTitle: false)
+                                    DistanceMakeChartView(data: data.aggregated.makeByDistance, pcgDivisor: max(1, filteredRounds.count), showsTitle: false)
                                 }
                             }
 

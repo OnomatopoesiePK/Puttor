@@ -9,9 +9,9 @@ import SwiftUI
 
 struct DistanceMakeChartView: View {
     let data: [DistanceBracket]
-    var gsdDivisor: Int = 1
+    var pcgDivisor: Int = 1
     var title: String? = nil
-    var showGSD: Bool = true
+    var showPCG: Bool = true
     /// Off when the surrounding section header already names the chart.
     var showsTitle: Bool = true
 
@@ -53,8 +53,8 @@ struct DistanceMakeChartView: View {
             Text(L("chart.made")).frame(width: 38, alignment: .trailing)
             Text(L("chart.you")).frame(width: 34, alignment: .trailing)
             Text(L("chart.tourAbbr")).frame(width: 34, alignment: .trailing)
-            if showGSD {
-                Text(L("stats.gsd")).frame(width: 36, alignment: .trailing)
+            if showPCG {
+                Text(L("stats.pcg")).frame(width: 36, alignment: .trailing)
             }
         }
         .font(.system(size: 9, weight: .semibold))
@@ -65,8 +65,8 @@ struct DistanceMakeChartView: View {
         let playerPct = b.total > 0 ? Double(b.made) / Double(b.total) * 100 : 0
         let ahead = playerPct >= b.tourMakePct
         let playerColor = ahead ? Theme.primary : Theme.error
-        let gsd = b.gsdTotal / Double(max(1, gsdDivisor))
-        let gsdColor = gsd > 0 ? Theme.primary : (gsd < 0 ? Theme.error : Theme.textSecondary)
+        let pcg = b.pcgTotal / Double(max(1, pcgDivisor))
+        let pcgColor = pcg > 0 ? Theme.primary : (pcg < 0 ? Theme.error : Theme.textSecondary)
 
         return HStack(alignment: .center, spacing: 6) {
             Text(b.label).font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
@@ -84,8 +84,8 @@ struct DistanceMakeChartView: View {
                 .lineLimit(1).minimumScaleFactor(0.8).frame(width: 34, alignment: .trailing)
             Text("\(Int(b.tourMakePct.rounded()))%").font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary)
                 .lineLimit(1).minimumScaleFactor(0.8).frame(width: 34, alignment: .trailing)
-            if showGSD {
-                Text("\(gsd >= 0 ? "+" : "")\(String(format: "%.1f", gsd))").font(.system(size: 11, weight: .semibold)).foregroundStyle(gsdColor)
+            if showPCG {
+                Text("\(pcg >= 0 ? "+" : "")\(String(format: "%.1f", pcg))").font(.system(size: 11, weight: .semibold)).foregroundStyle(pcgColor)
                     .lineLimit(1).minimumScaleFactor(0.8).frame(width: 36, alignment: .trailing)
             }
         }

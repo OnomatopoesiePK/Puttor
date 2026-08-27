@@ -45,9 +45,9 @@ final class RoundSession {
     var draftBadStrokeType: BadStrokeType?
     var draftWrongAim = false
 
-    /// GSD of the putt most recently saved by recordDraft()/recordTapIn() — used
+    /// PCG of the putt most recently saved by recordDraft()/recordTapIn() — used
     /// to show the "Saved +0.34" / "Saved -0.18" flash after every save.
-    var lastSavedGSD: Double?
+    var lastSavedPCG: Double?
 
     /// Set by the input view: does the surface the player is using actually ask
     /// which score the putt is for? Custom mode can leave that field out.
@@ -291,7 +291,7 @@ final class RoundSession {
             putt.badStroke = draftBadStroke
             putt.badStrokeType = draftBadStroke ? draftBadStrokeType : nil
             putt.wrongAim = draftWrongAim
-            lastSavedGSD = putt.gsd
+            lastSavedPCG = putt.pcg
 
             if effectiveResult == .holed {
                 // Holing out here ends the hole — anything recorded after it no longer applies.
@@ -377,7 +377,7 @@ final class RoundSession {
         modelContext.insert(putt)
         if asksForScoreCategory { round.tracksScoreCategory = true }
         try? modelContext.save()
-        lastSavedGSD = putt.gsd
+        lastSavedPCG = putt.pcg
 
         if effectiveResult == .holed {
             if isPostRoundEdit {

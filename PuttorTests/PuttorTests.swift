@@ -770,36 +770,36 @@ struct PuttorTests {
         #expect(RoundStats.holeStrokesGained([sentinel]) == nil)
     }
 
-    /// GSD scores a single putt against the odds of making it: holing a
+    /// PCG scores a single putt against the odds of making it: holing a
     /// coin-flip is +0.5, missing it -0.5.
-    @Test func gsdIsTheComplementOfTheMakeProbability() async throws {
+    @Test func pcgIsTheComplementOfTheMakeProbability() async throws {
         let coinFlipDistance = 2.3
         let p = StrokesGained.baseline(at: coinFlipDistance).makeProbability
         #expect(abs(p - 0.5) < 0.06)  // the table really is near a coin flip here
 
         let holed = Putt(holeNumber: 1, puttNumber: 1, distanceM: coinFlipDistance, puttFor: .par, result: .holed)
         let missed = Putt(holeNumber: 1, puttNumber: 1, distanceM: coinFlipDistance, puttFor: .par, result: .short)
-        #expect(abs(holed.gsd - (1 - p)) < 0.0001)
-        #expect(abs(missed.gsd + p) < 0.0001)
-        #expect(abs(holed.gsd + missed.gsd - (1 - 2 * p)) < 0.0001)
+        #expect(abs(holed.pcg - (1 - p)) < 0.0001)
+        #expect(abs(missed.pcg + p) < 0.0001)
+        #expect(abs(holed.pcg + missed.pcg - (1 - 2 * p)) < 0.0001)
     }
 
     /// The long putt nobody makes: holing it is worth nearly a full shot,
     /// missing it costs almost nothing.
-    @Test func gsdRewardsHolingUnlikelyPutts() async throws {
+    @Test func pcgRewardsHolingUnlikelyPutts() async throws {
         let holed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 20, puttFor: .par, result: .holed)
         let missed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 20, puttFor: .par, result: .short)
-        #expect(holed.gsd > 0.95)
-        #expect(missed.gsd > -0.05 && missed.gsd < 0)
+        #expect(holed.pcg > 0.95)
+        #expect(missed.pcg > -0.05 && missed.pcg < 0)
     }
 
     /// A tap-in is the mirror image: expected, so holing it gains nothing and
     /// missing it is a full-shot blunder.
-    @Test func gsdPunishesMissingGimmes() async throws {
+    @Test func pcgPunishesMissingGimmes() async throws {
         let holed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 0.3, puttFor: .par, result: .holed)
         let missed = Putt(holeNumber: 1, puttNumber: 1, distanceM: 0.3, puttFor: .par, result: .short)
-        #expect(holed.gsd < 0.01)
-        #expect(missed.gsd < -0.95)
+        #expect(holed.pcg < 0.01)
+        #expect(missed.pcg < -0.95)
     }
 
     // MARK: - Score vs putting
@@ -952,6 +952,29 @@ struct PuttorTests {
         #expect(stats.girPuttedHoles == 1)
         #expect(abs((stats.avgPuttsOnGir ?? 0) - 1.0) < 0.0001)
         #expect(abs((stats.avgGirProximityM ?? 0) - 5.0) < 0.0001)
+    }
+
+    /// Lip-outs are counted per round for the miss tendency after it — and a
+    /// holed putt that touched the lip on its way in isn't one.
+    @MainActor
+    @Test func lipOutsCountOnlyWhenThePuttStayedOut() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        func add(hole: Int, result: PuttResult, lipOut: Bool) {
+            let putt = Putt(holeNumber: hole, puttNumber: 1, distanceM: 3, puttFor: .par, result: result, lipOut: lipOut)
+            putt.round = round
+            round.putts.append(putt)
+            context.insert(putt)
+        }
+        add(hole: 1, result: .left, lipOut: true)
+        add(hole: 2, result: .short, lipOut: true)
+        add(hole: 3, result: .right, lipOut: false)
+        add(hole: 4, result: .holed, lipOut: true)
+        try context.save()
+
+        #expect(RoundStats.compute(putts: round.putts).lipOutCount == 2)
     }
 
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {

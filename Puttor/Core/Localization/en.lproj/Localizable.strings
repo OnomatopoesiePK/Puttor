@@ -216,7 +216,7 @@
 "stats.rounds" = "ROUNDS";
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.sgSubtitle" = "avg / round vs PGA Tour baseline";
-"stats.gsdSubtitle" = "avg / round from the tour make rates";
+"stats.pcgSubtitle" = "avg / round from the tour make rates";
 "stats.scoreVsPutting" = "SCORE VS PUTTING";
 "stats.svp.scoreLegend" = "score played";
 "stats.svp.withoutLegend" = "with standardized putting";
@@ -409,6 +409,7 @@
 "custom.distance.slider" = "Slider";
 "custom.distance.numpad" = "Numpad";
 "summary.missesLabel" = "MISSES";
+"summary.lipOuts" = "%ld× lip out";
 "summary.missNoDirection" = "%ld more without a recorded direction";
 
 "stats.customCount" = "Custom";
@@ -449,28 +450,28 @@
 "onCourse.nineHoleRound" = "Nine-hole round";
 
 /* Stats reference */
-"stats.gsd" = "GSD";
+"stats.pcg" = "PCG";
 "summary.sgCaption" = "per hole";
-"summary.gsdCaption" = "per putt";
+"summary.pcgCaption" = "per putt";
 "settings.reference" = "HOW THE NUMBERS WORK";
-"settings.reference.desc" = "Strokes gained, GSD and the tour baseline";
-"reference.title" = "Strokes Gained & GSD";
+"settings.reference.desc" = "Strokes gained, PCG and the tour baseline";
+"reference.title" = "Strokes Gained & PCG";
 "reference.expectedPutts" = "EXP. PUTTS";
 "reference.intro" = "Two numbers, both measured against the PGA Tour average — but they answer different questions.";
 "reference.sgText" = "Strokes gained judges a whole hole: the putts the tour would need from your first distance, minus the putts you actually took. A single putt has none of its own, because how good a lag was only shows once the hole is over.";
-"reference.gsdText" = "GSD judges one stroke against the odds of holing from that distance. Sinking a putt nobody makes is worth nearly a full point; missing a tap-in costs nearly one.";
+"reference.pcgText" = "PCG judges one stroke against the odds of holing from that distance. Sinking a putt nobody makes is worth nearly a full point; missing a tap-in costs nearly one.";
 "reference.example" = "EXAMPLE";
 "reference.version" = "Puttor v1.0";
 "reference.sgTitle" = "STROKES GAINED PER HOLE";
 "reference.sgLegend" = "E(d₁) = expected putts from the first putt's distance · n = putts taken";
 "reference.sgExample" = "From 6 m the tour averages 1.86 putts. Two-putt it: −0.14. Hole it: +0.86.";
-"reference.gsdTitle" = "GSD PER PUTT";
-"reference.gsdLegend" = "p = tour make probability at that distance · first formula if holed, second if missed";
-"reference.gsdExample" = "A 2.5 m putt falls 49% of the time: making it is +0.51, missing it −0.49. From 20 m: +0.97 or −0.03.";
+"reference.pcgTitle" = "PERCENTAGE CONVERSION GAIN (PCG)";
+"reference.pcgLegend" = "p = tour make probability at that distance · first formula if holed, second if missed";
+"reference.pcgExample" = "A 2.5 m putt falls 49% of the time: making it is +0.51, missing it −0.49. From 20 m: +0.97 or −0.03.";
 "reference.tableNote" = "Expected putts pass 2 beyond about 9 m. The rows are read off two fitted curves, so every distance in between has its own value.";
 "reference.tableTitle" = "TOUR BASELINE";
 "reference.sourceTitle" = "WHERE THESE NUMBERS COME FROM";
-"reference.sourceText" = "Every figure in Puttor is measured against the PGA Tour, and that yardstick is Mark Broadie's work at Columbia University. His putts-gained paper is built on ShotLink, the tour's tracking system, which records the position of every putt to within an inch — millions of putts, not a sample. From that he publishes how many putts a tour player needs on average from each distance: 1.61 from 10 feet, exactly 2.0 from 33 feet. Those figures and the tour's published make rates are what the two curves above were fitted to, and Puttor stays within about a hundredth of a stroke of them. Strokes gained follows his definition unchanged: the putts the tour would have needed from where you stood, less the putts you actually took. GSD is not his — it is Puttor's own reading of the same make rates, scoring one stroke against the odds of holing it.";
+"reference.sourceText" = "Every figure in Puttor is measured against the PGA Tour, and that yardstick is Mark Broadie's work at Columbia University. His putts-gained paper is built on ShotLink, the tour's tracking system, which records the position of every putt to within an inch — millions of putts, not a sample. From that he publishes how many putts a tour player needs on average from each distance: 1.61 from 10 feet, exactly 2.0 from 33 feet. Those figures and the tour's published make rates are what the two curves above were fitted to, and Puttor stays within about a hundredth of a stroke of them. Strokes gained follows his definition unchanged: the putts the tour would have needed from where you stood, less the putts you actually took. PCG is not his — it is Puttor's own reading of the same make rates, scoring one stroke against the odds of holing it.";
 "reference.sourceLink" = "Broadie: Putts Gained — Measuring Putting on the PGA TOUR (PDF)";
 "reference.curvesTitle" = "THE CURVES BEHIND THE TABLE";
 "reference.curvesText" = "Both columns are read off fitted curves, with x = ln(distance in metres), from 0.3 m to 40 m.";

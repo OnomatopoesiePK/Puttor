@@ -216,7 +216,7 @@
 "stats.rounds" = "RUNDEN";
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.sgSubtitle" = "Ø / Runde vs. PGA-Tour-Baseline";
-"stats.gsdSubtitle" = "Ø / Runde aus den Tour-Trefferquoten";
+"stats.pcgSubtitle" = "Ø / Runde aus den Tour-Trefferquoten";
 "stats.scoreVsPutting" = "SCORE VS. PUTTEN";
 "stats.svp.scoreLegend" = "gespielter Score";
 "stats.svp.withoutLegend" = "mit standardisiertem Putten";
@@ -409,6 +409,7 @@
 "custom.distance.slider" = "Slider";
 "custom.distance.numpad" = "Numpad";
 "summary.missesLabel" = "MISSES";
+"summary.lipOuts" = "%ld× Lip-out";
 "summary.missNoDirection" = "%ld weitere ohne erfasste Richtung";
 
 "stats.customCount" = "Eigene";
@@ -449,28 +450,28 @@
 "onCourse.nineHoleRound" = "9-Loch-Runde";
 
 /* Statistik-Referenz */
-"stats.gsd" = "GSD";
+"stats.pcg" = "PKR";
 "summary.sgCaption" = "pro Loch";
-"summary.gsdCaption" = "pro Putt";
+"summary.pcgCaption" = "pro Putt";
 "settings.reference" = "WIE DIE ZAHLEN FUNKTIONIEREN";
-"settings.reference.desc" = "Strokes Gained, GSD und die Tour-Baseline";
-"reference.title" = "Strokes Gained & GSD";
+"settings.reference.desc" = "Strokes Gained, PKR und die Tour-Baseline";
+"reference.title" = "Strokes Gained & PKR";
 "reference.expectedPutts" = "ERW. PUTTS";
 "reference.intro" = "Zwei Zahlen, beide am PGA-Tour-Schnitt gemessen — sie beantworten aber verschiedene Fragen.";
 "reference.sgText" = "Strokes Gained bewertet ein ganzes Loch: die Putts, die die Tour ab deiner ersten Distanz bräuchte, minus die, die du gebraucht hast. Ein einzelner Putt hat kein eigenes SG, denn wie gut ein Lag war, zeigt sich erst am Ende des Lochs.";
-"reference.gsdText" = "GSD bewertet einen einzelnen Schlag an der Trefferquote von dieser Distanz. Einen fast unmöglichen Putt zu lochen ist fast einen ganzen Punkt wert; ein Tap-in zu verfehlen kostet fast einen.";
+"reference.pcgText" = "Die PKR bewertet einen einzelnen Schlag an der Trefferquote von dieser Distanz. Einen fast unmöglichen Putt zu lochen ist fast einen ganzen Punkt wert; ein Tap-in zu verfehlen kostet fast einen.";
 "reference.example" = "BEISPIEL";
 "reference.version" = "Puttor v1.0";
 "reference.sgTitle" = "STROKES GAINED PRO LOCH";
 "reference.sgLegend" = "E(d₁) = erwartete Putts ab der Distanz des ersten Putts · n = benötigte Putts";
 "reference.sgExample" = "Aus 6 m braucht die Tour im Schnitt 1,86 Putts. Zwei Putts: −0,14. Gelocht: +0,86.";
-"reference.gsdTitle" = "GSD PRO PUTT";
-"reference.gsdLegend" = "p = Tour-Trefferquote auf dieser Distanz · erste Formel wenn gelocht, zweite wenn verfehlt";
-"reference.gsdExample" = "Ein 2,5-m-Putt fällt zu 49 %: gelocht +0,51, verfehlt −0,49. Aus 20 m: +0,97 oder −0,03.";
+"reference.pcgTitle" = "PROZENTUELLE KONVERSIONSRATE (PKR)";
+"reference.pcgLegend" = "p = Tour-Trefferquote auf dieser Distanz · erste Formel wenn gelocht, zweite wenn verfehlt";
+"reference.pcgExample" = "Ein 2,5-m-Putt fällt zu 49 %: gelocht +0,51, verfehlt −0,49. Aus 20 m: +0,97 oder −0,03.";
 "reference.tableNote" = "Die erwarteten Putts überschreiten ab etwa 9 m die 2. Die Zeilen stammen aus zwei angepassten Kurven, jede Distanz dazwischen hat also ihren eigenen Wert.";
 "reference.tableTitle" = "TOUR-BASISWERTE";
 "reference.sourceTitle" = "WORAUF DIESE ZAHLEN BERUHEN";
-"reference.sourceText" = "Jede Zahl in Puttor wird am PGA-Tour-Schnitt gemessen, und dieser Maßstab stammt aus der Arbeit von Mark Broadie an der Columbia University. Sein Putts-Gained-Paper stützt sich auf ShotLink, das Erfassungssystem der Tour, das die Position jedes Putts auf etwa einen Zoll genau festhält — Millionen Putts, keine Stichprobe. Daraus veröffentlicht er, wie viele Putts ein Tour-Spieler aus jeder Distanz im Schnitt braucht: 1,61 aus 10 Fuß, genau 2,0 aus 33 Fuß. An diesen Werten und den veröffentlichten Trefferquoten sind die beiden Kurven oben angepasst; Puttor bleibt ihnen bis auf rund einen Hundertstel Schlag treu. Strokes Gained folgt unverändert seiner Definition: die Putts, die die Tour von deiner Position gebraucht hätte, minus die, die du gebraucht hast. GSD stammt nicht von ihm — das ist Puttors eigene Lesart derselben Trefferquoten, die einen einzelnen Schlag an seiner Lochwahrscheinlichkeit misst.";
+"reference.sourceText" = "Jede Zahl in Puttor wird am PGA-Tour-Schnitt gemessen, und dieser Maßstab stammt aus der Arbeit von Mark Broadie an der Columbia University. Sein Putts-Gained-Paper stützt sich auf ShotLink, das Erfassungssystem der Tour, das die Position jedes Putts auf etwa einen Zoll genau festhält — Millionen Putts, keine Stichprobe. Daraus veröffentlicht er, wie viele Putts ein Tour-Spieler aus jeder Distanz im Schnitt braucht: 1,61 aus 10 Fuß, genau 2,0 aus 33 Fuß. An diesen Werten und den veröffentlichten Trefferquoten sind die beiden Kurven oben angepasst; Puttor bleibt ihnen bis auf rund einen Hundertstel Schlag treu. Strokes Gained folgt unverändert seiner Definition: die Putts, die die Tour von deiner Position gebraucht hätte, minus die, die du gebraucht hast. Die PKR stammt nicht von ihm — das ist Puttors eigene Lesart derselben Trefferquoten, die einen einzelnen Schlag an seiner Lochwahrscheinlichkeit misst.";
 "reference.sourceLink" = "Broadie: Putts Gained — Measuring Putting on the PGA TOUR (PDF)";
 "reference.curvesTitle" = "DIE KURVEN HINTER DER TABELLE";
 "reference.curvesText" = "Beide Spalten stammen aus angepassten Kurven, mit x = ln(Distanz in Metern), von 0,3 m bis 40 m.";

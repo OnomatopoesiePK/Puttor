@@ -30,7 +30,7 @@ final class Putt {
 
     // Legacy columns from when each putt carried its own strokes-gained value.
     // Strokes gained is now a per-hole figure derived from the hole's putts, and
-    // the per-putt number is `gsd`, so nothing reads these. They stay declared
+    // the per-putt number is `pcg`, so nothing reads these. They stay declared
     // only to leave the stored schema untouched.
     var sgBaseline: Double = 0
     var sgActual: Double = 0
@@ -57,13 +57,13 @@ final class Putt {
         set { resultRaw = newValue.rawValue }
     }
 
-    /// Gained Shots per Distance: how the result compares with the tour's odds
+    /// Percentage conversion gain: how the result compares with the tour's odds
     /// of making a putt from here. Holing a coin-flip is +0.5, missing it -0.5;
     /// holing a 20m putt is nearly +1, missing one costs almost nothing.
     ///
     /// Unlike strokes gained it judges a single stroke rather than a hole, so it
     /// never depends on what happened next.
-    var gsd: Double {
+    var pcg: Double {
         let makeProbability = StrokesGained.baseline(at: distanceM).makeProbability
         return result.isHoled ? 1 - makeProbability : -makeProbability
     }

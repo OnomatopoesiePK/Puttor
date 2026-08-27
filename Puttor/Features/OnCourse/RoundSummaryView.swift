@@ -29,7 +29,7 @@ struct RoundSummaryView: View {
     private var holeCount: Int { round.holeCount == 9 ? 9 : 18 }
 
     private var highlight: Putt? {
-        putts.filter { $0.result == .holed && $0.distanceM >= 1.5 }.max { $0.gsd < $1.gsd }
+        putts.filter { $0.result == .holed && $0.distanceM >= 1.5 }.max { $0.pcg < $1.pcg }
     }
 
     private var hasSituationData: Bool {
@@ -63,16 +63,16 @@ struct RoundSummaryView: View {
                 }
 
                 // Two different questions, so they get their own row: strokes
-                // gained scores whole holes, GSD scores single putts.
+                // gained scores whole holes, PCG scores single putts.
                 HStack(spacing: Theme.Spacing.xs) {
                     bigStat(L("summary.sg"),
                             "\(stats.sgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.sgTotal))",
                             caption: L("summary.sgCaption"),
                             color: sgColor(stats.sgTotal))
-                    bigStat(L("stats.gsd"),
-                            "\(stats.gsdTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.gsdTotal))",
-                            caption: L("summary.gsdCaption"),
-                            color: sgColor(stats.gsdTotal))
+                    bigStat(L("stats.pcg"),
+                            "\(stats.pcgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.pcgTotal))",
+                            caption: L("summary.pcgCaption"),
+                            color: sgColor(stats.pcgTotal))
                 }
 
                 if let highlight {
@@ -239,7 +239,7 @@ struct RoundSummaryView: View {
             Text("\(L("summary.holeAbbr")) \(putt.holeNumber) · \(UnitConverter.formatDistance(putt.distanceM, useFeet: useFeet)) \(L("result.holed"))")
                 .font(.system(size: 16, weight: .heavy))
                 .foregroundStyle(Theme.text)
-            Text("+\(String(format: "%.2f", putt.gsd)) \(L("stats.gsd"))")
+            Text("+\(String(format: "%.2f", putt.pcg)) \(L("stats.pcg"))")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(Theme.primary)
         }
@@ -391,7 +391,7 @@ struct RoundSummaryView: View {
                     Spacer(minLength: 0)
                     // Column heading for the per-putt numbers listed below.
                     if !holePutts.isEmpty {
-                        Text(L("stats.gsd"))
+                        Text(L("stats.pcg"))
                             .font(.system(size: 9, weight: .bold)).tracking(0.8)
                             .foregroundStyle(Theme.textMuted)
                     }
@@ -410,9 +410,9 @@ struct RoundSummaryView: View {
                     Text(UnitConverter.formatDistance(p.distanceM, useFeet: useFeet)).font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.text).frame(width: 46, alignment: .leading)
                     Text(L(p.result.labelKey)).font(.system(size: 12, weight: .semibold)).foregroundStyle(p.result == .holed ? Theme.primary : Theme.error)
                     Spacer()
-                    Text("\(p.gsd > 0 ? "+" : "")\(String(format: "%.2f", p.gsd))")
+                    Text("\(p.pcg > 0 ? "+" : "")\(String(format: "%.2f", p.pcg))")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(p.gsd > 0 ? Theme.primary : (p.gsd < 0 ? Theme.error : Theme.textSecondary))
+                        .foregroundStyle(p.pcg > 0 ? Theme.primary : (p.pcg < 0 ? Theme.error : Theme.textSecondary))
                 }
             }
         }
@@ -423,7 +423,7 @@ struct RoundSummaryView: View {
     }
 
     private var missGrid: some View {
-        MissDonutView(missCounts: stats.missCounts)
+        MissDonutView(missCounts: stats.missCounts, lipOutCount: stats.lipOutCount)
     }
 
     private func reasonStat(_ value: String, _ label: String, color: Color = Theme.warning) -> some View {

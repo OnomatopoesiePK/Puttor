@@ -13,6 +13,10 @@ import SwiftUI
 struct MissDonutView: View {
     /// Raw result counts; holed and non-directional results are filtered out here.
     let missCounts: [PuttResult: Int]
+    /// Putts that lipped out. Zero leaves the middle hollow, as before — only
+    /// the round summary passes a count, where the lip-outs of that round are
+    /// still fresh enough to mean something.
+    var lipOutCount: Int = 0
 
     private let size: CGFloat = 260
 
@@ -94,17 +98,30 @@ struct MissDonutView: View {
             }
 
             // Hollow centre: the total, so the ring still answers "how many".
+            // Lip-outs join it there, the way the dartboard keeps them in the
+            // middle — the misses that were nearly in.
+            let shift: CGFloat = lipOutCount > 0 ? 8 : 0
+
             var totalLabel = context.resolve(
                 Text("\(total)").font(.system(size: 22, weight: .black))
             )
             totalLabel.shading = .color(Theme.text)
-            context.draw(totalLabel, at: CGPoint(x: center.x, y: center.y - 8), anchor: .center)
+            context.draw(totalLabel, at: CGPoint(x: center.x, y: center.y - 8 - shift), anchor: .center)
 
             var caption = context.resolve(
                 Text(L("summary.missesLabel")).font(.system(size: 9, weight: .bold))
             )
             caption.shading = .color(Theme.textMuted)
-            context.draw(caption, at: CGPoint(x: center.x, y: center.y + 12), anchor: .center)
+            context.draw(caption, at: CGPoint(x: center.x, y: center.y + 12 - shift), anchor: .center)
+
+            if lipOutCount > 0 {
+                var lip = context.resolve(
+                    Text(String(format: L("summary.lipOuts"), lipOutCount))
+                        .font(.system(size: 11, weight: .bold))
+                )
+                lip.shading = .color(Theme.lipOut)
+                context.draw(lip, at: CGPoint(x: center.x, y: center.y + 28), anchor: .center)
+            }
         }
         .frame(width: size, height: size)
     }
