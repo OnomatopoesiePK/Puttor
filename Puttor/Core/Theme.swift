@@ -64,12 +64,19 @@ enum Theme {
     static var missLipIdle: Color { t(0x2A3D2A, 0x3F6B45) }
     static var missHoledIdle: Color { t(0x1E3A28, 0x2C6440) }
 
-    // Dispersion shading ramps. Break runs light blue to red, the way the
-    // slope grid reads a gentle line against a severe one. Length keeps one
-    // blue and varies its opacity instead, which separates near from far more
-    // clearly than a hue shift does.
-    static var dispersionBreakLow: Color { t(0x8FD0EE, 0x74B9DF) }
-    static var dispersionBreakHigh: Color { t(0xFF5C6C, 0xD62839) }
+    // Break strength is drawn in the slope grid artwork's own colours, one per
+    // step out from the middle: flat, 1, 2, 3, and more than 3 percent. Same
+    // values in both themes, since the grid is one image either way.
+    static let slopeClassColors: [Color] = [
+        Color(hex: 0xADE9E6), // flat
+        Color(hex: 0x4F748F), // 1
+        Color(hex: 0x59395D), // 2
+        Color(hex: 0x78401E), // 3
+        Color(hex: 0x981B25), // more than 3
+    ]
+
+    // Length keeps one blue and varies its opacity, which separates near from
+    // far more clearly than a hue shift does.
     static var dispersionLengthLow: Color { t(0x7FBBFF, 0x1D5FCC) }
     static var dispersionLengthHigh: Color { t(0x7FBBFF, 0x1D5FCC) }
 

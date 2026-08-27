@@ -233,10 +233,24 @@ struct MissDispersionPlotView: View {
     /// readable and overlapping markers still show what is underneath.
     private let dotOpacity: Double = 0.6
 
+    /// Break strength is stepped, not blended: the grid the putt was entered
+    /// on has five classes, so the plot uses the same five and the same
+    /// colours.
+    private func breakClass(_ percent: Double) -> Int {
+        let value = abs(percent)
+        if value < 0.5 { return 0 }
+        if value < 1.5 { return 1 }
+        if value < 2.5 { return 2 }
+        if value < 3.25 { return 3 }
+        return 4
+    }
+
+    private static let breakClassLabels = ["0", "1", "2", "3", ">3"]
+
     private var rampEnds: (low: Color, high: Color) {
         switch shading {
         case .none: return (Theme.error, Theme.error)
-        case .breakMagnitude: return (Theme.dispersionBreakLow, Theme.dispersionBreakHigh)
+        case .breakMagnitude: return (Theme.slopeClassColors.first ?? Theme.error, Theme.slopeClassColors.last ?? Theme.error)
         case .puttLength: return (Theme.dispersionLengthLow, Theme.dispersionLengthHigh)
         // Deliberately the other way round from the slope grid: on the miss
         // board the uphill putts are the red ones.
@@ -247,6 +261,9 @@ struct MissDispersionPlotView: View {
     /// Colour for one dot's averaged value. Slope reads outwards from a flat
     /// middle, the other two from nothing to the strongest in view.
     private func shadingColor(_ value: Double) -> Color {
+        if shading == .breakMagnitude {
+            return Theme.slopeClassColors[breakClass(value)].opacity(dotOpacity)
+        }
         guard shadingScale > 0.0001 else { return Theme.error.opacity(dotOpacity) }
         let ends = rampEnds
         if shading.isSigned {
@@ -265,7 +282,39 @@ struct MissDispersionPlotView: View {
         return mix(ends.low, ends.high, t).opacity(dotOpacity)
     }
 
+    @ViewBuilder
     private var shadingLegend: some View {
+        if shading == .breakMagnitude {
+            breakLegend
+        } else {
+            rampLegend
+        }
+    }
+
+    /// One swatch per class, labelled with the percent it stands for.
+    private var breakLegend: some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 4) {
+                ForEach(Array(Theme.slopeClassColors.enumerated()), id: \.offset) { index, color in
+                    VStack(spacing: 3) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(color.opacity(dotOpacity))
+                            .frame(height: 10)
+                        Text(Self.breakClassLabels[index])
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(Theme.textMuted)
+                    }
+                }
+            }
+            Text(L("dispersion.shading.breakLegend"))
+                .font(.system(size: 9))
+                .foregroundStyle(Theme.textMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(width: size)
+    }
+
+    private var rampLegend: some View {
         VStack(spacing: 4) {
             let ends = rampEnds
             LinearGradient(

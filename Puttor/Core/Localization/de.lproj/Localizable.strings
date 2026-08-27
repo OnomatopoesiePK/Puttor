@@ -235,6 +235,7 @@
 "dispersion.all" = "Alle Neigungen";
 "dispersion.shading.none" = "Keine Färbung";
 "dispersion.shading.break" = "Break-Stärke";
+"dispersion.shading.breakLegend" = "Break In Prozent, In Den Klassen Des Eingabe-Grids";
 "dispersion.shading.length" = "Putt-Länge";
 "dispersion.shading.slope" = "Bergauf / Bergab";
 "dispersion.shading.flat" = "Eben";

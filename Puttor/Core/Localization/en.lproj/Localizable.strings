@@ -235,6 +235,7 @@
 "dispersion.all" = "All Slopes";
 "dispersion.shading.none" = "No Shading";
 "dispersion.shading.break" = "Break Strength";
+"dispersion.shading.breakLegend" = "Break In Percent, In The Classes Of The Entry Grid";
 "dispersion.shading.length" = "Putt Length";
 "dispersion.shading.slope" = "Uphill / Downhill";
 "dispersion.shading.flat" = "Flat";
