@@ -18,10 +18,12 @@ private struct PulseHighlight: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            // No animated shadow here on purpose: a blur that changes every
+            // frame, on several boxes at once, is offscreen work the scroll
+            // view pays for. Fill and outline carry the pulse instead.
             .background(
                 RoundedRectangle(cornerRadius: Theme.Radius.md)
-                    .fill(color.opacity(isActive && on ? 0.55 : 0.05))
-                    .shadow(color: color.opacity(isActive && on ? 0.9 : 0), radius: on ? 22 : 0)
+                    .fill(color.opacity(isActive ? (on ? 0.6 : 0.10) : 0))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.md)

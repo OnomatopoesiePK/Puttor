@@ -108,11 +108,18 @@ struct MissDispersionPlotView: View {
     private let maxR: CGFloat = 100
     private let plotLimit: CGFloat = 110
 
-    /// Largest shading value in view, which the colour ramp stretches over.
-    /// Zero means the putts carry nothing to shade by — slope left unrecorded,
-    /// for instance.
-    private var shadingScale: Double {
-        dots.flatMap(\.values).map { abs($0) }.max() ?? 0
+    /// Everything the plot draws, worked out in one pass.
+    ///
+    /// This used to be two computed properties that each walked every putt of
+    /// every round — and the colour of a single dot asked for the scale, which
+    /// rebuilt the lot. Drawing a few dozen dots meant thousands of full
+    /// rebuilds per frame, which is what made the tab crawl.
+    private struct DispersionData {
+        var dots: [DispersionDot] = []
+        /// Largest shading value in view, which the colour ramp stretches over.
+        /// Zero means the putts carry nothing to shade by — slope left
+        /// unrecorded, for instance.
+        var shadingScale: Double = 0
     }
 
     /// Ring distances, marked on the scale line. The outer one — 3 m, or 10 ft
@@ -138,7 +145,7 @@ struct MissDispersionPlotView: View {
         return min(plotLimit, max(12, scaled))
     }
 
-    private var dots: [DispersionDot] {
+    private func computeData() -> DispersionData {
         var byHole: [String: [Putt]] = [:]
         for p in putts {
             let key = "\(p.round?.id.uuidString ?? "-")-\(p.holeNumber)"
@@ -173,17 +180,22 @@ struct MissDispersionPlotView: View {
                 }
             }
         }
-        return result
+        return DispersionData(
+            dots: result,
+            shadingScale: result.flatMap(\.values).map { abs($0) }.max() ?? 0
+        )
     }
 
     var body: some View {
-        VStack(spacing: 6) {
+        let data = computeData()
+
+        return VStack(spacing: 6) {
             if filter == .rl || filter == .lr {
                 slopeArrowHorizontal
             }
 
             HStack(spacing: 8) {
-                if dots.isEmpty {
+                if data.dots.isEmpty {
                     VStack {
                         Text(L("dispersion.noData"))
                             .font(.system(size: 12))
@@ -193,7 +205,7 @@ struct MissDispersionPlotView: View {
                     .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
                 } else {
                     ZStack {
-                        plot
+                        plot(data)
                         Text(L("dispersion.left")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
                             .position(x: 2, y: size / 2)
                         Text(L("dispersion.right")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
@@ -211,9 +223,9 @@ struct MissDispersionPlotView: View {
                 }
             }
 
-            if shading != .none, !dots.isEmpty {
-                if shadingScale > 0.0001 {
-                    shadingLegend
+            if shading != .none, !data.dots.isEmpty {
+                if data.shadingScale > 0.0001 {
+                    shadingLegend(scale: data.shadingScale)
                 } else {
                     Text(L("dispersion.shading.noValues"))
                         .font(.system(size: 10))
@@ -240,16 +252,16 @@ struct MissDispersionPlotView: View {
     /// How much of a putt this is, on a 0…1 scale: the class of its break, its
     /// length against the longest in view, or how far its slope is from level.
     /// Drives both the opacity and the drawing order.
-    private func normalisedStrength(_ value: Double) -> Double {
+    private func normalisedStrength(_ value: Double, scale: Double) -> Double {
         switch shading {
         case .none:
             return 0
         case .breakMagnitude:
             return Double(breakClass(value)) / 4
         case .puttLength:
-            return shadingScale > 0.0001 ? min(1, max(0, value / shadingScale)) : 0
+            return scale > 0.0001 ? min(1, max(0, value / scale)) : 0
         case .slope:
-            return shadingScale > 0.0001 ? min(1, abs(value) / shadingScale) : 0
+            return scale > 0.0001 ? min(1, abs(value) / scale) : 0
         }
     }
 
@@ -280,36 +292,38 @@ struct MissDispersionPlotView: View {
 
     /// Colour for one dot's averaged value. Slope reads outwards from a flat
     /// middle, the other two from nothing to the strongest in view.
-    private func shadingColor(_ value: Double) -> Color {
+    private func shadingColor(_ value: Double, scale: Double) -> Color {
+        let strength = normalisedStrength(value, scale: scale)
         if shading == .breakMagnitude {
-            return Theme.slopeClassColors[breakClass(value)]
-                .opacity(dotOpacity(normalisedStrength(value)))
+            return Theme.slopeClassColors[breakClass(value)].opacity(dotOpacity(strength))
         }
-        guard shadingScale > 0.0001 else { return Theme.error.opacity(maxDotOpacity) }
+        guard scale > 0.0001 else { return Theme.error.opacity(maxDotOpacity) }
         let ends = rampEnds
         if shading.isSigned {
-            let t = max(-1, min(1, value / shadingScale))
+            let t = max(-1, min(1, value / scale))
             let base = t >= 0
                 ? mix(Theme.textMuted, ends.high, t)
                 : mix(Theme.textMuted, ends.low, -t)
             // A level putt has nothing to say, a steep one has all of it.
-            return base.opacity(dotOpacity(normalisedStrength(value)))
+            return base.opacity(dotOpacity(strength))
         }
-        let t = max(0, min(1, value / shadingScale))
+        let t = max(0, min(1, value / scale))
         if shading == .puttLength {
             // One colour, carried from barely there to nearly solid — a longer
             // reach than any hue shift over this small a dot.
-            return ends.high.opacity(dotOpacity(normalisedStrength(value)))
+            return ends.high.opacity(dotOpacity(strength))
         }
-        return mix(ends.low, ends.high, t).opacity(dotOpacity(normalisedStrength(value)))
+        return mix(ends.low, ends.high, t).opacity(dotOpacity(strength))
     }
 
     @ViewBuilder
-    private var shadingLegend: some View {
-        if shading == .breakMagnitude {
-            breakLegend
-        } else {
-            rampLegend
+    private func shadingLegend(scale: Double) -> some View {
+        Group {
+            if shading == .breakMagnitude {
+                breakLegend
+            } else {
+                rampLegend(scale: scale)
+            }
         }
     }
 
@@ -336,7 +350,7 @@ struct MissDispersionPlotView: View {
         .frame(width: size)
     }
 
-    private var rampLegend: some View {
+    private func rampLegend(scale: Double) -> some View {
         VStack(spacing: 4) {
             let ends = rampEnds
             LinearGradient(
@@ -349,13 +363,13 @@ struct MissDispersionPlotView: View {
             .clipShape(Capsule())
 
             HStack {
-                Text(legendLabel(shading.isSigned ? -shadingScale : 0))
+                Text(legendLabel(shading.isSigned ? -scale : 0))
                 Spacer()
                 if shading.isSigned {
                     Text(L("dispersion.shading.flat"))
                     Spacer()
                 }
-                Text(legendLabel(shadingScale))
+                Text(legendLabel(scale))
             }
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(Theme.textMuted)
@@ -388,7 +402,7 @@ struct MissDispersionPlotView: View {
         return Color(red: channel(0), green: channel(1), blue: channel(2))
     }
 
-    private var plot: some View {
+    private func plot(_ data: DispersionData) -> some View {
         Canvas { context, canvasSize in
             let c = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
             // The scale reads outwards from the hole along one line to the
@@ -434,8 +448,11 @@ struct MissDispersionPlotView: View {
             // Strongest first, so the solid markers lie underneath and the
             // pale short-and-straight ones sit on top without hiding them.
             let ordered = shading == .none
-                ? dots
-                : dots.sorted { normalisedStrength($0.shadingAverage ?? 0) > normalisedStrength($1.shadingAverage ?? 0) }
+                ? data.dots
+                : data.dots.sorted {
+                    normalisedStrength($0.shadingAverage ?? 0, scale: data.shadingScale)
+                        > normalisedStrength($1.shadingAverage ?? 0, scale: data.shadingScale)
+                }
 
             for dot in ordered {
                 let r = min(22, 6 + CGFloat(dot.count - 1) * 2.4)
@@ -458,11 +475,11 @@ struct MissDispersionPlotView: View {
                             clockwise: false
                         )
                         wedge.closeSubpath()
-                        context.fill(wedge, with: .color(shadingColor(value)))
+                        context.fill(wedge, with: .color(shadingColor(value, scale: data.shadingScale)))
                     }
                     context.stroke(Path(ellipseIn: rect), with: .color(Theme.background.opacity(0.8)), lineWidth: 1)
                 } else if let value = dot.values.first {
-                    context.fill(Path(ellipseIn: rect), with: .color(shadingColor(value)))
+                    context.fill(Path(ellipseIn: rect), with: .color(shadingColor(value, scale: data.shadingScale)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Theme.background.opacity(0.8)), lineWidth: 1)
                 } else {
                     let alpha = min(maxDotOpacity, minDotOpacity + Double(dot.count) * 0.08)

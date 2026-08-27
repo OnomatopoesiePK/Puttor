@@ -57,8 +57,9 @@ struct StatisticsView: View {
     @State private var dispersionShading: DispersionShading = .none
     @State private var dispersionFromText: String = ""
     @State private var dispersionToText: String = ""
-    /// Once the player types a bound, the fields stop following the data.
-    @State private var dispersionRangeEdited = false
+    /// The last computed bundle, rebuilt only when the rounds behind it change
+    /// — not on every keystroke in a filter field or every section that folds.
+    @State private var bundle = StatsBundle()
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -140,6 +141,10 @@ struct StatisticsView: View {
                 scoreAggregated.makeByCategory[$0]?.contains { $0.total > 0 } ?? false
             }
         }
+
+        /// The blank state the tab renders for the instant before the first
+        /// computation lands.
+        init() {}
 
         init(rounds: [Round], useFeet: Bool) {
             var perRound: [RoundStats] = []
@@ -228,9 +233,8 @@ struct StatisticsView: View {
 
             Spacer(minLength: 0)
 
-            if dispersionRangeEdited {
+            if !isFullRange(longest: longest) {
                 Button {
-                    dispersionRangeEdited = false
                     resetDispersionRange(longest: longest)
                 } label: {
                     Image(systemName: "arrow.counterclockwise")
@@ -240,13 +244,34 @@ struct StatisticsView: View {
                 .buttonStyle(.plain)
             }
         }
-        .onAppear { if !dispersionRangeEdited { resetDispersionRange(longest: longest) } }
-        .onChange(of: longest) { _, newValue in
-            if !dispersionRangeEdited { resetDispersionRange(longest: newValue) }
+        // The fields keep following the data until they hold something the
+        // player typed; comparing against the bounds they would otherwise show
+        // says which of the two it is, with no flag to fall out of step.
+        .onAppear {
+            if dispersionFromText.isEmpty || dispersionToText.isEmpty {
+                resetDispersionRange(longest: longest)
+            }
         }
-        .onChange(of: useFeet) { _, _ in
-            if !dispersionRangeEdited { resetDispersionRange(longest: longest) }
+        .onChange(of: longest) { previous, current in
+            if dispersionToText == DistanceRangeFilter.text(forMetres: previous, useFeet: useFeet) {
+                dispersionToText = DistanceRangeFilter.text(forMetres: current, useFeet: useFeet)
+            }
         }
+        .onChange(of: useFeet) { wasFeet, nowFeet in
+            // Same putts, different unit: carry the numbers over rather than
+            // leaving "4" meaning metres one moment and feet the next.
+            for field in [$dispersionFromText, $dispersionToText] {
+                guard let metres = DistanceRangeFilter.parse(field.wrappedValue, useFeet: wasFeet) else { continue }
+                field.wrappedValue = DistanceRangeFilter.text(forMetres: metres, useFeet: nowFeet)
+            }
+        }
+    }
+
+    /// True while the fields still hold the whole range, so the reset button
+    /// only appears once there is something to reset.
+    private func isFullRange(longest: Double) -> Bool {
+        dispersionFromText == DistanceRangeFilter.text(forMetres: 0, useFeet: useFeet)
+            && dispersionToText == DistanceRangeFilter.text(forMetres: longest, useFeet: useFeet)
     }
 
     private func rangeField(_ text: Binding<String>) -> some View {
@@ -259,14 +284,12 @@ struct StatisticsView: View {
             .padding(.vertical, 6)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.surfaceElevated))
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.border, lineWidth: 1))
-            .onChange(of: text.wrappedValue) { _, _ in dispersionRangeEdited = true }
+
     }
 
     private func resetDispersionRange(longest: Double) {
         dispersionFromText = DistanceRangeFilter.text(forMetres: 0, useFeet: useFeet)
         dispersionToText = DistanceRangeFilter.text(forMetres: longest, useFeet: useFeet)
-        // Filling the fields is not the player editing them.
-        dispersionRangeEdited = false
     }
 
     private func decimalText(_ value: Double?) -> String {
@@ -279,8 +302,24 @@ struct StatisticsView: View {
         return "\(average > 0 ? "+" : "")\(String(format: "%.1f", average))"
     }
 
+    /// What the bundle depends on: which rounds are in view, how many putts
+    /// they hold (so an edit during the session still lands), and the unit.
+    private var statsKey: StatsKey {
+        StatsKey(
+            roundIDs: filteredRounds.map(\.persistentModelID),
+            puttCount: filteredRounds.reduce(0) { $0 + $1.putts.count },
+            useFeet: useFeet
+        )
+    }
+
+    private struct StatsKey: Equatable {
+        let roundIDs: [PersistentIdentifier]
+        let puttCount: Int
+        let useFeet: Bool
+    }
+
     var body: some View {
-        let data = StatsBundle(rounds: filteredRounds, useFeet: useFeet)
+        let data = bundle
 
         return NavigationStack {
             VStack(spacing: 0) {
@@ -524,6 +563,9 @@ struct StatisticsView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
+            .task(id: statsKey) {
+                bundle = StatsBundle(rounds: filteredRounds, useFeet: useFeet)
+            }
             .sheet(isPresented: $showRoundPicker) {
                 RoundSelectionSheet(
                     rounds: completeRounds,
