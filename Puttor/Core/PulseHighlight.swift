@@ -20,17 +20,19 @@ private struct PulseHighlight: ViewModifier {
         content
             .background(
                 RoundedRectangle(cornerRadius: Theme.Radius.md)
-                    .fill(color.opacity(isActive && on ? 0.20 : 0.0))
-                    .shadow(color: color.opacity(isActive && on ? 0.45 : 0), radius: on ? 10 : 0)
+                    .fill(color.opacity(isActive && on ? 0.55 : 0.05))
+                    .shadow(color: color.opacity(isActive && on ? 0.9 : 0), radius: on ? 22 : 0)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.md)
-                    .stroke(color.opacity(isActive ? (on ? 0.9 : 0.35) : 0), lineWidth: 1.5)
+                    .stroke(color.opacity(isActive ? (on ? 1 : 0.4) : 0), lineWidth: isActive ? 3 : 0)
             )
-            .scaleEffect(isActive && on ? 1.02 : 1)
+            // Four times the swing it had: the box grows by eight percent
+            // rather than two, and breathes a little faster with it.
+            .scaleEffect(isActive && on ? 1.08 : 1)
             .onAppear {
                 guard isActive else { return }
-                withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) { on = true }
+                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { on = true }
             }
     }
 }
