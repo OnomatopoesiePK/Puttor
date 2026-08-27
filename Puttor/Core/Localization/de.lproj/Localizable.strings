@@ -237,7 +237,7 @@
 "stats.rounds.info" = "Eine Kachel je Runde im aktuellen Filter mit ihren Strokes Gained beim Putten: pro Loch die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten.";
 "stats.sgPutting.info" = "Strokes Gained pro Loch, über die Runde summiert und über die gefilterten Runden gemittelt. Die PKR darunter ist der Wert pro Putt: wie das Ergebnis im Vergleich zur Tour-Trefferquote auf dieser Distanz steht.";
 "stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde. GIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden. Die drei Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde.";
-"stats.dispersion.info" = "Jeder Miss liegt in der eingetragenen Richtung, im Abstand der Restdistanz — übernommen vom nächsten Putt dieses Lochs oder geschätzt, wenn das Loch dort endete. Die Ringe markieren 1, 2 und 3 Meter; längere Reste liegen außerhalb. Das erste Menü grenzt die Putts nach Neigung ein, das zweite färbt sie: Break-Stärke in den fünf Klassen des Eingabe-Grids, Putt-Länge über die Deckkraft, oder bergauf gegen bergab. Schwierigere Putts drucken kräftiger und liegen hinter den blassen. Teilen sich mehrere Putts einen Punkt, wird er zum Tortendiagramm und wächst mit ihrer Zahl.";
+"stats.dispersion.info" = "Jeder verfehlte Putt liegt in der Richtung, in die er vorbeiging, und so weit vom Loch entfernt, wie er liegen geblieben ist — dafür braucht es bei der Eingabe das komplexe Resultat-Feld. Die Ringe markieren 1, 2 und 3 Meter Restdistanz; alles Längere liegt außerhalb. Das erste Menü wählt, welche Break-Richtungen gezeigt werden, das zweite, wofür die Farben stehen: die Stärke des Breaks, die Länge des Putts oder wie stark es bergauf oder bergab ging. Ein größerer Punkt heißt mehr Misses an derselben Stelle, und sobald ein Farbfilter aktiv ist, zeigt die Farbe jedes Punktes, in welche Klasse er fällt.";
 "chart.makeVsTour.info" = "Eine Zeile je Distanzbereich: deine gelochten Putts gegenüber den Versuchen von dort, verglichen mit der Tour-Trefferquote über denselben Bereich. Die rechte Spalte summiert die PKR dieses Bereichs, geteilt durch die Anzahl Runden.";
 "stats.makeBySituation.info" = "Dieselben Distanzbereiche, aufgeteilt danach, für welchen Score der Putt war — so lassen sich ein Birdie-Putt und ein Par-Putt aus derselben Entfernung vergleichen.";
 "summary.missTendency.info" = "Jeder Miss in der Richtung, in der er eingetragen wurde. Ein Sektor wird röter, je häufiger diese Richtung vorkam; in der Mitte steht die Gesamtzahl.";
@@ -264,7 +264,6 @@
 "dispersion.long" = "LANG";
 "dispersion.short" = "KURZ";
 "dispersion.noData" = "Keine Miss-Daten Für Diesen Filter.";
-"dispersion.ringScale" = "Ringe: Restdistanz Nach Dem Miss";
 
 /* Games */
 "games.title" = "Spiele";
@@ -325,6 +324,43 @@
 "game.unit.percent" = "TREFFERQUOTE";
 "game.unit.cycles" = "Runden bis sauber";
 "game.unit.strokes" = "Schläge";
+"game.aroundTheHole.title" = "Around The Hole";
+"game.aroundTheHole.goal" = "Fünf Tees rund ums Loch — alle lochen, Runde für Runde, ohne einen einzigen Fehler.";
+"game.aroundTheHole.explanation" = "Steck fünf Tees in gleicher Distanz rund ums Loch: einen geraden Bergauf-Putt zum Beginnen, dann rechts-links bergauf, rechts-links bergab, links-rechts bergauf und links-rechts bergab. Alle fünf gelocht heißt Runde geschafft. Ein Fehler schickt dich zurück ans erste Tee — die Runden zählen nur ununterbrochen. Kürzere Putts verlangen mehr Runden: fünf bei 1 m, drei bei 1,3 m, zwei bei 2 m, eine bei 2,5 m. Das lässt sich ändern, und wenn du den Drill danach als zu leicht markierst, schlägt die nächste Einstellung eine Runde mehr vor. Es ist ein Drill zum Abschließen, kein Score zum Jagen — festgehalten wird, wie lange du gebraucht hast und wie oft du da warst.";
+"game.unit.minutes" = "Zeit";
+"game.ath.tees" = "Tees";
+"game.ath.rounds" = "Runden";
+"game.ath.puttsTotal" = "%ld Putts am Stück";
+"game.ath.suggestion" = "Vorschlag aus deiner letzten Einheit: %ld Runden";
+"game.ath.mapHint" = "Bergauf-Putts unterhalb des Lochs, bergab oberhalb; die Nummer am Tee ist die Reihenfolge.";
+"game.ath.uphill" = "bergauf";
+"game.ath.station.straight" = "1 · Gerade bergauf";
+"game.ath.station.rlUp" = "2 · Rechts-links bergauf";
+"game.ath.station.rlDown" = "3 · Rechts-links bergab";
+"game.ath.station.lrUp" = "4 · Links-rechts bergauf";
+"game.ath.station.lrDown" = "5 · Links-rechts bergab";
+"game.ath.round" = "RUNDE";
+"game.ath.putt" = "PUTT";
+"game.ath.time" = "ZEIT";
+"game.ath.nextPutt" = "NÄCHSTER PUTT";
+"game.ath.restart" = "Verfehlt — die Runde beginnt hier von vorn.";
+"game.ath.end" = "Beenden";
+"game.ath.endTitle" = "Drill beenden?";
+"game.ath.endMessage" = "Die geschafften Runden bleiben erhalten, ein abgebrochener Drill zählt aber nicht als Bestzeit.";
+"game.ath.endConfirm" = "Jetzt beenden";
+"game.ath.finished" = "Drill geschafft";
+"game.ath.stopped" = "Vorzeitig beendet";
+"game.ath.timeTaken" = "BENÖTIGTE ZEIT";
+"game.ath.roundsDone" = "RUNDEN";
+"game.ath.howWasIt" = "Wie war das für dich?";
+"game.difficulty.tooEasy" = "Zu leicht";
+"game.difficulty.justRight" = "Passend";
+"game.difficulty.tooHard" = "Zu schwer";
+"game.ath.willAddRound" = "Beim nächsten Mal auf dieser Distanz verlangt der Drill eine Runde mehr.";
+"game.activity.title" = "TRAININGS-AKTIVITÄT";
+"game.activity.less" = "weniger";
+"game.activity.more" = "mehr";
+"game.activity.total" = "%ld Einheiten";
 
 /* Spiele — Info-Sheet */
 "game.info.goal" = "ZIEL";

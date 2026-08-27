@@ -237,7 +237,7 @@
 "stats.rounds.info" = "One tile per round in the current filter, showing that round's strokes gained putting: for each hole, the putts the tour would expect from where the first putt stood, less the putts actually taken.";
 "stats.sgPutting.info" = "Strokes gained per hole, summed over a round and then averaged across the filtered rounds. PCG underneath is the same rounds' per-putt figure: how each result compares with the tour's odds of holing from that distance.";
 "stats.playingStats.info" = "Score is the average strokes over par per round. GIR counts holes played for eagle or birdie, scramble the par saves among holes played for par with the green missed. The three putt figures count only holes that were actually putted.";
-"stats.dispersion.info" = "Every miss sits in the direction it was entered, at the distance it left behind — taken from the next putt on that hole, or estimated where the hole ended there. The rings mark 1, 2 and 3 metres; a longer leave is drawn outside them. The first menu narrows the putts by slope, the second colours them: break strength in the entry grid's five classes, putt length by opacity, or uphill against downhill. Harder putts print darker and sit behind the pale ones. Where several putts share a spot the dot becomes a pie and grows with their number.";
+"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it — so this needs the complex result field during entry. The rings mark 1, 2 and 3 metres of distance left; anything longer sits outside them. The first menu picks which break directions to show, the second what the colours mean: the strength of the break, the length of the putt, or how much it ran up or down the hill. A bigger dot means more misses in the same spot, and once a colour filter is on, each dot is shaded by the class it falls into.";
 "chart.makeVsTour.info" = "One row per distance bracket: the putts you holed over the putts you took from there, against the tour's average make rate across the same bracket. The right-hand column totals PCG for that bracket, divided by the number of rounds.";
 "stats.makeBySituation.info" = "The same distance brackets, split by the score each putt was for, so a birdie putt and a par putt from the same range can be compared.";
 "summary.missTendency.info" = "Every miss placed in the direction it was entered. A sector reddens with how often that direction came up, and the middle holds the total.";
@@ -264,7 +264,6 @@
 "dispersion.long" = "LONG";
 "dispersion.short" = "SHORT";
 "dispersion.noData" = "No Miss Data For This Filter.";
-"dispersion.ringScale" = "Rings: Distance Left After The Miss";
 
 /* Games */
 "games.title" = "Games";
@@ -325,6 +324,43 @@
 "game.unit.percent" = "MAKE RATE";
 "game.unit.cycles" = "Rounds to clear";
 "game.unit.strokes" = "Strokes";
+"game.aroundTheHole.title" = "Around The Hole";
+"game.aroundTheHole.goal" = "Five tees around the cup — hole every one of them, lap after lap, without a single miss.";
+"game.aroundTheHole.explanation" = "Set five tees at the same distance around the hole: one straight uphill putt to start on, then right-to-left uphill, right-to-left downhill, left-to-right uphill and left-to-right downhill. Hole all five and the lap is done. Miss one and you go back to the first tee — the laps only count unbroken. Shorter putts ask for more laps: five at 1 m, three at 1.3 m, two at 2 m, one at 2.5 m. You can change that, and if you mark the drill as too easy afterwards, the next setup offers a lap more. It is a drill you finish rather than a score you chase, so what it keeps is how long it took and how often you turned up.";
+"game.unit.minutes" = "Time";
+"game.ath.tees" = "tees";
+"game.ath.rounds" = "laps";
+"game.ath.puttsTotal" = "%ld putts in a row";
+"game.ath.suggestion" = "Suggested from your last session: %ld laps";
+"game.ath.mapHint" = "Uphill putts below the hole, downhill above; the tee number is the order they are played in.";
+"game.ath.uphill" = "uphill";
+"game.ath.station.straight" = "1 · Straight uphill";
+"game.ath.station.rlUp" = "2 · Right-left uphill";
+"game.ath.station.rlDown" = "3 · Right-left downhill";
+"game.ath.station.lrUp" = "4 · Left-right uphill";
+"game.ath.station.lrDown" = "5 · Left-right downhill";
+"game.ath.round" = "LAP";
+"game.ath.putt" = "PUTT";
+"game.ath.time" = "TIME";
+"game.ath.nextPutt" = "NEXT PUTT";
+"game.ath.restart" = "Missed — the lap starts again here.";
+"game.ath.end" = "End";
+"game.ath.endTitle" = "End the drill?";
+"game.ath.endMessage" = "The laps you have finished are kept, but an unfinished drill does not count as a time to beat.";
+"game.ath.endConfirm" = "End now";
+"game.ath.finished" = "Drill finished";
+"game.ath.stopped" = "Stopped early";
+"game.ath.timeTaken" = "TIME TAKEN";
+"game.ath.roundsDone" = "LAPS";
+"game.ath.howWasIt" = "How was that?";
+"game.difficulty.tooEasy" = "Too easy";
+"game.difficulty.justRight" = "About right";
+"game.difficulty.tooHard" = "Too hard";
+"game.ath.willAddRound" = "Next time at this distance the drill will ask for a lap more.";
+"game.activity.title" = "PRACTICE ACTIVITY";
+"game.activity.less" = "less";
+"game.activity.more" = "more";
+"game.activity.total" = "%ld sessions";
 
 /* Games — info sheet */
 "game.info.goal" = "GOAL";

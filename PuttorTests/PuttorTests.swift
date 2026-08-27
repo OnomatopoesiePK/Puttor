@@ -14,9 +14,9 @@ struct PuttorTests {
 
     // MARK: - Games: scoring
 
-    @Test func gameTypeLowerScoreIsBetterOnlyForCyclesAndStrokes() async throws {
+    @Test func gameTypeLowerScoreIsBetterOnlyForCyclesStrokesAndTime() async throws {
         for gameType in GameType.allCases {
-            let expected = gameType == .ninePutt || gameType == .aroundTheWorld
+            let expected = gameType == .ninePutt || gameType == .aroundTheWorld || gameType == .aroundTheHole
             #expect(gameType.lowerScoreIsBetter == expected)
         }
     }
@@ -975,6 +975,68 @@ struct PuttorTests {
         try context.save()
 
         #expect(RoundStats.compute(putts: round.putts).lipOutCount == 2)
+    }
+
+    // MARK: - Around The Hole
+
+    private static func athSession(distance: Double, rounds: Int, difficulty: DrillDifficulty?, daysAgo: Int) -> GameSession {
+        let session = GameSession(gameType: .aroundTheHole)
+        session.configDistanceM = distance
+        session.targetRounds = rounds
+        session.difficulty = difficulty
+        session.date = Date().addingTimeInterval(-86_400 * Double(daysAgo))
+        session.isComplete = true
+        return session
+    }
+
+    /// The published starting point: the shorter the putt, the more clean laps
+    /// it takes to prove anything.
+    @Test func aroundTheHoleDefaultsFollowTheDistance() async throws {
+        #expect(AroundTheHolePlan.defaultRounds(forDistance: 1.0) == 5)
+        #expect(AroundTheHolePlan.defaultRounds(forDistance: 1.3) == 3)
+        #expect(AroundTheHolePlan.defaultRounds(forDistance: 2.0) == 2)
+        #expect(AroundTheHolePlan.defaultRounds(forDistance: 2.5) == 1)
+    }
+
+    /// Marking a session too easy earns a lap next time, and the ladder climbs
+    /// one rung at a time rather than compounding.
+    @Test func tooEasySessionsAddOneLapAtATime() async throws {
+        let first = [Self.athSession(distance: 1.0, rounds: 5, difficulty: .tooEasy, daysAgo: 1)]
+        #expect(AroundTheHolePlan.suggestedRounds(forDistance: 1.0, history: first) == 6)
+
+        let second = first + [Self.athSession(distance: 1.0, rounds: 6, difficulty: .tooEasy, daysAgo: 0)]
+        #expect(AroundTheHolePlan.suggestedRounds(forDistance: 1.0, history: second) == 7)
+    }
+
+    /// "About right" holds the setup, "too hard" gives a lap back, and neither
+    /// falls below one.
+    @Test func difficultyFeedbackSteersTheNextSetup() async throws {
+        let right = [Self.athSession(distance: 1.0, rounds: 7, difficulty: .justRight, daysAgo: 0)]
+        #expect(AroundTheHolePlan.suggestedRounds(forDistance: 1.0, history: right) == 7)
+
+        let hard = [Self.athSession(distance: 1.0, rounds: 5, difficulty: .tooHard, daysAgo: 0)]
+        #expect(AroundTheHolePlan.suggestedRounds(forDistance: 1.0, history: hard) == 4)
+
+        let veryHard = [Self.athSession(distance: 2.5, rounds: 1, difficulty: .tooHard, daysAgo: 0)]
+        #expect(AroundTheHolePlan.suggestedRounds(forDistance: 2.5, history: veryHard) == 1)
+    }
+
+    /// Feedback from another distance, or none at all, leaves the default.
+    @Test func suggestionIgnoresOtherDistancesAndUnratedSessions() async throws {
+        let elsewhere = [Self.athSession(distance: 2.0, rounds: 4, difficulty: .tooEasy, daysAgo: 0)]
+        #expect(AroundTheHolePlan.suggestedRounds(forDistance: 1.0, history: elsewhere) == 5)
+
+        let unrated = [Self.athSession(distance: 1.0, rounds: 9, difficulty: nil, daysAgo: 0)]
+        #expect(AroundTheHolePlan.suggestedRounds(forDistance: 1.0, history: unrated) == 5)
+    }
+
+    /// A lap is the five tees, and the drill is timed rather than scored.
+    @Test func aroundTheHoleIsATimedTrainingDrill() async throws {
+        #expect(AroundTheHolePlan.puttsPerLap == 5)
+        #expect(GameType.aroundTheHole.isTrainingDrill)
+        #expect(GameType.aroundTheHole.lowerScoreIsBetter)
+        #expect(GameScoreFormat.clockText(75) == "1:15")
+        #expect(GameScoreFormat.clockText(600) == "10:00")
     }
 
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {

@@ -37,7 +37,14 @@ struct GameStatsView: View {
                 if history.isEmpty {
                     emptyState
                 } else {
-                    chartCard
+                    // A drill you either finish or don't is measured by turning
+                    // up, so its history is an activity board rather than a
+                    // chart of scores.
+                    if gameType.isTrainingDrill {
+                        activityCard
+                    } else {
+                        chartCard
+                    }
                     roundsCard
                 }
                 playButton
@@ -79,6 +86,19 @@ struct GameStatsView: View {
     }
 
     // MARK: - Header: best + recent average
+
+    private var activityCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("game.activity.title"))
+                .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+            ActivityBoardView(sessions: history)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Theme.Spacing.md)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
+    }
 
     private var headerCard: some View {
         HStack(spacing: Theme.Spacing.sm) {

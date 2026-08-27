@@ -34,24 +34,35 @@ struct GameCard: View {
             }
             .buttonStyle(.plain)
 
+            // Reads as a button: its own tinted panel with a chevron, so it is
+            // clear the score opens something rather than just standing there.
             Button(action: onShowStats) {
-                VStack(spacing: 2) {
-                    if let bestSession {
-                        Text(GameScoreFormat.text(bestSession.score, for: gameType))
-                            .font(.system(size: 18, weight: .black))
-                            .foregroundStyle(Theme.primary)
-                        Text(L("game.best")).font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.textMuted)
-                        if let recentAverage {
-                            Text("⌀ \(GameScoreFormat.preciseText(recentAverage, for: gameType))")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(Theme.accent)
+                HStack(spacing: 6) {
+                    VStack(spacing: 2) {
+                        if let bestSession {
+                            Text(GameScoreFormat.text(bestSession.score, for: gameType))
+                                .font(.system(size: 18, weight: .black))
+                                .foregroundStyle(Theme.primary)
+                            Text(L("game.best")).font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.textMuted)
+                            if let recentAverage {
+                                Text("⌀ \(GameScoreFormat.preciseText(recentAverage, for: gameType))")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(Theme.accent)
+                            }
+                        } else {
+                            Text("–").font(.system(size: 18, weight: .black)).foregroundStyle(Theme.textMuted)
+                            Text(L("game.noScoreYet")).font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.textMuted)
                         }
-                    } else {
-                        Text("–").font(.system(size: 18, weight: .black)).foregroundStyle(Theme.textMuted)
-                        Text(L("game.noScoreYet")).font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.textMuted)
                     }
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .black))
+                        .foregroundStyle(Theme.primary.opacity(0.7))
                 }
-                .frame(minWidth: 56)
+                .frame(minWidth: 64)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.primary.opacity(0.10)))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.primary.opacity(0.45), lineWidth: 1))
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

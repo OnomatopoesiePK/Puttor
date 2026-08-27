@@ -11,6 +11,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
     case ninePutt
     case routine
     case aroundTheWorld
+    case aroundTheHole
 
     var id: String { rawValue }
 
@@ -21,6 +22,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .ninePutt: return "🔢"
         case .routine: return "📋"
         case .aroundTheWorld: return "🌍"
+        case .aroundTheHole: return "🎯"
         }
     }
 
@@ -31,6 +33,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .ninePutt: return "game.ninePutt.title"
         case .routine: return "game.routine.title"
         case .aroundTheWorld: return "game.aroundTheWorld.title"
+        case .aroundTheHole: return "game.aroundTheHole.title"
         }
     }
 
@@ -41,6 +44,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .ninePutt: return "game.ninePutt.goal"
         case .routine: return "game.routine.goal"
         case .aroundTheWorld: return "game.aroundTheWorld.goal"
+        case .aroundTheHole: return "game.aroundTheHole.goal"
         }
     }
 
@@ -51,13 +55,15 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .ninePutt: return "game.ninePutt.explanation"
         case .routine: return "game.routine.explanation"
         case .aroundTheWorld: return "game.aroundTheWorld.explanation"
+        case .aroundTheHole: return "game.aroundTheHole.explanation"
         }
     }
 
-    /// True for games scored in strokes/cycles, where a smaller number is the better result.
+    /// True for games scored in strokes, cycles or minutes, where a smaller
+    /// number is the better result.
     var lowerScoreIsBetter: Bool {
         switch self {
-        case .ninePutt, .aroundTheWorld: return true
+        case .ninePutt, .aroundTheWorld, .aroundTheHole: return true
         default: return false
         }
     }
@@ -66,7 +72,13 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .ninePutt: return "game.unit.cycles"
         case .aroundTheWorld: return "game.unit.strokes"
+        case .aroundTheHole: return "game.unit.minutes"
         default: return "game.unit.percent"
         }
     }
+
+    /// A drill you either finish or don't, rather than one you score. Its
+    /// history is about turning up regularly, so it shows an activity board
+    /// instead of a scoreboard.
+    var isTrainingDrill: Bool { self == .aroundTheHole }
 }

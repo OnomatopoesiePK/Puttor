@@ -19,6 +19,7 @@ struct GameDestinationView: View {
         case .ninePutt: NinePuttDrillView(onDone: onDone)
         case .routine: RoutineDrillView(onDone: onDone)
         case .aroundTheWorld: AroundTheWorldView(onDone: onDone)
+        case .aroundTheHole: AroundTheHoleView(onDone: onDone)
         }
     }
 }

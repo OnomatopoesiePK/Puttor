@@ -206,13 +206,6 @@ struct MissDispersionPlotView: View {
                 }
             }
 
-            if !dots.isEmpty {
-                Text(L("dispersion.ringScale"))
-                    .font(.system(size: 9))
-                    .foregroundStyle(Theme.textMuted)
-                    .frame(width: size, alignment: .leading)
-            }
-
             if shading != .none, !dots.isEmpty {
                 if shadingScale > 0.0001 {
                     shadingLegend

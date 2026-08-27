@@ -14,9 +14,17 @@ enum GameScoreFormat {
         switch gameType.scoreUnitKey {
         case "game.unit.cycles", "game.unit.strokes":
             return String(format: "%.0f", score)
+        case "game.unit.minutes":
+            return clockText(score * 60)
         default:
             return "\(Int(score.rounded()))%"
         }
+    }
+
+    /// Minutes and seconds, the way a stopwatch reads.
+    static func clockText(_ seconds: Double) -> String {
+        let total = Int(seconds.rounded())
+        return String(format: "%d:%02d", total / 60, total % 60)
     }
 
     /// Same, but keeping one decimal — used for averages, where rounding to a
@@ -25,6 +33,8 @@ enum GameScoreFormat {
         switch gameType.scoreUnitKey {
         case "game.unit.cycles", "game.unit.strokes":
             return String(format: "%.1f", score)
+        case "game.unit.minutes":
+            return clockText(score * 60)
         default:
             return String(format: "%.1f%%", score)
         }
