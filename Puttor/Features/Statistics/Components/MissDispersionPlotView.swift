@@ -229,9 +229,15 @@ struct MissDispersionPlotView: View {
 
     // MARK: - Shading
 
-    /// Dots sit a little back from full strength so a crowded board stays
-    /// readable and overlapping markers still show what is underneath.
-    private let dotOpacity: Double = 0.6
+    /// Dots sit back from full strength so a crowded board stays readable, and
+    /// they earn their weight: the further the putt, the stronger the break or
+    /// the steeper the slope, the more solid the marker.
+    private let minDotOpacity: Double = 0.28
+    private let maxDotOpacity: Double = 0.85
+
+    private func dotOpacity(_ strength: Double) -> Double {
+        minDotOpacity + (maxDotOpacity - minDotOpacity) * min(1, max(0, strength))
+    }
 
     /// Break strength is stepped, not blended: the grid the putt was entered
     /// on has five classes, so the plot uses the same five and the same
@@ -262,24 +268,27 @@ struct MissDispersionPlotView: View {
     /// middle, the other two from nothing to the strongest in view.
     private func shadingColor(_ value: Double) -> Color {
         if shading == .breakMagnitude {
-            return Theme.slopeClassColors[breakClass(value)].opacity(dotOpacity)
+            let classIndex = breakClass(value)
+            return Theme.slopeClassColors[classIndex]
+                .opacity(dotOpacity(Double(classIndex) / 4))
         }
-        guard shadingScale > 0.0001 else { return Theme.error.opacity(dotOpacity) }
+        guard shadingScale > 0.0001 else { return Theme.error.opacity(maxDotOpacity) }
         let ends = rampEnds
         if shading.isSigned {
             let t = max(-1, min(1, value / shadingScale))
             let base = t >= 0
                 ? mix(Theme.textMuted, ends.high, t)
                 : mix(Theme.textMuted, ends.low, -t)
-            return base.opacity(dotOpacity)
+            // A level putt has nothing to say, a steep one has all of it.
+            return base.opacity(dotOpacity(abs(t)))
         }
         let t = max(0, min(1, value / shadingScale))
         if shading == .puttLength {
             // One colour, carried from barely there to nearly solid — a longer
             // reach than any hue shift over this small a dot.
-            return ends.high.opacity(0.12 + (dotOpacity - 0.12) * t)
+            return ends.high.opacity(dotOpacity(t))
         }
-        return mix(ends.low, ends.high, t).opacity(dotOpacity)
+        return mix(ends.low, ends.high, t).opacity(dotOpacity(t))
     }
 
     @ViewBuilder
@@ -298,7 +307,7 @@ struct MissDispersionPlotView: View {
                 ForEach(Array(Theme.slopeClassColors.enumerated()), id: \.offset) { index, color in
                     VStack(spacing: 3) {
                         RoundedRectangle(cornerRadius: 3)
-                            .fill(color.opacity(dotOpacity))
+                            .fill(color.opacity(dotOpacity(Double(index) / 4)))
                             .frame(height: 10)
                         Text(Self.breakClassLabels[index])
                             .font(.system(size: 9, weight: .semibold))
@@ -319,10 +328,8 @@ struct MissDispersionPlotView: View {
             let ends = rampEnds
             LinearGradient(
                 colors: shading.isSigned
-                    ? [ends.low.opacity(dotOpacity), Theme.textMuted.opacity(dotOpacity), ends.high.opacity(dotOpacity)]
-                    : (shading == .puttLength
-                        ? [ends.high.opacity(0.12), ends.high.opacity(dotOpacity)]
-                        : [ends.low.opacity(dotOpacity), ends.high.opacity(dotOpacity)]),
+                    ? [ends.low.opacity(maxDotOpacity), Theme.textMuted.opacity(minDotOpacity), ends.high.opacity(maxDotOpacity)]
+                    : [ends.high.opacity(minDotOpacity), ends.high.opacity(maxDotOpacity)],
                 startPoint: .leading, endPoint: .trailing
             )
             .frame(height: 10)
@@ -439,7 +446,7 @@ struct MissDispersionPlotView: View {
                     context.fill(Path(ellipseIn: rect), with: .color(shadingColor(value)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Theme.background.opacity(0.8)), lineWidth: 1)
                 } else {
-                    let alpha = min(dotOpacity, 0.28 + Double(dot.count) * 0.06)
+                    let alpha = min(maxDotOpacity, minDotOpacity + Double(dot.count) * 0.08)
                     context.fill(Path(ellipseIn: rect), with: .color(Theme.error.opacity(alpha)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111).opacity(0.6)), lineWidth: 1)
                 }
