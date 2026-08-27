@@ -8,10 +8,10 @@ import Foundation
 enum GameType: String, Codable, CaseIterable, Identifiable {
     case gate
     case clock
+    case aroundTheHole
     case ninePutt
     case routine
     case aroundTheWorld
-    case aroundTheHole
 
     var id: String { rawValue }
 

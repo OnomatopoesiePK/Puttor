@@ -236,13 +236,13 @@
 "stats.dispersion" = "MISS-STREUUNG";
 "stats.rounds.info" = "Eine Kachel je Runde im aktuellen Filter mit ihren Strokes Gained beim Putten: pro Loch die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten.";
 "stats.sgPutting.info" = "Strokes Gained pro Loch, über die Runde summiert und über die gefilterten Runden gemittelt. Die PKR darunter ist der Wert pro Putt: wie das Ergebnis im Vergleich zur Tour-Trefferquote auf dieser Distanz steht.";
-"stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde. GIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden. Die drei Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde.";
-"stats.dispersion.info" = "Jeder verfehlte Putt liegt in der Richtung, in die er vorbeiging, und so weit vom Loch entfernt, wie er liegen geblieben ist — dafür braucht es bei der Eingabe das komplexe Resultat-Feld. Die Ringe markieren 1, 2 und 3 Meter Restdistanz; alles Längere liegt außerhalb. Das erste Menü wählt, welche Break-Richtungen gezeigt werden, das zweite, wofür die Farben stehen: die Stärke des Breaks, die Länge des Putts oder wie stark es bergauf oder bergab ging. Ein größerer Punkt heißt mehr Misses an derselben Stelle, und sobald ein Farbfilter aktiv ist, zeigt die Farbe jedes Punktes, in welche Klasse er fällt.";
+"stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde. GIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden. Die drei Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde. Alles davon braucht den Score-Bezug („Putt für\"): den haben alle Modi außer Custom ohne dieses Feld.";
+"stats.dispersion.info" = "Jeder verfehlte Putt liegt in der Richtung, in die er vorbeiging, und so weit vom Loch entfernt, wie er liegen geblieben ist. Dafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex. Die Ringe markieren 1, 2 und 3 Meter Restdistanz. Das erste Menü wählt, welche Break-Richtungen gezeigt werden, das zweite, wofür die Farben stehen: Stärke des Breaks, Länge des Putts oder wie stark es bergauf oder bergab ging — die letzten beiden brauchen zusätzlich das Neigungsfeld. Ein größerer Punkt heißt mehr Misses an derselben Stelle, und sobald ein Farbfilter aktiv ist, zeigt die Farbe jedes Punktes, in welche Klasse er fällt.";
 "chart.makeVsTour.info" = "Eine Zeile je Distanzbereich: deine gelochten Putts gegenüber den Versuchen von dort, verglichen mit der Tour-Trefferquote über denselben Bereich. Die rechte Spalte summiert die PKR dieses Bereichs, geteilt durch die Anzahl Runden.";
-"stats.makeBySituation.info" = "Dieselben Distanzbereiche, aufgeteilt danach, für welchen Score der Putt war — so lassen sich ein Birdie-Putt und ein Par-Putt aus derselben Entfernung vergleichen.";
-"summary.missTendency.info" = "Jeder Miss in der Richtung, in der er eingetragen wurde. Ein Sektor wird röter, je häufiger diese Richtung vorkam; in der Mitte steht die Gesamtzahl.";
-"summary.missReasons.info" = "Wie oft jeder Grund bei einem verfehlten Putt angehakt wurde. Ein Putt mit mehreren Gründen zählt einmal unter „mehrere\".";
-"summary.leaveByMiss.info" = "Durchschnittliche Restdistanz nach einem Miss, gruppiert nach Richtung — gemessen an der Distanz des nächsten Putts auf diesem Loch. Die Balken sind auf den längsten dieser Mittelwerte skaliert.";
+"stats.makeBySituation.info" = "Dieselben Distanzbereiche, aufgeteilt danach, für welchen Score der Putt war — so lassen sich ein Birdie-Putt und ein Par-Putt aus derselben Entfernung vergleichen. Dafür braucht es den Score-Bezug („Putt für\"), den der Custom-Modus weglassen kann.";
+"summary.missTendency.info" = "Jeder Miss in der Richtung, in der er eingetragen wurde. Ein Sektor wird röter, je häufiger diese Richtung vorkam; in der Mitte steht die Gesamtzahl. Dafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex — ein bloßes „verfehlt\" hat keine Richtung.";
+"summary.missReasons.info" = "Wie oft jeder Grund bei einem verfehlten Putt angehakt wurde. Ein Putt mit mehreren Gründen zählt einmal unter „mehrere\". Dafür braucht es das Feld für Miss-Gründe: Pro-Modus oder Custom mit diesem Feld.";
+"summary.leaveByMiss.info" = "Durchschnittliche Restdistanz nach einem Miss, gruppiert nach Richtung — gemessen an der Distanz des nächsten Putts auf diesem Loch. Die Balken sind auf den längsten dieser Mittelwerte skaliert. Dafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.";
 
 /* Dispersion */
 "dispersion.all" = "Alle Neigungen";
@@ -331,7 +331,12 @@
 "game.ath.tees" = "Tees";
 "game.ath.rounds" = "Runden";
 "game.ath.puttsTotal" = "%ld Putts am Stück";
-"game.ath.suggestion" = "Vorschlag aus deiner letzten Einheit: %ld Runden";
+"game.ath.suggestion" = "Vorschlag: %ld Runden";
+"game.ath.suggestionFromLast" = "Vorschlag aus deiner letzten Einheit: %ld Runden";
+"game.ath.targetReminder" = "%1$ld saubere Runden auf %2$@";
+"game.ath.endCompleted" = "Runden geschafft";
+"game.ath.endGaveUp" = "Vorzeitig beendet";
+"game.ath.roundsTarget" = "RUNDEN";
 "game.ath.mapHint" = "Bergauf-Putts unterhalb des Lochs, bergab oberhalb; die Nummer am Tee ist die Reihenfolge.";
 "game.ath.uphill" = "bergauf";
 "game.ath.station.straight" = "1 · Gerade bergauf";
@@ -339,19 +344,12 @@
 "game.ath.station.rlDown" = "3 · Rechts-links bergab";
 "game.ath.station.lrUp" = "4 · Links-rechts bergauf";
 "game.ath.station.lrDown" = "5 · Links-rechts bergab";
-"game.ath.round" = "RUNDE";
-"game.ath.putt" = "PUTT";
-"game.ath.time" = "ZEIT";
-"game.ath.nextPutt" = "NÄCHSTER PUTT";
-"game.ath.restart" = "Verfehlt — die Runde beginnt hier von vorn.";
 "game.ath.end" = "Beenden";
-"game.ath.endTitle" = "Drill beenden?";
-"game.ath.endMessage" = "Die geschafften Runden bleiben erhalten, ein abgebrochener Drill zählt aber nicht als Bestzeit.";
-"game.ath.endConfirm" = "Jetzt beenden";
+"game.ath.endTitle" = "Drill beenden";
+"game.ath.endMessage" = "Sind die Runden durchgegangen, oder brichst du ab? Nur ein geschaffter Drill zählt als Bestzeit.";
 "game.ath.finished" = "Drill geschafft";
 "game.ath.stopped" = "Vorzeitig beendet";
 "game.ath.timeTaken" = "BENÖTIGTE ZEIT";
-"game.ath.roundsDone" = "RUNDEN";
 "game.ath.howWasIt" = "Wie war das für dich?";
 "game.difficulty.tooEasy" = "Zu leicht";
 "game.difficulty.justRight" = "Passend";

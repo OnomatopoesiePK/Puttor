@@ -52,16 +52,17 @@ enum AroundTheHoleStation: Int, CaseIterable, Identifiable {
         }
     }
 
-    /// Where the tee sits around the hole, as a compass angle in degrees with
-    /// 0 straight below the hole: the uphill putts come from below, the
-    /// downhill ones from above, and the break decides which side.
+    /// Where the tee sits around the hole, as an angle in degrees with 0
+    /// straight below the hole, seen the way the player stands over it: the
+    /// uphill putts are the near ones and travel away up the screen, the
+    /// downhill ones sit beyond the hole and come back towards the player.
     var angleDegrees: Double {
         switch self {
-        case .straightUphill: return 180
-        case .rightLeftUphill: return 225
-        case .rightLeftDownhill: return 315
-        case .leftRightUphill: return 135
-        case .leftRightDownhill: return 45
+        case .straightUphill: return 0
+        case .rightLeftUphill: return 45
+        case .rightLeftDownhill: return 135
+        case .leftRightUphill: return 315
+        case .leftRightDownhill: return 225
         }
     }
 }

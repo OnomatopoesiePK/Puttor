@@ -31,6 +31,16 @@ struct AroundTheHoleView: View {
         AroundTheHolePlan.suggestedRounds(forDistance: distance, history: allSessions)
     }
 
+    /// True once a session at this distance has been rated, which is what the
+    /// suggestion is drawn from — before that it is just the default.
+    private var suggestionHasHistory: Bool {
+        allSessions.contains {
+            $0.gameType == .aroundTheHole
+                && abs($0.configDistanceM - distance) < 0.05
+                && $0.difficulty != nil
+        }
+    }
+
     private var configSummary: String {
         "\(AroundTheHolePlan.puttsPerLap) \(L("game.ath.tees")) · \(UnitConverter.formatDistance(distance, useFeet: useFeet)) · \(rounds) \(L("game.ath.rounds"))"
     }
@@ -70,7 +80,7 @@ struct AroundTheHoleView: View {
                             rounds = suggestedRounds
                             roundsTouched = false
                         } label: {
-                            Text(String(format: L("game.ath.suggestion"), suggestedRounds))
+                            Text(String(format: L(suggestionHasHistory ? "game.ath.suggestionFromLast" : "game.ath.suggestion"), suggestedRounds))
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundStyle(Theme.primary)
                         }
@@ -153,26 +163,43 @@ private struct AroundTheHolePlayView: View {
     var onFinished: (GameSession) -> Void
 
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
 
     @State private var startedAt = Date()
-    @State private var stationIndex = 0
-    @State private var completedRounds = 0
-    @State private var attempts = 0
-    @State private var made = 0
-    @State private var lastMissAt: Date?
-    @State private var showGiveUpConfirm = false
-
-    private var station: AroundTheHoleStation { AroundTheHolePlan.stations[stationIndex] }
+    @State private var showEndDialog = false
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.md) {
-            header
-            AroundTheHoleMap(currentStation: station, madeStations: Set(AroundTheHolePlan.stations.prefix(stationIndex)))
-                .frame(maxHeight: 260)
-            currentCard
+        VStack(spacing: Theme.Spacing.lg) {
+            // Nothing to tap while putting: the drill is counted on the green,
+            // and the phone only keeps the time.
+            TimelineView(.periodic(from: startedAt, by: 1)) { context in
+                Text(GameScoreFormat.clockText(context.date.timeIntervalSince(startedAt)))
+                    .font(.system(size: 68, weight: .black, design: .rounded))
+                    .foregroundStyle(Theme.primary)
+                    .monospacedDigit()
+            }
+            .padding(.top, Theme.Spacing.lg)
+
+            Text(String(format: L("game.ath.targetReminder"), targetRounds, UnitConverter.formatDistance(distance, useFeet: useFeet)))
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.textSecondary)
+                .multilineTextAlignment(.center)
+
+            AroundTheHoleMap(currentStation: nil, madeStations: [])
+                .frame(maxHeight: 240)
+
             Spacer(minLength: 0)
-            buttons
+
+            Button {
+                showEndDialog = true
+            } label: {
+                Text(L("game.ath.end"))
+                    .font(.system(size: 17, weight: .heavy))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary))
+            }
+            .buttonStyle(.plain)
         }
         .padding(Theme.Spacing.lg)
         .background(Theme.background.ignoresSafeArea())
@@ -185,108 +212,15 @@ private struct AroundTheHolePlayView: View {
                     .font(.system(size: 16, weight: .heavy))
                     .foregroundStyle(Theme.text)
             }
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(L("game.ath.end")) { showGiveUpConfirm = true }
-                    .foregroundStyle(Theme.textSecondary)
-            }
         }
-        .confirmationDialog(L("game.ath.endTitle"), isPresented: $showGiveUpConfirm, titleVisibility: .visible) {
-            Button(L("game.ath.endConfirm")) { finish(completed: false) }
+        .confirmationDialog(L("game.ath.endTitle"), isPresented: $showEndDialog, titleVisibility: .visible) {
+            // The one thing the app can't see for itself: whether the laps
+            // actually came off.
+            Button(L("game.ath.endCompleted")) { finish(completed: true) }
+            Button(L("game.ath.endGaveUp")) { finish(completed: false) }
             Button(L("common.cancel"), role: .cancel) {}
         } message: {
             Text(L("game.ath.endMessage"))
-        }
-    }
-
-    private var header: some View {
-        HStack(spacing: Theme.Spacing.sm) {
-            statBox(L("game.ath.round"), "\(completedRounds + 1)/\(targetRounds)")
-            statBox(L("game.ath.putt"), "\(stationIndex + 1)/\(AroundTheHolePlan.puttsPerLap)")
-            // A running clock, since how long the drill took is the thing the
-            // player takes away from it.
-            TimelineView(.periodic(from: startedAt, by: 1)) { context in
-                statBox(L("game.ath.time"), GameScoreFormat.clockText(context.date.timeIntervalSince(startedAt)))
-            }
-        }
-    }
-
-    private func statBox(_ label: String, _ value: String) -> some View {
-        VStack(spacing: 2) {
-            Text(value).font(.system(size: 20, weight: .black)).foregroundStyle(Theme.text)
-                .lineLimit(1).minimumScaleFactor(0.6)
-            Text(label).font(.system(size: 9, weight: .bold)).tracking(0.6).foregroundStyle(Theme.textMuted)
-        }
-        .frame(maxWidth: .infinity, minHeight: 60)
-        .padding(.vertical, Theme.Spacing.sm)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-    }
-
-    private var currentCard: some View {
-        VStack(spacing: 6) {
-            Text(L("game.ath.nextPutt"))
-                .font(.system(size: 10, weight: .bold)).tracking(1.2)
-                .foregroundStyle(Theme.textMuted)
-            Text(L(station.labelKey))
-                .font(.system(size: 20, weight: .heavy))
-                .foregroundStyle(Theme.primary)
-                .multilineTextAlignment(.center)
-            Text(UnitConverter.formatDistance(distance, useFeet: useFeet))
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Theme.textSecondary)
-            if lastMissAt != nil, stationIndex == 0 {
-                Text(L("game.ath.restart"))
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Theme.error)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(Theme.Spacing.md)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
-    }
-
-    private var buttons: some View {
-        HStack(spacing: Theme.Spacing.sm) {
-            actionButton(L("result.missedGeneric"), color: Theme.error) { record(holed: false) }
-            actionButton(L("result.holed"), color: Theme.primary) { record(holed: true) }
-        }
-    }
-
-    private func actionButton(_ title: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 17, weight: .heavy))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(color))
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func record(holed: Bool) {
-        attempts += 1
-        guard holed else {
-            // The lap only counts unbroken, so a miss sends the player back to
-            // the straight putt to start it again.
-            made += 0
-            lastMissAt = Date()
-            stationIndex = 0
-            return
-        }
-
-        made += 1
-        lastMissAt = nil
-        if stationIndex + 1 < AroundTheHolePlan.puttsPerLap {
-            stationIndex += 1
-            return
-        }
-
-        completedRounds += 1
-        stationIndex = 0
-        if completedRounds >= targetRounds {
-            finish(completed: true)
         }
     }
 
@@ -295,11 +229,9 @@ private struct AroundTheHolePlayView: View {
         session.configSummary = configSummary
         session.configDistanceM = distance
         session.targetRounds = targetRounds
-        session.attemptsTotal = attempts
-        session.madeTotal = made
         session.durationSeconds = Date().timeIntervalSince(startedAt)
-        // Only a finished drill goes on the board; an abandoned one is kept as
-        // a record of the attempt but never counts as a time to beat.
+        // Only a finished drill is a time to beat; an abandoned one is kept as
+        // a record that the practice happened.
         session.isComplete = completed
         session.score = session.durationSeconds / 60
         modelContext.insert(session)
@@ -314,12 +246,11 @@ private struct AroundTheHoleResultView: View {
     let session: GameSession
     var onDone: () -> Void
 
+    @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
     @Environment(\.modelContext) private var modelContext
     @State private var picked: DrillDifficulty?
 
-    private var lapsDone: Int {
-        AroundTheHolePlan.puttsPerLap > 0 ? session.madeTotal / AroundTheHolePlan.puttsPerLap : 0
-    }
+    private var useFeet: Bool { unitsPref == "imperial" }
 
     var body: some View {
         ScrollView {
@@ -339,9 +270,8 @@ private struct AroundTheHoleResultView: View {
                 }
 
                 HStack(spacing: Theme.Spacing.sm) {
-                    statBox(L("game.ath.roundsDone"), "\(session.isComplete ? session.targetRounds : lapsDone)")
-                    statBox(L("game.attempts"), "\(session.attemptsTotal)")
-                    statBox(L("game.made"), "\(session.madeTotal)")
+                    statBox(L("game.ath.roundsTarget"), "\(session.targetRounds)")
+                    statBox(L("game.distance"), UnitConverter.formatDistance(session.configDistanceM, useFeet: useFeet))
                 }
 
                 if !session.configSummary.isEmpty {
