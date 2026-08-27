@@ -259,13 +259,25 @@ struct RoundSummaryView: View {
     }
 
     private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.primary) -> some View {
+        // Every box the same size, whatever length its label happens to be —
+        // a row of six that steps up and down reads as an accident.
         VStack(spacing: 2) {
-            Text(value).font(.system(size: 22, weight: .black)).foregroundStyle(color)
-            Text(label).font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.text)
-            Text(subtitle).font(.system(size: 10)).foregroundStyle(Theme.textMuted)
+            Text(value)
+                .font(.system(size: 22, weight: .black))
+                .foregroundStyle(color)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text(label)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Theme.text)
+                .lineLimit(1).minimumScaleFactor(0.55)
+            Text(subtitle)
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.textMuted)
+                .lineLimit(1).minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 78)
         .padding(.vertical, Theme.Spacing.sm)
+        .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
