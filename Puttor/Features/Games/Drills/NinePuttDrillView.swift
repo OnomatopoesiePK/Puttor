@@ -3,8 +3,9 @@
 //  Puttor
 //
 //  9-Putt Drill: 3 balls from each of 3 distances (9 putts total). All 9 must
-//  go in, or you start the cycle over. Score = cycles needed to clear (lower
-//  is better) — so this is a bespoke loop, not the generic % engine.
+//  go in, or the cycle starts over — counted on the green rather than on the
+//  phone, so the app only runs the clock and records that the practice
+//  happened.
 //
 
 import SwiftUI
@@ -64,17 +65,16 @@ struct NinePuttDrillView: View {
             }
         }
         .navigationDestination(isPresented: $playing) {
-            NinePuttPlayView(distances: distances, configSummary: configSummary, useFeet: useFeet) { session in
+            TimedDrillPlayView(
+                gameType: .ninePutt,
+                reminder: String(format: L("game.ninePutt.reminder"), configSummary),
+                configSummary: configSummary
+            ) { session in
                 finishedSession = session
             }
         }
         .navigationDestination(item: $finishedSession) { session in
-            GameResultView(
-                gameType: .ninePutt,
-                session: session,
-                isNewBest: GameScoring.isNewBest(session, among: allSessions),
-                onDone: onDone
-            )
+            TimedDrillResultView(session: session, onDone: onDone)
         }
     }
 
@@ -83,122 +83,5 @@ struct NinePuttDrillView: View {
             .padding(Theme.Spacing.md)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-    }
-}
-
-private struct NinePuttPlayView: View {
-    let distances: [Double]
-    let configSummary: String
-    let useFeet: Bool
-    var onFinished: (GameSession) -> Void
-
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-
-    @State private var cycle = 1
-    @State private var index = 0
-    @State private var currentCycleResults: [Bool] = []
-    @State private var allAttempts: [(cycle: Int, label: String, distance: Double, success: Bool)] = []
-
-    private var puttPlan: [(label: String, distance: Double)] {
-        distances.enumerated().flatMap { _, d in
-            (1...3).map { ball in (label: "\(L("game.ninePutt.ball")) \(ball) · \(UnitConverter.formatDistance(d, useFeet: useFeet))", distance: d) }
-        }
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            header
-            Spacer()
-            card
-            Spacer()
-            SuccessFailButtons(
-                successLabel: L("game.made"),
-                failLabel: L("game.missed"),
-                onSuccess: { mark(true) },
-                onFail: { mark(false) }
-            )
-            .padding(.horizontal, Theme.Spacing.lg)
-            .padding(.bottom, Theme.Spacing.lg)
-        }
-        .background(Theme.background.ignoresSafeArea())
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text(L(GameType.ninePutt.titleKey)).font(.system(size: 16, weight: .heavy)).foregroundStyle(Theme.text)
-            }
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(L("game.giveUp")) { dismiss() }
-                    .foregroundStyle(Theme.textSecondary)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                GameInfoButton(gameType: .ninePutt)
-            }
-        }
-        .toolbarBackground(Theme.background, for: .navigationBar)
-        .navigationBarBackButtonHidden(true)
-    }
-
-    private var header: some View {
-        VStack(spacing: 6) {
-            Text("\(L("game.ninePutt.cycle")) \(cycle)")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(Theme.accent)
-            Text("\(L("game.attempt")) \(index + 1) / 9")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(Theme.textMuted)
-            ProgressView(value: Double(index), total: 9)
-                .tint(Theme.primary)
-                .padding(.horizontal, Theme.Spacing.xl)
-        }
-        .padding(.top, Theme.Spacing.md)
-    }
-
-    private var card: some View {
-        let item = puttPlan[index]
-        return VStack(spacing: 10) {
-            Text(item.label)
-                .font(.system(size: 24, weight: .heavy))
-                .foregroundStyle(Theme.text)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(Theme.Spacing.xl)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
-        .padding(.horizontal, Theme.Spacing.lg)
-    }
-
-    private func mark(_ success: Bool) {
-        let item = puttPlan[index]
-        allAttempts.append((cycle, item.label, item.distance, success))
-        currentCycleResults.append(success)
-        if index + 1 < 9 {
-            index += 1
-        } else if currentCycleResults.allSatisfy({ $0 }) {
-            finish()
-        } else {
-            cycle += 1
-            index = 0
-            currentCycleResults = []
-        }
-    }
-
-    private func finish() {
-        let session = GameSession(gameType: .ninePutt)
-        session.configSummary = configSummary
-        session.attemptsTotal = allAttempts.count
-        session.madeTotal = allAttempts.filter { $0.success }.count
-        session.score = Double(cycle)
-        session.isComplete = true
-        modelContext.insert(session)
-        for (i, a) in allAttempts.enumerated() {
-            let attempt = GameAttempt(groupIndex: a.cycle, index: i, label: a.label, distanceM: a.distance, success: a.success)
-            attempt.session = session
-            session.attempts.append(attempt)
-            modelContext.insert(attempt)
-        }
-        try? modelContext.save()
-        onFinished(session)
     }
 }

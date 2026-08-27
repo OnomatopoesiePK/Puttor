@@ -114,17 +114,18 @@ struct AroundTheHoleView: View {
         }
         .onAppear { if !roundsTouched { rounds = suggestedRounds } }
         .navigationDestination(isPresented: $playing) {
-            AroundTheHolePlayView(
-                distance: distance,
-                targetRounds: rounds,
+            TimedDrillPlayView(
+                gameType: .aroundTheHole,
+                reminder: String(format: L("game.ath.targetReminder"), rounds, UnitConverter.formatDistance(distance, useFeet: useFeet)),
                 configSummary: configSummary,
-                useFeet: useFeet
-            ) { session in
-                finishedSession = session
-            }
+                configDistanceM: distance,
+                targetRounds: rounds,
+                extra: { AroundTheHoleMap(currentStation: nil, madeStations: []).frame(maxHeight: 240) },
+                onFinished: { session in finishedSession = session }
+            )
         }
         .navigationDestination(item: $finishedSession) { session in
-            AroundTheHoleResultView(session: session, onDone: onDone)
+            TimedDrillResultView(session: session, onDone: onDone)
         }
     }
 
@@ -150,211 +151,5 @@ struct AroundTheHoleView: View {
             .padding(Theme.Spacing.md)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-    }
-}
-
-// MARK: - Play
-
-private struct AroundTheHolePlayView: View {
-    let distance: Double
-    let targetRounds: Int
-    let configSummary: String
-    let useFeet: Bool
-    var onFinished: (GameSession) -> Void
-
-    @Environment(\.modelContext) private var modelContext
-
-    @State private var startedAt = Date()
-    @State private var showEndDialog = false
-
-    var body: some View {
-        VStack(spacing: Theme.Spacing.lg) {
-            // Nothing to tap while putting: the drill is counted on the green,
-            // and the phone only keeps the time.
-            TimelineView(.periodic(from: startedAt, by: 1)) { context in
-                Text(GameScoreFormat.clockText(context.date.timeIntervalSince(startedAt)))
-                    .font(.system(size: 68, weight: .black, design: .rounded))
-                    .foregroundStyle(Theme.primary)
-                    .monospacedDigit()
-            }
-            .padding(.top, Theme.Spacing.lg)
-
-            Text(String(format: L("game.ath.targetReminder"), targetRounds, UnitConverter.formatDistance(distance, useFeet: useFeet)))
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Theme.textSecondary)
-                .multilineTextAlignment(.center)
-
-            AroundTheHoleMap(currentStation: nil, madeStations: [])
-                .frame(maxHeight: 240)
-
-            Spacer(minLength: 0)
-
-            Button {
-                showEndDialog = true
-            } label: {
-                Text(L("game.ath.end"))
-                    .font(.system(size: 17, weight: .heavy))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary))
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(Theme.Spacing.lg)
-        .background(Theme.background.ignoresSafeArea())
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbarBackground(Theme.background, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text(L(GameType.aroundTheHole.titleKey))
-                    .font(.system(size: 16, weight: .heavy))
-                    .foregroundStyle(Theme.text)
-            }
-        }
-        .confirmationDialog(L("game.ath.endTitle"), isPresented: $showEndDialog, titleVisibility: .visible) {
-            // The one thing the app can't see for itself: whether the laps
-            // actually came off.
-            Button(L("game.ath.endCompleted")) { finish(completed: true) }
-            Button(L("game.ath.endGaveUp")) { finish(completed: false) }
-            Button(L("common.cancel"), role: .cancel) {}
-        } message: {
-            Text(L("game.ath.endMessage"))
-        }
-    }
-
-    private func finish(completed: Bool) {
-        let session = GameSession(gameType: .aroundTheHole)
-        session.configSummary = configSummary
-        session.configDistanceM = distance
-        session.targetRounds = targetRounds
-        session.durationSeconds = Date().timeIntervalSince(startedAt)
-        // Only a finished drill is a time to beat; an abandoned one is kept as
-        // a record that the practice happened.
-        session.isComplete = completed
-        session.score = session.durationSeconds / 60
-        modelContext.insert(session)
-        try? modelContext.save()
-        onFinished(session)
-    }
-}
-
-// MARK: - Result
-
-private struct AroundTheHoleResultView: View {
-    let session: GameSession
-    var onDone: () -> Void
-
-    @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
-    @Environment(\.modelContext) private var modelContext
-    @State private var picked: DrillDifficulty?
-
-    private var useFeet: Bool { unitsPref == "imperial" }
-
-    var body: some View {
-        ScrollView {
-            VStack(spacing: Theme.Spacing.lg) {
-                Text(GameType.aroundTheHole.icon).font(.system(size: 56))
-                Text(L(session.isComplete ? "game.ath.finished" : "game.ath.stopped"))
-                    .font(.system(size: 20, weight: .heavy))
-                    .foregroundStyle(session.isComplete ? Theme.primary : Theme.textSecondary)
-
-                VStack(spacing: 4) {
-                    Text(GameScoreFormat.clockText(session.durationSeconds))
-                        .font(.system(size: 56, weight: .black))
-                        .foregroundStyle(Theme.primary)
-                    Text(L("game.ath.timeTaken"))
-                        .font(.system(size: 12, weight: .bold)).tracking(1.2)
-                        .foregroundStyle(Theme.textMuted)
-                }
-
-                HStack(spacing: Theme.Spacing.sm) {
-                    statBox(L("game.ath.roundsTarget"), "\(session.targetRounds)")
-                    statBox(L("game.distance"), UnitConverter.formatDistance(session.configDistanceM, useFeet: useFeet))
-                }
-
-                if !session.configSummary.isEmpty {
-                    Text(session.configSummary)
-                        .font(.system(size: 12))
-                        .foregroundStyle(Theme.textMuted)
-                }
-
-                difficultyCard
-
-                Button(action: onDone) {
-                    Text(L("game.done"))
-                        .font(.system(size: 17, weight: .heavy))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary))
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(Theme.Spacing.lg)
-        }
-        .background(Theme.background.ignoresSafeArea())
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbarBackground(Theme.background, for: .navigationBar)
-        .onAppear { picked = session.difficulty }
-    }
-
-    /// The one question the drill asks, and the only one that changes what it
-    /// offers next time.
-    private var difficultyCard: some View {
-        VStack(spacing: 10) {
-            Text(L("game.ath.howWasIt"))
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(Theme.text)
-
-            HStack(spacing: Theme.Spacing.xs) {
-                ForEach(DrillDifficulty.allCases) { option in
-                    Button {
-                        picked = option
-                        session.difficulty = option
-                        try? modelContext.save()
-                    } label: {
-                        VStack(spacing: 6) {
-                            Image(systemName: option.icon).font(.system(size: 18, weight: .semibold))
-                            Text(L(option.labelKey))
-                                .font(.system(size: 11, weight: .bold))
-                                .multilineTextAlignment(.center)
-                                .lineLimit(2).minimumScaleFactor(0.7)
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 66)
-                        .padding(.vertical, 8)
-                        .foregroundStyle(picked == option ? Theme.primary : Theme.textSecondary)
-                        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(picked == option ? Theme.primary.opacity(0.12) : Theme.surface))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(picked == option ? Theme.primary : Theme.border, lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-
-            if picked == .tooEasy {
-                Text(L("game.ath.willAddRound"))
-                    .font(.system(size: 11))
-                    .foregroundStyle(Theme.textMuted)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(Theme.Spacing.md)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surfaceElevated))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
-    }
-
-    private func statBox(_ label: String, _ value: String) -> some View {
-        VStack(spacing: 2) {
-            Text(value).font(.system(size: 20, weight: .black)).foregroundStyle(Theme.text)
-            Text(label).font(.system(size: 9, weight: .bold)).tracking(0.6).foregroundStyle(Theme.textMuted)
-                .lineLimit(1).minimumScaleFactor(0.7)
-        }
-        .frame(maxWidth: .infinity, minHeight: 62)
-        .padding(.vertical, Theme.Spacing.sm)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 }

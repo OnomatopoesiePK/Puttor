@@ -31,13 +31,15 @@ struct PuttorTests {
         #expect(best?.score == 90) // higher % wins, incomplete sessions are ignored
     }
 
-    @Test func bestSessionPicksFewestCyclesForNinePutt() async throws {
-        let threeCycles = GameSession(gameType: .ninePutt); threeCycles.isComplete = true; threeCycles.score = 3
-        let oneCycle = GameSession(gameType: .ninePutt); oneCycle.isComplete = true; oneCycle.score = 1
+    @Test func bestSessionPicksTheQuickestTimeForNinePutt() async throws {
+        let slow = GameSession(gameType: .ninePutt)
+        slow.isComplete = true; slow.durationSeconds = 540; slow.score = 9
+        let quick = GameSession(gameType: .ninePutt)
+        quick.isComplete = true; quick.durationSeconds = 260; quick.score = 260.0 / 60
 
-        let best = GameScoring.bestSession(for: .ninePutt, in: [threeCycles, oneCycle])
+        let best = GameScoring.bestSession(for: .ninePutt, in: [slow, quick])
 
-        #expect(best?.score == 1) // fewer cycles-to-clear wins
+        #expect(best?.durationSeconds == 260) // the quicker clear wins
     }
 
     @Test func bestSessionPicksLowestStrokesForAroundTheWorld() async throws {
@@ -265,7 +267,8 @@ struct PuttorTests {
     @Test func scoreFormattingFollowsTheGamesUnit() async throws {
         #expect(GameScoreFormat.text(72.4, for: .gate) == "72%")
         #expect(GameScoreFormat.text(14, for: .aroundTheWorld) == "14")
-        #expect(GameScoreFormat.text(3, for: .ninePutt) == "3")
+        // The 9-putt drill is timed now: a score of 3 means three minutes.
+        #expect(GameScoreFormat.text(3, for: .ninePutt) == "3:00")
         #expect(GameScoreFormat.preciseText(72.45, for: .gate) == "72.5%")
         #expect(GameScoreFormat.preciseText(13.5, for: .aroundTheWorld) == "13.5")
     }
@@ -1031,12 +1034,34 @@ struct PuttorTests {
     }
 
     /// A lap is the five tees, and the drill is timed rather than scored.
-    @Test func aroundTheHoleIsATimedTrainingDrill() async throws {
+    @Test func timedDrillsAreScoredOnTheClock() async throws {
         #expect(AroundTheHolePlan.puttsPerLap == 5)
-        #expect(GameType.aroundTheHole.isTrainingDrill)
-        #expect(GameType.aroundTheHole.lowerScoreIsBetter)
+        for drill in [GameType.aroundTheHole, .ninePutt] {
+            #expect(drill.isTrainingDrill)
+            #expect(drill.lowerScoreIsBetter)
+            #expect(drill.scoreUnitKey == "game.unit.minutes")
+        }
         #expect(GameScoreFormat.clockText(75) == "1:15")
         #expect(GameScoreFormat.clockText(600) == "10:00")
+    }
+
+    /// The 9-putt drill used to be scored in cycles. Those sessions stay in the
+    /// history, but a cycle count is not a time, so it can't stand as a record.
+    @Test func untimedSessionsAreNoLongerATimeToBeat() async throws {
+        let old = GameSession(gameType: .ninePutt)
+        old.score = 3            // three cycles, from the tapped-through days
+        old.isComplete = true
+        old.date = Date().addingTimeInterval(-86_400)
+
+        let timed = GameSession(gameType: .ninePutt)
+        timed.durationSeconds = 420
+        timed.score = 7
+        timed.isComplete = true
+
+        let sessions = [old, timed]
+        #expect(GameScoring.history(for: .ninePutt, in: sessions).count == 2)
+        #expect(GameScoring.bestSession(for: .ninePutt, in: sessions)?.durationSeconds == 420)
+        #expect(GameScoring.recentAverage(for: .ninePutt, in: sessions) == 7)
     }
 
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {

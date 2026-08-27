@@ -70,15 +70,20 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
 
     var scoreUnitKey: String {
         switch self {
-        case .ninePutt: return "game.unit.cycles"
         case .aroundTheWorld: return "game.unit.strokes"
-        case .aroundTheHole: return "game.unit.minutes"
+        case .aroundTheHole, .ninePutt: return "game.unit.minutes"
         default: return "game.unit.percent"
         }
     }
 
-    /// A drill you either finish or don't, rather than one you score. Its
-    /// history is about turning up regularly, so it shows an activity board
-    /// instead of a scoreboard.
-    var isTrainingDrill: Bool { self == .aroundTheHole }
+    /// A drill you either finish or don't, rather than one you score. Nothing
+    /// is tapped while it runs, its result is the time it took, and its history
+    /// is about turning up regularly — so it shows an activity board instead of
+    /// a scoreboard.
+    var isTrainingDrill: Bool {
+        switch self {
+        case .aroundTheHole, .ninePutt: return true
+        default: return false
+        }
+    }
 }
