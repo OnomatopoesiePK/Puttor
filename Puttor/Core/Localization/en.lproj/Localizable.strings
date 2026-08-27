@@ -157,7 +157,7 @@
 "summary.done" = "Done";
 "summary.putts" = "Putts";
 "summary.holes" = "Holes";
-"summary.avgPerHole" = "Avg putts/hole";
+"summary.avgPerHole" = "Ø Putts/Hole";
 "summary.sg" = "SG";
 "summary.highlight" = "HIGHLIGHT";
 "summary.holeAbbr" = "Hole";
