@@ -77,7 +77,8 @@ struct RoundSummaryView: View {
                     bigStat(L("stats.pcg"),
                             "\(stats.pcgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.pcgTotal))",
                             caption: L("summary.pcgCaption"),
-                            color: sgColor(stats.pcgTotal))
+                            color: sgColor(stats.pcgTotal),
+                            highlighted: RoundHighlights.strongPCG(stats.pcgTotal))
                 }
 
                 if let highlight {

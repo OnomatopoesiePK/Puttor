@@ -56,6 +56,10 @@ extension View {
 enum RoundHighlights {
     static func scoreUnderPar(_ strokesRelativeToPar: Int) -> Bool { strokesRelativeToPar < 0 }
     static func strongStrokesGained(_ sgTotal: Double) -> Bool { sgTotal >= 2 }
+    /// PCG runs higher than strokes gained — it counts every putt against the
+    /// odds rather than every hole — so it takes three to be worth the same
+    /// notice.
+    static func strongPCG(_ pcgTotal: Double) -> Bool { pcgTotal >= 3 }
     /// Fourteen greens out of eighteen, as a rate so nine-hole rounds count too.
     static func strongGreensInRegulation(_ girPercent: Double) -> Bool { girPercent >= 14.0 / 18.0 * 100 }
     static func strongScrambling(_ scramblePercent: Double) -> Bool { scramblePercent >= 70 }

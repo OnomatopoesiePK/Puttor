@@ -1072,6 +1072,10 @@ struct PuttorTests {
         #expect(RoundHighlights.strongStrokesGained(2.0))
         #expect(!RoundHighlights.strongStrokesGained(1.99))
 
+        // PCG counts every putt rather than every hole, so it takes more of it.
+        #expect(RoundHighlights.strongPCG(3.0))
+        #expect(!RoundHighlights.strongPCG(2.9))
+
         // Fourteen of eighteen, held as a rate so a nine-hole round qualifies
         // with seven of nine.
         #expect(RoundHighlights.strongGreensInRegulation(14.0 / 18 * 100))
