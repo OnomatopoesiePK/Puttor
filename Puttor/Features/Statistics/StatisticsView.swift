@@ -46,6 +46,7 @@ struct StatisticsView: View {
     @AppStorage(AppStorageKeys.statsCustomRoundCount) private var customCount: Int = 7
     @State private var selectedPutterID: PersistentIdentifier?
     @State private var dispersionFilter: DispersionFilter = .all
+    @State private var dispersionShading: DispersionShading = .none
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -144,6 +145,18 @@ struct StatisticsView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    /// Longest average leave in view, rounded up to a readable step — half a
+    /// metre, or a whole foot — so the bars share one honest scale.
+    private func leaveScaleMax(_ leave: [PuttResult: LeaveInfo]) -> Double {
+        let longest = leave.values.map(\.avgLeaveM).max() ?? 0
+        guard longest > 0 else { return 1 }
+        if useFeet {
+            let feet = UnitConverter.metresToFeet(longest).rounded(.up)
+            return UnitConverter.feetToMetres(max(1, feet))
+        }
+        return max(0.5, (longest * 2).rounded(.up) / 2)
     }
 
     private func avgScorePerRoundText(_ average: Double?) -> String {
@@ -278,14 +291,29 @@ struct StatisticsView: View {
                             }
 
                             CollapsibleStatSection(title: L("stats.dispersion"), storageKey: "dispersion") {
-                                Picker(L(dispersionFilter.labelKey), selection: $dispersionFilter) {
-                                    ForEach(DispersionFilter.allCases) { f in
-                                        Text(L(f.labelKey)).tag(f)
+                                // Which putts to plot, and what their colour
+                                // should say about them.
+                                HStack(spacing: Theme.Spacing.sm) {
+                                    Picker(L(dispersionFilter.labelKey), selection: $dispersionFilter) {
+                                        ForEach(DispersionFilter.allCases) { f in
+                                            Text(L(f.labelKey)).tag(f)
+                                        }
+                                    }
+                                    Picker(L(dispersionShading.labelKey), selection: $dispersionShading) {
+                                        ForEach(DispersionShading.allCases) { s in
+                                            Text(L(s.labelKey)).tag(s)
+                                        }
                                     }
                                 }
                                 .pickerStyle(.menu)
                                 .tint(Theme.text)
-                                MissDispersionPlotView(putts: data.allPutts, filter: dispersionFilter)
+
+                                MissDispersionPlotView(
+                                    putts: data.allPutts,
+                                    filter: dispersionFilter,
+                                    shading: dispersionShading,
+                                    useFeet: useFeet
+                                )
                             }
 
                             if data.aggregated.missReasonCounts.total > 0 {
@@ -302,21 +330,39 @@ struct StatisticsView: View {
                             let leave = data.leaveByMiss
                             if !leave.isEmpty {
                                 CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss") {
+                                    // Bars are scaled to the longest leave in
+                                    // view, rounded up, so the widest one fills
+                                    // the track and the labels keep their room.
+                                    let leaveScale = leaveScaleMax(leave)
                                     ForEach(leave.sorted { $0.value.count > $1.value.count }, id: \.key) { dir, info in
                                         HStack(spacing: 8) {
-                                            Text(L(dir.labelKey)).font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.textSecondary).frame(width: 76, alignment: .leading)
-                                            GeometryReader { geo in
-                                                ZStack(alignment: .leading) {
-                                                    RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.borderLight)
-                                                    RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.accent)
-                                                        .frame(width: geo.size.width * min(1, info.avgLeaveM / 5))
-                                                }
+                                            Text(L(dir.labelKey))
+                                                .font(.system(size: 11, weight: .semibold))
+                                                .foregroundStyle(Theme.textSecondary)
+                                                .lineLimit(1).minimumScaleFactor(0.75)
+                                                .frame(width: 72, alignment: .leading)
+                                            ZStack(alignment: .leading) {
+                                                Capsule().fill(Theme.borderLight)
+                                                Capsule().fill(Theme.accent)
+                                                    .frame(width: 88 * min(1, info.avgLeaveM / leaveScale))
                                             }
-                                            .frame(height: 8)
-                                            Text(UnitConverter.formatDistance(info.avgLeaveM, useFeet: useFeet)).font(.system(size: 12, weight: .heavy)).foregroundStyle(Theme.accent).frame(width: 40, alignment: .trailing)
-                                            Text("\(info.count) \(L("summary.puttsAbbr"))").font(.system(size: 10)).foregroundStyle(Theme.textMuted)
+                                            .frame(width: 88, height: 8)
+                                            Text(UnitConverter.formatDistance(info.avgLeaveM, useFeet: useFeet))
+                                                .font(.system(size: 12, weight: .heavy))
+                                                .foregroundStyle(Theme.accent)
+                                                .lineLimit(1).minimumScaleFactor(0.8)
+                                                .frame(width: 46, alignment: .trailing)
+                                            Spacer(minLength: 0)
+                                            Text("\(info.count) \(L("summary.puttsAbbr"))")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(Theme.textMuted)
+                                                .lineLimit(1).minimumScaleFactor(0.8)
                                         }
                                     }
+                                    Text(String(format: L("summary.leaveScale"), UnitConverter.formatDistance(leaveScale, useFeet: useFeet)))
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(Theme.textMuted)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
                         }

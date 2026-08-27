@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 enum DispersionFilter: String, CaseIterable, Identifiable {
     case all, rl, lr, up, down
@@ -22,10 +23,49 @@ enum DispersionFilter: String, CaseIterable, Identifiable {
     }
 }
 
+/// A second axis for the dispersion plot: the dots keep their position and
+/// take their colour from something about the putt — how much it broke, how
+/// long it was, or whether it ran up or down the hill.
+enum DispersionShading: String, CaseIterable, Identifiable {
+    case none, breakMagnitude, puttLength, slope
+    var id: String { rawValue }
+
+    var labelKey: String {
+        switch self {
+        case .none: return "dispersion.shading.none"
+        case .breakMagnitude: return "dispersion.shading.break"
+        case .puttLength: return "dispersion.shading.length"
+        case .slope: return "dispersion.shading.slope"
+        }
+    }
+
+    /// The number each putt contributes. Nil where nothing is shaded.
+    func value(for putt: Putt) -> Double? {
+        switch self {
+        case .none: return nil
+        case .breakMagnitude: return abs(putt.sideSlopePct)
+        case .puttLength: return putt.distanceM
+        case .slope: return putt.hillSlopePct
+        }
+    }
+
+    /// Slope runs from downhill through flat to uphill, so its scale is
+    /// symmetric around zero; the other two start at zero.
+    var isSigned: Bool { self == .slope }
+}
+
 private struct DispersionDot {
     var x: CGFloat
     var y: CGFloat
     var count: Int
+    /// Sum of the shading values behind this dot, averaged when it's drawn —
+    /// several putts can land on the same spot.
+    var shadingSum: Double = 0
+    var shadedCount: Int = 0
+
+    var shadingAverage: Double? {
+        shadedCount > 0 ? shadingSum / Double(shadedCount) : nil
+    }
 }
 
 private func missVector(_ result: PuttResult) -> (x: CGFloat, y: CGFloat) {
@@ -56,9 +96,18 @@ private func includeByFilter(_ p: Putt, _ filter: DispersionFilter) -> Bool {
 struct MissDispersionPlotView: View {
     let putts: [Putt]
     let filter: DispersionFilter
+    var shading: DispersionShading = .none
+    var useFeet: Bool = false
 
     private let size: CGFloat = 268
     private let maxR: CGFloat = 108
+
+    /// Largest shading value in view, which the colour ramp stretches over.
+    /// Zero means the putts carry nothing to shade by — slope left unrecorded,
+    /// for instance.
+    private var shadingScale: Double {
+        dots.compactMap { $0.shadingAverage }.map { abs($0) }.max() ?? 0
+    }
 
     private var dots: [DispersionDot] {
         var byHole: [String: [Putt]] = [:]
@@ -81,11 +130,20 @@ struct MissDispersionPlotView: View {
                 let x = (vec.x * radial * 10).rounded() / 10
                 let y = (vec.y * radial * 10).rounded() / 10
                 let key = "\(x)|\(y)"
+                let shadingValue = shading.value(for: p)
                 if let idx = index[key] {
                     result[idx].count += 1
+                    if let shadingValue {
+                        result[idx].shadingSum += shadingValue
+                        result[idx].shadedCount += 1
+                    }
                 } else {
                     index[key] = result.count
-                    result.append(DispersionDot(x: x, y: y, count: 1))
+                    result.append(DispersionDot(
+                        x: x, y: y, count: 1,
+                        shadingSum: shadingValue ?? 0,
+                        shadedCount: shadingValue == nil ? 0 : 1
+                    ))
                 }
             }
         }
@@ -126,7 +184,97 @@ struct MissDispersionPlotView: View {
                     slopeArrowVertical
                 }
             }
+
+            if shading != .none, !dots.isEmpty {
+                if shadingScale > 0.0001 {
+                    shadingLegend
+                } else {
+                    Text(L("dispersion.shading.noValues"))
+                        .font(.system(size: 10))
+                        .foregroundStyle(Theme.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
         }
+    }
+
+    // MARK: - Shading
+
+    private var rampEnds: (low: Color, high: Color) {
+        switch shading {
+        case .none: return (Theme.error, Theme.error)
+        case .breakMagnitude: return (Theme.dispersionBreakLow, Theme.dispersionBreakHigh)
+        case .puttLength: return (Theme.dispersionLengthLow, Theme.dispersionLengthHigh)
+        case .slope: return (Theme.downhill, Theme.uphill)
+        }
+    }
+
+    /// Colour for one dot's averaged value. Slope reads outwards from a flat
+    /// middle, the other two from nothing to the strongest in view.
+    private func shadingColor(_ value: Double) -> Color {
+        guard shadingScale > 0.0001 else { return Theme.error }
+        let ends = rampEnds
+        if shading.isSigned {
+            let t = max(-1, min(1, value / shadingScale))
+            return t >= 0
+                ? mix(Theme.textMuted, ends.high, t)
+                : mix(Theme.textMuted, ends.low, -t)
+        }
+        let t = max(0, min(1, value / shadingScale))
+        return mix(ends.low, ends.high, t)
+    }
+
+    private var shadingLegend: some View {
+        VStack(spacing: 4) {
+            let ends = rampEnds
+            LinearGradient(
+                colors: shading.isSigned
+                    ? [ends.low, Theme.textMuted, ends.high]
+                    : [ends.low, ends.high],
+                startPoint: .leading, endPoint: .trailing
+            )
+            .frame(height: 10)
+            .clipShape(Capsule())
+
+            HStack {
+                Text(legendLabel(shading.isSigned ? -shadingScale : 0))
+                Spacer()
+                if shading.isSigned {
+                    Text(L("dispersion.shading.flat"))
+                    Spacer()
+                }
+                Text(legendLabel(shadingScale))
+            }
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(Theme.textMuted)
+        }
+        .frame(width: size)
+    }
+
+    private func legendLabel(_ value: Double) -> String {
+        switch shading {
+        case .none:
+            return ""
+        case .puttLength:
+            return UnitConverter.formatDistance(abs(value), useFeet: useFeet)
+        case .breakMagnitude:
+            return "\(String(format: "%.1f", abs(value)))%"
+        case .slope:
+            let suffix = value >= 0 ? L("dispersion.shading.uphill") : L("dispersion.shading.downhill")
+            return "\(String(format: "%.1f", abs(value)))% \(suffix)"
+        }
+    }
+
+    private func mix(_ a: Color, _ b: Color, _ t: Double) -> Color {
+        let ca = UIColor(a).cgColor.components ?? [0, 0, 0, 1]
+        let cb = UIColor(b).cgColor.components ?? [0, 0, 0, 1]
+        func channel(_ i: Int) -> Double {
+            let x = Double(ca.count > i ? ca[i] : ca[0])
+            let y = Double(cb.count > i ? cb[i] : cb[0])
+            return x + (y - x) * t
+        }
+        return Color(red: channel(0), green: channel(1), blue: channel(2))
     }
 
     private var plot: some View {
@@ -147,8 +295,11 @@ struct MissDispersionPlotView: View {
                 let r = min(14, 5 + CGFloat(dot.count - 1) * 1.8)
                 let alpha = min(0.95, 0.45 + Double(dot.count) * 0.08)
                 let rect = CGRect(x: c.x + dot.x - r, y: c.y + dot.y - r, width: r * 2, height: r * 2)
-                context.fill(Path(ellipseIn: rect), with: .color(Theme.error.opacity(alpha)))
-                context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111)), lineWidth: 1)
+                // Size still counts the putts; colour says what they had in
+                // common when a shading is picked.
+                let fill = dot.shadingAverage.map { shadingColor($0) } ?? Theme.error
+                context.fill(Path(ellipseIn: rect), with: .color(fill.opacity(alpha)))
+                context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111).opacity(0.6)), lineWidth: 1)
             }
         }
     }

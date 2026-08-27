@@ -171,6 +171,7 @@
 "summary.missReasons" = "MISS-GRÜNDE";
 "summary.multipleReasons" = "Mehrere";
 "summary.leaveByMiss" = "RESTDISTANZ NACH MISS";
+"summary.leaveScale" = "Balken skaliert auf %@";
 "summary.holedOut" = "Vom Vorgrün eingelocht — 0 Putts";
 "summary.editHole" = "Bearbeiten";
 "summary.addPutts" = "Putts hinzufügen";
@@ -232,6 +233,14 @@
 
 /* Dispersion */
 "dispersion.all" = "Alle Neigungen";
+"dispersion.shading.none" = "Keine Färbung";
+"dispersion.shading.break" = "Break-Stärke";
+"dispersion.shading.length" = "Putt-Länge";
+"dispersion.shading.slope" = "Berg / Tal";
+"dispersion.shading.flat" = "eben";
+"dispersion.shading.uphill" = "berg";
+"dispersion.shading.downhill" = "tal";
+"dispersion.shading.noValues" = "Bei diesen Putts ist dieser Wert nicht erfasst, es gibt also nichts einzufärben.";
 "dispersion.rl" = "Rechts-Links";
 "dispersion.lr" = "Links-Rechts";
 "dispersion.up" = "Bergauf";
