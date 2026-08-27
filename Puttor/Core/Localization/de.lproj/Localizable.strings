@@ -236,11 +236,11 @@
 "dispersion.shading.none" = "Keine Färbung";
 "dispersion.shading.break" = "Break-Stärke";
 "dispersion.shading.length" = "Putt-Länge";
-"dispersion.shading.slope" = "Berg / Tal";
-"dispersion.shading.flat" = "eben";
-"dispersion.shading.uphill" = "berg";
-"dispersion.shading.downhill" = "tal";
-"dispersion.shading.noValues" = "Bei diesen Putts ist dieser Wert nicht erfasst, es gibt also nichts einzufärben.";
+"dispersion.shading.slope" = "Bergauf / Bergab";
+"dispersion.shading.flat" = "Eben";
+"dispersion.shading.uphill" = "Bergauf";
+"dispersion.shading.downhill" = "Bergab";
+"dispersion.shading.noValues" = "Bei Diesen Putts Ist Dieser Wert Nicht Erfasst, Es Gibt Also Nichts Einzufärben.";
 "dispersion.rl" = "Rechts-Links";
 "dispersion.lr" = "Links-Rechts";
 "dispersion.up" = "Bergauf";
@@ -249,7 +249,8 @@
 "dispersion.right" = "RECHTS";
 "dispersion.long" = "LANG";
 "dispersion.short" = "KURZ";
-"dispersion.noData" = "Keine Miss-Daten für diesen Filter.";
+"dispersion.noData" = "Keine Miss-Daten Für Diesen Filter.";
+"dispersion.ringScale" = "Ringe: Restdistanz Nach Dem Miss";
 
 /* Games */
 "games.title" = "Spiele";

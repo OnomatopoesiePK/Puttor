@@ -233,14 +233,14 @@
 
 /* Dispersion */
 "dispersion.all" = "All Slopes";
-"dispersion.shading.none" = "No shading";
-"dispersion.shading.break" = "Break strength";
-"dispersion.shading.length" = "Putt length";
-"dispersion.shading.slope" = "Uphill / downhill";
-"dispersion.shading.flat" = "flat";
-"dispersion.shading.uphill" = "up";
-"dispersion.shading.downhill" = "down";
-"dispersion.shading.noValues" = "None of these putts carry that value, so there is nothing to shade by.";
+"dispersion.shading.none" = "No Shading";
+"dispersion.shading.break" = "Break Strength";
+"dispersion.shading.length" = "Putt Length";
+"dispersion.shading.slope" = "Uphill / Downhill";
+"dispersion.shading.flat" = "Flat";
+"dispersion.shading.uphill" = "Uphill";
+"dispersion.shading.downhill" = "Downhill";
+"dispersion.shading.noValues" = "None Of These Putts Carry That Value, So There Is Nothing To Shade By.";
 "dispersion.rl" = "Right-Left";
 "dispersion.lr" = "Left-Right";
 "dispersion.up" = "Uphill";
@@ -249,7 +249,8 @@
 "dispersion.right" = "RIGHT";
 "dispersion.long" = "LONG";
 "dispersion.short" = "SHORT";
-"dispersion.noData" = "No miss data for this filter.";
+"dispersion.noData" = "No Miss Data For This Filter.";
+"dispersion.ringScale" = "Rings: Distance Left After The Miss";
 
 /* Games */
 "games.title" = "Games";

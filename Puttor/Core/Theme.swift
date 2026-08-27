@@ -64,13 +64,14 @@ enum Theme {
     static var missLipIdle: Color { t(0x2A3D2A, 0x3F6B45) }
     static var missHoledIdle: Color { t(0x1E3A28, 0x2C6440) }
 
-    // Dispersion shading ramps: rust for how much a putt broke, blue for how
-    // long it was. Uphill/downhill shading reuses the slope grid's own colours
-    // above, so the two controls agree on what a slope looks like.
-    static var dispersionBreakLow: Color { t(0x6B4A38, 0xE0B79B) }
-    static var dispersionBreakHigh: Color { t(0xF08A4B, 0x8A3A12) }
-    static var dispersionLengthLow: Color { t(0x3E5566, 0xC3D6E6) }
-    static var dispersionLengthHigh: Color { t(0x7FBBFF, 0x14508F) }
+    // Dispersion shading ramps. Break runs light blue to red, the way the
+    // slope grid reads a gentle line against a severe one. Length keeps one
+    // blue and varies its opacity instead, which separates near from far more
+    // clearly than a hue shift does.
+    static var dispersionBreakLow: Color { t(0x8FD0EE, 0x74B9DF) }
+    static var dispersionBreakHigh: Color { t(0xFF5C6C, 0xD62839) }
+    static var dispersionLengthLow: Color { t(0x7FBBFF, 0x1D5FCC) }
+    static var dispersionLengthHigh: Color { t(0x7FBBFF, 0x1D5FCC) }
 
     // Putt-for score category (eagle -> double+, best to worst)
     static var categoryEagle: Color { t(0xF5D26B, 0x9A7A0A) }

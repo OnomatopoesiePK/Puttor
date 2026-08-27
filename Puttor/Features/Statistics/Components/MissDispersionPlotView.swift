@@ -58,13 +58,12 @@ private struct DispersionDot {
     var x: CGFloat
     var y: CGFloat
     var count: Int
-    /// Sum of the shading values behind this dot, averaged when it's drawn —
-    /// several putts can land on the same spot.
-    var shadingSum: Double = 0
-    var shadedCount: Int = 0
+    /// One entry per putt stacked on this spot, so the dot can be drawn as a
+    /// pie of what those putts had in common. Empty when nothing is shaded.
+    var values: [Double] = []
 
     var shadingAverage: Double? {
-        shadedCount > 0 ? shadingSum / Double(shadedCount) : nil
+        values.isEmpty ? nil : values.reduce(0, +) / Double(values.count)
     }
 }
 
@@ -106,8 +105,12 @@ struct MissDispersionPlotView: View {
     /// Zero means the putts carry nothing to shade by — slope left unrecorded,
     /// for instance.
     private var shadingScale: Double {
-        dots.compactMap { $0.shadingAverage }.map { abs($0) }.max() ?? 0
+        dots.flatMap(\.values).map { abs($0) }.max() ?? 0
     }
+
+    /// The radial mapping the dots use, read backwards: what leave distance a
+    /// ring of this radius stands for.
+    static func leaveAt(radius: CGFloat) -> Double { Double((radius - 18) / 24) }
 
     private var dots: [DispersionDot] {
         var byHole: [String: [Putt]] = [:]
@@ -133,16 +136,12 @@ struct MissDispersionPlotView: View {
                 let shadingValue = shading.value(for: p)
                 if let idx = index[key] {
                     result[idx].count += 1
-                    if let shadingValue {
-                        result[idx].shadingSum += shadingValue
-                        result[idx].shadedCount += 1
-                    }
+                    if let shadingValue { result[idx].values.append(shadingValue) }
                 } else {
                     index[key] = result.count
                     result.append(DispersionDot(
                         x: x, y: y, count: 1,
-                        shadingSum: shadingValue ?? 0,
-                        shadedCount: shadingValue == nil ? 0 : 1
+                        values: shadingValue.map { [$0] } ?? []
                     ))
                 }
             }
@@ -185,6 +184,13 @@ struct MissDispersionPlotView: View {
                 }
             }
 
+            if !dots.isEmpty {
+                Text(L("dispersion.ringScale"))
+                    .font(.system(size: 9))
+                    .foregroundStyle(Theme.textMuted)
+                    .frame(width: size, alignment: .leading)
+            }
+
             if shading != .none, !dots.isEmpty {
                 if shadingScale > 0.0001 {
                     shadingLegend
@@ -206,7 +212,9 @@ struct MissDispersionPlotView: View {
         case .none: return (Theme.error, Theme.error)
         case .breakMagnitude: return (Theme.dispersionBreakLow, Theme.dispersionBreakHigh)
         case .puttLength: return (Theme.dispersionLengthLow, Theme.dispersionLengthHigh)
-        case .slope: return (Theme.downhill, Theme.uphill)
+        // Deliberately the other way round from the slope grid: on the miss
+        // board the uphill putts are the red ones.
+        case .slope: return (Theme.uphill, Theme.downhill)
         }
     }
 
@@ -222,6 +230,11 @@ struct MissDispersionPlotView: View {
                 : mix(Theme.textMuted, ends.low, -t)
         }
         let t = max(0, min(1, value / shadingScale))
+        if shading == .puttLength {
+            // One colour, carried from barely there to solid — a longer reach
+            // than any hue shift over this small a dot.
+            return ends.high.opacity(0.2 + 0.8 * t)
+        }
         return mix(ends.low, ends.high, t)
     }
 
@@ -231,7 +244,9 @@ struct MissDispersionPlotView: View {
             LinearGradient(
                 colors: shading.isSigned
                     ? [ends.low, Theme.textMuted, ends.high]
-                    : [ends.low, ends.high],
+                    : (shading == .puttLength
+                        ? [ends.high.opacity(0.2), ends.high]
+                        : [ends.low, ends.high]),
                 startPoint: .leading, endPoint: .trailing
             )
             .frame(height: 10)
@@ -282,6 +297,15 @@ struct MissDispersionPlotView: View {
             let c = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
             for r in [maxR, maxR * 0.66, maxR * 0.33] {
                 context.stroke(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)), with: .color(Theme.borderLight), lineWidth: 1)
+                // Each ring is a leave distance — the radius is what the miss
+                // left behind, so say so on the ring itself.
+                context.draw(
+                    Text(UnitConverter.formatDistance(Self.leaveAt(radius: r), useFeet: useFeet))
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(Theme.textMuted),
+                    at: CGPoint(x: c.x + 7, y: c.y - r + 8),
+                    anchor: .leading
+                )
             }
             var crosshair = Path()
             crosshair.move(to: CGPoint(x: c.x - maxR, y: c.y)); crosshair.addLine(to: CGPoint(x: c.x + maxR, y: c.y))
@@ -292,14 +316,37 @@ struct MissDispersionPlotView: View {
             context.stroke(Path(ellipseIn: CGRect(x: c.x - 7, y: c.y - 7, width: 14, height: 14)), with: .color(.white), lineWidth: 2)
 
             for dot in dots {
-                let r = min(14, 5 + CGFloat(dot.count - 1) * 1.8)
-                let alpha = min(0.95, 0.45 + Double(dot.count) * 0.08)
-                let rect = CGRect(x: c.x + dot.x - r, y: c.y + dot.y - r, width: r * 2, height: r * 2)
-                // Size still counts the putts; colour says what they had in
-                // common when a shading is picked.
-                let fill = dot.shadingAverage.map { shadingColor($0) } ?? Theme.error
-                context.fill(Path(ellipseIn: rect), with: .color(fill.opacity(alpha)))
-                context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111).opacity(0.6)), lineWidth: 1)
+                let r = min(22, 6 + CGFloat(dot.count - 1) * 2.4)
+                let centre = CGPoint(x: c.x + dot.x, y: c.y + dot.y)
+                let rect = CGRect(x: centre.x - r, y: centre.y - r, width: r * 2, height: r * 2)
+
+                if dot.values.count > 1 {
+                    // Several putts on one spot: a pie of what each of them
+                    // was, so a cluster of gentle putts can't hide one severe
+                    // one inside an average.
+                    let sorted = dot.values.sorted()
+                    let slice = 360.0 / Double(sorted.count)
+                    for (i, value) in sorted.enumerated() {
+                        var wedge = Path()
+                        wedge.move(to: centre)
+                        wedge.addArc(
+                            center: centre, radius: r,
+                            startAngle: .degrees(-90 + slice * Double(i)),
+                            endAngle: .degrees(-90 + slice * Double(i + 1)),
+                            clockwise: false
+                        )
+                        wedge.closeSubpath()
+                        context.fill(wedge, with: .color(shadingColor(value)))
+                    }
+                    context.stroke(Path(ellipseIn: rect), with: .color(Theme.background.opacity(0.8)), lineWidth: 1)
+                } else if let value = dot.values.first {
+                    context.fill(Path(ellipseIn: rect), with: .color(shadingColor(value)))
+                    context.stroke(Path(ellipseIn: rect), with: .color(Theme.background.opacity(0.8)), lineWidth: 1)
+                } else {
+                    let alpha = min(0.95, 0.45 + Double(dot.count) * 0.08)
+                    context.fill(Path(ellipseIn: rect), with: .color(Theme.error.opacity(alpha)))
+                    context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111).opacity(0.6)), lineWidth: 1)
+                }
             }
         }
     }
