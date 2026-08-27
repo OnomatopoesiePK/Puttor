@@ -564,8 +564,10 @@ struct StatisticsView: View {
                 .foregroundStyle(selected ? color : Theme.textSecondary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 7)
-                .background(Capsule().fill(selected ? color.opacity(0.13) : Theme.surface))
-                .overlay(Capsule().stroke(selected ? color : Theme.border, lineWidth: 1))
+                // Quiet enough that the selected chip reads as marked rather
+                // than shouting over the numbers below it.
+                .background(Capsule().fill(selected ? color.opacity(0.08) : Theme.surface))
+                .overlay(Capsule().stroke(selected ? color.opacity(0.6) : Theme.border, lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
