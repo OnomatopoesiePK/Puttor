@@ -97,6 +97,10 @@ struct MissDispersionPlotView: View {
     let filter: DispersionFilter
     var shading: DispersionShading = .none
     var useFeet: Bool = false
+    /// Only putts struck from inside this band are plotted. The whole hole is
+    /// still read, so a putt keeps the leave its follow-up recorded even when
+    /// that follow-up is outside the band.
+    var distanceRange: ClosedRange<Double>?
 
     private let size: CGFloat = 268
     /// The outer ring, and how far a dot may stray beyond it before the plot
@@ -148,6 +152,7 @@ struct MissDispersionPlotView: View {
             let sorted = holePutts.sorted { $0.puttNumber < $1.puttNumber }
             for (i, p) in sorted.enumerated() {
                 guard p.result != .holed, includeByFilter(p, filter) else { continue }
+                if let distanceRange, !distanceRange.contains(p.distanceM) { continue }
                 let next = i + 1 < sorted.count ? sorted[i + 1] : nil
                 let leave = next.map { max(0.3, $0.distanceM) } ?? max(0.3, p.distanceM * 0.35)
                 let radial = radius(forLeave: Double(leave))

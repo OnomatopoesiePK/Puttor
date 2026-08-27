@@ -237,7 +237,7 @@
 "stats.rounds.info" = "One tile per round in the current filter, showing that round's strokes gained putting: for each hole, the putts the tour would expect from where the first putt stood, less the putts actually taken.";
 "stats.sgPutting.info" = "Strokes gained per hole, summed over a round and then averaged across the filtered rounds. PCG underneath is the same rounds' per-putt figure: how each result compares with the tour's odds of holing from that distance.";
 "stats.playingStats.info" = "Score is the average strokes over par per round. GIR counts holes played for eagle or birdie, scramble the par saves among holes played for par with the green missed. The three putt figures count only holes that were actually putted. All of it needs the score reference (\"putt for\"): every mode has it except Custom without that field.";
-"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. Needs the complex result field: Pro mode, or Custom with the result set to complex. The rings mark 1, 2 and 3 metres of distance left. The first menu picks which break directions to show, the second what the colours mean: the strength of the break, the length of the putt, or how much it ran up or down the hill — the last two need the slope field as well. A bigger dot means more misses in the same spot, and once a colour filter is on, each dot is shaded by the class it falls into.";
+"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. Needs the complex result field: Pro mode, or Custom with the result set to complex. The rings mark 1, 2 and 3 metres of distance left. The first menu picks which break directions to show, the second what the colours mean: the strength of the break, the length of the putt, or how much it ran up or down the hill — the last two need the slope field as well. The two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time. A bigger dot means more misses in the same spot, and once a colour filter is on, each dot is shaded by the class it falls into.";
 "chart.makeVsTour.info" = "One row per distance bracket: the putts you holed over the putts you took from there, against the tour's average make rate across the same bracket. The right-hand column totals PCG for that bracket, divided by the number of rounds.";
 "stats.makeBySituation.info" = "The same distance brackets, split by the score each putt was for, so a birdie putt and a par putt from the same range can be compared. Needs the score reference (\"putt for\"), which Custom mode can leave out.";
 "summary.missTendency.info" = "Every miss placed in the direction it was entered. A sector reddens with how often that direction came up, and the middle holds the total. Needs the complex result field: Pro mode, or Custom with the result set to complex — a plain \"missed\" has no direction to place.";
@@ -246,6 +246,7 @@
 
 /* Dispersion */
 "dispersion.all" = "All Slopes";
+"dispersion.distanceRange" = "Putt length";
 "dispersion.shading.none" = "No Shading";
 "dispersion.shading.break" = "Break Strength";
 "dispersion.shading.breakLegend" = "Break In Percent, In The Classes Of The Entry Grid";

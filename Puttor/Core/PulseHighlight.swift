@@ -30,6 +30,9 @@ private struct PulseHighlight: ViewModifier {
             // Four times the swing it had: the box grows by eight percent
             // rather than two, and breathes a little faster with it.
             .scaleEffect(isActive && on ? 1.08 : 1)
+            // Siblings are drawn in order, so without this the glow and the
+            // grown edge disappear behind the next box in the row.
+            .zIndex(isActive ? 1 : 0)
             .onAppear {
                 guard isActive else { return }
                 withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { on = true }

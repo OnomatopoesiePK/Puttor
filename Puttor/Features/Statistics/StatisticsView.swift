@@ -55,6 +55,10 @@ struct StatisticsView: View {
     @State private var showRoundPicker = false
     @State private var dispersionFilter: DispersionFilter = .all
     @State private var dispersionShading: DispersionShading = .none
+    @State private var dispersionFromText: String = ""
+    @State private var dispersionToText: String = ""
+    /// Once the player types a bound, the fields stop following the data.
+    @State private var dispersionRangeEdited = false
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -200,6 +204,69 @@ struct StatisticsView: View {
             return UnitConverter.feetToMetres(max(1, feet))
         }
         return max(0.5, (longest * 2).rounded(.up) / 2)
+    }
+
+    private func longestPuttDistance(_ putts: [Putt]) -> Double {
+        putts.filter { $0.puttNumber > 0 }.map(\.distanceM).max() ?? 0
+    }
+
+    /// Two fields holding the band of putt distances to plot, filled with the
+    /// full range so it is clear what they mean before anything is typed.
+    private func dispersionRangeRow(longest: Double) -> some View {
+        HStack(spacing: 6) {
+            Text(L("dispersion.distanceRange"))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Theme.textMuted)
+
+            rangeField($dispersionFromText)
+            Text("–").font(.system(size: 12, weight: .bold)).foregroundStyle(Theme.textMuted)
+            rangeField($dispersionToText)
+
+            Text(L(useFeet ? "unit.ft" : "unit.m"))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Theme.textMuted)
+
+            Spacer(minLength: 0)
+
+            if dispersionRangeEdited {
+                Button {
+                    dispersionRangeEdited = false
+                    resetDispersionRange(longest: longest)
+                } label: {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Theme.primary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .onAppear { if !dispersionRangeEdited { resetDispersionRange(longest: longest) } }
+        .onChange(of: longest) { _, newValue in
+            if !dispersionRangeEdited { resetDispersionRange(longest: newValue) }
+        }
+        .onChange(of: useFeet) { _, _ in
+            if !dispersionRangeEdited { resetDispersionRange(longest: longest) }
+        }
+    }
+
+    private func rangeField(_ text: Binding<String>) -> some View {
+        TextField("", text: text)
+            .keyboardType(.decimalPad)
+            .multilineTextAlignment(.center)
+            .font(.system(size: 13, weight: .bold))
+            .foregroundStyle(Theme.text)
+            .frame(width: 52)
+            .padding(.vertical, 6)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.surfaceElevated))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.border, lineWidth: 1))
+            .onChange(of: text.wrappedValue) { _, _ in dispersionRangeEdited = true }
+    }
+
+    private func resetDispersionRange(longest: Double) {
+        dispersionFromText = DistanceRangeFilter.text(forMetres: 0, useFeet: useFeet)
+        dispersionToText = DistanceRangeFilter.text(forMetres: longest, useFeet: useFeet)
+        // Filling the fields is not the player editing them.
+        dispersionRangeEdited = false
     }
 
     private func decimalText(_ value: Double?) -> String {
@@ -366,11 +433,19 @@ struct StatisticsView: View {
                                 // for a menu can't fold the section away.
                                 .padding(.top, 10)
 
+                                dispersionRangeRow(longest: longestPuttDistance(data.allPutts))
+
                                 MissDispersionPlotView(
                                     putts: data.allPutts,
                                     filter: dispersionFilter,
                                     shading: dispersionShading,
-                                    useFeet: useFeet
+                                    useFeet: useFeet,
+                                    distanceRange: DistanceRangeFilter.range(
+                                        fromText: dispersionFromText,
+                                        toText: dispersionToText,
+                                        useFeet: useFeet,
+                                        fullRangeMaxM: longestPuttDistance(data.allPutts)
+                                    )
                                 )
                             }
 

@@ -1087,6 +1087,43 @@ struct PuttorTests {
         #expect(!RoundHighlights.lowPuttsPerHole(0))
     }
 
+    /// The dispersion plot's distance band: what the two fields add up to.
+    @Test func distanceRangeReadsBothFieldsInclusively() async throws {
+        let band = DistanceRangeFilter.range(fromText: "2", toText: "4", useFeet: false, fullRangeMaxM: 12)
+        #expect(band.contains(2.0))   // both ends belong to the band
+        #expect(band.contains(4.0))
+        #expect(band.contains(3.1))
+        #expect(!band.contains(1.9))
+        #expect(!band.contains(4.2))
+    }
+
+    /// Empty fields mean the whole range, and bounds typed the wrong way round
+    /// are read as the band they obviously mean.
+    @Test func distanceRangeFallsBackAndSelfCorrects() async throws {
+        let full = DistanceRangeFilter.range(fromText: "", toText: "", useFeet: false, fullRangeMaxM: 9)
+        #expect(full.contains(0))
+        #expect(full.contains(9))
+        #expect(!full.contains(9.5))
+
+        let reversed = DistanceRangeFilter.range(fromText: "5", toText: "3", useFeet: false, fullRangeMaxM: 12)
+        #expect(reversed.contains(4))
+        #expect(!reversed.contains(6))
+
+        // Junk in a field is treated as "no bound on that side".
+        let junk = DistanceRangeFilter.range(fromText: "abc", toText: "3", useFeet: false, fullRangeMaxM: 12)
+        #expect(junk.contains(0.5))
+        #expect(!junk.contains(3.5))
+    }
+
+    /// The fields are read in whatever unit the player works in.
+    @Test func distanceRangeConvertsFromFeet() async throws {
+        let band = DistanceRangeFilter.range(fromText: "3", toText: "6", useFeet: true, fullRangeMaxM: 12)
+        #expect(band.contains(UnitConverter.feetToMetres(4)))
+        #expect(!band.contains(UnitConverter.feetToMetres(7)))
+        // A comma is what the app's own numpad writes.
+        #expect(DistanceRangeFilter.parse("2,5", useFeet: false) == 2.5)
+    }
+
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)
         let mid = StrokesGained.baseline(at: 3.25)
