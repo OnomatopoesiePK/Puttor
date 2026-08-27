@@ -345,25 +345,6 @@ struct StatisticsView: View {
                                 }
                             }
 
-                            if !data.aggregated.makeByDistance.isEmpty {
-                                CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance") {
-                                    DistanceMakeChartView(data: data.aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count), showsTitle: false)
-                                }
-                            }
-
-                            if data.hasScoreSituationData {
-                                CollapsibleStatSection(title: sectionTitle(L("stats.makeBySituation"), marked: data.hasRoundsWithoutScore), storageKey: "situation") {
-                                    SituationComparisonView(makeByCategory: data.scoreAggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
-                                    scoreCoverageNote(data)
-                                }
-                            }
-
-                            if !data.aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
-                                CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency") {
-                                    MissDonutView(missCounts: data.aggregated.missCounts)
-                                }
-                            }
-
                             CollapsibleStatSection(title: L("stats.dispersion"), storageKey: "dispersion") {
                                 // Which putts to plot, and what their colour
                                 // should say about them.
@@ -391,6 +372,25 @@ struct StatisticsView: View {
                                     shading: dispersionShading,
                                     useFeet: useFeet
                                 )
+                            }
+
+                            if !data.aggregated.makeByDistance.isEmpty {
+                                CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance") {
+                                    DistanceMakeChartView(data: data.aggregated.makeByDistance, gsdDivisor: max(1, filteredRounds.count), showsTitle: false)
+                                }
+                            }
+
+                            if data.hasScoreSituationData {
+                                CollapsibleStatSection(title: sectionTitle(L("stats.makeBySituation"), marked: data.hasRoundsWithoutScore), storageKey: "situation") {
+                                    SituationComparisonView(makeByCategory: data.scoreAggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
+                                    scoreCoverageNote(data)
+                                }
+                            }
+
+                            if !data.aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
+                                CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency") {
+                                    MissDonutView(missCounts: data.aggregated.missCounts)
+                                }
                             }
 
                             if data.aggregated.missReasonCounts.total > 0 {
