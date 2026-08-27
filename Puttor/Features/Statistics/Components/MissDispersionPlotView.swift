@@ -113,11 +113,13 @@ struct MissDispersionPlotView: View {
 
     /// Ring distances, marked on the scale line. The outer one — 3 m, or 10 ft
     /// in imperial — is what the plot is normalised to; a longer leave than
-    /// that is drawn outside the rings rather than pinned to them.
+    /// that is drawn outside the rings rather than pinned to them. Nothing is
+    /// marked closer in: a ring that near the hole sits among the dots it is
+    /// meant to measure without telling them apart.
     private var ringDistances: [Double] {
         useFeet
-            ? [3, 6, 10].map { UnitConverter.feetToMetres($0) }
-            : [1, 2, 3]
+            ? [6, 10].map { UnitConverter.feetToMetres($0) }
+            : [2, 3]
     }
 
     private var outerDistance: Double { ringDistances.last ?? 3 }
@@ -184,9 +186,9 @@ struct MissDispersionPlotView: View {
                     ZStack {
                         plot
                         Text(L("dispersion.left")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                            .position(x: 10, y: size / 2)
+                            .position(x: 2, y: size / 2)
                         Text(L("dispersion.right")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                            .position(x: size - 10, y: size / 2)
+                            .position(x: size - 2, y: size / 2)
                         Text(L("dispersion.long")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
                             .position(x: size / 2, y: 10)
                         Text(L("dispersion.short")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
@@ -223,6 +225,10 @@ struct MissDispersionPlotView: View {
 
     // MARK: - Shading
 
+    /// Dots sit a little back from full strength so a crowded board stays
+    /// readable and overlapping markers still show what is underneath.
+    private let dotOpacity: Double = 0.75
+
     private var rampEnds: (low: Color, high: Color) {
         switch shading {
         case .none: return (Theme.error, Theme.error)
@@ -237,21 +243,22 @@ struct MissDispersionPlotView: View {
     /// Colour for one dot's averaged value. Slope reads outwards from a flat
     /// middle, the other two from nothing to the strongest in view.
     private func shadingColor(_ value: Double) -> Color {
-        guard shadingScale > 0.0001 else { return Theme.error }
+        guard shadingScale > 0.0001 else { return Theme.error.opacity(dotOpacity) }
         let ends = rampEnds
         if shading.isSigned {
             let t = max(-1, min(1, value / shadingScale))
-            return t >= 0
+            let base = t >= 0
                 ? mix(Theme.textMuted, ends.high, t)
                 : mix(Theme.textMuted, ends.low, -t)
+            return base.opacity(dotOpacity)
         }
         let t = max(0, min(1, value / shadingScale))
         if shading == .puttLength {
-            // One colour, carried from barely there to solid — a longer reach
-            // than any hue shift over this small a dot.
-            return ends.high.opacity(0.2 + 0.8 * t)
+            // One colour, carried from barely there to nearly solid — a longer
+            // reach than any hue shift over this small a dot.
+            return ends.high.opacity(0.15 + (dotOpacity - 0.15) * t)
         }
-        return mix(ends.low, ends.high, t)
+        return mix(ends.low, ends.high, t).opacity(dotOpacity)
     }
 
     private var shadingLegend: some View {
@@ -259,10 +266,10 @@ struct MissDispersionPlotView: View {
             let ends = rampEnds
             LinearGradient(
                 colors: shading.isSigned
-                    ? [ends.low, Theme.textMuted, ends.high]
+                    ? [ends.low.opacity(dotOpacity), Theme.textMuted.opacity(dotOpacity), ends.high.opacity(dotOpacity)]
                     : (shading == .puttLength
-                        ? [ends.high.opacity(0.2), ends.high]
-                        : [ends.low, ends.high]),
+                        ? [ends.high.opacity(0.15), ends.high.opacity(dotOpacity)]
+                        : [ends.low.opacity(dotOpacity), ends.high.opacity(dotOpacity)]),
                 startPoint: .leading, endPoint: .trailing
             )
             .frame(height: 10)
@@ -378,7 +385,7 @@ struct MissDispersionPlotView: View {
                     context.fill(Path(ellipseIn: rect), with: .color(shadingColor(value)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Theme.background.opacity(0.8)), lineWidth: 1)
                 } else {
-                    let alpha = min(0.95, 0.45 + Double(dot.count) * 0.08)
+                    let alpha = min(dotOpacity, 0.35 + Double(dot.count) * 0.07)
                     context.fill(Path(ellipseIn: rect), with: .color(Theme.error.opacity(alpha)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111).opacity(0.6)), lineWidth: 1)
                 }
