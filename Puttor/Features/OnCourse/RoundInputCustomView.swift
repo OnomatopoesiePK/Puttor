@@ -28,6 +28,7 @@ struct RoundInputCustomView: View {
     @State private var showHolePicker = false
     @State private var showSavedFlash = false
     @State private var flashPCG: Double = 0
+    @State private var celebration: ScoreCategory?
     @State private var showDeleteHoleConfirm = false
 
     private var useFeet: Bool { unitsPref == "imperial" }
@@ -44,6 +45,14 @@ struct RoundInputCustomView: View {
                     new.asksForScoreCategory = config.fields.contains { $0.kind == .puttForCategory }
                     session = new
                 }
+            }
+        }
+        .overlay {
+            // Sits above everything, hits nothing: the shout for a birdie or
+            // an eagle, gone again in a second and a half.
+            if let celebration {
+                ScoreCelebrationView(category: celebration)
+                    .transition(.opacity)
             }
         }
         .background(Theme.background.ignoresSafeArea())
@@ -205,6 +214,14 @@ struct RoundInputCustomView: View {
     private func handleOutcome(_ outcome: RoundOutcome, _ session: RoundSession) {
         if outcome == .reachedSequenceEnd {
             showSequenceEndAlert = true
+        }
+        if let category = session.celebration {
+            session.celebration = nil
+            celebration = category
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(ScoreCelebrationView.totalDuration * 1_000_000_000))
+                withAnimation(.easeOut(duration: 0.25)) { celebration = nil }
+            }
         }
         if let pcg = session.lastSavedPCG {
             flashSaved(pcg: pcg)

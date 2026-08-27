@@ -59,7 +59,11 @@ struct RoundSummaryView: View {
                 HStack(spacing: Theme.Spacing.xs) {
                     bigStat(L("summary.putts"), "\(stats.totalPutts)")
                     bigStat(L("summary.holes"), "\(stats.holes)")
-                    bigStat(L("summary.avgPerHole"), String(format: "%.1f", stats.avgPuttsPerHole))
+                    bigStat(
+                        L("summary.avgPerHole"),
+                        String(format: "%.1f", stats.avgPuttsPerHole),
+                        highlighted: RoundHighlights.lowPuttsPerHole(stats.avgPuttsPerHole)
+                    )
                 }
 
                 // Two different questions, so they get their own row: strokes
@@ -68,7 +72,8 @@ struct RoundSummaryView: View {
                     bigStat(L("summary.sg"),
                             "\(stats.sgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.sgTotal))",
                             caption: L("summary.sgCaption"),
-                            color: sgColor(stats.sgTotal))
+                            color: sgColor(stats.sgTotal),
+                            highlighted: RoundHighlights.strongStrokesGained(stats.sgTotal))
                     bigStat(L("stats.pcg"),
                             "\(stats.pcgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.pcgTotal))",
                             caption: L("summary.pcgCaption"),
@@ -85,9 +90,22 @@ struct RoundSummaryView: View {
                 card {
                     Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
                     HStack(spacing: Theme.Spacing.sm) {
-                        playingStat(L("stats.score"), stats.scoreRelativeToParText, subtitle: String(format: L("stats.overHoles"), stats.scoredHoles), color: scoreColor(stats.scoreRelativeToPar))
-                        playingStat(L("stats.gir"), "\(Int(stats.girPercent.rounded()))%", subtitle: "\(stats.girCount)/\(stats.holes)")
-                        playingStat(L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%", subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)")
+                        playingStat(
+                            L("stats.score"), stats.scoreRelativeToParText,
+                            subtitle: String(format: L("stats.overHoles"), stats.scoredHoles),
+                            color: scoreColor(stats.scoreRelativeToPar),
+                            highlighted: RoundHighlights.scoreUnderPar(stats.scoreRelativeToPar)
+                        )
+                        playingStat(
+                            L("stats.gir"), "\(Int(stats.girPercent.rounded()))%",
+                            subtitle: "\(stats.girCount)/\(stats.holes)",
+                            highlighted: RoundHighlights.strongGreensInRegulation(stats.girPercent)
+                        )
+                        playingStat(
+                            L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%",
+                            subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)",
+                            highlighted: RoundHighlights.strongScrambling(stats.scramblePercent)
+                        )
                     }
                     HStack(spacing: Theme.Spacing.sm) {
                         playingStat(
@@ -218,7 +236,7 @@ struct RoundSummaryView: View {
         sg > 0.5 ? Theme.primary : (sg < -0.5 ? Theme.error : Theme.warning)
     }
 
-    private func bigStat(_ label: String, _ value: String, caption: String? = nil, color: Color = Theme.text) -> some View {
+    private func bigStat(_ label: String, _ value: String, caption: String? = nil, color: Color = Theme.text, highlighted: Bool = false) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.system(size: 20, weight: .black)).foregroundStyle(color)
                 .lineLimit(1).minimumScaleFactor(0.7)
@@ -231,6 +249,7 @@ struct RoundSummaryView: View {
         .padding(.vertical, Theme.Spacing.sm)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+        .pulsingHighlight(highlighted)
     }
 
     private func highlightCard(_ putt: Putt) -> some View {
@@ -258,7 +277,7 @@ struct RoundSummaryView: View {
         score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
     }
 
-    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.primary) -> some View {
+    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.primary, highlighted: Bool = false) -> some View {
         // Every box the same size, whatever length its label happens to be —
         // a row of six that steps up and down reads as an accident.
         VStack(spacing: 2) {
@@ -280,6 +299,7 @@ struct RoundSummaryView: View {
         .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+        .pulsingHighlight(highlighted)
     }
 
     private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {

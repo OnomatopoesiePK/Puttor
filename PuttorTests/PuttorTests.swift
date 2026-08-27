@@ -1064,6 +1064,29 @@ struct PuttorTests {
         #expect(GameScoring.recentAverage(for: .ninePutt, in: sessions) == 7)
     }
 
+    /// What the round summary is allowed to celebrate.
+    @Test func roundHighlightsFireOnlyAtTheirThresholds() async throws {
+        #expect(RoundHighlights.scoreUnderPar(-1))
+        #expect(!RoundHighlights.scoreUnderPar(0))
+
+        #expect(RoundHighlights.strongStrokesGained(2.0))
+        #expect(!RoundHighlights.strongStrokesGained(1.99))
+
+        // Fourteen of eighteen, held as a rate so a nine-hole round qualifies
+        // with seven of nine.
+        #expect(RoundHighlights.strongGreensInRegulation(14.0 / 18 * 100))
+        #expect(!RoundHighlights.strongGreensInRegulation(13.0 / 18 * 100))
+        #expect(RoundHighlights.strongGreensInRegulation(8.0 / 9 * 100))
+
+        #expect(RoundHighlights.strongScrambling(70))
+        #expect(!RoundHighlights.strongScrambling(69.9))
+
+        #expect(RoundHighlights.lowPuttsPerHole(1.49))
+        #expect(!RoundHighlights.lowPuttsPerHole(1.5))
+        // An empty round averages zero putts, which is not a triumph.
+        #expect(!RoundHighlights.lowPuttsPerHole(0))
+    }
+
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)
         let mid = StrokesGained.baseline(at: 3.25)

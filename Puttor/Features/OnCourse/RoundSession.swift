@@ -48,6 +48,9 @@ final class RoundSession {
     /// PCG of the putt most recently saved by recordDraft()/recordTapIn() — used
     /// to show the "Saved +0.34" / "Saved -0.18" flash after every save.
     var lastSavedPCG: Double?
+    /// Set when a putt for birdie or eagle drops, so the input screen can put
+    /// the wordmark up. Cleared by the view once it has shown it.
+    var celebration: ScoreCategory?
 
     /// Set by the input view: does the surface the player is using actually ask
     /// which score the putt is for? Custom mode can leave that field out.
@@ -378,6 +381,11 @@ final class RoundSession {
         if asksForScoreCategory { round.tracksScoreCategory = true }
         try? modelContext.save()
         lastSavedPCG = putt.pcg
+        // Only the two that are worth a shout, and only when the field that
+        // says which is even on screen.
+        if asksForScoreCategory, effectiveResult == .holed, putt.puttFor == .birdie || putt.puttFor == .eagle {
+            celebration = putt.puttFor
+        }
 
         if effectiveResult == .holed {
             if isPostRoundEdit {
