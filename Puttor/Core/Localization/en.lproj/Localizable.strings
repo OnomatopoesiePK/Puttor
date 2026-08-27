@@ -219,20 +219,20 @@
 "stats.gsdSubtitle" = "avg / round from the tour make rates";
 "stats.scoreVsPutting" = "SCORE VS PUTTING";
 "stats.svp.scoreLegend" = "score played";
-"stats.svp.withoutLegend" = "with pro putting";
+"stats.svp.withoutLegend" = "with standardized putting";
 "stats.svp.gapLegend" = "what putting did";
 "stats.svp.avgScore" = "Ø SCORE";
-"stats.svp.avgWithout" = "Ø SCORE WITH PRO PUTTING";
+"stats.svp.avgWithout" = "Ø SCORE · STANDARDIZED PUTTING";
 "stats.svp.perRound" = "per round";
 "stats.svp.needMore" = "%ld finished rounds are needed before scores and putting can be compared.";
-"stats.svp.note" = "Each round counts as it was played. \"Pro putting\" adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting. Each band covers one standard deviation either side of that series' average. A narrower pro-putting band means your putting is what pulls the rounds apart; a wider one means they would differ regardless of the putter.";
+"stats.svp.note" = "Each round counts as it was played. \"Standardized putting\" adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting. Each band covers one standard deviation either side of that series' average. A narrower standardized band means your putting is what pulls the rounds apart; a wider one means they would differ regardless of the putter.";
 "stats.svp.bandLegend" = "score average ± spread";
-"stats.svp.bandLegendPro" = "pro putting average ± spread";
+"stats.svp.bandLegendPro" = "standardized putting average ± spread";
 "stats.svp.impactHigh" = "PUTTING DRIVES YOUR SCORE";
 "stats.svp.impactLow" = "ROUNDS DIFFER ANYWAY";
 "stats.svp.impactNone" = "NO CLEAR EFFECT";
-"stats.svp.tighter" = "tighter with pro putting";
-"stats.svp.wider" = "wider with pro putting";
+"stats.svp.tighter" = "tighter with standardized putting";
+"stats.svp.wider" = "wider with standardized putting";
 "stats.dispersion" = "MISS DISPERSION";
 
 /* Dispersion */
