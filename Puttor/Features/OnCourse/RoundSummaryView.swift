@@ -89,6 +89,23 @@ struct RoundSummaryView: View {
                         playingStat(L("stats.gir"), "\(Int(stats.girPercent.rounded()))%", subtitle: "\(stats.girCount)/\(stats.holes)")
                         playingStat(L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%", subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)")
                     }
+                    HStack(spacing: Theme.Spacing.sm) {
+                        playingStat(
+                            L("stats.puttsGir"),
+                            stats.avgPuttsOnGir.map { String(format: "%.2f", $0) } ?? "—",
+                            subtitle: String(format: L("stats.overHoles"), stats.girPuttedHoles)
+                        )
+                        playingStat(
+                            L("stats.puttsNoGir"),
+                            stats.avgPuttsOffGir.map { String(format: "%.2f", $0) } ?? "—",
+                            subtitle: String(format: L("stats.overHoles"), stats.nonGirPuttedHoles)
+                        )
+                        playingStat(
+                            L("stats.girProximity"),
+                            stats.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
+                            subtitle: L("stats.firstPutt")
+                        )
+                    }
                 }
                 }
 

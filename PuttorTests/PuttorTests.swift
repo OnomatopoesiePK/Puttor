@@ -889,6 +889,71 @@ struct PuttorTests {
 
     /// The curve is continuous, so a distance between two reference rows lands
     /// between their values rather than snapping to either.
+    /// Putts split by whether the green was hit, plus how close the approach
+    /// left the ball when it was.
+    @MainActor
+    @Test func girSplitCountsPuttsAndProximitySeparately() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        func addHole(_ hole: Int, category: ScoreCategory, distances: [Double]) {
+            for (index, distance) in distances.enumerated() {
+                let putt = Putt(
+                    holeNumber: hole,
+                    puttNumber: index + 1,
+                    distanceM: distance,
+                    puttFor: index == 0 ? category : category.next,
+                    result: index == distances.count - 1 ? .holed : .short
+                )
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+            }
+        }
+        // Two greens hit: a 6m birdie putt two-putted, a 4m birdie holed.
+        addHole(1, category: .birdie, distances: [6.0, 0.5])
+        addHole(2, category: .birdie, distances: [4.0])
+        // Two greens missed, played for par.
+        addHole(3, category: .par, distances: [3.0])
+        addHole(4, category: .par, distances: [2.0, 0.4, 0.2])
+        try context.save()
+
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.girPuttedHoles == 2)
+        #expect(stats.nonGirPuttedHoles == 2)
+        #expect(abs((stats.avgPuttsOnGir ?? 0) - 1.5) < 0.0001)
+        #expect(abs((stats.avgPuttsOffGir ?? 0) - 2.0) < 0.0001)
+        // Proximity is the first putt on the greens that were hit: (6 + 4) / 2.
+        #expect(abs((stats.avgGirProximityM ?? 0) - 5.0) < 0.0001)
+    }
+
+    /// Holing out from off the green says nothing about putting, so it can't
+    /// drag the per-hole putt averages down.
+    @MainActor
+    @Test func holeOutsStayOutOfTheGirPuttAverages() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        let sentinel = Putt(holeNumber: 1, puttNumber: 0, distanceM: 0, puttFor: .birdie, result: .holed)
+        sentinel.round = round
+        round.putts.append(sentinel)
+        context.insert(sentinel)
+
+        let putt = Putt(holeNumber: 2, puttNumber: 1, distanceM: 5.0, puttFor: .birdie, result: .holed)
+        putt.round = round
+        round.putts.append(putt)
+        context.insert(putt)
+        try context.save()
+
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.girCount == 2)
+        #expect(stats.girPuttedHoles == 1)
+        #expect(abs((stats.avgPuttsOnGir ?? 0) - 1.0) < 0.0001)
+        #expect(abs((stats.avgGirProximityM ?? 0) - 5.0) < 0.0001)
+    }
+
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)
         let mid = StrokesGained.baseline(at: 3.25)

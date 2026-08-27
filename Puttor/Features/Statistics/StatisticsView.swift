@@ -202,6 +202,10 @@ struct StatisticsView: View {
         return max(0.5, (longest * 2).rounded(.up) / 2)
     }
 
+    private func decimalText(_ value: Double?) -> String {
+        value.map { String(format: "%.2f", $0) } ?? "—"
+    }
+
     private func avgScorePerRoundText(_ average: Double?) -> String {
         guard let average else { return "—" }
         if abs(average) < 0.05 { return "E" }
@@ -306,6 +310,25 @@ struct StatisticsView: View {
                                         playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: L("stats.svp.perRound"))
                                         playingStat(L("stats.gir"), "\(Int(data.scoreAggregated.girPercent.rounded()))%", subtitle: "\(data.scoreAggregated.girCount)/\(data.scoreAggregated.holes)")
                                         playingStat(L("stats.scramble"), "\(Int(data.scoreAggregated.scramblePercent.rounded()))%", subtitle: "\(data.scoreAggregated.scrambleSuccesses)/\(data.scoreAggregated.scrambleAttempts)")
+                                    }
+                                    // What the putter faces after hitting the
+                                    // green, and after missing it.
+                                    HStack(spacing: Theme.Spacing.sm) {
+                                        playingStat(
+                                            L("stats.puttsGir"),
+                                            decimalText(data.scoreAggregated.avgPuttsOnGir),
+                                            subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.girPuttedHoles)
+                                        )
+                                        playingStat(
+                                            L("stats.puttsNoGir"),
+                                            decimalText(data.scoreAggregated.avgPuttsOffGir),
+                                            subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.nonGirPuttedHoles)
+                                        )
+                                        playingStat(
+                                            L("stats.girProximity"),
+                                            data.scoreAggregated.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
+                                            subtitle: L("stats.firstPutt")
+                                        )
                                     }
                                     scoreCoverageNote(data)
                                 }

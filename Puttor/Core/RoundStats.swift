@@ -67,6 +67,22 @@ struct RoundStats {
     /// Of those, how many were saved (one putt, or holed out from off the green).
     var scrambleSuccesses: Int = 0
 
+    /// Putts taken on holes reached in regulation, and on the ones that
+    /// weren't — counted only over holes that were actually putted, since a
+    /// hole-out says nothing about putting.
+    var girPutts: Int = 0
+    var girPuttedHoles: Int = 0
+    var nonGirPutts: Int = 0
+    var nonGirPuttedHoles: Int = 0
+    /// First-putt distances on greens hit in regulation: how close the
+    /// approach left the ball.
+    var girProximitySumM: Double = 0
+    var girProximityCount: Int = 0
+
+    var avgPuttsOnGir: Double? { girPuttedHoles > 0 ? Double(girPutts) / Double(girPuttedHoles) : nil }
+    var avgPuttsOffGir: Double? { nonGirPuttedHoles > 0 ? Double(nonGirPutts) / Double(nonGirPuttedHoles) : nil }
+    var avgGirProximityM: Double? { girProximityCount > 0 ? girProximitySumM / Double(girProximityCount) : nil }
+
     /// Total strokes over/under par across the scored holes.
     var scoreRelativeToPar: Int = 0
     /// Holes the score could be derived for — the divisor behind any average.
@@ -218,7 +234,22 @@ struct RoundStats {
 
             if category.isGreenInRegulation {
                 stats.girCount += 1
-            } else if category.isScrambleAttempt {
+                if !realOnHole.isEmpty {
+                    stats.girPutts += realOnHole.count
+                    stats.girPuttedHoles += 1
+                    if let first = realOnHole.min(by: { $0.puttNumber < $1.puttNumber }) {
+                        stats.girProximitySumM += first.distanceM
+                        stats.girProximityCount += 1
+                    }
+                }
+            } else {
+                if !realOnHole.isEmpty {
+                    stats.nonGirPutts += realOnHole.count
+                    stats.nonGirPuttedHoles += 1
+                }
+            }
+
+            if !category.isGreenInRegulation, category.isScrambleAttempt {
                 stats.scrambleAttempts += 1
                 // Holing out from off the green is the up-and-down; with putts
                 // it takes exactly one to count as saved.
@@ -321,6 +352,12 @@ struct RoundStats {
         }
 
         merged.girCount = list.reduce(0) { $0 + $1.girCount }
+        merged.girPutts = list.reduce(0) { $0 + $1.girPutts }
+        merged.girPuttedHoles = list.reduce(0) { $0 + $1.girPuttedHoles }
+        merged.nonGirPutts = list.reduce(0) { $0 + $1.nonGirPutts }
+        merged.nonGirPuttedHoles = list.reduce(0) { $0 + $1.nonGirPuttedHoles }
+        merged.girProximitySumM = list.reduce(0) { $0 + $1.girProximitySumM }
+        merged.girProximityCount = list.reduce(0) { $0 + $1.girProximityCount }
         merged.scrambleAttempts = list.reduce(0) { $0 + $1.scrambleAttempts }
         merged.scrambleSuccesses = list.reduce(0) { $0 + $1.scrambleSuccesses }
         merged.scoreRelativeToPar = list.reduce(0) { $0 + $1.scoreRelativeToPar }
