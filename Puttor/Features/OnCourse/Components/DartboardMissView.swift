@@ -61,7 +61,10 @@ struct DartboardMissView: View {
     @Binding var result: PuttResult?
     @Binding var lipOut: Bool
 
-    private let size: CGFloat = 280
+    /// The board's edge length. Landscape hands it a smaller one so the miss
+    /// board ends above the slope grid beside it, leaving the corner free for
+    /// the controls.
+    var size: CGFloat = 280
 
     var body: some View {
         VStack(spacing: 8) {

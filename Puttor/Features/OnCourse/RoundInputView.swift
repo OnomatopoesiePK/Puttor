@@ -65,11 +65,16 @@ struct RoundInputView: View {
     @ViewBuilder
     private func content(_ session: RoundSession) -> some View {
         VStack(spacing: 0) {
-            if isLandscape { landscapeTopBar(session) } else { topBar(session) }
+            if !isLandscape { topBar(session) }
 
             Group {
                 if isLandscape {
+                    // The two rows float over the fields instead of taking a
+                    // strip of the little height there is, and they are only
+                    // as wide as what is written in them.
                     landscapeFields(session)
+                        .overlay(alignment: .topLeading) { landscapeTopBar(session) }
+                        .overlay(alignment: .bottomTrailing) { landscapeBottomBar(session) }
                 } else {
                     portraitFields(session)
                 }
@@ -82,7 +87,7 @@ struct RoundInputView: View {
                 .animation(.easeOut(duration: 0.2), value: showSavedFlash)
             }
 
-            if isLandscape { landscapeBottomBar(session) } else { bottomBar(session) }
+            if !isLandscape { bottomBar(session) }
         }
         .alert(L("input.holeCompleteTitle"), isPresented: $showSequenceEndAlert) {
             Button(L("input.endRound")) { session.endRound(holeCount: session.playedHoleCount <= 9 ? 9 : 18); navigateToSummary = true }
@@ -153,11 +158,12 @@ struct RoundInputView: View {
         }
     }
 
-    private func resultField(_ session: RoundSession) -> some View {
+    private func resultField(_ session: RoundSession, boardSize: CGFloat = 280) -> some View {
         section {
             DartboardMissView(
                 result: Binding(get: { session.draftResult }, set: { session.draftResult = $0 }),
-                lipOut: Binding(get: { session.draftLipOut }, set: { session.draftLipOut = $0 })
+                lipOut: Binding(get: { session.draftLipOut }, set: { session.draftLipOut = $0 }),
+                size: boardSize
             )
             missReasonRow(session)
         }
@@ -185,17 +191,22 @@ struct RoundInputView: View {
 
                 HStack(alignment: .top, spacing: Theme.Spacing.md) {
                     puttForField(session, axis: .vertical)
-                        .frame(width: 96)
+                        .frame(width: 192)
                     distanceField(session)
                 }
 
+                // The miss board is the shorter of the two, so the bottom
+                // right corner stays clear for the controls that float there.
                 HStack(alignment: .top, spacing: Theme.Spacing.md) {
                     slopeField(session)
-                    resultField(session)
+                    resultField(session, boardSize: 220)
                 }
             }
             .padding(.horizontal, Theme.Spacing.md)
-            .padding(.vertical, Theme.Spacing.sm)
+            // Room for the floating rows at either end, so nothing is stuck
+            // underneath them when the layout is scrolled to its limits.
+            .padding(.top, 58)
+            .padding(.bottom, 74)
         }
     }
 
@@ -255,10 +266,12 @@ struct RoundInputView: View {
     /// empty row is just paint, so the background only goes where something is
     /// written.
     private func landscapeTopBar(_ session: RoundSession) -> some View {
-        HStack(alignment: .center, spacing: 8) {
+        HStack(alignment: .top, spacing: 8) {
             island {
                 holeButton(session)
-                PuttChipsView(session: session)
+                // Capped, or the chips' scroll view stretches the island into
+                // a bar across a row that has nothing else in it.
+                PuttChipsView(session: session).frame(maxWidth: 132)
                 deleteHoleButton(session)
             }
             Spacer(minLength: 0)
@@ -363,13 +376,10 @@ struct RoundInputView: View {
     /// One island at the trailing edge, on the side the thumb is already on,
     /// with nothing painted across the empty half of the row.
     private func landscapeBottomBar(_ session: RoundSession) -> some View {
-        HStack(spacing: 8) {
-            Spacer(minLength: 0)
-            island {
-                navArrows(session)
-                recordButton(session, fills: false)
-                tapInButton(session)
-            }
+        island {
+            navArrows(session)
+            recordButton(session, fills: false)
+            tapInButton(session)
         }
         .padding(.horizontal, Theme.Spacing.md)
         .padding(.bottom, 6)

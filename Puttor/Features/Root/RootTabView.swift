@@ -47,6 +47,17 @@ struct RootTabView: View {
     }
 
     var body: some View {
+        HStack(spacing: 0) {
+            // Its own column rather than an inset over the content: the rail
+            // takes the width it needs at the very edge, and the tabs get the
+            // rest without anything lying on top of them.
+            if isLandscape { tabRail }
+            tabs
+        }
+        .ignoresSafeArea(.container, edges: isLandscape ? .leading : [])
+    }
+
+    private var tabs: some View {
         TabView(selection: $selectedTab) {
             OnCourseListView()
                 .tabItem { Label(L("tab.course"), systemImage: "flag.fill") }
@@ -69,9 +80,6 @@ struct RootTabView: View {
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
         }
         .tint(Theme.primary)
-        .safeAreaInset(edge: .leading, spacing: 0) {
-            if isLandscape { tabRail }
-        }
         .id("\(localization.languageCode)-\(themeManager.appearance.rawValue)")
         .preferredColorScheme(themeManager.colorScheme)
     }
@@ -106,10 +114,10 @@ struct RootTabView: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 3)
-        .frame(width: 48)
+        .frame(width: 46)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-        .padding(.leading, 4)
+        .padding(.leading, 3)
         // Centred on the screen's height rather than stretched down it.
         .frame(maxHeight: .infinity, alignment: .center)
     }
