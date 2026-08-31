@@ -14,6 +14,10 @@
 "coach.summary" = "Read from your last %1$ld rounds and %2$ld putts.";
 "coach.weakestDistance" = "Your weakest distance right now is %@ — that is where you sit furthest below the tour.";
 "coach.numbers" = "THE NUMBERS";
+"coach.mistakes" = "SHOULD NOT HAVE HAPPENED";
+"coach.mistakes.threePutts" = "%1$ld three-putts on %2$ld holes from a distance the tour two-putts — %3$.1f strokes handed back.";
+"coach.mistakes.sureThings" = "%1$ld of %2$ld putts missed from where the ball drops %3$ld%% of the time.";
+"coach.mistakes.worstMiss" = "The one that stings: %1$@, a %2$ld%% putt.";
 "coach.numbers.source" = "From the rounds you played on the course — strokes gained and PCG summed per hole, then per round.";
 "coach.practice" = "PRACTICE";
 "coach.practice.sessions" = "SESSIONS";

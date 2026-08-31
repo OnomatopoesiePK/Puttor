@@ -1263,6 +1263,59 @@ struct PuttorTests {
         #expect(MissPatternFinder.findings(in: holed).isEmpty)
     }
 
+    // MARK: - Avoidable mistakes
+
+    @MainActor
+    private static func puttsOnHole(_ hole: Int, distances: [Double], holedLast: Bool = true) -> [Putt] {
+        distances.enumerated().map { index, distance in
+            Putt(
+                holeNumber: hole, puttNumber: index + 1, distanceM: distance,
+                puttFor: .par,
+                result: index == distances.count - 1 && holedLast ? .holed : .short
+            )
+        }
+    }
+
+    /// A three-putt from a distance the tour two-putts is a stroke handed
+    /// back; the same from 25 m is just a long putt.
+    @MainActor
+    @Test func onlyThreePuttsFromTwoPuttRangeCount() async throws {
+        let avoidable = Self.puttsOnHole(1, distances: [4, 1, 0.4])   // E(4m) is under 2
+        let forgivable = Self.puttsOnHole(2, distances: [25, 3, 0.5]) // E(25m) is over 2
+
+        let found = AvoidableMistakeFinder.find(inRounds: [avoidable + forgivable])
+        #expect(found.threePutts == 1)
+        #expect(found.holes == 2)
+        #expect(found.threePuttStrokesLost > 1)
+    }
+
+    /// A miss from where the ball drops four times in five is the other leak,
+    /// and the worst of them is the one worth naming.
+    @MainActor
+    @Test func missesFromNearCertainRangeAreCounted() async throws {
+        let missedTapIn = Putt(holeNumber: 1, puttNumber: 1, distanceM: 0.5, puttFor: .par, result: .left)
+        let missedShort = Putt(holeNumber: 2, puttNumber: 1, distanceM: 1.2, puttFor: .par, result: .short)
+        let holedShort = Putt(holeNumber: 3, puttNumber: 1, distanceM: 1.0, puttFor: .par, result: .holed)
+        let missedLong = Putt(holeNumber: 4, puttNumber: 1, distanceM: 8, puttFor: .par, result: .short)
+
+        let found = AvoidableMistakeFinder.find(inRounds: [[missedTapIn, missedShort, holedShort, missedLong]])
+        #expect(found.missedSureThings == 2)   // the 8m miss is not one of them
+        #expect(found.sureThingAttempts == 3)
+        #expect(found.worstMissDistanceM == 0.5)
+        #expect((found.worstMissProbability ?? 0) > 0.95)
+    }
+
+    /// Rounds are read one at a time: pooled, hole 1 of three rounds would
+    /// look like one long three-putt.
+    @MainActor
+    @Test func mistakesAreCountedPerRound() async throws {
+        let round = Self.puttsOnHole(1, distances: [3, 0.4])
+        let found = AvoidableMistakeFinder.find(inRounds: [round, round, round])
+        #expect(found.threePutts == 0)
+        #expect(found.holes == 3)
+        #expect(!found.hasAny)
+    }
+
     // MARK: - Coach
 
     /// The bug that made the coach report double figures of strokes lost:

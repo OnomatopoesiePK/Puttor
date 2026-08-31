@@ -132,6 +132,8 @@ struct RoundSummaryView: View {
                 }
                 }
 
+                mistakesCard
+
                 card {
                     Text(L("summary.holes").uppercased()).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
                     holeGrid
@@ -239,6 +241,44 @@ struct RoundSummaryView: View {
 
     private func sgColor(_ sg: Double) -> Color {
         sg > 0.5 ? Theme.primary : (sg < -0.5 ? Theme.error : Theme.warning)
+    }
+
+    /// The strokes this round handed back where it shouldn't have: a three-putt
+    /// from two-putt range, a miss from inside the near-certain distances.
+    @ViewBuilder
+    private var mistakesCard: some View {
+        let mistakes = AvoidableMistakeFinder.find(inRounds: [putts])
+        if mistakes.hasAny {
+            card {
+                Text(L("coach.mistakes"))
+                    .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                    .foregroundStyle(Theme.error)
+
+                if mistakes.threePutts > 0 {
+                    mistakeRow(String(format: L("coach.mistakes.threePutts"),
+                                      mistakes.threePutts, mistakes.holes, mistakes.threePuttStrokesLost))
+                }
+                if mistakes.missedSureThings > 0 {
+                    mistakeRow(String(format: L("coach.mistakes.sureThings"),
+                                      mistakes.missedSureThings,
+                                      mistakes.sureThingAttempts,
+                                      Int(AvoidableMistakeFinder.sureThingProbability * 100)))
+                }
+            }
+        }
+    }
+
+    private func mistakeRow(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Theme.error)
+                .padding(.top, 2)
+            Text(text)
+                .font(.system(size: 13))
+                .foregroundStyle(Theme.text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     private func bigStat(_ label: String, _ value: String, caption: String? = nil, color: Color = Theme.text, highlighted: Bool = false) -> some View {
