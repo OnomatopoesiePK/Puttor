@@ -5,10 +5,11 @@
 //  4-tab root, replacing the default ContentView.swift template.
 //  Ported from (tabs)/_layout.tsx.
 //
-//  In landscape the tabs move to a rail down the left edge, where a short wide
-//  screen has room to spare. The TabView itself stays — only its bar is
-//  hidden — so the four tabs keep their state across a rotation instead of
-//  being rebuilt as a different view tree.
+//  In landscape the tabs move to a strip across the top middle — the one part
+//  of a short wide screen nothing else wants, and the one part neither
+//  rotation puts a notch through. The TabView itself stays and only its bar is
+//  hidden, so the tabs keep their state across a rotation instead of being
+//  rebuilt as a different view tree.
 //
 
 import SwiftUI
@@ -48,14 +49,12 @@ struct RootTabView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Its own column rather than an inset over the content: the rail
-            // takes the width it needs at the very edge, and the tabs get the
-            // rest without anything lying on top of them.
-            if isLandscape { tabRail }
+        VStack(spacing: 0) {
+            // A strip along the top rather than a rail down the side: rotate
+            // the other way and a side rail ends up under the island.
+            if isLandscape { tabStrip }
             tabs
         }
-        .ignoresSafeArea(.container, edges: isLandscape ? .leading : [])
     }
 
     private var tabs: some View {
@@ -90,42 +89,39 @@ struct RootTabView: View {
         .preferredColorScheme(themeManager.colorScheme)
     }
 
-    /// The tab bar stood on its end: a floating strip rather than a wall, kept
-    /// narrow and centred so it takes as little of a short screen as it can.
-    private var tabRail: some View {
-        VStack(spacing: 2) {
+    /// The tab bar laid across the top: centred, only as wide as its buttons,
+    /// and short enough to cost the layout almost nothing.
+    private var tabStrip: some View {
+        HStack(spacing: 2) {
             ForEach(rootTabs) { tab in
                 Button {
                     selectedTab = tab.tag
                 } label: {
-                    VStack(spacing: 2) {
+                    HStack(spacing: 5) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.system(size: 13, weight: .semibold))
                         Text(L(tab.labelKey))
-                            .font(.system(size: 8, weight: .semibold))
+                            .font(.system(size: 11, weight: .semibold))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.6)
                     }
                     .foregroundStyle(selectedTab == tab.tag ? Theme.primary : Theme.textMuted)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 7)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
                     .background(
-                        RoundedRectangle(cornerRadius: Theme.Radius.sm)
-                            .fill(selectedTab == tab.tag ? Theme.primary.opacity(0.14) : .clear)
+                        Capsule().fill(selectedTab == tab.tag ? Theme.primary.opacity(0.14) : .clear)
                     )
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 3)
-        .frame(width: 46)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-        .padding(.leading, 3)
-        // Centred on the screen's height rather than stretched down it.
-        .frame(maxHeight: .infinity, alignment: .center)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 3)
+        .background(Capsule().fill(Theme.surface))
+        .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
+        .padding(.top, 2)
+        .padding(.bottom, 4)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
