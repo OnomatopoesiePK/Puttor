@@ -76,40 +76,42 @@ struct RootTabView: View {
         .preferredColorScheme(themeManager.colorScheme)
     }
 
-    /// The tab bar stood on its end.
+    /// The tab bar stood on its end: a floating strip rather than a wall, kept
+    /// narrow and centred so it takes as little of a short screen as it can.
     private var tabRail: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 2) {
             ForEach(rootTabs) { tab in
                 Button {
                     selectedTab = tab.tag
                 } label: {
-                    VStack(spacing: 3) {
+                    VStack(spacing: 2) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.system(size: 15, weight: .semibold))
                         Text(L(tab.labelKey))
-                            .font(.system(size: 9, weight: .semibold))
+                            .font(.system(size: 8, weight: .semibold))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                            .minimumScaleFactor(0.6)
                     }
                     .foregroundStyle(selectedTab == tab.tag ? Theme.primary : Theme.textMuted)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 7)
                     .background(
                         RoundedRectangle(cornerRadius: Theme.Radius.sm)
-                            .fill(selectedTab == tab.tag ? Theme.primary.opacity(0.12) : .clear)
+                            .fill(selectedTab == tab.tag ? Theme.primary.opacity(0.14) : .clear)
                     )
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
-            Spacer(minLength: 0)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 4)
-        .frame(width: 66)
-        .background(Theme.surface)
-        .overlay(Rectangle().fill(Theme.border).frame(width: 1), alignment: .trailing)
-        .ignoresSafeArea(edges: .bottom)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 3)
+        .frame(width: 48)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+        .padding(.leading, 4)
+        // Centred on the screen's height rather than stretched down it.
+        .frame(maxHeight: .infinity, alignment: .center)
     }
 }
 

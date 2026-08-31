@@ -65,7 +65,7 @@ struct RoundInputView: View {
     @ViewBuilder
     private func content(_ session: RoundSession) -> some View {
         VStack(spacing: 0) {
-            topBar(session)
+            if isLandscape { landscapeTopBar(session) } else { topBar(session) }
 
             Group {
                 if isLandscape {
@@ -82,7 +82,7 @@ struct RoundInputView: View {
                 .animation(.easeOut(duration: 0.2), value: showSavedFlash)
             }
 
-            bottomBar(session)
+            if isLandscape { landscapeBottomBar(session) } else { bottomBar(session) }
         }
         .alert(L("input.holeCompleteTitle"), isPresented: $showSequenceEndAlert) {
             Button(L("input.endRound")) { session.endRound(holeCount: session.playedHoleCount <= 9 ? 9 : 18); navigateToSummary = true }
@@ -176,28 +176,27 @@ struct RoundInputView: View {
         }
     }
 
-    /// Two columns: what the putt was on the left, what it did on the right —
-    /// distance over slope, the score it was for over the result.
+    /// One layout that scrolls as a whole: the score the putt is played for
+    /// down a narrow strip beside the numpad, the two boards underneath.
     private func landscapeFields(_ session: RoundSession) -> some View {
-        HStack(alignment: .top, spacing: Theme.Spacing.md) {
-            ScrollView {
-                VStack(spacing: Theme.Spacing.md) {
-                    holeOutCard(session)
-                    distanceField(session)
-                    slopeField(session)
-                }
-                .padding(.vertical, Theme.Spacing.sm)
-            }
+        ScrollView {
+            VStack(spacing: Theme.Spacing.md) {
+                holeOutCard(session)
 
-            ScrollView {
-                VStack(spacing: Theme.Spacing.md) {
+                HStack(alignment: .top, spacing: Theme.Spacing.md) {
                     puttForField(session, axis: .vertical)
+                        .frame(width: 96)
+                    distanceField(session)
+                }
+
+                HStack(alignment: .top, spacing: Theme.Spacing.md) {
+                    slopeField(session)
                     resultField(session)
                 }
-                .padding(.vertical, Theme.Spacing.sm)
             }
+            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.vertical, Theme.Spacing.sm)
         }
-        .padding(.horizontal, Theme.Spacing.md)
     }
 
     private func handleOutcome(_ outcome: RoundOutcome, _ session: RoundSession) {
@@ -241,141 +240,191 @@ struct RoundInputView: View {
 
     private func topBar(_ session: RoundSession) -> some View {
         HStack(spacing: 8) {
-            Button {
-                showHolePicker = true
-            } label: {
-                VStack(spacing: 0) {
-                    Text(L("input.hole")).font(.system(size: 9, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-                    HStack(spacing: 2) {
-                        Text("\(session.displayHole)").font(.system(size: 30, weight: .black)).foregroundStyle(Theme.primary)
-                        Image(systemName: "chevron.down").font(.system(size: 10, weight: .heavy)).foregroundStyle(Theme.primary)
-                    }
-                }
-            }
-            .buttonStyle(.plain)
-            .frame(minWidth: 40)
-
+            holeButton(session)
             PuttChipsView(session: session)
-
-            if !session.puttsOnHole(session.displayHole).isEmpty {
-                Button {
-                    showDeleteHoleConfirm = true
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Theme.error)
-                        .frame(width: 32, height: 32)
-                        .background(Circle().fill(Theme.error.opacity(0.13)))
-                        .overlay(Circle().stroke(Theme.error, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .confirmationDialog(
-                    String(format: L("input.deleteHoleConfirm"), session.displayHole),
-                    isPresented: $showDeleteHoleConfirm,
-                    titleVisibility: .visible
-                ) {
-                    Button(L("onCourse.delete"), role: .destructive) {
-                        session.deleteAllPuttsOnHole(session.displayHole)
-                    }
-                    Button(L("common.cancel"), role: .cancel) {}
-                }
-            }
-
-            VStack(spacing: 0) {
-                Text("\(session.totalRealPutts)").font(.system(size: 18, weight: .heavy)).foregroundStyle(Theme.text)
-                Text(L("input.total")).font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.textMuted)
-            }
-
-            Button {
-                if isPostRoundEdit {
-                    round.isComplete = true
-                    try? modelContext.save()
-                    dismiss()
-                } else {
-                    showEndRoundAlert = true
-                }
-            } label: {
-                Text(isPostRoundEdit ? L("summary.done") : L("input.end"))
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(isPostRoundEdit ? Theme.primary : Theme.error)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(isPostRoundEdit ? Theme.primary : Theme.error, lineWidth: 1.5))
-            }
-            .buttonStyle(.plain)
+            deleteHoleButton(session)
+            totalCount(session)
+            endButton()
         }
         .padding(.horizontal, Theme.Spacing.md)
-        // A strip rather than a header when the screen is short: same content,
-        // less of the little height there is.
-        .padding(.vertical, isLandscape ? 4 : Theme.Spacing.sm)
-        .background(Theme.surface)
+        .padding(.vertical, Theme.Spacing.sm)
         .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .bottom)
     }
 
+    /// Two islands rather than a bar: a band of colour across an otherwise
+    /// empty row is just paint, so the background only goes where something is
+    /// written.
+    private func landscapeTopBar(_ session: RoundSession) -> some View {
+        HStack(alignment: .center, spacing: 8) {
+            island {
+                holeButton(session)
+                PuttChipsView(session: session)
+                deleteHoleButton(session)
+            }
+            Spacer(minLength: 0)
+            island {
+                totalCount(session)
+                endButton()
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.top, 6)
+    }
 
-    private func missReasonRow(_ session: RoundSession) -> some View {
-        MissReasonRow(
-            missRead: Binding(get: { session.draftMissRead }, set: { session.draftMissRead = $0 }),
-            badStroke: Binding(get: { session.draftBadStroke }, set: { session.draftBadStroke = $0 }),
-            badStrokeType: Binding(get: { session.draftBadStrokeType }, set: { session.draftBadStrokeType = $0 }),
-            wrongAim: Binding(get: { session.draftWrongAim }, set: { session.draftWrongAim = $0 }),
-            showsTitle: false
-        )
+    private func island<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        HStack(spacing: 8) { content() }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    private func holeButton(_ session: RoundSession) -> some View {
+        Button {
+            showHolePicker = true
+        } label: {
+            VStack(spacing: 0) {
+                Text(L("input.hole")).font(.system(size: 9, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                HStack(spacing: 2) {
+                    Text("\(session.displayHole)").font(.system(size: 30, weight: .black)).foregroundStyle(Theme.primary)
+                    Image(systemName: "chevron.down").font(.system(size: 10, weight: .heavy)).foregroundStyle(Theme.primary)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .frame(minWidth: 40)
+    }
+
+    @ViewBuilder
+    private func deleteHoleButton(_ session: RoundSession) -> some View {
+        if !session.puttsOnHole(session.displayHole).isEmpty {
+            Button {
+                showDeleteHoleConfirm = true
+            } label: {
+                Image(systemName: "trash")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Theme.error)
+                    .frame(width: 32, height: 32)
+                    .background(Circle().fill(Theme.error.opacity(0.13)))
+                    .overlay(Circle().stroke(Theme.error, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .confirmationDialog(
+                String(format: L("input.deleteHoleConfirm"), session.displayHole),
+                isPresented: $showDeleteHoleConfirm,
+                titleVisibility: .visible
+            ) {
+                Button(L("onCourse.delete"), role: .destructive) {
+                    session.deleteAllPuttsOnHole(session.displayHole)
+                }
+                Button(L("common.cancel"), role: .cancel) {}
+            }
+        }
+    }
+
+    private func totalCount(_ session: RoundSession) -> some View {
+        VStack(spacing: 0) {
+            Text("\(session.totalRealPutts)").font(.system(size: 18, weight: .heavy)).foregroundStyle(Theme.text)
+            Text(L("input.total")).font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.textMuted)
+        }
+    }
+
+    private func endButton() -> some View {
+        Button {
+            if isPostRoundEdit {
+                round.isComplete = true
+                try? modelContext.save()
+                dismiss()
+            } else {
+                showEndRoundAlert = true
+            }
+        } label: {
+            Text(isPostRoundEdit ? L("summary.done") : L("input.end"))
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(isPostRoundEdit ? Theme.primary : Theme.error)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(isPostRoundEdit ? Theme.primary : Theme.error, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
     }
 
     private func bottomBar(_ session: RoundSession) -> some View {
         HStack(spacing: 8) {
-            navArrowButton(icon: "chevron.left", enabled: session.canGoPreviousHole) {
-                session.goToPreviousHole()
-            }
-            navArrowButton(icon: "chevron.right", enabled: session.canGoNextHole) {
-                session.goToNextHole()
-            }
+            navArrows(session)
+            recordButton(session, fills: true)
+            tapInButton(session)
+        }
+        .padding(Theme.Spacing.md)
+        .background(Theme.surface)
+        .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .top)
+    }
 
-            Button {
-                handleOutcome(session.recordDraft(), session)
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: recordIcon(session)).font(.system(size: 20, weight: .heavy))
-                    Text(recordLabel(session))
-                        .font(.system(size: 16, weight: .heavy))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(session.canRecord ? Theme.primary : Theme.border))
-            }
-            .buttonStyle(.plain)
-            .disabled(!session.canRecord)
-
-            if !session.isReviewing || session.canStartNewPutt {
-                Button {
-                    if session.isReviewing { session.startNewPutt() }
-                    handleOutcome(session.recordTapIn(), session)
-                } label: {
-                    Text(L("input.tapInShort"))
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(Theme.primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .padding(.horizontal, 12)
-                        .frame(height: 48)
-                        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary.opacity(0.13)))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.primary, lineWidth: 1.5))
-                }
-                .buttonStyle(.plain)
+    /// One island at the trailing edge, on the side the thumb is already on,
+    /// with nothing painted across the empty half of the row.
+    private func landscapeBottomBar(_ session: RoundSession) -> some View {
+        HStack(spacing: 8) {
+            Spacer(minLength: 0)
+            island {
+                navArrows(session)
+                recordButton(session, fills: false)
+                tapInButton(session)
             }
         }
         .padding(.horizontal, Theme.Spacing.md)
-        .padding(.vertical, isLandscape ? 6 : Theme.Spacing.md)
-        // Landscape keeps the bar to the left half, under the column it acts
-        // on, rather than stretching a row of buttons across the whole width.
-        .frame(maxWidth: isLandscape ? 460 : .infinity, alignment: .leading)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface)
-        .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .top)
+        .padding(.bottom, 6)
+    }
+
+    @ViewBuilder
+    private func navArrows(_ session: RoundSession) -> some View {
+        navArrowButton(icon: "chevron.left", enabled: session.canGoPreviousHole) {
+            session.goToPreviousHole()
+        }
+        navArrowButton(icon: "chevron.right", enabled: session.canGoNextHole) {
+            session.goToNextHole()
+        }
+    }
+
+    private func recordButton(_ session: RoundSession, fills: Bool) -> some View {
+        Button {
+            handleOutcome(session.recordDraft(), session)
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: recordIcon(session)).font(.system(size: 20, weight: .heavy))
+                Text(recordLabel(session))
+                    .font(.system(size: 16, weight: .heavy))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: fills ? .infinity : nil)
+            .padding(.horizontal, fills ? 0 : 24)
+            .padding(.vertical, 14)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(session.canRecord ? Theme.primary : Theme.border))
+        }
+        .buttonStyle(.plain)
+        .disabled(!session.canRecord)
+    }
+
+    @ViewBuilder
+    private func tapInButton(_ session: RoundSession) -> some View {
+        if !session.isReviewing || session.canStartNewPutt {
+            Button {
+                if session.isReviewing { session.startNewPutt() }
+                handleOutcome(session.recordTapIn(), session)
+            } label: {
+                Text(L("input.tapInShort"))
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Theme.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .padding(.horizontal, 12)
+                    .frame(height: 48)
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary.opacity(0.13)))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.primary, lineWidth: 1.5))
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     private func navArrowButton(icon: String, enabled: Bool, action: @escaping () -> Void) -> some View {
@@ -390,6 +439,16 @@ struct RoundInputView: View {
         .buttonStyle(.plain)
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.3)
+    }
+
+    private func missReasonRow(_ session: RoundSession) -> some View {
+        MissReasonRow(
+            missRead: Binding(get: { session.draftMissRead }, set: { session.draftMissRead = $0 }),
+            badStroke: Binding(get: { session.draftBadStroke }, set: { session.draftBadStroke = $0 }),
+            badStrokeType: Binding(get: { session.draftBadStrokeType }, set: { session.draftBadStrokeType = $0 }),
+            wrongAim: Binding(get: { session.draftWrongAim }, set: { session.draftWrongAim = $0 }),
+            showsTitle: false
+        )
     }
 
     private func recordIcon(_ session: RoundSession) -> String {
