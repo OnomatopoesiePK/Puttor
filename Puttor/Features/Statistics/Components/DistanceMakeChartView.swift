@@ -15,8 +15,12 @@ struct DistanceMakeChartView: View {
     /// Off when the surrounding section header already names the chart.
     var showsTitle: Bool = true
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     private var visible: [DistanceBracket] { data.filter { $0.total > 0 } }
-    private let barsWidth: CGFloat = 84
+    /// Twice the length in landscape, where the width is there for the taking
+    /// and an 84pt bar reads as a stub.
+    private var barsWidth: CGFloat { verticalSizeClass == .compact ? 168 : 84 }
 
     var body: some View {
         if visible.isEmpty {

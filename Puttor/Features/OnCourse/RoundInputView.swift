@@ -190,7 +190,7 @@ struct RoundInputView: View {
             scrollingFields(session, columnWidth: columnWidth)
                 .overlay(alignment: .topLeading) { landscapeTopBar(session) }
                 .overlay(alignment: .bottomTrailing) {
-                    landscapeBottomBar(session).frame(width: columnWidth)
+                    landscapeBottomBar(session, width: columnWidth)
                 }
         }
     }
@@ -404,12 +404,15 @@ struct RoundInputView: View {
 
     /// One island at the trailing edge, on the side the thumb is already on,
     /// with nothing painted across the empty half of the row.
-    private func landscapeBottomBar(_ session: RoundSession) -> some View {
+    private func landscapeBottomBar(_ session: RoundSession, width: CGFloat) -> some View {
         island {
             navArrows(session)
             recordButton(session, fills: true)
             tapInButton(session)
         }
+        // The width goes on the island itself; padding outside it would eat
+        // into the column width the board above is drawn at.
+        .frame(width: width)
         .padding(.trailing, Theme.Spacing.md)
         .padding(.bottom, 6)
     }

@@ -60,6 +60,10 @@ struct StatisticsView: View {
     /// The last computed bundle, rebuilt only when the rounds behind it change
     /// — not on every keystroke in a filter field or every section that folds.
     @State private var bundle = StatsBundle()
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
+    /// Bars double in landscape rather than leaving the extra width empty.
+    private var leaveBarWidth: CGFloat { verticalSizeClass == .compact ? 176 : 88 }
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -545,9 +549,9 @@ struct StatisticsView: View {
                                             ZStack(alignment: .leading) {
                                                 Capsule().fill(Theme.borderLight)
                                                 Capsule().fill(Theme.accent)
-                                                    .frame(width: 88 * min(1, info.avgLeaveM / leaveScale))
+                                                    .frame(width: leaveBarWidth * min(1, info.avgLeaveM / leaveScale))
                                             }
-                                            .frame(width: 88, height: 8)
+                                            .frame(width: leaveBarWidth, height: 8)
                                             Text(UnitConverter.formatDistance(info.avgLeaveM, useFeet: useFeet))
                                                 .font(.system(size: 12, weight: .heavy))
                                                 .foregroundStyle(Theme.accent)
