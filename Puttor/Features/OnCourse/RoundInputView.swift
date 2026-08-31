@@ -28,6 +28,10 @@ struct RoundInputView: View {
     @State private var flashPCG: Double = 0
     @State private var celebration: ScoreCategory?
     @State private var showDeleteHoleConfirm = false
+    /// Landscape on a phone: short and wide, which is a different screen to
+    /// lay out rather than the same one squeezed.
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -56,44 +60,19 @@ struct RoundInputView: View {
         }
     }
 
+    private var isLandscape: Bool { verticalSizeClass == .compact }
+
     @ViewBuilder
     private func content(_ session: RoundSession) -> some View {
         VStack(spacing: 0) {
             topBar(session)
 
-            ScrollView {
-                VStack(spacing: Theme.Spacing.md) {
-                    if let holeOutCategory = session.displayedHoleOutCategory {
-                        HoleOutCategoryCard(category: holeOutCategory) { newCategory in
-                            session.updateHoleOutCategory(session.displayHole, to: newCategory)
-                        }
-                    }
-
-                    section {
-                        DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
-                    }
-
-                    section {
-                        scoreCategoryRow(session)
-                    }
-
-                    section {
-                        SlopeGridPickerView(
-                            sideValue: Binding(get: { session.draftSideSlopePct }, set: { session.draftSideSlopePct = $0 }),
-                            hillValue: Binding(get: { session.draftHillSlopePct }, set: { session.draftHillSlopePct = $0 })
-                        )
-                        DoubleBreakButtonsView(value: Binding(get: { session.draftDoubleBreak }, set: { session.draftDoubleBreak = $0 }))
-                    }
-
-                    section {
-                        DartboardMissView(
-                            result: Binding(get: { session.draftResult }, set: { session.draftResult = $0 }),
-                            lipOut: Binding(get: { session.draftLipOut }, set: { session.draftLipOut = $0 })
-                        )
-                        missReasonRow(session)
-                    }
+            Group {
+                if isLandscape {
+                    landscapeFields(session)
+                } else {
+                    portraitFields(session)
                 }
-                .padding(Theme.Spacing.md)
             }
             .overlay(alignment: .top) {
                 InputStatusBanner(
@@ -135,6 +114,90 @@ struct RoundInputView: View {
                 session.jumpToHole(hole)
             }
         }
+    }
+
+    // MARK: - Fields
+
+    private func holeOutCard(_ session: RoundSession) -> some View {
+        Group {
+            if let holeOutCategory = session.displayedHoleOutCategory {
+                HoleOutCategoryCard(category: holeOutCategory) { newCategory in
+                    session.updateHoleOutCategory(session.displayHole, to: newCategory)
+                }
+            }
+        }
+    }
+
+    private func distanceField(_ session: RoundSession) -> some View {
+        section {
+            DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
+        }
+    }
+
+    private func puttForField(_ session: RoundSession, axis: Axis) -> some View {
+        section {
+            ScoreCategoryRow(
+                selection: Binding(get: { session.draftPuttFor }, set: { session.draftPuttFor = $0 }),
+                axis: axis
+            )
+        }
+    }
+
+    private func slopeField(_ session: RoundSession) -> some View {
+        section {
+            SlopeGridPickerView(
+                sideValue: Binding(get: { session.draftSideSlopePct }, set: { session.draftSideSlopePct = $0 }),
+                hillValue: Binding(get: { session.draftHillSlopePct }, set: { session.draftHillSlopePct = $0 })
+            )
+            DoubleBreakButtonsView(value: Binding(get: { session.draftDoubleBreak }, set: { session.draftDoubleBreak = $0 }))
+        }
+    }
+
+    private func resultField(_ session: RoundSession) -> some View {
+        section {
+            DartboardMissView(
+                result: Binding(get: { session.draftResult }, set: { session.draftResult = $0 }),
+                lipOut: Binding(get: { session.draftLipOut }, set: { session.draftLipOut = $0 })
+            )
+            missReasonRow(session)
+        }
+    }
+
+    private func portraitFields(_ session: RoundSession) -> some View {
+        ScrollView {
+            VStack(spacing: Theme.Spacing.md) {
+                holeOutCard(session)
+                distanceField(session)
+                puttForField(session, axis: .horizontal)
+                slopeField(session)
+                resultField(session)
+            }
+            .padding(Theme.Spacing.md)
+        }
+    }
+
+    /// Two columns: what the putt was on the left, what it did on the right —
+    /// distance over slope, the score it was for over the result.
+    private func landscapeFields(_ session: RoundSession) -> some View {
+        HStack(alignment: .top, spacing: Theme.Spacing.md) {
+            ScrollView {
+                VStack(spacing: Theme.Spacing.md) {
+                    holeOutCard(session)
+                    distanceField(session)
+                    slopeField(session)
+                }
+                .padding(.vertical, Theme.Spacing.sm)
+            }
+
+            ScrollView {
+                VStack(spacing: Theme.Spacing.md) {
+                    puttForField(session, axis: .vertical)
+                    resultField(session)
+                }
+                .padding(.vertical, Theme.Spacing.sm)
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.md)
     }
 
     private func handleOutcome(_ outcome: RoundOutcome, _ session: RoundSession) {
@@ -242,13 +305,13 @@ struct RoundInputView: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, Theme.Spacing.md)
-        .padding(.vertical, Theme.Spacing.sm)
+        // A strip rather than a header when the screen is short: same content,
+        // less of the little height there is.
+        .padding(.vertical, isLandscape ? 4 : Theme.Spacing.sm)
+        .background(Theme.surface)
         .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .bottom)
     }
 
-    private func scoreCategoryRow(_ session: RoundSession) -> some View {
-        ScoreCategoryRow(selection: Binding(get: { session.draftPuttFor }, set: { session.draftPuttFor = $0 }))
-    }
 
     private func missReasonRow(_ session: RoundSession) -> some View {
         MissReasonRow(
@@ -305,7 +368,12 @@ struct RoundInputView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(Theme.Spacing.md)
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.vertical, isLandscape ? 6 : Theme.Spacing.md)
+        // Landscape keeps the bar to the left half, under the column it acts
+        // on, rather than stretching a row of buttons across the whole width.
+        .frame(maxWidth: isLandscape ? 460 : .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.surface)
         .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .top)
     }

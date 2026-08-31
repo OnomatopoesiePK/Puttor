@@ -14,6 +14,9 @@ import SwiftUI
 struct ScoreCategoryRow: View {
     @Binding var selection: ScoreCategory
     var titleKey: String = "input.puttFor"
+    /// Chips run across the screen in portrait. In a landscape column there is
+    /// height to spare and no width, so they stack instead.
+    var axis: Axis = .horizontal
 
     /// How many chips share the visible width; the rest scroll into view.
     private let visibleCount = 5
@@ -26,22 +29,32 @@ struct ScoreCategoryRow: View {
                 .tracking(1.2)
                 .foregroundStyle(Theme.textMuted)
 
-            GeometryReader { geo in
-                let chipWidth = (geo.size.width - spacing * CGFloat(visibleCount - 1)) / CGFloat(visibleCount)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: spacing) {
+            if axis == .horizontal {
+                GeometryReader { geo in
+                    let chipWidth = (geo.size.width - spacing * CGFloat(visibleCount - 1)) / CGFloat(visibleCount)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: spacing) {
+                            ForEach(ScoreCategory.allCases) { category in
+                                chip(category, width: chipWidth)
+                            }
+                        }
+                    }
+                    .scrollClipDisabled(false)
+                }
+                .frame(height: 34)
+            } else {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: spacing) {
                         ForEach(ScoreCategory.allCases) { category in
-                            chip(category, width: chipWidth)
+                            chip(category, width: nil)
                         }
                     }
                 }
-                .scrollClipDisabled(false)
             }
-            .frame(height: 34)
         }
     }
 
-    private func chip(_ category: ScoreCategory, width: CGFloat) -> some View {
+    private func chip(_ category: ScoreCategory, width: CGFloat?) -> some View {
         let selected = selection == category
         return Button {
             selection = category
@@ -51,6 +64,7 @@ struct ScoreCategoryRow: View {
                 .foregroundStyle(selected ? .white : category.color)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+                .frame(maxWidth: width == nil ? .infinity : nil)
                 .frame(width: width, height: 32)
                 .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(category.color.opacity(selected ? 0.85 : 0.18)))
                 .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(category.color, lineWidth: selected ? 2 : 1.2))
