@@ -440,12 +440,12 @@ struct StatisticsView: View {
                                             decimalText(data.scoreAggregated.avgPuttsOffGir),
                                             subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.nonGirPuttedHoles)
                                         )
-                                        playingStat(
-                                            L("stats.girProximity"),
-                                            data.scoreAggregated.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
-                                            subtitle: L("stats.firstPutt")
-                                        )
                                     }
+                                    playingStatWide(
+                                        L("stats.girProximity"),
+                                        data.scoreAggregated.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
+                                        subtitle: L("stats.firstPutt")
+                                    )
                                     scoreCoverageNote(data)
                                 }
                             }
@@ -727,6 +727,32 @@ struct StatisticsView: View {
         score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
     }
 
+
+    /// A full-width row rather than a tile: the proximity is one number with a
+    /// long name, and a seventh square in a three-column grid left a hole.
+    private func playingStatWide(_ label: String, _ value: String, subtitle: String) -> some View {
+        HStack(spacing: Theme.Spacing.sm) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(Theme.text)
+                Text(subtitle)
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.textMuted)
+            }
+            Spacer(minLength: 0)
+            Text(value)
+                .font(.system(size: 22, weight: .black))
+                .foregroundStyle(Theme.text)
+                .lineLimit(1).minimumScaleFactor(0.6)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.vertical, Theme.Spacing.sm)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
     private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.text, highlighted: Bool = false) -> some View {
         // Every box the same size, whatever length its label happens to be —
         // a row of six that steps up and down reads as an accident.
@@ -738,13 +764,17 @@ struct StatisticsView: View {
             Text(label)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Theme.text)
-                .lineLimit(1).minimumScaleFactor(0.55)
+                .multilineTextAlignment(.center)
+                // Two lines, so a label like "Eagle/Birdie conversion rate"
+                // can say what it is instead of shrinking to nothing.
+                .lineLimit(2).minimumScaleFactor(0.6)
             Text(subtitle)
                 .font(.system(size: 10))
                 .foregroundStyle(Theme.textMuted)
                 .lineLimit(1).minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity, minHeight: 78)
+        // maxHeight lets every box in a grid row match the tallest of them.
+        .frame(maxWidth: .infinity, minHeight: 78, maxHeight: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
         .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
