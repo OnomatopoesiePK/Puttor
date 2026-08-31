@@ -292,6 +292,10 @@ struct StatisticsView: View {
         dispersionToText = DistanceRangeFilter.text(forMetres: longest, useFeet: useFeet)
     }
 
+    private var playingStatColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 3)
+    }
+
     private func decimalText(_ value: Double?) -> String {
         value.map { String(format: "%.2f", $0) } ?? "—"
     }
@@ -410,16 +414,22 @@ struct StatisticsView: View {
                             // only the per-category putt comparison needs putts.
                             if data.scoreAggregated.holes > 0 {
                                 CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats", infoKey: "stats.playingStats.info") {
-                                    HStack(spacing: Theme.Spacing.sm) {
+                                    // A grid rather than rows, so a seventh box
+                                    // keeps the width of the six above it.
+                                    LazyVGrid(columns: playingStatColumns, spacing: Theme.Spacing.sm) {
                                         // An average per round compares across
                                         // filters; a running total only grows.
                                         playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: L("stats.svp.perRound"))
                                         playingStat(L("stats.gir"), "\(Int(data.scoreAggregated.girPercent.rounded()))%", subtitle: "\(data.scoreAggregated.girCount)/\(data.scoreAggregated.holes)")
+                                        playingStat(
+                                            L("stats.conversion"),
+                                            data.scoreAggregated.girCount > 0 ? "\(Int(data.scoreAggregated.girConversionPercent.rounded()))%" : "—",
+                                            subtitle: "\(data.scoreAggregated.girConversions)/\(data.scoreAggregated.girCount)",
+                                            highlighted: RoundHighlights.strongConversion(data.scoreAggregated.girConversionPercent)
+                                        )
                                         playingStat(L("stats.scramble"), "\(Int(data.scoreAggregated.scramblePercent.rounded()))%", subtitle: "\(data.scoreAggregated.scrambleSuccesses)/\(data.scoreAggregated.scrambleAttempts)")
-                                    }
-                                    // What the putter faces after hitting the
-                                    // green, and after missing it.
-                                    HStack(spacing: Theme.Spacing.sm) {
+                                        // What the putter faces after hitting
+                                        // the green, and after missing it.
                                         playingStat(
                                             L("stats.puttsGir"),
                                             decimalText(data.scoreAggregated.avgPuttsOnGir),
@@ -717,7 +727,7 @@ struct StatisticsView: View {
         score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
     }
 
-    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.text) -> some View {
+    private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.text, highlighted: Bool = false) -> some View {
         // Every box the same size, whatever length its label happens to be —
         // a row of six that steps up and down reads as an accident.
         VStack(spacing: 2) {
@@ -739,6 +749,7 @@ struct StatisticsView: View {
         .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+        .pulsingHighlight(highlighted)
     }
 
     private func statBox(_ label: String, _ value: String) -> some View {

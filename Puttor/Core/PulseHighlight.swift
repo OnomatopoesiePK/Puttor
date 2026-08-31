@@ -63,5 +63,7 @@ enum RoundHighlights {
     /// Fourteen greens out of eighteen, as a rate so nine-hole rounds count too.
     static func strongGreensInRegulation(_ girPercent: Double) -> Bool { girPercent >= 14.0 / 18.0 * 100 }
     static func strongScrambling(_ scramblePercent: Double) -> Bool { scramblePercent >= 70 }
+    /// More than half the greens hit turned into a birdie or better.
+    static func strongConversion(_ conversionPercent: Double) -> Bool { conversionPercent > 50 }
     static func lowPuttsPerHole(_ average: Double) -> Bool { average > 0 && average < 1.5 }
 }

@@ -90,7 +90,7 @@ struct RoundSummaryView: View {
                 if round.tracksScoreCategory {
                 card {
                     Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-                    HStack(spacing: Theme.Spacing.sm) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 3), spacing: Theme.Spacing.sm) {
                         playingStat(
                             L("stats.score"), stats.scoreRelativeToParText,
                             subtitle: String(format: L("stats.overHoles"), stats.scoredHoles),
@@ -107,8 +107,12 @@ struct RoundSummaryView: View {
                             subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)",
                             highlighted: RoundHighlights.strongScrambling(stats.scramblePercent)
                         )
-                    }
-                    HStack(spacing: Theme.Spacing.sm) {
+                        playingStat(
+                            L("stats.conversion"),
+                            stats.girCount > 0 ? "\(Int(stats.girConversionPercent.rounded()))%" : "—",
+                            subtitle: "\(stats.girConversions)/\(stats.girCount)",
+                            highlighted: RoundHighlights.strongConversion(stats.girConversionPercent)
+                        )
                         playingStat(
                             L("stats.puttsGir"),
                             stats.avgPuttsOnGir.map { String(format: "%.2f", $0) } ?? "—",

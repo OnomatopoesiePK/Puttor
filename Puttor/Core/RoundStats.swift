@@ -69,6 +69,11 @@ struct RoundStats {
     /// Of those, how many were saved (one putt, or holed out from off the green).
     var scrambleSuccesses: Int = 0
 
+    /// Greens hit in regulation that were turned into a birdie or better —
+    /// the chance taken rather than the chance had.
+    var girConversions: Int = 0
+    var girConversionPercent: Double { girCount > 0 ? Double(girConversions) / Double(girCount) * 100 : 0 }
+
     /// Putts taken on holes reached in regulation, and on the ones that
     /// weren't — counted only over holes that were actually putted, since a
     /// hole-out says nothing about putting.
@@ -237,6 +242,11 @@ struct RoundStats {
 
             if category.isGreenInRegulation {
                 stats.girCount += 1
+                // Converted means the hole actually came in under par, however
+                // many putts it took to get there.
+                if let score = holeScoreRelativeToPar(holePutts), score < 0 {
+                    stats.girConversions += 1
+                }
                 if !realOnHole.isEmpty {
                     stats.girPutts += realOnHole.count
                     stats.girPuttedHoles += 1
@@ -356,6 +366,7 @@ struct RoundStats {
 
         merged.lipOutCount = list.reduce(0) { $0 + $1.lipOutCount }
         merged.girCount = list.reduce(0) { $0 + $1.girCount }
+        merged.girConversions = list.reduce(0) { $0 + $1.girConversions }
         merged.girPutts = list.reduce(0) { $0 + $1.girPutts }
         merged.girPuttedHoles = list.reduce(0) { $0 + $1.girPuttedHoles }
         merged.nonGirPutts = list.reduce(0) { $0 + $1.nonGirPutts }

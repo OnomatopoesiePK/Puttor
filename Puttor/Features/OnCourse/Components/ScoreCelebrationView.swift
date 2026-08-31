@@ -21,6 +21,28 @@ struct ScoreCelebrationView: View {
     private static let pulseDuration = 0.28
     static let totalDuration = 1.6
 
+    private var lettering: Text {
+        Text(L(category.labelKey).uppercased())
+            .font(.system(size: 46, weight: .black, design: .rounded))
+            .tracking(6)
+    }
+
+    /// The letters sit on a halo of the app's own background colour, spread
+    /// outwards in layers. Whatever the wordmark lands on — a slope grid, a
+    /// dartboard, a light card or a dark one — the colour behind the letters is
+    /// the one the app is already wearing, so they stay readable.
+    private var wordmark: some View {
+        ZStack {
+            lettering.foregroundStyle(Theme.background).blur(radius: 16)
+            lettering.foregroundStyle(Theme.background).blur(radius: 8)
+            lettering.foregroundStyle(Theme.background).blur(radius: 3)
+            lettering.foregroundStyle(Theme.background).opacity(0.9)
+            lettering
+                .foregroundStyle(category.color)
+                .shadow(color: category.color.opacity(pulse ? 0.7 : 0.35), radius: pulse ? 14 : 6)
+        }
+    }
+
     var body: some View {
         ZStack {
             // A halo rather than a plate: the wordmark keeps the green behind
@@ -36,25 +58,12 @@ struct ScoreCelebrationView: View {
                 .scaleEffect(pulse ? 1.08 : 0.92)
 
             VStack(spacing: 6) {
-                Text(L(category.labelKey).uppercased())
-                    .font(.system(size: 46, weight: .black, design: .rounded))
-                    .tracking(6)
-                    .foregroundStyle(category.color)
-                    .shadow(color: category.color.opacity(0.55), radius: pulse ? 18 : 8)
-                    // A second copy underneath in the surface colour keeps the
-                    // letters legible whichever theme is on.
-                    .background(
-                        Text(L(category.labelKey).uppercased())
-                            .font(.system(size: 46, weight: .black, design: .rounded))
-                            .tracking(6)
-                            .foregroundStyle(Theme.background)
-                            .blur(radius: 6)
-                    )
-
+                wordmark
                 Rectangle()
                     .fill(category.color)
                     .frame(width: pulse ? 120 : 70, height: 3)
                     .clipShape(Capsule())
+                    .shadow(color: Theme.background, radius: 6)
             }
             .scaleEffect(pulse ? 1.06 : 1)
         }

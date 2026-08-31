@@ -1128,6 +1128,48 @@ struct PuttorTests {
         #expect(DistanceRangeFilter.parse("2,5", useFeet: false) == 2.5)
     }
 
+    /// Conversion is the chance taken: greens hit in regulation that came in
+    /// under par, over the greens hit.
+    @MainActor
+    @Test func conversionCountsBirdiesMadeFromGreensHit() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        func addHole(_ hole: Int, category: ScoreCategory, distances: [Double]) {
+            for (index, distance) in distances.enumerated() {
+                let putt = Putt(
+                    holeNumber: hole,
+                    puttNumber: index + 1,
+                    distanceM: distance,
+                    puttFor: index == 0 ? category : category.next,
+                    result: index == distances.count - 1 ? .holed : .short
+                )
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+            }
+        }
+        addHole(1, category: .birdie, distances: [4.0])            // green hit, birdie made
+        addHole(2, category: .eagle, distances: [8.0, 1.0])        // green hit, birdie from an eagle putt
+        addHole(3, category: .birdie, distances: [6.0, 0.6])       // green hit, two putts for par
+        addHole(4, category: .par, distances: [3.0])               // green missed
+        try context.save()
+
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.girCount == 3)
+        #expect(stats.girConversions == 2)
+        #expect(abs(stats.girConversionPercent - 200.0 / 3) < 0.0001)
+        #expect(RoundHighlights.strongConversion(stats.girConversionPercent))
+    }
+
+    /// Over half, not half: five of ten greens converted is not a highlight.
+    @Test func conversionHighlightNeedsMoreThanHalf() async throws {
+        #expect(!RoundHighlights.strongConversion(50))
+        #expect(RoundHighlights.strongConversion(50.1))
+        #expect(!RoundHighlights.strongConversion(0))
+    }
+
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)
         let mid = StrokesGained.baseline(at: 3.25)
