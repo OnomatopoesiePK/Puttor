@@ -1194,6 +1194,75 @@ struct PuttorTests {
         #expect(!RoundHighlights.strongConversion(0))
     }
 
+    // MARK: - Miss patterns
+
+    @MainActor
+    private static func miss(_ result: PuttResult, distance: Double = 3, slope: Double = 0) -> Putt {
+        Putt(holeNumber: 1, puttNumber: 1, distanceM: distance, sideSlopePct: slope, puttFor: .par, result: result)
+    }
+
+    /// A lean has to be a lean: three in five going the same way, over enough
+    /// putts to mean it.
+    @MainActor
+    @Test func aClearSideBiasIsReported() async throws {
+        let putts = Array(repeating: Self.miss(.left), count: 7) + Array(repeating: Self.miss(.right), count: 3)
+        let findings = MissPatternFinder.findings(in: putts)
+
+        let side = try #require(findings.first { $0.key == "pattern.missLeft" })
+        #expect(side.count == 7)
+        #expect(side.total == 10)
+    }
+
+    /// One long putt that ran past is a putt, not a habit.
+    @MainActor
+    @Test func aSingleWildPuttIsNotAPattern() async throws {
+        let findings = MissPatternFinder.findings(in: [Self.miss(.long, distance: 20)])
+        #expect(findings.isEmpty)
+    }
+
+    /// An even split says nothing, however many putts it covers.
+    @MainActor
+    @Test func anEvenSplitIsNotAPattern() async throws {
+        let putts = Array(repeating: Self.miss(.left), count: 10) + Array(repeating: Self.miss(.right), count: 10)
+        #expect(!MissPatternFinder.findings(in: putts).contains { $0.key.hasPrefix("pattern.miss") && $0.key.contains("Left") })
+    }
+
+    /// Below the hole on a breaking putt is the miss worth naming, and the
+    /// side depends on which way the green falls.
+    @MainActor
+    @Test func lowSideMissesOnBreakingPuttsAreReported() async throws {
+        // Right-to-left break (negative slope): missing left is the low side.
+        let putts = Array(repeating: Self.miss(.left, slope: -2), count: 8)
+            + Array(repeating: Self.miss(.right, slope: -2), count: 2)
+        let findings = MissPatternFinder.findings(in: putts)
+
+        let low = try #require(findings.first { $0.key == "pattern.missLowSide" })
+        #expect(low.count == 8)
+        #expect(low.total == 10)
+    }
+
+    /// Distance control from range is its own question, counted over its own
+    /// putts.
+    @MainActor
+    @Test func longPuttsAreJudgedOnTheirOwnLengths() async throws {
+        let putts = Array(repeating: Self.miss(.short, distance: 12), count: 6)
+            + Array(repeating: Self.miss(.long, distance: 2), count: 6)
+        let findings = MissPatternFinder.findings(in: putts)
+
+        let long = try #require(findings.first { $0.key == "pattern.longPuttsShort" })
+        #expect(long.count == 6)
+        #expect(long.total == 6)
+    }
+
+    /// Holed putts have no miss in them to read.
+    @MainActor
+    @Test func holedPuttsCarryNoPattern() async throws {
+        let holed = (0..<12).map { _ in
+            Putt(holeNumber: 1, puttNumber: 1, distanceM: 2, puttFor: .par, result: .holed)
+        }
+        #expect(MissPatternFinder.findings(in: holed).isEmpty)
+    }
+
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)
         let mid = StrokesGained.baseline(at: 3.25)

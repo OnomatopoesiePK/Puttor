@@ -285,6 +285,33 @@ private struct StatisticsPane: View {
         return max(0.5, (longest * 2).rounded(.up) / 2)
     }
 
+    /// What the misses keep doing, in sentences with the count behind them.
+    @ViewBuilder
+    private func missPatterns(_ patterns: [MissPattern]) -> some View {
+        if !patterns.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(L("pattern.title"))
+                    .font(.system(size: 9, weight: .bold)).tracking(1.0)
+                    .foregroundStyle(Theme.textMuted)
+
+                ForEach(patterns) { pattern in
+                    HStack(alignment: .top, spacing: 6) {
+                        Image(systemName: "arrow.turn.down.right")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, 2)
+                        Text(String(format: L(pattern.key), pattern.count, pattern.total))
+                            .font(.system(size: 12))
+                            .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
+        }
+    }
+
     private func longestPuttDistance(_ putts: [Putt]) -> Double {
         putts.filter { $0.puttNumber > 0 }.map(\.distanceM).max() ?? 0
     }
@@ -578,6 +605,11 @@ private struct StatisticsPane: View {
                                     ),
                                     size: dense ? 224 : 268
                                 )
+
+                                // Read from every putt in the selection, not
+                                // from whatever the menus above are showing:
+                                // a habit is a habit whichever slice is shown.
+                                missPatterns(MissPatternFinder.findings(in: data.allPutts))
                             }
 
                             if !data.aggregated.makeByDistance.isEmpty {
