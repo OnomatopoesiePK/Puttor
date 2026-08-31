@@ -43,13 +43,14 @@ struct ScoreCategoryRow: View {
                 }
                 .frame(height: 34)
             } else {
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: spacing) {
-                        ForEach(ScoreCategory.allCases) { category in
-                            chip(category, width: nil)
-                        }
+                // No inner scrolling: the chips share whatever height the
+                // column has, so the strip matches the card beside it.
+                VStack(spacing: spacing) {
+                    ForEach(ScoreCategory.allCases) { category in
+                        chip(category, width: nil)
                     }
                 }
+                .frame(maxHeight: .infinity)
             }
         }
     }
@@ -65,7 +66,8 @@ struct ScoreCategoryRow: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: width == nil ? .infinity : nil)
-                .frame(width: width, height: 32)
+                .frame(maxHeight: width == nil ? .infinity : nil)
+                .frame(width: width, height: width == nil ? nil : 32)
                 .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(category.color.opacity(selected ? 0.85 : 0.18)))
                 .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(category.color, lineWidth: selected ? 2 : 1.2))
         }

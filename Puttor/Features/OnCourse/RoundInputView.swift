@@ -73,8 +73,6 @@ struct RoundInputView: View {
                     // strip of the little height there is, and they are only
                     // as wide as what is written in them.
                     landscapeFields(session)
-                        .overlay(alignment: .topLeading) { landscapeTopBar(session) }
-                        .overlay(alignment: .bottomTrailing) { landscapeBottomBar(session) }
                 } else {
                     portraitFields(session)
                 }
@@ -185,6 +183,19 @@ struct RoundInputView: View {
     /// One layout that scrolls as a whole: the score the putt is played for
     /// down a narrow strip beside the numpad, the two boards underneath.
     private func landscapeFields(_ session: RoundSession) -> some View {
+        GeometryReader { geo in
+            // The controls end up the width of the column above them, so the
+            // grid, the board and the buttons share one bottom line.
+            let columnWidth = max(120, (geo.size.width - Theme.Spacing.md * 3) / 2)
+            scrollingFields(session, columnWidth: columnWidth)
+                .overlay(alignment: .topLeading) { landscapeTopBar(session) }
+                .overlay(alignment: .bottomTrailing) {
+                    landscapeBottomBar(session).frame(width: columnWidth)
+                }
+        }
+    }
+
+    private func scrollingFields(_ session: RoundSession, columnWidth: CGFloat) -> some View {
         ScrollView {
             VStack(spacing: Theme.Spacing.md) {
                 holeOutCard(session)
@@ -192,8 +203,11 @@ struct RoundInputView: View {
                 HStack(alignment: .top, spacing: Theme.Spacing.md) {
                     puttForField(session, axis: .vertical)
                         .frame(width: 192)
+                        .frame(maxHeight: .infinity)
                     distanceField(session)
+                        .frame(maxHeight: .infinity)
                 }
+                .fixedSize(horizontal: false, vertical: true)
 
                 // The miss board is the shorter of the two, so the bottom
                 // right corner stays clear for the controls that float there.
@@ -203,10 +217,11 @@ struct RoundInputView: View {
                 }
             }
             .padding(.horizontal, Theme.Spacing.md)
-            // Room for the floating rows at either end, so nothing is stuck
-            // underneath them when the layout is scrolled to its limits.
-            .padding(.top, 58)
-            .padding(.bottom, 74)
+            // Room at the top for the floating corners; none at the bottom, so
+            // scrolling stops at the foot of the slope grid rather than on
+            // empty space below it.
+            .padding(.top, 52)
+            .padding(.bottom, 6)
         }
     }
 
@@ -267,15 +282,16 @@ struct RoundInputView: View {
     /// written.
     private func landscapeTopBar(_ session: RoundSession) -> some View {
         HStack(alignment: .top, spacing: 8) {
-            island {
-                holeButton(session)
+            // Both corners the same height, set by the smaller of the two.
+            island(height: landscapeIslandHeight) {
+                holeButton(session, compact: true)
                 // Capped, or the chips' scroll view stretches the island into
                 // a bar across a row that has nothing else in it.
                 PuttChipsView(session: session).frame(maxWidth: 132)
                 deleteHoleButton(session)
             }
             Spacer(minLength: 0)
-            island {
+            island(height: landscapeIslandHeight) {
                 totalCount(session)
                 endButton()
             }
@@ -284,24 +300,37 @@ struct RoundInputView: View {
         .padding(.top, 6)
     }
 
-    private func island<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+    private var landscapeIslandHeight: CGFloat { 40 }
+
+    private func island<Content: View>(height: CGFloat? = nil, @ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 8) { content() }
+            .frame(height: height)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
-    private func holeButton(_ session: RoundSession) -> some View {
+    /// Compact puts the hole number beside its label rather than under it, so
+    /// the corner islands can share a height.
+    private func holeButton(_ session: RoundSession, compact: Bool = false) -> some View {
         Button {
             showHolePicker = true
         } label: {
-            VStack(spacing: 0) {
-                Text(L("input.hole")).font(.system(size: 9, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
-                HStack(spacing: 2) {
-                    Text("\(session.displayHole)").font(.system(size: 30, weight: .black)).foregroundStyle(Theme.primary)
-                    Image(systemName: "chevron.down").font(.system(size: 10, weight: .heavy)).foregroundStyle(Theme.primary)
-                }
+            let number = HStack(spacing: 2) {
+                Text("\(session.displayHole)")
+                    .font(.system(size: compact ? 22 : 30, weight: .black))
+                    .foregroundStyle(Theme.primary)
+                Image(systemName: "chevron.down").font(.system(size: 10, weight: .heavy)).foregroundStyle(Theme.primary)
+            }
+            let label = Text(L("input.hole"))
+                .font(.system(size: 9, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+
+            if compact {
+                HStack(spacing: 5) { label; number }
+            } else {
+                VStack(spacing: 0) { label; number }
             }
         }
         .buttonStyle(.plain)
@@ -378,10 +407,10 @@ struct RoundInputView: View {
     private func landscapeBottomBar(_ session: RoundSession) -> some View {
         island {
             navArrows(session)
-            recordButton(session, fills: false)
+            recordButton(session, fills: true)
             tapInButton(session)
         }
-        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.trailing, Theme.Spacing.md)
         .padding(.bottom, 6)
     }
 
