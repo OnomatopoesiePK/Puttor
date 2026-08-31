@@ -24,6 +24,7 @@ private struct RootTab: Identifiable {
 private let rootTabs: [RootTab] = [
     RootTab(tag: 0, labelKey: "tab.course", icon: "flag.fill"),
     RootTab(tag: 1, labelKey: "tab.stats", icon: "chart.bar.fill"),
+    RootTab(tag: 4, labelKey: "tab.coach", icon: "figure.golf"),
     RootTab(tag: 2, labelKey: "tab.games", icon: "scope"),
     RootTab(tag: 3, labelKey: "tab.settings", icon: "gearshape.fill"),
 ]
@@ -67,6 +68,11 @@ struct RootTabView: View {
             StatisticsView()
                 .tabItem { Label(L("tab.stats"), systemImage: "chart.bar.fill") }
                 .tag(1)
+                .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
+
+            CoachView()
+                .tabItem { Label(L("tab.coach"), systemImage: "figure.golf") }
+                .tag(4)
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
 
             GamesHomeView()

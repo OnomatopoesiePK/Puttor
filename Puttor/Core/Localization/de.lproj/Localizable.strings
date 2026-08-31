@@ -10,6 +10,27 @@
 "tab.course" = "Platz";
 "tab.games" = "Spiele";
 "tab.stats" = "Statistik";
+"tab.coach" = "Coach";
+"coach.summary" = "Gelesen aus deinen letzten %1$ld Runden und %2$ld Putts.";
+"coach.weakestDistance" = "Deine derzeit schwächste Distanz ist %@ — dort liegst du am weitesten unter dem Tour-Schnitt.";
+"coach.numbers" = "DIE ZAHLEN";
+"coach.threePuttRate" = "3-PUTT-LÖCHER";
+"coach.whatIsHappening" = "WAS IMMER WIEDER PASSIERT";
+"coach.workOnThis" = "DEIN PLAN";
+"coach.startWith" = "FANG DAMIT AN";
+"coach.notEnough.title" = "Noch zu wenig Grundlage";
+"coach.notEnough.body" = "Für eine Einschätzung braucht es %1$ld beendete Runden und %2$ld Putts; bisher sind es %3$ld Runden und %4$ld Putts. Bis dahin decken diese drei Drills ab, was jeder Putter braucht.";
+"coach.reason.weakDistance" = "Trainiert den Bereich, aus dem du am schwächsten bist — rund %@.";
+"coach.reason.lowSide" = "Deine Break-Putts gehen immer wieder unterhalb vorbei — dieser Drill besteht aus vier Break-Putts und einem geraden.";
+"coach.reason.startLine" = "Deine kurzen Putts kippen immer zur selben Seite, das ist die Startlinie.";
+"coach.reason.pace" = "Deine Misses sind zuerst ein Tempo-Problem, dann erst ein Linien-Problem.";
+"coach.reason.threePutts" = "Drei-Putts kosten dich Schläge; hier geht es darum, den ersten Putt nah zu legen.";
+"coach.reason.neverPlayed" = "Diesen hast du noch nie gespielt.";
+"coach.reason.startHere" = "Ein Anfang, solange die App dein Putten noch nicht kennt.";
+"coach.trend.improving" = "Dein Putten geht aufwärts — %.2f Schläge pro Runde besser als zuvor.";
+"coach.trend.steady" = "Dein Putten bleibt über diese Runden stabil.";
+"coach.trend.slipping" = "Dein Putten ist zuletzt um %.2f Schläge pro Runde abgerutscht.";
+"coach.reason.idle" = "Zuletzt vor %ld Tagen gespielt — wieder mal dran.";
 "tab.settings" = "Einstellungen";
 
 /* On Course list */

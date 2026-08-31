@@ -10,6 +10,27 @@
 "tab.course" = "Course";
 "tab.games" = "Games";
 "tab.stats" = "Stats";
+"tab.coach" = "Coach";
+"coach.summary" = "Read from your last %1$ld rounds and %2$ld putts.";
+"coach.weakestDistance" = "Your weakest distance right now is %@ — that is where you sit furthest below the tour.";
+"coach.numbers" = "THE NUMBERS";
+"coach.threePuttRate" = "3-PUTT HOLES";
+"coach.whatIsHappening" = "WHAT KEEPS HAPPENING";
+"coach.workOnThis" = "YOUR PLAN";
+"coach.startWith" = "START WITH THESE";
+"coach.notEnough.title" = "Not enough to go on yet";
+"coach.notEnough.body" = "A read needs %1$ld finished rounds and %2$ld putts; there are %3$ld rounds and %4$ld putts so far. Until then, these three drills cover what every putter needs.";
+"coach.reason.weakDistance" = "Trains the range you are weakest from, around %@.";
+"coach.reason.lowSide" = "Your breaking putts keep missing on the low side — this drill is four breaking putts and a straight one.";
+"coach.reason.startLine" = "Your short putts keep leaning one way, which is a start-line problem.";
+"coach.reason.pace" = "Your misses are a pace problem before they are a line problem.";
+"coach.reason.threePutts" = "Three-putts are costing you strokes; this one is about getting the first putt close.";
+"coach.reason.neverPlayed" = "You have not tried this one yet.";
+"coach.reason.startHere" = "A place to start while the app learns your putting.";
+"coach.trend.improving" = "Your putting is on the way up — %.2f strokes a round better than it was.";
+"coach.trend.steady" = "Your putting is holding steady across these rounds.";
+"coach.trend.slipping" = "Your putting has slipped %.2f strokes a round lately.";
+"coach.reason.idle" = "Last played %ld days ago — worth another turn.";
 "tab.settings" = "Settings";
 
 /* On Course list */

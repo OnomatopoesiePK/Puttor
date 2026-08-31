@@ -1,0 +1,256 @@
+//
+//  CoachView.swift
+//  Puttor
+//
+//  What the numbers add up to, in sentences, and what to go and practise
+//  because of them. Everything here is read from rounds already recorded; the
+//  drills it points at are the ones in the Games tab.
+//
+
+import SwiftUI
+import SwiftData
+
+struct CoachView: View {
+    @Query(sort: \Round.date, order: .reverse) private var allRounds: [Round]
+    @Query(sort: \GameSession.date, order: .reverse) private var sessions: [GameSession]
+    @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
+
+    @State private var report = CoachReport(hasEnoughData: false, roundCount: 0, puttCount: 0)
+    @State private var drillToPlay: GameType?
+
+    private var useFeet: Bool { unitsPref == "imperial" }
+    private var completeRounds: [Round] { allRounds.filter { $0.isComplete } }
+    /// The recent stretch rather than a career: advice about last season is
+    /// advice about somebody else.
+    private var consideredRounds: [Round] { Array(completeRounds.prefix(10)) }
+
+    private var reportKey: Int {
+        consideredRounds.reduce(sessions.count) { $0 &+ $1.putts.count }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                    if report.hasEnoughData {
+                        summaryCard
+                        if !report.metrics.isEmpty { metricsCard }
+                        if !report.findings.isEmpty { findingsCard }
+                    } else {
+                        notEnoughYetCard
+                    }
+
+                    recommendationsCard
+                }
+                .padding(Theme.Spacing.lg)
+            }
+            .background(Theme.background.ignoresSafeArea())
+            .safeAreaInset(edge: .top) {
+                Text(L("tab.coach"))
+                    .font(.system(size: 28, weight: .heavy))
+                    .foregroundStyle(Theme.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    .padding(.top, Theme.Spacing.lg)
+                    .padding(.bottom, 4)
+                    .background(Theme.background)
+            }
+            .navigationBarHidden(true)
+            .task(id: reportKey) {
+                let putts = consideredRounds.flatMap { $0.putts }
+                report = CoachAdvisor.report(
+                    rounds: consideredRounds,
+                    stats: RoundStats.compute(putts: putts, useFeet: useFeet),
+                    putts: putts,
+                    sessions: sessions
+                )
+            }
+            .navigationDestination(item: $drillToPlay) { drill in
+                GameDestinationView(gameType: drill) { drillToPlay = nil }
+            }
+        }
+    }
+
+    // MARK: - Cards
+
+    private var summaryCard: some View {
+        card {
+            Text(String(format: L("coach.summary"), report.roundCount, report.puttCount))
+                .font(.system(size: 14))
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let weakest = report.weakestBracketLabel {
+                Text(String(format: L("coach.weakestDistance"), weakest))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Theme.text)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if let trend = report.trend {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: trendIcon(trend))
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(trendColour(trend))
+                        .padding(.top, 1)
+                    Text(String(format: L(trend.key), abs(report.trendDelta)))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(trendColour(trend))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private var metricsCard: some View {
+        card {
+            Text(L("coach.numbers"))
+                .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 2), spacing: Theme.Spacing.sm) {
+                ForEach(report.metrics) { metric in
+                    VStack(spacing: 2) {
+                        Text(metric.value)
+                            .font(.system(size: 22, weight: .black))
+                            .foregroundStyle(colour(for: metric.tone))
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                        Text(L(metric.labelKey))
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Theme.textMuted)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2).minimumScaleFactor(0.7)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 68)
+                    .padding(.vertical, Theme.Spacing.sm)
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+                }
+            }
+        }
+    }
+
+    private var findingsCard: some View {
+        card {
+            Text(L("coach.whatIsHappening"))
+                .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+
+            ForEach(report.findings) { finding in
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "arrow.turn.down.right")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(text(for: finding))
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private var notEnoughYetCard: some View {
+        card {
+            Text(L("coach.notEnough.title"))
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(Theme.text)
+            Text(String(format: L("coach.notEnough.body"), CoachAdvisor.minimumRounds, CoachAdvisor.minimumPutts, report.roundCount, report.puttCount))
+                .font(.system(size: 13))
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var recommendationsCard: some View {
+        card {
+            Text(L(report.hasEnoughData ? "coach.workOnThis" : "coach.startWith"))
+                .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+
+            ForEach(report.recommendations) { recommendation in
+                Button {
+                    drillToPlay = recommendation.gameType
+                } label: {
+                    HStack(spacing: Theme.Spacing.md) {
+                        Text(recommendation.gameType.icon).font(.system(size: 28))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(L(recommendation.gameType.titleKey))
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundStyle(Theme.text)
+                            Text(reasonText(recommendation))
+                                .font(.system(size: 12))
+                                .foregroundStyle(Theme.textSecondary)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: 0)
+                        VStack(spacing: 2) {
+                            Text("\(recommendation.targetSessions)×")
+                                .font(.system(size: 14, weight: .black))
+                                .foregroundStyle(Theme.primary)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(Theme.primary)
+                        }
+                    }
+                    .padding(Theme.Spacing.sm)
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Text
+
+    private func text(for finding: CoachFinding) -> String {
+        guard let count = finding.count, let total = finding.total else { return L(finding.key) }
+        return String(format: L(finding.key), count, total)
+    }
+
+    private func reasonText(_ recommendation: CoachRecommendation) -> String {
+        if let distance = recommendation.distanceM {
+            return String(format: L(recommendation.reasonKey), UnitConverter.formatDistance(distance, useFeet: useFeet))
+        }
+        if let idleDays = recommendation.idleDays {
+            return String(format: L(recommendation.reasonKey), idleDays)
+        }
+        return L(recommendation.reasonKey)
+    }
+
+    private func trendIcon(_ trend: CoachTrend) -> String {
+        switch trend {
+        case .improving: return "arrow.up.right"
+        case .steady: return "equal"
+        case .slipping: return "arrow.down.right"
+        }
+    }
+
+    private func trendColour(_ trend: CoachTrend) -> Color {
+        switch trend {
+        case .improving: return Theme.primary
+        case .steady: return Theme.textSecondary
+        case .slipping: return Theme.error
+        }
+    }
+
+    private func colour(for tone: CoachMetric.Tone) -> Color {
+        switch tone {
+        case .good: return Theme.primary
+        case .neutral: return Theme.text
+        case .bad: return Theme.error
+        }
+    }
+
+    private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) { content() }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Theme.Spacing.md)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
+    }
+}

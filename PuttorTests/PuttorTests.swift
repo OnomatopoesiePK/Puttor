@@ -1263,6 +1263,106 @@ struct PuttorTests {
         #expect(MissPatternFinder.findings(in: holed).isEmpty)
     }
 
+    // MARK: - Coach
+
+    /// Nothing to read yet: the coach offers a starting point rather than an
+    /// opinion about four putts.
+    @MainActor
+    @Test func coachOffersAStartingPointBeforeThereIsData() async throws {
+        let report = CoachAdvisor.report(rounds: [], stats: RoundStats(), putts: [], sessions: [])
+        #expect(!report.hasEnoughData)
+        #expect(report.recommendations.count == 3)
+        #expect(report.recommendations.allSatisfy { $0.reasonKey == "coach.reason.startHere" })
+    }
+
+    /// The weakest distance is where the gap to the tour is biggest, not where
+    /// the most putts are missed — which would always be the long ones.
+    @Test func weakestBracketIsTheBiggestGapToTheTour() async throws {
+        let brackets = [
+            DistanceBracket(id: "a", label: "1–2m", min: 1, max: 2, made: 6, total: 10, tourMakePct: 70, pcgTotal: 0),
+            DistanceBracket(id: "b", label: "2–3m", min: 2, max: 3, made: 2, total: 10, tourMakePct: 50, pcgTotal: 0),
+            DistanceBracket(id: "c", label: "9–12m", min: 9, max: 12, made: 0, total: 8, tourMakePct: 8, pcgTotal: 0),
+        ]
+        // 10 points behind at 1–2m, 30 behind at 2–3m, 8 behind from range.
+        #expect(CoachAdvisor.weakestBracket(in: brackets)?.label == "2–3m")
+
+        // A bracket with barely any attempts can't be the verdict.
+        let thin = [DistanceBracket(id: "d", label: "4–5m", min: 4, max: 5, made: 0, total: 2, tourMakePct: 30, pcgTotal: 0)]
+        #expect(CoachAdvisor.weakestBracket(in: thin) == nil)
+    }
+
+    /// Each band of distance has the drill that trains it.
+    @Test func drillsMatchTheDistanceTheyTrain() async throws {
+        #expect(CoachAdvisor.drill(forDistanceM: 0.8) == .gate)
+        #expect(CoachAdvisor.drill(forDistanceM: 2.5) == .aroundTheHole)
+        #expect(CoachAdvisor.drill(forDistanceM: 5) == .clock)
+        #expect(CoachAdvisor.drill(forDistanceM: 12) == .ninePutt)
+    }
+
+    /// A drill nobody has played comes before one that is merely overdue, and
+    /// a drill played yesterday is neither.
+    @MainActor
+    @Test func idleDrillPrefersTheOneNeverPlayed() async throws {
+        func session(_ type: GameType, daysAgo: Int) -> GameSession {
+            let s = GameSession(gameType: type)
+            s.isComplete = true
+            s.date = Date().addingTimeInterval(-86_400 * Double(daysAgo))
+            return s
+        }
+        // Everything played recently except the routine drill, never played.
+        let sessions = GameType.allCases
+            .filter { $0 != .routine }
+            .map { session($0, daysAgo: 1) }
+        #expect(CoachAdvisor.idleDrill(sessions: sessions, excluding: [])?.gameType == .routine)
+
+        // With everything played, the one left longest comes up.
+        let all = GameType.allCases.map { session($0, daysAgo: $0 == .clock ? 40 : 1) }
+        let pick = try #require(CoachAdvisor.idleDrill(sessions: all, excluding: []))
+        #expect(pick.gameType == .clock)
+        #expect(pick.reasonKey == "coach.reason.idle")
+
+        // Nothing overdue, nothing to say.
+        let fresh = GameType.allCases.map { session($0, daysAgo: 2) }
+        #expect(CoachAdvisor.idleDrill(sessions: fresh, excluding: []) == nil)
+    }
+
+    /// Improving, holding or slipping, measured over the rounds themselves.
+    @MainActor
+    @Test func trendComparesTheRecentRoundsWithTheEarlierOnes() async throws {
+        let context = try Self.makeInMemoryContext()
+
+        func round(daysAgo: Int, distance: Double, putts: Int) -> Round {
+            let round = Round(courseName: "T", date: Date().addingTimeInterval(-86_400 * Double(daysAgo)))
+            context.insert(round)
+            for hole in 1...9 {
+                for n in 1...putts {
+                    let putt = Putt(
+                        holeNumber: hole, puttNumber: n,
+                        distanceM: n == 1 ? distance : 0.5,
+                        puttFor: .par,
+                        result: n == putts ? .holed : .short
+                    )
+                    putt.round = round
+                    round.putts.append(putt)
+                    context.insert(putt)
+                }
+            }
+            return round
+        }
+
+        // Older rounds three-putt from range, recent ones one-putt from there.
+        let older = [round(daysAgo: 20, distance: 8, putts: 3), round(daysAgo: 18, distance: 8, putts: 3)]
+        let newer = [round(daysAgo: 2, distance: 8, putts: 1), round(daysAgo: 1, distance: 8, putts: 1)]
+        try context.save()
+
+        let (trend, delta) = CoachAdvisor.trend(in: newer + older)
+        #expect(trend == .improving)
+        #expect(delta > 0)
+
+        // Too few rounds to compare halves at all.
+        #expect(CoachAdvisor.trend(in: Array(newer.prefix(1))).0 == nil)
+    }
+
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)
         let mid = StrokesGained.baseline(at: 3.25)
