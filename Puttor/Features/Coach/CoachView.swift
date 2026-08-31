@@ -23,9 +23,13 @@ struct CoachView: View {
     /// The recent stretch rather than a career: advice about last season is
     /// advice about somebody else.
     private var consideredRounds: [Round] { Array(completeRounds.prefix(10)) }
+    /// Conditions are read from further back: how you putt in the rain is a
+    /// trait rather than a form, and rain is rare enough that ten rounds
+    /// rarely hold enough of it.
+    private var conditionRounds: [Round] { Array(completeRounds.prefix(30)) }
 
     private var reportKey: Int {
-        consideredRounds.reduce(sessions.count) { $0 &+ $1.putts.count }
+        conditionRounds.reduce(sessions.count) { $0 &+ $1.putts.count }
     }
 
     var body: some View {
@@ -37,6 +41,7 @@ struct CoachView: View {
                         if !report.metrics.isEmpty { metricsCard }
                         if report.practice.sessions > 0 { practiceCard }
                         if !report.findings.isEmpty { findingsCard }
+                        if !report.conditions.isEmpty { conditionsCard }
                     } else {
                         notEnoughYetCard
                     }
@@ -62,7 +67,8 @@ struct CoachView: View {
                     rounds: consideredRounds,
                     stats: RoundStats.merge(perRound, useFeet: useFeet),
                     putts: consideredRounds.flatMap { $0.putts },
-                    sessions: sessions
+                    sessions: sessions,
+                    conditionRounds: conditionRounds
                 )
             }
             .navigationDestination(item: $drillToPlay) { drill in
@@ -205,6 +211,35 @@ struct CoachView: View {
         }
     }
 
+    /// The conditions card: differences that belong to the day rather than to
+    /// the player, and are therefore worth knowing before the round instead of
+    /// after it.
+    private var conditionsCard: some View {
+        card {
+            Text(L("coach.conditions"))
+                .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+
+            ForEach(report.conditions) { finding in
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "cloud.sun")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.warning)
+                        .padding(.top, 2)
+                    Text(text(for: finding))
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            Text(L("coach.conditions.source"))
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     private var notEnoughYetCard: some View {
         card {
             Text(L("coach.notEnough.title"))
@@ -264,6 +299,16 @@ struct CoachView: View {
     private func text(for finding: CoachFinding) -> String {
         guard !finding.numbers.isEmpty else { return L(finding.key) }
         return String(format: L(finding.key), arguments: finding.numbers.map { $0 as CVarArg })
+    }
+
+    private func text(for finding: SplitFinding) -> String {
+        String(
+            format: L(finding.key),
+            L(finding.conditionKey),
+            finding.highText,
+            L(finding.otherKey),
+            finding.lowText
+        )
     }
 
     private func reasonText(_ recommendation: CoachRecommendation) -> String {

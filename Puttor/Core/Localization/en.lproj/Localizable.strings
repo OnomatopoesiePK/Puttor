@@ -25,7 +25,7 @@
 "coach.practice.pcgPerPutt" = "PCG / PUTT";
 "coach.practice.source" = "From the drills in the Games tab, counted on their own: practice under no pressure is not a scorecard, so it never mixes into the numbers above.";
 "coach.reason.weakestDrill" = "The drill you convert worst in, measured against the odds of holing from those distances.";
-"coach.threePuttRate" = "3-PUTT HOLES";
+"coach.threePuttRate" = "3-PUTTS PER ROUND";
 "coach.whatIsHappening" = "WHAT KEEPS HAPPENING";
 "coach.workOnThis" = "YOUR PLAN";
 "coach.startWith" = "START WITH THESE";
@@ -46,10 +46,6 @@
 "coach.trend.steadyWeak" = "Holding steady at %2$+.2f strokes a round — steady, but steadily losing strokes.";
 "coach.trend.method" = "Your last %1$ld rounds against the average of all %2$ld being read.";
 "coach.costliestBand" = "MOST STROKES LOST";
-"coach.green.fastRunsLong" = "On quick greens %1$ld%% of your misses run past, against %2$ld%% on slow ones — the pace is getting away from you when they are fast.";
-"coach.green.slowLeavesShort" = "On slow greens %1$ld%% of your misses run past, against %2$ld%% on quick ones — you are hitting the slow ones harder than they need.";
-"coach.green.fastMissRead" = "On quick greens %1$ld%% of your misses are down to the read, against %2$ld%% on slow ones — quick greens take more break than you are giving them.";
-"coach.green.slowMissRead" = "On slow greens %1$ld%% of your misses are down to the read, against %2$ld%% on quick ones — you may be playing break the slow ones will not take.";
 "coach.reason.idle" = "Last played %ld days ago — worth another turn.";
 "tab.settings" = "Settings";
 
@@ -576,3 +572,31 @@ CONVERSION RATE";
 "reference.curvesText" = "Both columns are read off fitted curves, with x = ln(distance in metres), from 0.3 m to 40 m.";
 "reference.curvesMake" = "MAKE PROBABILITY";
 "reference.curvesExpected" = "EXPECTED PUTTS";
+
+// Conditions the numbers depend on
+"coach.conditions" = "WHEN THE CONDITIONS ARE LIKE THIS";
+"coach.conditions.source" = "Only differences too large to be chance are listed, and only where both sides were putting from comparable distances.";
+"split.cond.fastGreens" = "quick greens";
+"split.cond.slowGreens" = "slow greens";
+"split.cond.rain" = "rain";
+"split.cond.dry" = "dry weather";
+"split.cond.wind" = "strong wind";
+"split.cond.calm" = "calm days";
+"split.cond.cold" = "cold days";
+"split.cond.warm" = "warm days";
+"split.cond.grain" = "grainy greens";
+"split.cond.noGrain" = "greens without grain";
+"split.cond.strongBreak" = "strong break";
+"split.cond.flat" = "flat putts";
+"split.cond.downhill" = "downhill putts";
+"split.cond.uphill" = "uphill putts";
+"split.cond.doubleBreak" = "double breaks";
+"split.cond.singleBreak" = "single breaks";
+"split.missLong" = "On %1$@, %2$@%% of your misses run past the hole — on %3$@ %4$@%%.";
+"split.missShort" = "On %1$@, %2$@%% of your misses come up short — on %3$@ %4$@%%.";
+"split.missHighSide" = "On %1$@, %2$@%% of your breaking misses stay above the hole — on %3$@ %4$@%%.";
+"split.missLowSide" = "On %1$@, %2$@%% of your breaking misses fall below the hole — on %3$@ %4$@%%.";
+"split.missRead" = "On %1$@, %2$@%% of your misses come down to the read — on %3$@ %4$@%%.";
+"split.holedMore" = "On %1$@, %2$@%% of your putts drop — on %3$@ %4$@%%.";
+"split.holedLess" = "On %1$@, %2$@%% of your putts stay out — on %3$@ %4$@%%.";
+"split.threePutts" = "On %1$@ you three-putt %2$@ times a round — on %3$@ %4$@, from the same sort of distance.";

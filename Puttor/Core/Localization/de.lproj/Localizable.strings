@@ -25,7 +25,7 @@
 "coach.practice.pcgPerPutt" = "PKR / PUTT";
 "coach.practice.source" = "Aus den Drills im Games-Tab, getrennt gezählt: Training ohne Druck ist keine Scorekarte und fließt deshalb nie in die Zahlen oben ein.";
 "coach.reason.weakestDrill" = "Der Drill, in dem du am schlechtesten konvertierst — gemessen an der Lochwahrscheinlichkeit dieser Distanzen.";
-"coach.threePuttRate" = "3-PUTT-LÖCHER";
+"coach.threePuttRate" = "3-PUTTS PRO RUNDE";
 "coach.whatIsHappening" = "WAS IMMER WIEDER PASSIERT";
 "coach.workOnThis" = "DEIN PLAN";
 "coach.startWith" = "FANG DAMIT AN";
@@ -46,10 +46,6 @@
 "coach.trend.steadyWeak" = "Stabil bei %2$+.2f Schlägen pro Runde — stabil, aber stetig Schläge liegen lassend.";
 "coach.trend.method" = "Deine letzten %1$ld Runden gegen den Schnitt aller %2$ld gelesenen.";
 "coach.costliestBand" = "MEISTE SCHLÄGE VERLOREN";
-"coach.green.fastRunsLong" = "Auf schnellen Grüns laufen %1$ld%% deiner Misses zu weit, auf langsamen nur %2$ld%% — bei Tempo läuft dir die Länge davon.";
-"coach.green.slowLeavesShort" = "Auf langsamen Grüns laufen %1$ld%% deiner Misses zu weit, auf schnellen nur %2$ld%% — du schlägst die langsamen härter als nötig.";
-"coach.green.fastMissRead" = "Auf schnellen Grüns gehen %1$ld%% deiner Misses auf die Leseleistung, auf langsamen %2$ld%% — schnelle Grüns brechen mehr, als du ihnen zugestehst.";
-"coach.green.slowMissRead" = "Auf langsamen Grüns gehen %1$ld%% deiner Misses auf die Leseleistung, auf schnellen %2$ld%% — womöglich spielst du Break, den die langsamen nicht hergeben.";
 "coach.reason.idle" = "Zuletzt vor %ld Tagen gespielt — wieder mal dran.";
 "tab.settings" = "Einstellungen";
 
@@ -576,3 +572,31 @@ KONVERSIONSRATE";
 "reference.curvesText" = "Beide Spalten stammen aus angepassten Kurven, mit x = ln(Distanz in Metern), von 0,3 m bis 40 m.";
 "reference.curvesMake" = "TREFFERWAHRSCHEINLICHKEIT";
 "reference.curvesExpected" = "ERWARTETE PUTTS";
+
+// Conditions the numbers depend on
+"coach.conditions" = "WENN DIE BEDINGUNGEN SO SIND";
+"coach.conditions.source" = "Aufgeführt sind nur Unterschiede, die für Zufall zu groß sind — und nur dort, wo beide Seiten aus vergleichbaren Distanzen geputtet haben.";
+"split.cond.fastGreens" = "schnellen Grüns";
+"split.cond.slowGreens" = "langsamen Grüns";
+"split.cond.rain" = "Regen";
+"split.cond.dry" = "trockenem Wetter";
+"split.cond.wind" = "starkem Wind";
+"split.cond.calm" = "windstillen Tagen";
+"split.cond.cold" = "kalten Tagen";
+"split.cond.warm" = "warmen Tagen";
+"split.cond.grain" = "Grüns mit Grain";
+"split.cond.noGrain" = "Grüns ohne Grain";
+"split.cond.strongBreak" = "starkem Break";
+"split.cond.flat" = "flachen Putts";
+"split.cond.downhill" = "Bergab-Putts";
+"split.cond.uphill" = "Bergauf-Putts";
+"split.cond.doubleBreak" = "Doppelbreaks";
+"split.cond.singleBreak" = "einfachem Break";
+"split.missLong" = "Bei %1$@ laufen %2$@%% deiner Fehlputts übers Loch hinaus — bei %3$@ %4$@%%.";
+"split.missShort" = "Bei %1$@ bleiben %2$@%% deiner Fehlputts kurz — bei %3$@ %4$@%%.";
+"split.missHighSide" = "Bei %1$@ bleiben %2$@%% deiner Break-Misses oberhalb des Lochs — bei %3$@ %4$@%%.";
+"split.missLowSide" = "Bei %1$@ gehen %2$@%% deiner Break-Misses unterhalb des Lochs vorbei — bei %3$@ %4$@%%.";
+"split.missRead" = "Bei %1$@ gehen %2$@%% deiner Misses auf die Leseleistung — bei %3$@ %4$@%%.";
+"split.holedMore" = "Bei %1$@ fallen %2$@%% deiner Putts — bei %3$@ %4$@%%.";
+"split.holedLess" = "Bei %1$@ bleiben %2$@%% deiner Putts draußen — bei %3$@ %4$@%%.";
+"split.threePutts" = "Bei %1$@ sind es %2$@ 3-Putts pro Runde — bei %3$@ %4$@, aus vergleichbaren Distanzen.";

@@ -1533,39 +1533,137 @@ struct PuttorTests {
         #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
     }
 
-    /// Green speed is only worth a sentence when the same player's misses
-    /// behave differently on the quick ones and the slow ones.
+    // MARK: - Conditions
+
+    /// A condition is only named when the same player's misses behave
+    /// differently under it than under its opposite.
     @MainActor
-    @Test func greenSpeedIsComparedBetweenFastAndSlowRounds() async throws {
+    @Test func aConditionIsNamedWhenTheMissesBehaveDifferentlyUnderIt() async throws {
         let context = try Self.makeInMemoryContext()
 
-        func round(stimp: Double, longMisses: Int, shortMisses: Int) -> Round {
+        func round(stimp: Double, long: Int, short: Int) -> Round {
             let round = Round(courseName: "T", stimp: stimp)
             context.insert(round)
             var hole = 1
-            for _ in 0..<longMisses {
-                let putt = Putt(holeNumber: hole, puttNumber: 1, distanceM: 6, puttFor: .par, result: .long)
-                putt.round = round; round.putts.append(putt); context.insert(putt); hole += 1
-            }
-            for _ in 0..<shortMisses {
-                let putt = Putt(holeNumber: hole, puttNumber: 1, distanceM: 6, puttFor: .par, result: .short)
-                putt.round = round; round.putts.append(putt); context.insert(putt); hole += 1
+            for index in 0..<(long + short) {
+                let putt = Putt(
+                    holeNumber: hole,
+                    puttNumber: 1,
+                    distanceM: 6,
+                    result: index < long ? .long : .short
+                )
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+                hole += 1
             }
             return round
         }
 
         // Quick greens: nearly everything runs past. Slow ones: nothing does.
-        let quick = round(stimp: 11, longMisses: 8, shortMisses: 1)
-        let slow = round(stimp: 8, longMisses: 1, shortMisses: 8)
+        let quick = round(stimp: 11, long: 8, short: 1)
+        let slow = round(stimp: 8, long: 1, short: 8)
         try context.save()
 
-        let findings = GreenSpeedInsight.findings(in: [quick, slow])
-        #expect(findings.contains { $0.key == "coach.green.fastRunsLong" })
+        let findings = SplitInsight.findings(in: [quick, slow])
+        let pace = try #require(findings.first { $0.key == "split.missLong" })
+        #expect(pace.conditionKey == "split.cond.fastGreens")
+        #expect(pace.otherKey == "split.cond.slowGreens")
+        #expect(pace.high > pace.low)
 
         // One kind of green alone says nothing about the other.
-        #expect(GreenSpeedInsight.findings(in: [quick]).isEmpty)
+        #expect(SplitInsight.findings(in: [quick]).isEmpty)
     }
 
+    /// The point of the correction: a gap that looks large over a handful of
+    /// putts is what random data looks like, and never reaches the player.
+    @MainActor
+    @Test func aGapTooSmallToTrustIsNotReported() async throws {
+        let context = try Self.makeInMemoryContext()
+
+        func round(stimp: Double, long: Int, short: Int) -> Round {
+            let round = Round(courseName: "T", stimp: stimp)
+            context.insert(round)
+            var hole = 1
+            for index in 0..<(long + short) {
+                let putt = Putt(
+                    holeNumber: hole,
+                    puttNumber: 1,
+                    distanceM: 6,
+                    result: index < long ? .long : .short
+                )
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+                hole += 1
+            }
+            return round
+        }
+
+        // Five of eight against two of eight: a 37-point gap that a coin
+        // produces often enough to mean nothing.
+        let quick = round(stimp: 11, long: 5, short: 3)
+        let slow = round(stimp: 8, long: 2, short: 6)
+        try context.save()
+
+        #expect(SplitInsight.findings(in: [quick, slow]).isEmpty)
+    }
+
+    /// Three-putts are reported per round, and only between sides whose first
+    /// putts came from the same sort of range — otherwise the finding is about
+    /// distance wearing a condition's name.
+    @MainActor
+    @Test func threePuttsAreOnlyComparedFromComparableDistances() async throws {
+        let context = try Self.makeInMemoryContext()
+
+        func round(stimp: Double, firstPuttM: Double, threePutts: Int) -> Round {
+            let round = Round(courseName: "T", stimp: stimp)
+            context.insert(round)
+            for hole in 1...18 {
+                let putts = hole <= threePutts ? 3 : 2
+                for number in 1...putts {
+                    let putt = Putt(
+                        holeNumber: hole,
+                        puttNumber: number,
+                        distanceM: number == 1 ? firstPuttM : 2,
+                        result: number == putts ? .holed : .short
+                    )
+                    putt.round = round
+                    round.putts.append(putt)
+                    context.insert(putt)
+                }
+            }
+            return round
+        }
+
+        // Same distances, different pace: four three-putts a round on the slow
+        // greens against half of one on the quick.
+        let slow = (0..<2).map { _ in round(stimp: 8, firstPuttM: 10, threePutts: 4) }
+        let quick = (0..<2).map { _ in round(stimp: 11, firstPuttM: 10, threePutts: 0) }
+        try context.save()
+
+        let finding = try #require(SplitInsight.findings(in: slow + quick).first { $0.key == "split.threePutts" })
+        #expect(finding.conditionKey == "split.cond.slowGreens")
+        #expect(abs(finding.high - 4) < 0.001)
+        #expect(finding.highText == "4.0")
+
+        // The same three-putts, but now the slow greens were putted from
+        // twice the distance: nothing to say about the greens.
+        let far = (0..<2).map { _ in round(stimp: 8, firstPuttM: 18, threePutts: 4) }
+        let near = (0..<2).map { _ in round(stimp: 11, firstPuttM: 4, threePutts: 0) }
+        try context.save()
+        #expect(!SplitInsight.findings(in: far + near).contains { $0.key == "split.threePutts" })
+    }
+
+    /// Three-putts belong in the coach's numbers as a count a round, not as a
+    /// share of holes — nobody plays a percentage of a green.
+    @Test func threePuttsAreCountedPerRound() async throws {
+        var stats = RoundStats()
+        stats.holes = 36
+        stats.threePuttHoles = 3
+        #expect(abs(CoachAdvisor.threePuttsPerRound(stats, rounds: 2) - 1.5) < 0.001)
+        #expect(CoachAdvisor.threePuttsPerRound(stats, rounds: 0) == 0)
+    }
 
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)

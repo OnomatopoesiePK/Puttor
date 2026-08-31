@@ -99,6 +99,9 @@ struct CoachReport {
     var puttCount: Int
     var metrics: [CoachMetric] = []
     var findings: [CoachFinding] = []
+    /// Differences that depend on the conditions rather than on the player:
+    /// worth knowing before the next round rather than after it.
+    var conditions: [SplitFinding] = []
     var recommendations: [CoachRecommendation] = []
     /// The bracket the player is furthest below the tour in, if there is one.
     var weakestBracketLabel: String?
@@ -138,11 +141,15 @@ enum CoachAdvisor {
     /// A drill needs this many logged attempts before its PCG means anything.
     static let minimumDrillAttempts = 10
 
+    /// `conditionRounds` is read for the weather-and-green findings only, and
+    /// may reach further back than the rounds the form is judged on: rain is
+    /// rare, and a condition needs putts under it before it says anything.
     static func report(
         rounds: [Round],
         stats: RoundStats,
         putts: [Putt],
-        sessions: [GameSession]
+        sessions: [GameSession],
+        conditionRounds: [Round]? = nil
     ) -> CoachReport {
         let realPutts = putts.filter { $0.puttNumber > 0 }
         var report = CoachReport(
@@ -161,7 +168,8 @@ enum CoachAdvisor {
         report.metrics = metrics(from: stats, rounds: rounds.count, costliest: costliestBracket(in: stats.makeByDistance))
         report.findings = MissPatternFinder.findings(in: putts).map {
             CoachFinding(key: $0.key, count: $0.count, total: $0.total)
-        } + GreenSpeedInsight.findings(in: rounds)
+        }
+        report.conditions = SplitInsight.findings(in: conditionRounds ?? rounds)
 
         let reading = self.trend(in: rounds)
         report.trend = reading.trend
@@ -187,6 +195,7 @@ enum CoachAdvisor {
     // MARK: - Numbers
 
     private static func metrics(from stats: RoundStats, rounds: Int, costliest: CoachWeakness?) -> [CoachMetric] {
+        let threePutts = threePuttsPerRound(stats, rounds: rounds)
         let sgPerRound = rounds > 0 ? stats.sgTotal / Double(rounds) : 0
         let pcgPerRound = rounds > 0 ? stats.pcgTotal / Double(rounds) : 0
 
@@ -203,11 +212,14 @@ enum CoachAdvisor {
                 value: "\(pcgPerRound > 0 ? "+" : "")\(String(format: "%.2f", pcgPerRound))",
                 tone: pcgPerRound >= 1 ? .good : (pcgPerRound <= -1 ? .bad : .neutral)
             ),
+            // Per round rather than as a share of holes: nobody plays a
+            // percentage of a green, and "one and a half a round" is a number
+            // you can hold on to.
             CoachMetric(
                 id: "threePutts",
                 labelKey: "coach.threePuttRate",
-                value: "\(Int((threePuttRate(stats) * 100).rounded()))%",
-                tone: threePuttRate(stats) <= 0.05 ? .good : (threePuttRate(stats) >= 0.15 ? .bad : .neutral)
+                value: String(format: "%.1f", threePutts),
+                tone: threePutts <= 0.9 ? .good : (threePutts >= 2.7 ? .bad : .neutral)
             ),
             // Putts per hole says nothing without the distances behind it —
             // two putts from 20 m is good work and from 2 m is a stroke gone.
@@ -218,6 +230,11 @@ enum CoachAdvisor {
                 tone: costliest == nil ? .neutral : ((costliest?.strokesLost ?? 0) >= 2 ? .bad : .neutral)
             ),
         ]
+    }
+
+    /// Three-putts a round, over the rounds actually read.
+    static func threePuttsPerRound(_ stats: RoundStats, rounds: Int) -> Double {
+        rounds > 0 ? Double(stats.threePuttHoles) / Double(rounds) : 0
     }
 
     static func threePuttRate(_ stats: RoundStats) -> Double {
