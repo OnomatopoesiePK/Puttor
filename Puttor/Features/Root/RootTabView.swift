@@ -117,7 +117,7 @@ struct RootTabView: View {
         .padding(.vertical, 4)
         .background(Capsule().fill(Theme.surface))
         .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
-        .padding(.top, 4)
+        .padding(.top, 10)
     }
 }
 

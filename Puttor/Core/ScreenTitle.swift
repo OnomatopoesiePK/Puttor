@@ -30,7 +30,9 @@ private struct ScreenHeaderPadding: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(.horizontal, Theme.Spacing.lg)
-            .padding(.top, verticalSizeClass == .compact ? 6 : Theme.Spacing.lg)
+            // Landscape is tight, but not so tight that the title should sit
+            // on the status bar — and the tab strip floats in this row too.
+            .padding(.top, verticalSizeClass == .compact ? 14 : Theme.Spacing.lg)
             .padding(.bottom, 4)
     }
 }
