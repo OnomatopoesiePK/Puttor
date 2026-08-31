@@ -55,7 +55,11 @@ struct RoundStats {
     /// Make % by distance bracket, filtered to putts taken "for" a given score (birdie/par/bogey).
     var makeByCategory: [ScoreCategory: [DistanceBracket]] = [:]
     var missCounts: [PuttResult: Int] = [:]
+    /// Per round only: hole numbers repeat across rounds, so this never
+    /// survives a merge. `threePuttHoles` is the part that does.
     var puttsByHole: [Int: Int] = [:]
+    /// Holes that took three putts or more.
+    var threePuttHoles: Int = 0
     var leaveByMissDirection: [PuttResult: LeaveInfo] = [:]
     var missReasonCounts: MissReasonCounts = MissReasonCounts()
     /// Putts that caught the lip and stayed out — misses that were nearly in.
@@ -217,6 +221,7 @@ struct RoundStats {
         }
 
         stats.pcgTotal = realPutts.reduce(0.0) { $0 + $1.pcg }
+        stats.threePuttHoles = stats.puttsByHole.values.filter { $0 >= 3 }.count
         stats.makeByDistance = computeDistanceBrackets(realPutts, useFeet: useFeet)
 
         for category in situationCategories {
@@ -355,6 +360,8 @@ struct RoundStats {
         merged.totalPutts = list.reduce(0) { $0 + $1.totalPutts }
         merged.holes = list.reduce(0) { $0 + $1.holes }
         merged.sgTotal = list.reduce(0) { $0 + $1.sgTotal }
+        merged.pcgTotal = list.reduce(0) { $0 + $1.pcgTotal }
+        merged.threePuttHoles = list.reduce(0) { $0 + $1.threePuttHoles }
         merged.avgPuttsPerHole = merged.holes > 0 ? Double(merged.totalPutts) / Double(merged.holes) : 0
 
         merged.makeByDistance = mergeBracketLists(list.map { $0.makeByDistance }, useFeet: useFeet)

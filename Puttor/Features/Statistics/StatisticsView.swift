@@ -978,8 +978,6 @@ struct StatisticsView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, Theme.Spacing.lg)
-        .padding(.top, canCompare ? 6 : Theme.Spacing.lg)
-        .padding(.bottom, 4)
+        .screenHeaderPadding()
     }
 }

@@ -83,9 +83,7 @@ struct OnCourseListView: View {
             Spacer(minLength: 0)
             startButton
         }
-        .padding(.horizontal, Theme.Spacing.lg)
-        .padding(.top, Theme.Spacing.lg)
-        .padding(.bottom, Theme.Spacing.sm)
+        .screenHeaderPadding()
     }
 
     private var startButton: some View {

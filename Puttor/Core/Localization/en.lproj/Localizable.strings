@@ -14,6 +14,13 @@
 "coach.summary" = "Read from your last %1$ld rounds and %2$ld putts.";
 "coach.weakestDistance" = "Your weakest distance right now is %@ — that is where you sit furthest below the tour.";
 "coach.numbers" = "THE NUMBERS";
+"coach.numbers.source" = "From the rounds you played on the course — strokes gained and PCG summed per hole, then per round.";
+"coach.practice" = "PRACTICE";
+"coach.practice.sessions" = "SESSIONS";
+"coach.practice.putts" = "PUTTS";
+"coach.practice.pcgPerPutt" = "PCG / PUTT";
+"coach.practice.source" = "From the drills in the Games tab, counted on their own: practice under no pressure is not a scorecard, so it never mixes into the numbers above.";
+"coach.reason.weakestDrill" = "The drill you convert worst in, measured against the odds of holing from those distances.";
 "coach.threePuttRate" = "3-PUTT HOLES";
 "coach.whatIsHappening" = "WHAT KEEPS HAPPENING";
 "coach.workOnThis" = "YOUR PLAN";

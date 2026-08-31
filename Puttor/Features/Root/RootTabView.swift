@@ -102,7 +102,9 @@ struct RootTabView: View {
                     Image(systemName: tab.icon)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(selectedTab == tab.tag ? Theme.primary : Theme.textMuted)
-                        .frame(width: 34, height: 26)
+                        // The height the input screen's own corner islands
+                        // use, so the row reads as one line of chrome.
+                        .frame(width: 36, height: 32)
                         .background(
                             Capsule().fill(selectedTab == tab.tag ? Theme.primary.opacity(0.16) : .clear)
                         )
@@ -111,8 +113,8 @@ struct RootTabView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 3)
-        .padding(.vertical, 2)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 4)
         .background(Capsule().fill(Theme.surface))
         .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
         .padding(.top, 4)

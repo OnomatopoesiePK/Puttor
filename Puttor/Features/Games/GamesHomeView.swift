@@ -47,9 +47,7 @@ struct GamesHomeView: View {
             .safeAreaInset(edge: .top) {
                 ScreenTitle(text: L("games.title"))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, Theme.Spacing.lg)
-                    .padding(.top, Theme.Spacing.lg)
-                    .padding(.bottom, 4)
+                    .screenHeaderPadding()
                     .background(Theme.background)
             }
             .navigationBarHidden(true)

@@ -1265,6 +1265,106 @@ struct PuttorTests {
 
     // MARK: - Coach
 
+    /// The bug that made the coach report double figures of strokes lost:
+    /// pooling every putt into one call puts hole 7 of every round on one
+    /// hole. Per round, then merged, is the only reading that holds.
+    @MainActor
+    @Test func statsMustBeMergedPerRoundRatherThanPooled() async throws {
+        let context = try Self.makeInMemoryContext()
+
+        func round() -> Round {
+            let round = Round(courseName: "T")
+            context.insert(round)
+            for hole in 1...9 {
+                // One 3m putt holed on every hole: a gain on each.
+                let putt = Putt(holeNumber: hole, puttNumber: 1, distanceM: 3, puttFor: .par, result: .holed)
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+            }
+            return round
+        }
+        let rounds = [round(), round(), round()]
+        try context.save()
+
+        let merged = RoundStats.merge(rounds.map { RoundStats.compute(putts: $0.putts) })
+        #expect(merged.holes == 27)
+        #expect(merged.totalPutts == 27)
+        // Every putt was holed from 3m, where the tour needs about 1.6.
+        #expect(merged.sgTotal > 15)
+        #expect(merged.threePuttHoles == 0)
+
+        // Pooled, the same putts look like nine holes of three putts each.
+        let pooled = RoundStats.compute(putts: rounds.flatMap { $0.putts })
+        #expect(pooled.holes == 9)
+        #expect(pooled.sgTotal < 0)
+    }
+
+    /// PCG and the three-putt count survive a merge; they used to be dropped,
+    /// which read as a player who never three-putts and gains nothing.
+    @MainActor
+    @Test func mergeCarriesPCGAndThreePutts() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "T")
+        context.insert(round)
+        for n in 1...3 {
+            let putt = Putt(
+                holeNumber: 1, puttNumber: n, distanceM: n == 1 ? 12 : 1,
+                puttFor: .par, result: n == 3 ? .holed : .short
+            )
+            putt.round = round
+            round.putts.append(putt)
+            context.insert(putt)
+        }
+        try context.save()
+
+        let single = RoundStats.compute(putts: round.putts)
+        let merged = RoundStats.merge([single, single])
+        #expect(single.threePuttHoles == 1)
+        #expect(merged.threePuttHoles == 2)
+        #expect(abs(merged.pcgTotal - single.pcgTotal * 2) < 0.0001)
+        #expect(merged.pcgTotal < 0) // three putts is not a gain
+    }
+
+    /// Practice is counted from the drills alone, and the weakest drill is the
+    /// one converting furthest below the odds.
+    @MainActor
+    @Test func practiceIsReadFromTheDrillsOnly() async throws {
+        func session(_ type: GameType, made: Int, attempts: Int, distance: Double) -> GameSession {
+            let session = GameSession(gameType: type)
+            session.isComplete = true
+            session.madeTotal = made
+            session.attemptsTotal = attempts
+            for i in 0..<attempts {
+                let attempt = GameAttempt(
+                    groupIndex: 0, index: i, label: "",
+                    distanceM: distance, success: i < made
+                )
+                attempt.session = session
+                session.attempts.append(attempt)
+            }
+            return session
+        }
+
+        // Twelve short putts, most of them made; twelve mid putts, few made.
+        let practice = CoachAdvisor.practice(in: [
+            session(.gate, made: 10, attempts: 12, distance: 1),
+            session(.clock, made: 2, attempts: 12, distance: 4),
+        ])
+
+        #expect(practice.sessions == 2)
+        #expect(practice.attempts == 24)
+        #expect(practice.made == 12)
+        #expect(abs(practice.makePercent - 50) < 0.0001)
+        #expect(practice.pcgPerAttempt != nil)
+        #expect(practice.weakestDrill == .clock)
+
+        // Nothing played, nothing claimed.
+        #expect(CoachAdvisor.practice(in: []).sessions == 0)
+    }
+
+    // MARK: - Coach
+
     /// Nothing to read yet: the coach offers a starting point rather than an
     /// opinion about four putts.
     @MainActor

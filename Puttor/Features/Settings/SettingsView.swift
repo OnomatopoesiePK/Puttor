@@ -181,9 +181,7 @@ struct SettingsView: View {
             .safeAreaInset(edge: .top) {
                 ScreenTitle(text: L("settings.title"))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, Theme.Spacing.lg)
-                    .padding(.top, Theme.Spacing.lg)
-                    .padding(.bottom, 4)
+                    .screenHeaderPadding()
                     .background(Theme.background)
             }
             .alert(L("settings.deletePutterTitle"), isPresented: Binding(get: { putterToDelete != nil }, set: { if !$0 { putterToDelete = nil } })) {

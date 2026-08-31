@@ -57,6 +57,20 @@ enum CoachTrend {
     }
 }
 
+/// What the drills say, kept apart from what the course says: one is practice
+/// under no pressure, the other is a scorecard.
+struct CoachPractice {
+    var sessions: Int = 0
+    var attempts: Int = 0
+    var made: Int = 0
+    /// PCG over the attempts that recorded a distance; nil when the drills
+    /// played don't log one.
+    var pcgPerAttempt: Double?
+    var makePercent: Double { attempts > 0 ? Double(made) / Double(attempts) * 100 : 0 }
+    /// The drill the player converts worst in, by PCG per attempt.
+    var weakestDrill: GameType?
+}
+
 struct CoachReport {
     var hasEnoughData: Bool
     var roundCount: Int
@@ -69,6 +83,8 @@ struct CoachReport {
     /// Which way it is going, and by how many strokes a round.
     var trend: CoachTrend?
     var trendDelta: Double = 0
+    /// The drills, counted separately from the rounds.
+    var practice = CoachPractice()
 }
 
 enum CoachAdvisor {
@@ -85,6 +101,8 @@ enum CoachAdvisor {
     static let idleDaysBeforeRepeat = 14
     /// Below this many rounds there are not two halves to compare.
     static let minimumRoundsForTrend = 4
+    /// A drill needs this many logged attempts before its PCG means anything.
+    static let minimumDrillAttempts = 10
 
     static func report(
         rounds: [Round],
@@ -100,10 +118,12 @@ enum CoachAdvisor {
         )
 
         guard report.hasEnoughData else {
+            report.practice = practice(in: sessions)
             report.recommendations = startingPoints()
             return report
         }
 
+        report.practice = practice(in: sessions)
         report.metrics = metrics(from: stats, rounds: rounds.count)
         report.findings = MissPatternFinder.findings(in: putts).map {
             CoachFinding(key: $0.key, count: $0.count, total: $0.total)
@@ -120,7 +140,8 @@ enum CoachAdvisor {
             weakest: weakest,
             patterns: report.findings,
             sessions: sessions,
-            trend: trend
+            trend: trend,
+            practice: report.practice
         )
         return report
     }
@@ -161,8 +182,7 @@ enum CoachAdvisor {
 
     static func threePuttRate(_ stats: RoundStats) -> Double {
         guard stats.holes > 0 else { return 0 }
-        let threeOrMore = stats.puttsByHole.values.filter { $0 >= 3 }.count
-        return Double(threeOrMore) / Double(stats.holes)
+        return Double(stats.threePuttHoles) / Double(stats.holes)
     }
 
     /// The distance the player is furthest below the tour from — the honest
@@ -178,6 +198,56 @@ enum CoachAdvisor {
     private static func gapToTour(_ bracket: DistanceBracket) -> Double {
         let mine = bracket.total > 0 ? Double(bracket.made) / Double(bracket.total) * 100 : 0
         return bracket.tourMakePct - mine
+    }
+
+    // MARK: - The drills
+
+    /// Reads the drill history the way the course numbers are read: how much
+    /// was played, how much of it dropped, and — where a drill logs the
+    /// distance of each attempt — how that compares with the tour's odds.
+    static func practice(in sessions: [GameSession]) -> CoachPractice {
+        let complete = sessions.filter { $0.isComplete }
+        guard !complete.isEmpty else { return CoachPractice() }
+
+        var practice = CoachPractice(
+            sessions: complete.count,
+            attempts: complete.reduce(0) { $0 + $1.attemptsTotal },
+            made: complete.reduce(0) { $0 + $1.madeTotal }
+        )
+
+        // Attempt-level PCG, per drill, over the attempts that carry a
+        // distance. Drills counted on the green rather than in the app record
+        // none, and are simply absent here.
+        var pcgByDrill: [GameType: (total: Double, count: Int)] = [:]
+        for session in complete {
+            for attempt in session.attempts where attempt.distanceM > 0 {
+                let make = StrokesGained.baseline(at: attempt.distanceM).makeProbability
+                let pcg = attempt.success ? 1 - make : -make
+                var entry = pcgByDrill[session.gameType] ?? (0, 0)
+                entry.total += pcg
+                entry.count += 1
+                pcgByDrill[session.gameType] = entry
+            }
+        }
+
+        let counted = pcgByDrill.values.reduce(into: (total: 0.0, count: 0)) {
+            $0.total += $1.total
+            $0.count += $1.count
+        }
+        if counted.count > 0 {
+            practice.pcgPerAttempt = counted.total / Double(counted.count)
+        }
+
+        // The worst drill is the one converting furthest below the odds, over
+        // enough attempts to mean it.
+        practice.weakestDrill = pcgByDrill
+            .filter { $0.value.count >= minimumDrillAttempts }
+            .min { lhs, rhs in
+                lhs.value.total / Double(lhs.value.count) < rhs.value.total / Double(rhs.value.count)
+            }?
+            .key
+
+        return practice
     }
 
     // MARK: - What to practise
@@ -225,7 +295,8 @@ enum CoachAdvisor {
         weakest: DistanceBracket?,
         patterns: [CoachFinding],
         sessions: [GameSession],
-        trend: CoachTrend?
+        trend: CoachTrend?,
+        practice: CoachPractice
     ) -> [CoachRecommendation] {
         var result: [CoachRecommendation] = []
 
@@ -250,12 +321,19 @@ enum CoachAdvisor {
             result.append(recommendation)
         }
 
-        // 3. Three-putts are a pace problem before they are anything else.
+        // 3. The drill the player converts worst in — practice has its own
+        // scoreboard, and it is worth a place beside the course's.
+        if let weakestDrill = practice.weakestDrill,
+           !result.contains(where: { $0.gameType == weakestDrill }) {
+            result.append(CoachRecommendation(gameType: weakestDrill, reasonKey: "coach.reason.weakestDrill"))
+        }
+
+        // 4. Three-putts are a pace problem before they are anything else.
         if threePuttRate(stats) >= 0.12, !result.contains(where: { $0.gameType == .ninePutt }) {
             result.append(CoachRecommendation(gameType: .ninePutt, reasonKey: "coach.reason.threePutts"))
         }
 
-        // 4. Whatever has been sitting untouched — a plan that only ever names
+        // 5. Whatever has been sitting untouched — a plan that only ever names
         // the current weakness quietly loses everything else.
         if let idle = idleDrill(sessions: sessions, excluding: result.map(\.gameType)) {
             result.append(idle)

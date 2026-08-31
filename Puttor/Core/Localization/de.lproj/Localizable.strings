@@ -14,6 +14,13 @@
 "coach.summary" = "Gelesen aus deinen letzten %1$ld Runden und %2$ld Putts.";
 "coach.weakestDistance" = "Deine derzeit schwächste Distanz ist %@ — dort liegst du am weitesten unter dem Tour-Schnitt.";
 "coach.numbers" = "DIE ZAHLEN";
+"coach.numbers.source" = "Aus deinen gespielten Runden auf dem Platz — Strokes Gained und PKR je Loch summiert, dann je Runde.";
+"coach.practice" = "TRAINING";
+"coach.practice.sessions" = "EINHEITEN";
+"coach.practice.putts" = "PUTTS";
+"coach.practice.pcgPerPutt" = "PKR / PUTT";
+"coach.practice.source" = "Aus den Drills im Games-Tab, getrennt gezählt: Training ohne Druck ist keine Scorekarte und fließt deshalb nie in die Zahlen oben ein.";
+"coach.reason.weakestDrill" = "Der Drill, in dem du am schlechtesten konvertierst — gemessen an der Lochwahrscheinlichkeit dieser Distanzen.";
 "coach.threePuttRate" = "3-PUTT-LÖCHER";
 "coach.whatIsHappening" = "WAS IMMER WIEDER PASSIERT";
 "coach.workOnThis" = "DEIN PLAN";

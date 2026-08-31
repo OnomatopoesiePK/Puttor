@@ -35,6 +35,7 @@ struct CoachView: View {
                     if report.hasEnoughData {
                         summaryCard
                         if !report.metrics.isEmpty { metricsCard }
+                        if report.practice.sessions > 0 { practiceCard }
                         if !report.findings.isEmpty { findingsCard }
                     } else {
                         notEnoughYetCard
@@ -48,18 +49,19 @@ struct CoachView: View {
             .safeAreaInset(edge: .top) {
                 ScreenTitle(text: L("tab.coach"))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, Theme.Spacing.lg)
-                    .padding(.top, Theme.Spacing.lg)
-                    .padding(.bottom, 4)
+                    .screenHeaderPadding()
                     .background(Theme.background)
             }
             .navigationBarHidden(true)
             .task(id: reportKey) {
-                let putts = consideredRounds.flatMap { $0.putts }
+                // Per round, then merged. Pooling every putt into one call
+                // would put hole 7 of ten different rounds on one hole and
+                // report a score nobody shot.
+                let perRound = consideredRounds.map { RoundStats.compute(putts: $0.putts, useFeet: useFeet) }
                 report = CoachAdvisor.report(
                     rounds: consideredRounds,
-                    stats: RoundStats.compute(putts: putts, useFeet: useFeet),
-                    putts: putts,
+                    stats: RoundStats.merge(perRound, useFeet: useFeet),
+                    putts: consideredRounds.flatMap { $0.putts },
                     sessions: sessions
                 )
             }
@@ -105,6 +107,10 @@ struct CoachView: View {
             Text(L("coach.numbers"))
                 .font(.system(size: 10, weight: .bold)).tracking(1.2)
                 .foregroundStyle(Theme.textMuted)
+            Text(L("coach.numbers.source"))
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 2), spacing: Theme.Spacing.sm) {
                 ForEach(report.metrics) { metric in
@@ -126,6 +132,48 @@ struct CoachView: View {
                 }
             }
         }
+    }
+
+    /// The drills, counted on their own. Practice under no pressure and a
+    /// scorecard are different things, and averaging them would say neither.
+    private var practiceCard: some View {
+        card {
+            Text(L("coach.practice"))
+                .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+
+            HStack(spacing: Theme.Spacing.sm) {
+                practiceStat("\(report.practice.sessions)", L("coach.practice.sessions"))
+                practiceStat("\(report.practice.attempts)", L("coach.practice.putts"))
+                practiceStat("\(Int(report.practice.makePercent.rounded()))%", L("chart.made"))
+                if let pcg = report.practice.pcgPerAttempt {
+                    practiceStat("\(pcg > 0 ? "+" : "")\(String(format: "%.2f", pcg))", L("coach.practice.pcgPerPutt"))
+                }
+            }
+
+            Text(L("coach.practice.source"))
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func practiceStat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(size: 18, weight: .black))
+                .foregroundStyle(Theme.text)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text(label)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(Theme.textMuted)
+                .multilineTextAlignment(.center)
+                .lineLimit(2).minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, minHeight: 56)
+        .padding(.vertical, 6)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
     private var findingsCard: some View {
