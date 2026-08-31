@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 private enum FilterMode: String, CaseIterable, Identifiable {
-    case last1, last3, last5, last10, custom, thisMonth, dateRange, choose, all, byPutter
+    case last1, last3, last5, last10, custom, thisMonth, dateRange, choose, all, byPutter, byWeather
     var id: String { rawValue }
 
     var labelKey: String {
@@ -24,6 +24,7 @@ private enum FilterMode: String, CaseIterable, Identifiable {
         case .choose: return "stats.choose"
         case .all: return "stats.allRounds"
         case .byPutter: return "stats.byPutter"
+        case .byWeather: return "stats.byWeather"
         }
     }
 
@@ -35,23 +36,85 @@ private enum FilterMode: String, CaseIterable, Identifiable {
         case .last3: return 3
         case .last5: return 5
         case .last10: return 10
-        case .custom, .thisMonth, .dateRange, .choose, .all, .byPutter: return nil
+        case .custom, .thisMonth, .dateRange, .choose, .all, .byPutter, .byWeather: return nil
         }
     }
 }
 
-struct StatisticsView: View {
+/// One condition a round was played in. Wind, warmth and rain live on the
+/// round as three separate fields; for filtering they read better as one list
+/// of "what was it like out there".
+private enum WeatherFilter: String, CaseIterable, Identifiable {
+    case sun, rain, windNone, windMedium, windHigh, cold, warm, hot
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .sun: return "\(Precipitation.sun.emoji) \(L(Precipitation.sun.labelKey))"
+        case .rain: return "\(Precipitation.rain.emoji) \(L(Precipitation.rain.labelKey))"
+        case .windNone: return "\(WindLevel.none.emoji) \(L(WindLevel.none.labelKey))"
+        case .windMedium: return "\(WindLevel.medium.emoji) \(L(WindLevel.medium.labelKey))"
+        case .windHigh: return "\(WindLevel.high.emoji) \(L(WindLevel.high.labelKey))"
+        case .cold: return "\(WeatherTemp.cold.emoji) \(L(WeatherTemp.cold.labelKey))"
+        case .warm: return "\(WeatherTemp.warm.emoji) \(L(WeatherTemp.warm.labelKey))"
+        case .hot: return "\(WeatherTemp.hot.emoji) \(L(WeatherTemp.hot.labelKey))"
+        }
+    }
+
+    func matches(_ round: Round) -> Bool {
+        switch self {
+        case .sun: return round.precipitation == .sun
+        case .rain: return round.precipitation == .rain
+        case .windNone: return round.wind == .none
+        case .windMedium: return round.wind == .medium
+        case .windHigh: return round.wind == .high
+        case .cold: return round.weather == .cold
+        case .warm: return round.weather == .warm
+        case .hot: return round.weather == .hot
+        }
+    }
+}
+
+/// One statistics column: its own filter, its own numbers. Two of them side by
+/// side is what the compare mode is.
+private struct StatisticsPane: View {
     @Query(sort: \Round.date, order: .reverse) private var allRounds: [Round]
     @Query(sort: \Putter.name) private var putters: [Putter]
 
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
-    @State private var filterMode: FilterMode = .last5
-    @AppStorage(AppStorageKeys.statsCustomRoundCount) private var customCount: Int = 7
+    @AppStorage private var filterModeRaw: String
+    @AppStorage private var customCount: Int
     @State private var selectedPutterID: PersistentIdentifier?
-    @AppStorage(AppStorageKeys.statsSelectedRoundIDs) private var selectedRoundIDsRaw: String = ""
-    @AppStorage(AppStorageKeys.statsRangeStart) private var rangeStartStamp: Double = 0
-    @AppStorage(AppStorageKeys.statsRangeEnd) private var rangeEndStamp: Double = 0
-    @AppStorage(AppStorageKeys.statsRoundSort) private var roundSortRaw: String = RoundSort.newest.rawValue
+    @AppStorage private var selectedRoundIDsRaw: String
+    @AppStorage private var rangeStartStamp: Double
+    @AppStorage private var rangeEndStamp: Double
+    @AppStorage private var roundSortRaw: String
+    @AppStorage private var weatherFilterRaw: String
+
+    /// Empty for the single view, "B" for the second column, so the two panes
+    /// remember their own filters.
+    private let storageSuffix: String
+
+    init(storageSuffix: String = "") {
+        self.storageSuffix = storageSuffix
+        _filterModeRaw = AppStorage(wrappedValue: FilterMode.last5.rawValue, "statsFilterMode\(storageSuffix)")
+        _customCount = AppStorage(wrappedValue: 7, AppStorageKeys.statsCustomRoundCount + storageSuffix)
+        _selectedRoundIDsRaw = AppStorage(wrappedValue: "", AppStorageKeys.statsSelectedRoundIDs + storageSuffix)
+        _rangeStartStamp = AppStorage(wrappedValue: 0, AppStorageKeys.statsRangeStart + storageSuffix)
+        _rangeEndStamp = AppStorage(wrappedValue: 0, AppStorageKeys.statsRangeEnd + storageSuffix)
+        _roundSortRaw = AppStorage(wrappedValue: RoundSort.newest.rawValue, AppStorageKeys.statsRoundSort + storageSuffix)
+        _weatherFilterRaw = AppStorage(wrappedValue: WeatherFilter.sun.rawValue, "statsWeatherFilter\(storageSuffix)")
+    }
+
+    private var filterMode: FilterMode {
+        get { FilterMode(rawValue: filterModeRaw) ?? .last5 }
+        nonmutating set { filterModeRaw = newValue.rawValue }
+    }
+
+    private var weatherFilter: WeatherFilter {
+        get { WeatherFilter(rawValue: weatherFilterRaw) ?? .sun }
+        nonmutating set { weatherFilterRaw = newValue.rawValue }
+    }
     @State private var showRoundPicker = false
     @State private var dispersionFilter: DispersionFilter = .all
     @State private var dispersionShading: DispersionShading = .none
@@ -113,6 +176,8 @@ struct StatisticsView: View {
         case .byPutter:
             guard let id = selectedPutterID else { return completeRounds }
             return completeRounds.filter { $0.putter?.persistentModelID == id }
+        case .byWeather:
+            return completeRounds.filter { weatherFilter.matches($0) }
         default: return completeRounds
         }
     }
@@ -329,16 +394,7 @@ struct StatisticsView: View {
     var body: some View {
         let data = bundle
 
-        return NavigationStack {
-            VStack(spacing: 0) {
-                Text(L("stats.title"))
-                    .font(.system(size: 28, weight: .heavy))
-                    .foregroundStyle(Theme.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, Theme.Spacing.lg)
-                    .padding(.top, Theme.Spacing.lg)
-                    .padding(.bottom, 4)
-
+        return VStack(spacing: 0) {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(FilterMode.allCases) { mode in
@@ -362,6 +418,21 @@ struct StatisticsView: View {
 
                 if filterMode == .choose {
                     chooseRoundsRow
+                }
+
+                if filterMode == .byWeather {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(WeatherFilter.allCases) { option in
+                                filterChip(option.label, selected: weatherFilter == option, color: Theme.accent) {
+                                    weatherFilter = option
+                                }
+                            }
+                        }
+                        .padding(.horizontal, Theme.Spacing.lg)
+                        .padding(.vertical, 6)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
 
                 if filterMode == .byPutter && !putters.isEmpty {
@@ -574,22 +645,20 @@ struct StatisticsView: View {
                         .padding(Theme.Spacing.lg)
                     }
                 }
-            }
-            .background(Theme.background.ignoresSafeArea())
-            .navigationBarHidden(true)
-            .task(id: statsKey) {
-                bundle = StatsBundle(rounds: filteredRounds, useFeet: useFeet)
-            }
-            .sheet(isPresented: $showRoundPicker) {
-                RoundSelectionSheet(
-                    rounds: completeRounds,
-                    selectedIDs: Binding(get: { selectedRoundIDs }, set: { selectedRoundIDs = $0 }),
-                    sort: Binding(get: { roundSort }, set: { roundSort = $0 })
-                )
-            }
-            .onAppear {
-                if selectedPutterID == nil { selectedPutterID = putters.first?.persistentModelID }
-            }
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .task(id: statsKey) {
+            bundle = StatsBundle(rounds: filteredRounds, useFeet: useFeet)
+        }
+        .sheet(isPresented: $showRoundPicker) {
+            RoundSelectionSheet(
+                rounds: completeRounds,
+                selectedIDs: Binding(get: { selectedRoundIDs }, set: { selectedRoundIDs = $0 }),
+                sort: Binding(get: { roundSort }, set: { roundSort = $0 })
+            )
+        }
+        .onAppear {
+            if selectedPutterID == nil { selectedPutterID = putters.first?.persistentModelID }
         }
     }
 
@@ -811,5 +880,69 @@ struct StatisticsView: View {
         }
         .padding(.top, 80)
         .frame(maxWidth: .infinity)
+    }
+}
+
+
+/// The statistics tab. In landscape it can split into two independent panes,
+/// each with its own filter, so a season can be held against a month, one
+/// putter against another, or the rounds played in the wind against the calm
+/// ones.
+struct StatisticsView: View {
+    @AppStorage("statsCompareEnabled") private var comparing = false
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
+    private var canCompare: Bool { verticalSizeClass == .compact }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                header
+
+                if canCompare && comparing {
+                    HStack(spacing: 0) {
+                        StatisticsPane(storageSuffix: "")
+                        Rectangle().fill(Theme.border).frame(width: 1)
+                        StatisticsPane(storageSuffix: "B")
+                    }
+                } else {
+                    StatisticsPane(storageSuffix: "")
+                }
+            }
+            .background(Theme.background.ignoresSafeArea())
+            .navigationBarHidden(true)
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            Text(L("stats.title"))
+                .font(.system(size: canCompare ? 20 : 28, weight: .heavy))
+                .foregroundStyle(Theme.primary)
+
+            Spacer(minLength: 0)
+
+            // Only offered where there is width for two columns.
+            if canCompare {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { comparing.toggle() }
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: comparing ? "rectangle.split.2x1.fill" : "rectangle.split.2x1")
+                        Text(L("stats.compare"))
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(comparing ? .white : Theme.primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(comparing ? Theme.primary : Theme.primary.opacity(0.12)))
+                    .overlay(Capsule().stroke(Theme.primary, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.top, canCompare ? 6 : Theme.Spacing.lg)
+        .padding(.bottom, 4)
     }
 }

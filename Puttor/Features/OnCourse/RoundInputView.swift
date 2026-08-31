@@ -300,13 +300,15 @@ struct RoundInputView: View {
         .padding(.top, 6)
     }
 
-    private var landscapeIslandHeight: CGFloat { 40 }
+    /// The height of a putt chip, which is what the right-hand island was
+    /// before it was given a taller one to match.
+    private var landscapeIslandHeight: CGFloat { 32 }
 
     private func island<Content: View>(height: CGFloat? = nil, @ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 8) { content() }
             .frame(height: height)
             .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .padding(.vertical, 4)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
@@ -328,7 +330,7 @@ struct RoundInputView: View {
                 .foregroundStyle(Theme.textMuted)
 
             if compact {
-                HStack(spacing: 5) { label; number }
+                HStack(spacing: 5) { label; number }.frame(height: 32)
             } else {
                 VStack(spacing: 0) { label; number }
             }
@@ -385,7 +387,7 @@ struct RoundInputView: View {
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(isPostRoundEdit ? Theme.primary : Theme.error)
                 .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .frame(height: isLandscape ? 30 : 32)
                 .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(isPostRoundEdit ? Theme.primary : Theme.error, lineWidth: 1.5))
         }
         .buttonStyle(.plain)

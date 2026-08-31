@@ -213,6 +213,8 @@ CONVERSION RATE";
 "stats.last10" = "Last 10";
 "stats.allRounds" = "All Rounds";
 "stats.byPutter" = "By Putter";
+"stats.byWeather" = "By Weather";
+"stats.compare" = "Compare";
 "stats.noRounds" = "No completed rounds yet.";
 "stats.noMatch" = "No rounds match this filter.";
 "stats.rounds" = "ROUNDS";
