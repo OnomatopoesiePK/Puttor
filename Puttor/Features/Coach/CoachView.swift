@@ -93,10 +93,18 @@ struct CoachView: View {
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(trendColour(trend))
                         .padding(.top, 1)
-                    Text(String(format: L(trend.key), abs(report.trendDelta)))
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(trendColour(trend))
-                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(String(format: L(trend.key), abs(report.trendDelta), report.trendBaseline))
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(trendColour(trend))
+                            .fixedSize(horizontal: false, vertical: true)
+                        // Say what was compared with what, or the arrow is
+                        // just a mood.
+                        Text(String(format: L("coach.trend.method"), report.trendRecentRounds, report.trendWindowRounds))
+                            .font(.system(size: 11))
+                            .foregroundStyle(Theme.textMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
         }
@@ -254,8 +262,8 @@ struct CoachView: View {
     // MARK: - Text
 
     private func text(for finding: CoachFinding) -> String {
-        guard let count = finding.count, let total = finding.total else { return L(finding.key) }
-        return String(format: L(finding.key), count, total)
+        guard !finding.numbers.isEmpty else { return L(finding.key) }
+        return String(format: L(finding.key), arguments: finding.numbers.map { $0 as CVarArg })
     }
 
     private func reasonText(_ recommendation: CoachRecommendation) -> String {
@@ -271,16 +279,18 @@ struct CoachView: View {
     private func trendIcon(_ trend: CoachTrend) -> String {
         switch trend {
         case .improving: return "arrow.up.right"
-        case .steady: return "equal"
         case .slipping: return "arrow.down.right"
+        case .steadyStrong: return "checkmark.circle"
+        case .steadySolid: return "equal"
+        case .steadyWeak: return "exclamationmark.circle"
         }
     }
 
     private func trendColour(_ trend: CoachTrend) -> Color {
         switch trend {
-        case .improving: return Theme.primary
-        case .steady: return Theme.textSecondary
-        case .slipping: return Theme.error
+        case .improving, .steadyStrong: return Theme.primary
+        case .slipping, .steadyWeak: return Theme.error
+        case .steadySolid: return Theme.textSecondary
         }
     }
 

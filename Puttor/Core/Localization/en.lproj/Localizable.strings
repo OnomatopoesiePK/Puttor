@@ -38,9 +38,18 @@
 "coach.reason.threePutts" = "Three-putts are costing you strokes; this one is about getting the first putt close.";
 "coach.reason.neverPlayed" = "You have not tried this one yet.";
 "coach.reason.startHere" = "A place to start while the app learns your putting.";
-"coach.trend.improving" = "Your putting is on the way up — %.2f strokes a round better than it was.";
+"coach.trend.improving" = "Your last rounds are %1$.2f strokes a round better than your average of %2$+.2f — you are putting your way up.";
 "coach.trend.steady" = "Your putting is holding steady across these rounds.";
-"coach.trend.slipping" = "Your putting has slipped %.2f strokes a round lately.";
+"coach.trend.slipping" = "Your last rounds are %1$.2f strokes a round below your average of %2$+.2f — something has slipped.";
+"coach.trend.steadyStrong" = "Holding steady at %2$+.2f strokes a round — and that is a good place to be standing.";
+"coach.trend.steadySolid" = "Holding steady at %2$+.2f strokes a round: no swing either way lately.";
+"coach.trend.steadyWeak" = "Holding steady at %2$+.2f strokes a round — steady, but steadily losing strokes.";
+"coach.trend.method" = "Your last %1$ld rounds against the average of all %2$ld being read.";
+"coach.costliestBand" = "MOST STROKES LOST";
+"coach.green.fastRunsLong" = "On quick greens %1$ld%% of your misses run past, against %2$ld%% on slow ones — the pace is getting away from you when they are fast.";
+"coach.green.slowLeavesShort" = "On slow greens %1$ld%% of your misses run past, against %2$ld%% on quick ones — you are hitting the slow ones harder than they need.";
+"coach.green.fastMissRead" = "On quick greens %1$ld%% of your misses are down to the read, against %2$ld%% on slow ones — quick greens take more break than you are giving them.";
+"coach.green.slowMissRead" = "On slow greens %1$ld%% of your misses are down to the read, against %2$ld%% on quick ones — you may be playing break the slow ones will not take.";
 "coach.reason.idle" = "Last played %ld days ago — worth another turn.";
 "tab.settings" = "Settings";
 

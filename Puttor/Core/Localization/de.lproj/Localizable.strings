@@ -38,9 +38,18 @@
 "coach.reason.threePutts" = "Drei-Putts kosten dich Schläge; hier geht es darum, den ersten Putt nah zu legen.";
 "coach.reason.neverPlayed" = "Diesen hast du noch nie gespielt.";
 "coach.reason.startHere" = "Ein Anfang, solange die App dein Putten noch nicht kennt.";
-"coach.trend.improving" = "Dein Putten geht aufwärts — %.2f Schläge pro Runde besser als zuvor.";
+"coach.trend.improving" = "Deine letzten Runden liegen %1$.2f Schläge pro Runde über deinem Schnitt von %2$+.2f — es geht aufwärts.";
 "coach.trend.steady" = "Dein Putten bleibt über diese Runden stabil.";
-"coach.trend.slipping" = "Dein Putten ist zuletzt um %.2f Schläge pro Runde abgerutscht.";
+"coach.trend.slipping" = "Deine letzten Runden liegen %1$.2f Schläge pro Runde unter deinem Schnitt von %2$+.2f — da ist etwas weggerutscht.";
+"coach.trend.steadyStrong" = "Stabil bei %2$+.2f Schlägen pro Runde — und das ist ein guter Platz zum Stehenbleiben.";
+"coach.trend.steadySolid" = "Stabil bei %2$+.2f Schlägen pro Runde: zuletzt kein Ausschlag in eine Richtung.";
+"coach.trend.steadyWeak" = "Stabil bei %2$+.2f Schlägen pro Runde — stabil, aber stetig Schläge liegen lassend.";
+"coach.trend.method" = "Deine letzten %1$ld Runden gegen den Schnitt aller %2$ld gelesenen.";
+"coach.costliestBand" = "MEISTE SCHLÄGE VERLOREN";
+"coach.green.fastRunsLong" = "Auf schnellen Grüns laufen %1$ld%% deiner Misses zu weit, auf langsamen nur %2$ld%% — bei Tempo läuft dir die Länge davon.";
+"coach.green.slowLeavesShort" = "Auf langsamen Grüns laufen %1$ld%% deiner Misses zu weit, auf schnellen nur %2$ld%% — du schlägst die langsamen härter als nötig.";
+"coach.green.fastMissRead" = "Auf schnellen Grüns gehen %1$ld%% deiner Misses auf die Leseleistung, auf langsamen %2$ld%% — schnelle Grüns brechen mehr, als du ihnen zugestehst.";
+"coach.green.slowMissRead" = "Auf langsamen Grüns gehen %1$ld%% deiner Misses auf die Leseleistung, auf schnellen %2$ld%% — womöglich spielst du Break, den die langsamen nicht hergeben.";
 "coach.reason.idle" = "Zuletzt vor %ld Tagen gespielt — wieder mal dran.";
 "tab.settings" = "Einstellungen";
 

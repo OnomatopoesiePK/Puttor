@@ -1428,22 +1428,6 @@ struct PuttorTests {
         #expect(report.recommendations.allSatisfy { $0.reasonKey == "coach.reason.startHere" })
     }
 
-    /// The weakest distance is where the gap to the tour is biggest, not where
-    /// the most putts are missed — which would always be the long ones.
-    @Test func weakestBracketIsTheBiggestGapToTheTour() async throws {
-        let brackets = [
-            DistanceBracket(id: "a", label: "1–2m", min: 1, max: 2, made: 6, total: 10, tourMakePct: 70, pcgTotal: 0),
-            DistanceBracket(id: "b", label: "2–3m", min: 2, max: 3, made: 2, total: 10, tourMakePct: 50, pcgTotal: 0),
-            DistanceBracket(id: "c", label: "9–12m", min: 9, max: 12, made: 0, total: 8, tourMakePct: 8, pcgTotal: 0),
-        ]
-        // 10 points behind at 1–2m, 30 behind at 2–3m, 8 behind from range.
-        #expect(CoachAdvisor.weakestBracket(in: brackets)?.label == "2–3m")
-
-        // A bracket with barely any attempts can't be the verdict.
-        let thin = [DistanceBracket(id: "d", label: "4–5m", min: 4, max: 5, made: 0, total: 2, tourMakePct: 30, pcgTotal: 0)]
-        #expect(CoachAdvisor.weakestBracket(in: thin) == nil)
-    }
-
     /// Each band of distance has the drill that trains it.
     @Test func drillsMatchTheDistanceTheyTrain() async throws {
         #expect(CoachAdvisor.drill(forDistanceM: 0.8) == .gate)
@@ -1479,9 +1463,11 @@ struct PuttorTests {
         #expect(CoachAdvisor.idleDrill(sessions: fresh, excluding: []) == nil)
     }
 
-    /// Improving, holding or slipping, measured over the rounds themselves.
+    /// The last three rounds against the whole window, not one half against
+    /// the other — and standing still is reported as a good or a bad place to
+    /// be standing.
     @MainActor
-    @Test func trendComparesTheRecentRoundsWithTheEarlierOnes() async throws {
+    @Test func trendComparesTheLastRoundsWithTheWholeWindow() async throws {
         let context = try Self.makeInMemoryContext()
 
         func round(daysAgo: Int, distance: Double, putts: Int) -> Round {
@@ -1503,18 +1489,83 @@ struct PuttorTests {
             return round
         }
 
-        // Older rounds three-putt from range, recent ones one-putt from there.
-        let older = [round(daysAgo: 20, distance: 8, putts: 3), round(daysAgo: 18, distance: 8, putts: 3)]
-        let newer = [round(daysAgo: 2, distance: 8, putts: 1), round(daysAgo: 1, distance: 8, putts: 1)]
+        // Six poor rounds, then three good ones.
+        let poor = (4...9).map { round(daysAgo: $0 * 3, distance: 8, putts: 3) }
+        let good = (1...3).map { round(daysAgo: $0, distance: 8, putts: 1) }
         try context.save()
 
-        let (trend, delta) = CoachAdvisor.trend(in: newer + older)
-        #expect(trend == .improving)
-        #expect(delta > 0)
+        let improving = CoachAdvisor.trend(in: good + poor)
+        #expect(improving.trend == .improving)
+        #expect(improving.delta > 0)
+        #expect(improving.recent == 3)
 
-        // Too few rounds to compare halves at all.
-        #expect(CoachAdvisor.trend(in: Array(newer.prefix(1))).0 == nil)
+        // The same rounds throughout: steady, and steady in a bad place.
+        let flatPoor = (1...6).map { round(daysAgo: $0 * 2, distance: 8, putts: 3) }
+        try context.save()
+        let steadyWeak = CoachAdvisor.trend(in: flatPoor)
+        #expect(steadyWeak.trend == .steadyWeak)
+        #expect(abs(steadyWeak.delta) < CoachAdvisor.trendThreshold)
+
+        // Steadily holing from range is steady in a good place.
+        let flatGood = (1...6).map { round(daysAgo: $0 * 2, distance: 8, putts: 1) }
+        try context.save()
+        #expect(CoachAdvisor.trend(in: flatGood).trend == .steadyStrong)
+
+        // Too few rounds to compare against anything.
+        #expect(CoachAdvisor.trend(in: Array(good.prefix(2))).trend == nil)
     }
+
+    /// The costliest band is the one where the most putts were lost against
+    /// the tour, not the widest percentage gap over a handful of putts.
+    @Test func costliestBandCountsStrokesNotPercentagePoints() async throws {
+        let brackets = [
+            // 20 points behind over 30 putts: six putts lost.
+            DistanceBracket(id: "a", label: "3–4m", min: 3, max: 4, made: 6, total: 30, tourMakePct: 40, pcgTotal: 0),
+            // 40 points behind over 5 putts: two putts lost.
+            DistanceBracket(id: "b", label: "1–2m", min: 1, max: 2, made: 1, total: 5, tourMakePct: 60, pcgTotal: 0),
+        ]
+        let costliest = try #require(CoachAdvisor.costliestBracket(in: brackets))
+        #expect(costliest.label == "3–4m")
+        #expect(abs(costliest.strokesLost - 6) < 0.001)
+
+        // Putting better than the tour everywhere is not a weakness.
+        let strong = [DistanceBracket(id: "c", label: "2–3m", min: 2, max: 3, made: 9, total: 10, tourMakePct: 45, pcgTotal: 0)]
+        #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
+    }
+
+    /// Green speed is only worth a sentence when the same player's misses
+    /// behave differently on the quick ones and the slow ones.
+    @MainActor
+    @Test func greenSpeedIsComparedBetweenFastAndSlowRounds() async throws {
+        let context = try Self.makeInMemoryContext()
+
+        func round(stimp: Double, longMisses: Int, shortMisses: Int) -> Round {
+            let round = Round(courseName: "T", stimp: stimp)
+            context.insert(round)
+            var hole = 1
+            for _ in 0..<longMisses {
+                let putt = Putt(holeNumber: hole, puttNumber: 1, distanceM: 6, puttFor: .par, result: .long)
+                putt.round = round; round.putts.append(putt); context.insert(putt); hole += 1
+            }
+            for _ in 0..<shortMisses {
+                let putt = Putt(holeNumber: hole, puttNumber: 1, distanceM: 6, puttFor: .par, result: .short)
+                putt.round = round; round.putts.append(putt); context.insert(putt); hole += 1
+            }
+            return round
+        }
+
+        // Quick greens: nearly everything runs past. Slow ones: nothing does.
+        let quick = round(stimp: 11, longMisses: 8, shortMisses: 1)
+        let slow = round(stimp: 8, longMisses: 1, shortMisses: 8)
+        try context.save()
+
+        let findings = GreenSpeedInsight.findings(in: [quick, slow])
+        #expect(findings.contains { $0.key == "coach.green.fastRunsLong" })
+
+        // One kind of green alone says nothing about the other.
+        #expect(GreenSpeedInsight.findings(in: [quick]).isEmpty)
+    }
+
 
     @Test func baselineIsContinuousBetweenReferencePoints() async throws {
         let low = StrokesGained.baseline(at: 3.0)

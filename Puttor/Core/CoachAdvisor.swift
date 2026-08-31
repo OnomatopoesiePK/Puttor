@@ -20,14 +20,22 @@ struct CoachMetric: Identifiable {
     let tone: Tone
 }
 
-/// One sentence about the data. `count` and `total` fill a "%1$ld of %2$ld"
-/// key; without them the key stands on its own.
+/// One sentence about the data. The numbers fill the key's placeholders in
+/// order; a key with none stands on its own.
 struct CoachFinding: Identifiable {
     let key: String
-    var count: Int?
-    var total: Int?
+    var numbers: [Int] = []
 
     var id: String { key }
+
+    init(key: String, numbers: [Int] = []) {
+        self.key = key
+        self.numbers = numbers
+    }
+
+    init(key: String, count: Int, total: Int) {
+        self.init(key: key, numbers: [count, total])
+    }
 }
 
 /// A drill to go and do, the reason it was chosen, and how much of it.
@@ -44,17 +52,31 @@ struct CoachRecommendation: Identifiable {
     var id: String { "\(gameType.rawValue)-\(reasonKey)" }
 }
 
-/// Which way the putting is going, over the rounds being read.
+/// Which way the putting is going, and — when it is going nowhere — whether
+/// that is a good place to be standing still in.
 enum CoachTrend {
-    case improving, steady, slipping
+    case improving, slipping, steadyStrong, steadySolid, steadyWeak
 
     var key: String {
         switch self {
         case .improving: return "coach.trend.improving"
-        case .steady: return "coach.trend.steady"
         case .slipping: return "coach.trend.slipping"
+        case .steadyStrong: return "coach.trend.steadyStrong"
+        case .steadySolid: return "coach.trend.steadySolid"
+        case .steadyWeak: return "coach.trend.steadyWeak"
         }
     }
+
+    var isImproving: Bool { self == .improving }
+    var isSlipping: Bool { self == .slipping }
+}
+
+/// A distance band and what it is costing.
+struct CoachWeakness {
+    let label: String
+    let strokesLost: Double
+    let attempts: Int
+    let midDistanceM: Double
 }
 
 /// What the drills say, kept apart from what the course says: one is practice
@@ -80,9 +102,15 @@ struct CoachReport {
     var recommendations: [CoachRecommendation] = []
     /// The bracket the player is furthest below the tour in, if there is one.
     var weakestBracketLabel: String?
-    /// Which way it is going, and by how many strokes a round.
+    /// Which way it is going: the last few rounds against the whole window,
+    /// in strokes a round, and the window's own level.
     var trend: CoachTrend?
     var trendDelta: Double = 0
+    var trendBaseline: Double = 0
+    var trendRecentRounds: Int = 0
+    var trendWindowRounds: Int = 0
+    /// The distance band costing the most strokes against the tour.
+    var costliest: CoachWeakness?
     /// The drills, counted separately from the rounds.
     var practice = CoachPractice()
 }
@@ -99,8 +127,14 @@ enum CoachAdvisor {
     static let trendThreshold = 0.5
     /// A drill left this long deserves a turn again.
     static let idleDaysBeforeRepeat = 14
-    /// Below this many rounds there are not two halves to compare.
+    /// Below this many rounds there is nothing to compare against.
     static let minimumRoundsForTrend = 4
+    /// The recent stretch, held against the whole window.
+    static let recentRoundsForTrend = 3
+    /// Standing still above this is standing still in a good place; below the
+    /// other, a bad one.
+    static let steadyStrongLevel = 0.5
+    static let steadyWeakLevel = -0.5
     /// A drill needs this many logged attempts before its PCG means anything.
     static let minimumDrillAttempts = 10
 
@@ -124,23 +158,27 @@ enum CoachAdvisor {
         }
 
         report.practice = practice(in: sessions)
-        report.metrics = metrics(from: stats, rounds: rounds.count)
+        report.metrics = metrics(from: stats, rounds: rounds.count, costliest: costliestBracket(in: stats.makeByDistance))
         report.findings = MissPatternFinder.findings(in: putts).map {
             CoachFinding(key: $0.key, count: $0.count, total: $0.total)
-        }
+        } + GreenSpeedInsight.findings(in: rounds)
 
-        let (trend, delta) = self.trend(in: rounds)
-        report.trend = trend
-        report.trendDelta = delta
+        let reading = self.trend(in: rounds)
+        report.trend = reading.trend
+        report.trendDelta = reading.delta
+        report.trendBaseline = reading.baseline
+        report.trendRecentRounds = reading.recent
+        report.trendWindowRounds = rounds.filter { !$0.putts.isEmpty }.count
 
-        let weakest = weakestBracket(in: stats.makeByDistance)
-        report.weakestBracketLabel = weakest?.label
+        let costliest = costliestBracket(in: stats.makeByDistance)
+        report.costliest = costliest
+        report.weakestBracketLabel = costliest?.label
         report.recommendations = plan(
             stats: stats,
-            weakest: weakest,
+            costliest: costliest,
             patterns: report.findings,
             sessions: sessions,
-            trend: trend,
+            trend: reading.trend,
             practice: report.practice
         )
         return report
@@ -148,7 +186,7 @@ enum CoachAdvisor {
 
     // MARK: - Numbers
 
-    private static func metrics(from stats: RoundStats, rounds: Int) -> [CoachMetric] {
+    private static func metrics(from stats: RoundStats, rounds: Int, costliest: CoachWeakness?) -> [CoachMetric] {
         let sgPerRound = rounds > 0 ? stats.sgTotal / Double(rounds) : 0
         let pcgPerRound = rounds > 0 ? stats.pcgTotal / Double(rounds) : 0
 
@@ -166,16 +204,18 @@ enum CoachAdvisor {
                 tone: pcgPerRound >= 1 ? .good : (pcgPerRound <= -1 ? .bad : .neutral)
             ),
             CoachMetric(
-                id: "perHole",
-                labelKey: "summary.avgPerHole",
-                value: String(format: "%.2f", stats.avgPuttsPerHole),
-                tone: stats.avgPuttsPerHole < 1.7 ? .good : (stats.avgPuttsPerHole > 2 ? .bad : .neutral)
-            ),
-            CoachMetric(
                 id: "threePutts",
                 labelKey: "coach.threePuttRate",
                 value: "\(Int((threePuttRate(stats) * 100).rounded()))%",
                 tone: threePuttRate(stats) <= 0.05 ? .good : (threePuttRate(stats) >= 0.15 ? .bad : .neutral)
+            ),
+            // Putts per hole says nothing without the distances behind it —
+            // two putts from 20 m is good work and from 2 m is a stroke gone.
+            CoachMetric(
+                id: "costliest",
+                labelKey: "coach.costliestBand",
+                value: costliest.map { "\($0.label) · −\(String(format: "%.1f", $0.strokesLost))" } ?? "—",
+                tone: costliest == nil ? .neutral : ((costliest?.strokesLost ?? 0) >= 2 ? .bad : .neutral)
             ),
         ]
     }
@@ -185,19 +225,25 @@ enum CoachAdvisor {
         return Double(stats.threePuttHoles) / Double(stats.holes)
     }
 
-    /// The distance the player is furthest below the tour from — the honest
-    /// answer to "where am I losing it", rather than simply where they miss
-    /// most, which is always the long putts.
-    static func weakestBracket(in brackets: [DistanceBracket]) -> DistanceBracket? {
+    /// The distance band costing the most strokes: how many more putts the
+    /// tour would have holed from there, which is what the gap actually costs
+    /// — a wide gap over four putts is worth less than a narrow one over
+    /// thirty.
+    static func costliestBracket(in brackets: [DistanceBracket]) -> CoachWeakness? {
         brackets
             .filter { $0.total >= minimumBracketAttempts }
-            .max { a, b in gapToTour(a) < gapToTour(b) }
-            .flatMap { gapToTour($0) > 0 ? $0 : nil }
-    }
-
-    private static func gapToTour(_ bracket: DistanceBracket) -> Double {
-        let mine = bracket.total > 0 ? Double(bracket.made) / Double(bracket.total) * 100 : 0
-        return bracket.tourMakePct - mine
+            .map { bracket -> CoachWeakness in
+                let mine = Double(bracket.made) / Double(bracket.total) * 100
+                let lost = Double(bracket.total) * (bracket.tourMakePct - mine) / 100
+                return CoachWeakness(
+                    label: bracket.label,
+                    strokesLost: lost,
+                    attempts: bracket.total,
+                    midDistanceM: (bracket.min + min(bracket.max, bracket.min + 6)) / 2
+                )
+            }
+            .filter { $0.strokesLost > 0 }
+            .max { $0.strokesLost < $1.strokesLost }
     }
 
     // MARK: - The drills
@@ -262,24 +308,31 @@ enum CoachAdvisor {
         return .ninePutt
     }
 
-    /// Strokes gained a round over the recent half of the rounds against the
-    /// earlier half. Rounds arrive newest first.
-    static func trend(in rounds: [Round]) -> (CoachTrend?, Double) {
+    /// The last few rounds held against the whole window, rather than one half
+    /// against the other: what matters is whether the recent putting sits
+    /// above or below where the player has been, not how two arbitrary halves
+    /// compare.
+    static func trend(in rounds: [Round]) -> (trend: CoachTrend?, delta: Double, baseline: Double, recent: Int) {
         let scored = rounds
             .filter { !$0.putts.isEmpty }
-            .sorted { $0.date < $1.date }
-        guard scored.count >= minimumRoundsForTrend else { return (nil, 0) }
+            .sorted { $0.date > $1.date }
+        guard scored.count >= minimumRoundsForTrend else { return (nil, 0, 0, 0) }
 
-        let split = scored.count / 2
-        func average(_ slice: ArraySlice<Round>) -> Double {
-            guard !slice.isEmpty else { return 0 }
-            return slice.reduce(0.0) { $0 + roundStrokesGained($1) } / Double(slice.count)
+        let recent = Array(scored.prefix(recentRoundsForTrend))
+        func average(_ list: [Round]) -> Double {
+            guard !list.isEmpty else { return 0 }
+            return list.reduce(0.0) { $0 + roundStrokesGained($1) } / Double(list.count)
         }
-        let delta = average(scored.suffix(scored.count - split)) - average(scored.prefix(split))
 
-        if delta >= trendThreshold { return (.improving, delta) }
-        if delta <= -trendThreshold { return (.slipping, delta) }
-        return (.steady, delta)
+        let baseline = average(scored)
+        let delta = average(recent) - baseline
+
+        if delta >= trendThreshold { return (.improving, delta, baseline, recent.count) }
+        if delta <= -trendThreshold { return (.slipping, delta, baseline, recent.count) }
+        // Standing still is only bad news when the place itself is.
+        if baseline >= steadyStrongLevel { return (.steadyStrong, delta, baseline, recent.count) }
+        if baseline <= steadyWeakLevel { return (.steadyWeak, delta, baseline, recent.count) }
+        return (.steadySolid, delta, baseline, recent.count)
     }
 
     private static func roundStrokesGained(_ round: Round) -> Double {
@@ -292,7 +345,7 @@ enum CoachAdvisor {
     /// behind it, and whatever has been left alone too long.
     private static func plan(
         stats: RoundStats,
-        weakest: DistanceBracket?,
+        costliest: CoachWeakness?,
         patterns: [CoachFinding],
         sessions: [GameSession],
         trend: CoachTrend?,
@@ -301,15 +354,14 @@ enum CoachAdvisor {
         var result: [CoachRecommendation] = []
 
         // Ground being lost gets more repetitions than ground being made.
-        let focusSessions = trend == .slipping ? 3 : (trend == .improving ? 1 : 2)
+        let focusSessions = trend?.isSlipping == true ? 3 : (trend?.isImproving == true ? 1 : 2)
 
-        // 1. The distance the numbers are worst at.
-        if let weakest {
-            let middle = (weakest.min + min(weakest.max, weakest.min + 6)) / 2
+        // 1. The distance costing the most strokes.
+        if let costliest {
             result.append(CoachRecommendation(
-                gameType: drill(forDistanceM: middle),
+                gameType: drill(forDistanceM: costliest.midDistanceM),
                 reasonKey: "coach.reason.weakDistance",
-                distanceM: middle,
+                distanceM: costliest.midDistanceM,
                 targetSessions: focusSessions
             ))
         }

@@ -37,6 +37,10 @@ struct RootTabView: View {
     /// Lives outside the .id()'d TabView below, so switching language or
     /// appearance (which rebuilds that subtree) doesn't reset the active tab.
     @State private var selectedTab = 0
+    /// Bumped when a tab already showing is tapped again, which rebuilds that
+    /// tab and so pops whatever it had pushed — the system tab bar does this
+    /// for free, and the landscape strip has to do it itself.
+    @State private var reselects: [Int: Int] = [:]
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     private var isLandscape: Bool { verticalSizeClass == .compact }
@@ -62,26 +66,31 @@ struct RootTabView: View {
     private var tabs: some View {
         TabView(selection: $selectedTab) {
             OnCourseListView()
+                .id(reselects[0] ?? 0)
                 .tabItem { Label(L("tab.course"), systemImage: "flag.fill") }
                 .tag(0)
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
 
             StatisticsView()
+                .id(reselects[1] ?? 0)
                 .tabItem { Label(L("tab.stats"), systemImage: "chart.bar.fill") }
                 .tag(1)
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
 
             CoachView()
+                .id(reselects[4] ?? 0)
                 .tabItem { Label(L("tab.coach"), systemImage: "eyeglasses") }
                 .tag(4)
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
 
             GamesHomeView()
+                .id(reselects[2] ?? 0)
                 .tabItem { Label(L("tab.games"), systemImage: "scope") }
                 .tag(2)
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
 
             SettingsView()
+                .id(reselects[3] ?? 0)
                 .tabItem { Label(L("tab.settings"), systemImage: "gearshape.fill") }
                 .tag(3)
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
@@ -97,7 +106,11 @@ struct RootTabView: View {
         HStack(spacing: 2) {
             ForEach(rootTabs) { tab in
                 Button {
-                    selectedTab = tab.tag
+                    if selectedTab == tab.tag {
+                        reselects[tab.tag, default: 0] += 1
+                    } else {
+                        selectedTab = tab.tag
+                    }
                 } label: {
                     Image(systemName: tab.icon)
                         .font(.system(size: 14, weight: .semibold))
