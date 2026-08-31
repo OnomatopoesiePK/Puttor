@@ -81,6 +81,7 @@ struct CoachView: View {
 
     private var summaryCard: some View {
         card {
+            cardHeader(L("coach.readingTitle"), info: "coach.summary.info")
             Text(String(format: L("coach.summary"), report.roundCount, report.puttCount))
                 .font(.system(size: 14))
                 .foregroundStyle(Theme.textSecondary)
@@ -118,13 +119,7 @@ struct CoachView: View {
 
     private var metricsCard: some View {
         card {
-            Text(L("coach.numbers"))
-                .font(.system(size: 10, weight: .bold)).tracking(1.2)
-                .foregroundStyle(Theme.textMuted)
-            Text(L("coach.numbers.source"))
-                .font(.system(size: 11))
-                .foregroundStyle(Theme.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
+            cardHeader(L("coach.numbers"), info: "coach.numbers.info")
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 2), spacing: Theme.Spacing.sm) {
                 ForEach(report.metrics) { metric in
@@ -158,9 +153,7 @@ struct CoachView: View {
     /// scorecard are different things, and averaging them would say neither.
     private var practiceCard: some View {
         card {
-            Text(L("coach.practice"))
-                .font(.system(size: 10, weight: .bold)).tracking(1.2)
-                .foregroundStyle(Theme.textMuted)
+            cardHeader(L("coach.practice"), info: "coach.practice.info")
 
             HStack(spacing: Theme.Spacing.sm) {
                 practiceStat("\(report.practice.sessions)", L("coach.practice.sessions"))
@@ -171,10 +164,6 @@ struct CoachView: View {
                 }
             }
 
-            Text(L("coach.practice.source"))
-                .font(.system(size: 11))
-                .foregroundStyle(Theme.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -198,9 +187,7 @@ struct CoachView: View {
 
     private var findingsCard: some View {
         card {
-            Text(L("coach.whatIsHappening"))
-                .font(.system(size: 10, weight: .bold)).tracking(1.2)
-                .foregroundStyle(Theme.textMuted)
+            cardHeader(L("coach.whatIsHappening"), info: "coach.whatIsHappening.info")
 
             ForEach(report.findings) { finding in
                 HStack(alignment: .top, spacing: 8) {
@@ -222,9 +209,7 @@ struct CoachView: View {
     /// after it.
     private var conditionsCard: some View {
         card {
-            Text(L("coach.conditions"))
-                .font(.system(size: 10, weight: .bold)).tracking(1.2)
-                .foregroundStyle(Theme.textMuted)
+            cardHeader(L("coach.conditions"), info: "coach.conditions.info")
 
             ForEach(report.conditions) { finding in
                 HStack(alignment: .top, spacing: 8) {
@@ -238,11 +223,6 @@ struct CoachView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-
-            Text(L("coach.conditions.source"))
-                .font(.system(size: 11))
-                .foregroundStyle(Theme.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -260,9 +240,7 @@ struct CoachView: View {
 
     private var recommendationsCard: some View {
         card {
-            Text(L(report.hasEnoughData ? "coach.workOnThis" : "coach.startWith"))
-                .font(.system(size: 10, weight: .bold)).tracking(1.2)
-                .foregroundStyle(Theme.textMuted)
+            cardHeader(L(report.hasEnoughData ? "coach.workOnThis" : "coach.startWith"), info: "coach.plan.info")
 
             ForEach(report.recommendations) { recommendation in
                 Button {
@@ -350,6 +328,18 @@ struct CoachView: View {
         case .good: return Theme.primary
         case .neutral: return Theme.text
         case .bad: return Theme.error
+        }
+    }
+
+    /// A card's own title with the (ⓘ) that explains it: every card in here
+    /// is a calculation, and a number without its method is a rumour.
+    private func cardHeader(_ title: String, info: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(title)
+                .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+            Spacer(minLength: 0)
+            FieldInfoButton(titleKey: title, textKey: info)
         }
     }
 

@@ -197,7 +197,8 @@ enum CoachAdvisor {
             costliest: costliest,
             trend: reading.trend,
             delta: reading.delta,
-            baseline: reading.baseline
+            baseline: reading.baseline,
+            pcgChange: change(in: rounds, of: roundPCG)
         )
         report.recommendations = plan(
             stats: stats,
@@ -218,7 +219,8 @@ enum CoachAdvisor {
         costliest: CoachWeakness?,
         trend: CoachTrend?,
         delta: Double,
-        baseline: Double
+        baseline: Double,
+        pcgChange: (delta: Double, baseline: Double, recent: Int)?
     ) -> [CoachMetric] {
         let threePutts = threePuttsPerRound(stats, rounds: rounds)
         let sgPerRound = rounds > 0 ? stats.sgTotal / Double(rounds) : 0
@@ -242,7 +244,17 @@ enum CoachAdvisor {
                     detail: "Ø \(signed(baseline))",
                     tone: tone(delta)
                 ),
-            CoachMetric(
+            // The same for conversion gain: which way it is moving, with the
+            // level it is moving from underneath.
+            pcgChange.map { change in
+                CoachMetric(
+                    id: "pcgTrend",
+                    labelKey: "coach.pcgTrendMetric",
+                    value: signed(change.delta),
+                    detail: "Ø \(signed(change.baseline))",
+                    tone: tone(change.delta)
+                )
+            } ?? CoachMetric(
                 id: "pcg",
                 labelKey: "stats.pcg",
                 value: signed(pcgPerRound),
@@ -382,29 +394,46 @@ enum CoachAdvisor {
     /// above or below where the player has been, not how two arbitrary halves
     /// compare.
     static func trend(in rounds: [Round]) -> (trend: CoachTrend?, delta: Double, baseline: Double, recent: Int) {
+        guard let reading = change(in: rounds, of: roundStrokesGained) else { return (nil, 0, 0, 0) }
+        let (delta, baseline, recent) = (reading.delta, reading.baseline, reading.recent)
+
+        if delta >= trendThreshold { return (.improving, delta, baseline, recent) }
+        if delta <= -trendThreshold { return (.slipping, delta, baseline, recent) }
+        // Standing still is only bad news when the place itself is.
+        if baseline >= steadyStrongLevel { return (.steadyStrong, delta, baseline, recent) }
+        if baseline <= steadyWeakLevel { return (.steadyWeak, delta, baseline, recent) }
+        return (.steadySolid, delta, baseline, recent)
+    }
+
+    /// The last few rounds held against the whole window, for any number that
+    /// can be read off a round. nil when there are too few rounds for the
+    /// comparison to mean anything.
+    static func change(
+        in rounds: [Round],
+        of value: (Round) -> Double
+    ) -> (delta: Double, baseline: Double, recent: Int)? {
         let scored = rounds
             .filter { !$0.putts.isEmpty }
             .sorted { $0.date > $1.date }
-        guard scored.count >= minimumRoundsForTrend else { return (nil, 0, 0, 0) }
+        guard scored.count >= minimumRoundsForTrend else { return nil }
 
         let recent = Array(scored.prefix(recentRoundsForTrend))
         func average(_ list: [Round]) -> Double {
             guard !list.isEmpty else { return 0 }
-            return list.reduce(0.0) { $0 + roundStrokesGained($1) } / Double(list.count)
+            return list.reduce(0.0) { $0 + value($1) } / Double(list.count)
         }
 
         let baseline = average(scored)
-        let delta = average(recent) - baseline
-
-        if delta >= trendThreshold { return (.improving, delta, baseline, recent.count) }
-        if delta <= -trendThreshold { return (.slipping, delta, baseline, recent.count) }
-        // Standing still is only bad news when the place itself is.
-        if baseline >= steadyStrongLevel { return (.steadyStrong, delta, baseline, recent.count) }
-        if baseline <= steadyWeakLevel { return (.steadyWeak, delta, baseline, recent.count) }
-        return (.steadySolid, delta, baseline, recent.count)
+        return (average(recent) - baseline, baseline, recent.count)
     }
 
-    private static func roundStrokesGained(_ round: Round) -> Double {
+    /// Conversion gain over a round: every putt against the tour's odds of
+    /// holing it from where it stood.
+    static func roundPCG(_ round: Round) -> Double {
+        round.putts.filter { $0.puttNumber > 0 }.reduce(0.0) { $0 + $1.pcg }
+    }
+
+    static func roundStrokesGained(_ round: Round) -> Double {
         Set(round.putts.map(\.holeNumber)).compactMap { hole in
             RoundStats.holeStrokesGained(round.putts.filter { $0.holeNumber == hole })
         }.reduce(0, +)
