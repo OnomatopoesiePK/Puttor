@@ -179,9 +179,7 @@ struct SettingsView: View {
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
             .safeAreaInset(edge: .top) {
-                Text(L("settings.title"))
-                    .font(.system(size: 28, weight: .heavy))
-                    .foregroundStyle(Theme.primary)
+                ScreenTitle(text: L("settings.title"))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, Theme.Spacing.lg)
                     .padding(.top, Theme.Spacing.lg)

@@ -5,11 +5,12 @@
 //  4-tab root, replacing the default ContentView.swift template.
 //  Ported from (tabs)/_layout.tsx.
 //
-//  In landscape the tabs move to a strip across the top middle — the one part
-//  of a short wide screen nothing else wants, and the one part neither
-//  rotation puts a notch through. The TabView itself stays and only its bar is
-//  hidden, so the tabs keep their state across a rotation instead of being
-//  rebuilt as a different view tree.
+//  In landscape the tabs become a row of icons floating in the middle of
+//  whatever top row the screen already has — the one strip of a short wide
+//  screen nothing else wants, and the one neither rotation puts a notch
+//  through. It is an overlay, so it costs no height at all. The TabView itself
+//  stays and only its bar is hidden, so the tabs keep their state across a
+//  rotation instead of being rebuilt as a different view tree.
 //
 
 import SwiftUI
@@ -25,7 +26,7 @@ private struct RootTab: Identifiable {
 private let rootTabs: [RootTab] = [
     RootTab(tag: 0, labelKey: "tab.course", icon: "flag.fill"),
     RootTab(tag: 1, labelKey: "tab.stats", icon: "chart.bar.fill"),
-    RootTab(tag: 4, labelKey: "tab.coach", icon: "figure.golf"),
+    RootTab(tag: 4, labelKey: "tab.coach", icon: "eyeglasses"),
     RootTab(tag: 2, labelKey: "tab.games", icon: "scope"),
     RootTab(tag: 3, labelKey: "tab.settings", icon: "gearshape.fill"),
 ]
@@ -49,12 +50,13 @@ struct RootTabView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // A strip along the top rather than a rail down the side: rotate
-            // the other way and a side rail ends up under the island.
-            if isLandscape { tabStrip }
-            tabs
-        }
+        tabs
+            // Laid over the screen's own top row rather than above it: every
+            // screen keeps its title at the left and its actions at the right,
+            // and the middle of that line was empty anyway.
+            .overlay(alignment: .top) {
+                if isLandscape { tabStrip }
+            }
     }
 
     private var tabs: some View {
@@ -70,7 +72,7 @@ struct RootTabView: View {
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
 
             CoachView()
-                .tabItem { Label(L("tab.coach"), systemImage: "figure.golf") }
+                .tabItem { Label(L("tab.coach"), systemImage: "eyeglasses") }
                 .tag(4)
                 .toolbar(isLandscape ? .hidden : .visible, for: .tabBar)
 
@@ -89,39 +91,31 @@ struct RootTabView: View {
         .preferredColorScheme(themeManager.colorScheme)
     }
 
-    /// The tab bar laid across the top: centred, only as wide as its buttons,
-    /// and short enough to cost the layout almost nothing.
+    /// Icons only: five glyphs the app uses everywhere else, small enough to
+    /// sit inside a row that already has something in it.
     private var tabStrip: some View {
         HStack(spacing: 2) {
             ForEach(rootTabs) { tab in
                 Button {
                     selectedTab = tab.tag
                 } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 13, weight: .semibold))
-                        Text(L(tab.labelKey))
-                            .font(.system(size: 11, weight: .semibold))
-                            .lineLimit(1)
-                    }
-                    .foregroundStyle(selectedTab == tab.tag ? Theme.primary : Theme.textMuted)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule().fill(selectedTab == tab.tag ? Theme.primary.opacity(0.14) : .clear)
-                    )
-                    .contentShape(Rectangle())
+                    Image(systemName: tab.icon)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(selectedTab == tab.tag ? Theme.primary : Theme.textMuted)
+                        .frame(width: 34, height: 26)
+                        .background(
+                            Capsule().fill(selectedTab == tab.tag ? Theme.primary.opacity(0.16) : .clear)
+                        )
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 4)
-        .padding(.vertical, 3)
+        .padding(.horizontal, 3)
+        .padding(.vertical, 2)
         .background(Capsule().fill(Theme.surface))
         .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
-        .padding(.top, 2)
-        .padding(.bottom, 4)
-        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.top, 4)
     }
 }
 

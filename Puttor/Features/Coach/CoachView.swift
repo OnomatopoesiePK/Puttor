@@ -46,9 +46,7 @@ struct CoachView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .safeAreaInset(edge: .top) {
-                Text(L("tab.coach"))
-                    .font(.system(size: 28, weight: .heavy))
-                    .foregroundStyle(Theme.primary)
+                ScreenTitle(text: L("tab.coach"))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, Theme.Spacing.lg)
                     .padding(.top, Theme.Spacing.lg)

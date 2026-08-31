@@ -79,9 +79,7 @@ struct OnCourseListView: View {
     /// list of rounds back the height a full-width button used to take.
     private var header: some View {
         HStack(alignment: .center, spacing: Theme.Spacing.md) {
-            Text("On Course")
-                .font(.system(size: 30, weight: .heavy))
-                .foregroundStyle(Theme.primary)
+            ScreenTitle(text: "On Course")
             Spacer(minLength: 0)
             startButton
         }

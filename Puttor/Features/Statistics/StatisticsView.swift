@@ -955,9 +955,7 @@ struct StatisticsView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Text(L("stats.title"))
-                .font(.system(size: canCompare ? 20 : 28, weight: .heavy))
-                .foregroundStyle(Theme.primary)
+            ScreenTitle(text: L("stats.title"))
 
             Spacer(minLength: 0)
 
