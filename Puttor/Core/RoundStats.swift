@@ -69,8 +69,9 @@ struct RoundStats {
     /// Of those, how many were saved (one putt, or holed out from off the green).
     var scrambleSuccesses: Int = 0
 
-    /// Greens hit in regulation that were turned into a birdie or better —
-    /// the chance taken rather than the chance had.
+    /// Greens hit in regulation that were turned into a birdie or better with
+    /// the putter — one or two putts, so a chip-in doesn't count as putting
+    /// having taken the chance.
     var girConversions: Int = 0
     var girConversionPercent: Double { girCount > 0 ? Double(girConversions) / Double(girCount) * 100 : 0 }
 
@@ -242,9 +243,12 @@ struct RoundStats {
 
             if category.isGreenInRegulation {
                 stats.girCount += 1
-                // Converted means the hole actually came in under par, however
-                // many putts it took to get there.
-                if let score = holeScoreRelativeToPar(holePutts), score < 0 {
+                // Converted means the hole came in under par off one or two
+                // putts: a birdie holed, or a birdie two-putted from an eagle
+                // putt. A hole-out is a chip, not a conversion.
+                if let score = holeScoreRelativeToPar(holePutts),
+                   score < 0,
+                   (1...2).contains(realOnHole.count) {
                     stats.girConversions += 1
                 }
                 if !realOnHole.isEmpty {

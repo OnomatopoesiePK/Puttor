@@ -1128,8 +1128,8 @@ struct PuttorTests {
         #expect(DistanceRangeFilter.parse("2,5", useFeet: false) == 2.5)
     }
 
-    /// Conversion is the chance taken: greens hit in regulation that came in
-    /// under par, over the greens hit.
+    /// Conversion is the chance taken with the putter: greens hit in
+    /// regulation turned into a birdie or better off one or two putts.
     @MainActor
     @Test func conversionCountsBirdiesMadeFromGreensHit() async throws {
         let context = try Self.makeInMemoryContext()
@@ -1161,6 +1161,30 @@ struct PuttorTests {
         #expect(stats.girConversions == 2)
         #expect(abs(stats.girConversionPercent - 200.0 / 3) < 0.0001)
         #expect(RoundHighlights.strongConversion(stats.girConversionPercent))
+    }
+
+    /// A chip-in is not the putter taking the chance, so it stays out of the
+    /// conversion rate even though the hole counts as a green hit.
+    @MainActor
+    @Test func chipInsAreNotBirdieConversions() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+
+        let sentinel = Putt(holeNumber: 1, puttNumber: 0, distanceM: 0, puttFor: .birdie, result: .holed)
+        sentinel.round = round
+        round.putts.append(sentinel)
+        context.insert(sentinel)
+
+        let putt = Putt(holeNumber: 2, puttNumber: 1, distanceM: 4, puttFor: .birdie, result: .holed)
+        putt.round = round
+        round.putts.append(putt)
+        context.insert(putt)
+        try context.save()
+
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.girCount == 2)      // both count as greens hit
+        #expect(stats.girConversions == 1) // only the holed putt converted
     }
 
     /// Over half, not half: five of ten greens converted is not a highlight.

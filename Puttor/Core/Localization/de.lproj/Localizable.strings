@@ -181,7 +181,7 @@
 "stats.playingStats" = "SPIEL-STATISTIK";
 "stats.scoreCoverage" = "* Nur %1$ld von %2$ld Runden dieser Auswahl wurden mit Score-Bezug erfasst. Alle Score-Werte zählen nur diese Runden; die Putt-Statistiken nutzen weiterhin alle.";
 "stats.gir" = "GIR";
-"stats.conversion" = "EAGLE/BIRDIE
+"stats.conversion" = "BIRDIE
 KONVERSIONSRATE";
 "stats.puttsGir" = "Ø PUTTS · GIR";
 "stats.puttsNoGir" = "Ø PUTTS · KEIN GIR";
@@ -240,7 +240,7 @@ KONVERSIONSRATE";
 "stats.dispersion" = "MISS-STREUUNG";
 "stats.rounds.info" = "Eine Kachel je Runde im aktuellen Filter mit ihren Strokes Gained beim Putten: pro Loch die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten.";
 "stats.sgPutting.info" = "Strokes Gained pro Loch, über die Runde summiert und über die gefilterten Runden gemittelt. Die PKR darunter ist der Wert pro Putt: wie das Ergebnis im Vergleich zur Tour-Trefferquote auf dieser Distanz steht.";
-"stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde. GIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, die Konversion, wie viele dieser Grüns unter Par abgeschlossen wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden. Die drei Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde. Alles davon braucht den Score-Bezug („Putt für\"): den haben alle Modi außer Custom ohne dieses Feld.";
+"stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde. GIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, die Birdie-Konversion, wie viele dieser Grüns mit einem oder zwei Putts zu einem Birdie oder Eagle wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden. Die drei Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde. Alles davon braucht den Score-Bezug („Putt für\"): den haben alle Modi außer Custom ohne dieses Feld.";
 "stats.dispersion.info" = "Jeder verfehlte Putt liegt in der Richtung, in die er vorbeiging, und so weit vom Loch entfernt, wie er liegen geblieben ist. Dafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex. Die Ringe markieren 1, 2 und 3 Meter Restdistanz. Das erste Menü wählt, welche Break-Richtungen gezeigt werden, das zweite, wofür die Farben stehen: Stärke des Breaks, Länge des Putts oder wie stark es bergauf oder bergab ging — die letzten beiden brauchen zusätzlich das Neigungsfeld. Die beiden Felder darunter grenzen die Anzeige auf Putts aus einem Distanzbereich ein, beide Grenzen eingeschlossen — so lässt sich ein Neigungsfilter Distanz für Distanz lesen. Ein größerer Punkt heißt mehr Misses an derselben Stelle, und sobald ein Farbfilter aktiv ist, zeigt die Farbe jedes Punktes, in welche Klasse er fällt.";
 "chart.makeVsTour.info" = "Eine Zeile je Distanzbereich: deine gelochten Putts gegenüber den Versuchen von dort, verglichen mit der Tour-Trefferquote über denselben Bereich. Die rechte Spalte summiert die PKR dieses Bereichs, geteilt durch die Anzahl Runden.";
 "stats.makeBySituation.info" = "Dieselben Distanzbereiche, aufgeteilt danach, für welchen Score der Putt war — so lassen sich ein Birdie-Putt und ein Par-Putt aus derselben Entfernung vergleichen. Dafür braucht es den Score-Bezug („Putt für\"), den der Custom-Modus weglassen kann.";
