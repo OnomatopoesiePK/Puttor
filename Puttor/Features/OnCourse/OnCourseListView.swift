@@ -21,7 +21,6 @@ struct OnCourseListView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 header
-                startButton
 
                 if rounds.isEmpty {
                     emptyState
@@ -76,13 +75,16 @@ struct OnCourseListView: View {
         }
     }
 
+    /// Title and the one action on this screen share a line, which gives the
+    /// list of rounds back the height a full-width button used to take.
     private var header: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .center, spacing: Theme.Spacing.md) {
             Text("On Course")
                 .font(.system(size: 30, weight: .heavy))
                 .foregroundStyle(Theme.primary)
+            Spacer(minLength: 0)
+            startButton
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, Theme.Spacing.lg)
         .padding(.top, Theme.Spacing.lg)
         .padding(.bottom, Theme.Spacing.sm)
@@ -92,19 +94,19 @@ struct OnCourseListView: View {
         Button {
             showingSetup = true
         } label: {
-            HStack(spacing: 12) {
-                Text("⛳").font(.system(size: 24))
+            HStack(spacing: 8) {
+                Text("⛳").font(.system(size: 18))
                 Text(L("onCourse.startNewRound"))
-                    .font(.system(size: 18, weight: .heavy))
+                    .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Theme.Spacing.lg)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary))
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, Theme.Spacing.lg)
-        .padding(.vertical, Theme.Spacing.md)
     }
 
     private var emptyState: some View {
