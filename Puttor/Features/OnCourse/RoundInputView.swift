@@ -80,8 +80,13 @@ struct RoundInputView: View {
             .overlay(alignment: .top) {
                 InputStatusBanner(
                     savedPCG: showSavedFlash ? flashPCG : nil,
-                    isEditing: session.hasUnsavedEdits
+                    isEditing: session.hasUnsavedEdits,
+                    compact: isLandscape
                 )
+                // Clear of the floating islands and the tab strip that share
+                // the top row in landscape — behind them it would be a strip
+                // nobody ever sees.
+                .padding(.top, isLandscape ? landscapeTopRowHeight : 0)
                 .animation(.easeOut(duration: 0.2), value: showSavedFlash)
             }
 
@@ -303,6 +308,10 @@ struct RoundInputView: View {
     /// The height of a putt chip, which is what the right-hand island was
     /// before it was given a taller one to match.
     private var landscapeIslandHeight: CGFloat { 32 }
+    /// What the islands occupy from the top of the screen: their own height,
+    /// their padding, and the gap above them. The root tab strip is built to
+    /// the same figure, so the whole row shares one bottom edge.
+    private var landscapeTopRowHeight: CGFloat { landscapeIslandHeight + 8 + 6 }
 
     private func island<Content: View>(height: CGFloat? = nil, @ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 8) { content() }

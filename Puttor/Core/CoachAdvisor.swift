@@ -17,7 +17,18 @@ struct CoachMetric: Identifiable {
     let id: String
     let labelKey: String
     let value: String
+    /// A second line under the value: the average behind a change, the
+    /// strokes behind a distance band.
+    var detail: String?
     let tone: Tone
+
+    init(id: String, labelKey: String, value: String, detail: String? = nil, tone: Tone) {
+        self.id = id
+        self.labelKey = labelKey
+        self.value = value
+        self.detail = detail
+        self.tone = tone
+    }
 }
 
 /// One sentence about the data. The numbers fill the key's placeholders in
@@ -165,7 +176,6 @@ enum CoachAdvisor {
         }
 
         report.practice = practice(in: sessions)
-        report.metrics = metrics(from: stats, rounds: rounds.count, costliest: costliestBracket(in: stats.makeByDistance))
         report.findings = MissPatternFinder.findings(in: putts).map {
             CoachFinding(key: $0.key, count: $0.count, total: $0.total)
         }
@@ -181,6 +191,14 @@ enum CoachAdvisor {
         let costliest = costliestBracket(in: stats.makeByDistance)
         report.costliest = costliest
         report.weakestBracketLabel = costliest?.label
+        report.metrics = metrics(
+            from: stats,
+            rounds: rounds.count,
+            costliest: costliest,
+            trend: reading.trend,
+            delta: reading.delta,
+            baseline: reading.baseline
+        )
         report.recommendations = plan(
             stats: stats,
             costliest: costliest,
@@ -194,23 +212,41 @@ enum CoachAdvisor {
 
     // MARK: - Numbers
 
-    private static func metrics(from stats: RoundStats, rounds: Int, costliest: CoachWeakness?) -> [CoachMetric] {
+    private static func metrics(
+        from stats: RoundStats,
+        rounds: Int,
+        costliest: CoachWeakness?,
+        trend: CoachTrend?,
+        delta: Double,
+        baseline: Double
+    ) -> [CoachMetric] {
         let threePutts = threePuttsPerRound(stats, rounds: rounds)
         let sgPerRound = rounds > 0 ? stats.sgTotal / Double(rounds) : 0
         let pcgPerRound = rounds > 0 ? stats.pcgTotal / Double(rounds) : 0
 
         return [
-            CoachMetric(
-                id: "sg",
-                labelKey: "summary.sg",
-                value: "\(sgPerRound > 0 ? "+" : "")\(String(format: "%.2f", sgPerRound))",
-                tone: sgPerRound >= 0.5 ? .good : (sgPerRound <= -0.5 ? .bad : .neutral)
-            ),
+            // Where it is going, with where it has been underneath: the
+            // average over ten rounds is the statistics tab's job, and what a
+            // coach is for is the direction.
+            trend == nil
+                ? CoachMetric(
+                    id: "sg",
+                    labelKey: "summary.sg",
+                    value: signed(sgPerRound),
+                    tone: tone(sgPerRound)
+                )
+                : CoachMetric(
+                    id: "trend",
+                    labelKey: "coach.trendMetric",
+                    value: signed(delta),
+                    detail: "Ø \(signed(baseline))",
+                    tone: tone(delta)
+                ),
             CoachMetric(
                 id: "pcg",
                 labelKey: "stats.pcg",
-                value: "\(pcgPerRound > 0 ? "+" : "")\(String(format: "%.2f", pcgPerRound))",
-                tone: pcgPerRound >= 1 ? .good : (pcgPerRound <= -1 ? .bad : .neutral)
+                value: signed(pcgPerRound),
+                tone: tone(pcgPerRound)
             ),
             // Per round rather than as a share of holes: nobody plays a
             // percentage of a green, and "one and a half a round" is a number
@@ -223,13 +259,29 @@ enum CoachAdvisor {
             ),
             // Putts per hole says nothing without the distances behind it —
             // two putts from 20 m is good work and from 2 m is a stroke gone.
+            // The band above what it costs, on its own line: two numbers
+            // side by side in a tile this size read as one.
             CoachMetric(
                 id: "costliest",
                 labelKey: "coach.costliestBand",
-                value: costliest.map { "\($0.label) · −\(String(format: "%.1f", $0.strokesLost))" } ?? "—",
-                tone: costliest == nil ? .neutral : ((costliest?.strokesLost ?? 0) >= 2 ? .bad : .neutral)
+                value: costliest?.label ?? "—",
+                detail: costliest.map { "−\(String(format: "%.1f", $0.strokesLost))" },
+                // Ground lost is ground lost, however little of it.
+                tone: costliest == nil ? .neutral : .bad
             ),
         ]
+    }
+
+    /// A gain reads green and a loss red, whatever its size — the coach's
+    /// colours mean direction, not magnitude.
+    private static func tone(_ value: Double) -> CoachMetric.Tone {
+        if value > 0 { return .good }
+        if value < 0 { return .bad }
+        return .neutral
+    }
+
+    private static func signed(_ value: Double) -> String {
+        "\(value > 0 ? "+" : "")\(String(format: "%.2f", value))"
     }
 
     /// Three-putts a round, over the rounds actually read.

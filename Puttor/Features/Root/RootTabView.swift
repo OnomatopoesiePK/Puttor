@@ -130,7 +130,9 @@ struct RootTabView: View {
         .padding(.vertical, 4)
         .background(Capsule().fill(Theme.surface))
         .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
-        .padding(.top, 10)
+        // The gap the input screen's own islands leave above themselves, so
+        // the strip sits in the same row and ends on the same line.
+        .padding(.top, 6)
     }
 }
 

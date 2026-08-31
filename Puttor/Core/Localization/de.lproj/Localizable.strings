@@ -45,7 +45,7 @@
 "coach.trend.steadySolid" = "Stabil bei %2$+.2f Schlägen pro Runde: zuletzt kein Ausschlag in eine Richtung.";
 "coach.trend.steadyWeak" = "Stabil bei %2$+.2f Schlägen pro Runde — stabil, aber stetig Schläge liegen lassend.";
 "coach.trend.method" = "Deine letzten %1$ld Runden gegen den Schnitt aller %2$ld gelesenen.";
-"coach.costliestBand" = "MEISTE SCHLÄGE VERLOREN";
+"coach.costliestBand" = "PCG VERLOREN";
 "coach.reason.idle" = "Zuletzt vor %ld Tagen gespielt — wieder mal dran.";
 "tab.settings" = "Einstellungen";
 
@@ -600,3 +600,4 @@ KONVERSIONSRATE";
 "split.holedMore" = "Bei %1$@ fallen %2$@%% deiner Putts — bei %3$@ %4$@%%.";
 "split.holedLess" = "Bei %1$@ bleiben %2$@%% deiner Putts draußen — bei %3$@ %4$@%%.";
 "split.threePutts" = "Bei %1$@ sind es %2$@ 3-Putts pro Runde — bei %3$@ %4$@, aus vergleichbaren Distanzen.";
+"coach.trendMetric" = "VERÄNDERUNG SG / RUNDE";

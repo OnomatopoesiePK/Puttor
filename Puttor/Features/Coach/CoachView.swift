@@ -133,13 +133,19 @@ struct CoachView: View {
                             .font(.system(size: 22, weight: .black))
                             .foregroundStyle(colour(for: metric.tone))
                             .lineLimit(1).minimumScaleFactor(0.6)
+                        if let detail = metric.detail {
+                            Text(detail)
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(colour(for: metric.tone))
+                                .lineLimit(1).minimumScaleFactor(0.6)
+                        }
                         Text(L(metric.labelKey))
                             .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(Theme.textMuted)
                             .multilineTextAlignment(.center)
                             .lineLimit(2).minimumScaleFactor(0.7)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 68)
+                    .frame(maxWidth: .infinity, minHeight: 84)
                     .padding(.vertical, Theme.Spacing.sm)
                     .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
                     .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))

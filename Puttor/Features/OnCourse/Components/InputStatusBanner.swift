@@ -17,6 +17,9 @@ struct InputStatusBanner: View {
     /// Strokes gained by the putt just saved; nil when the flash isn't showing.
     let savedPCG: Double?
     let isEditing: Bool
+    /// Landscape has no room to spare and the floating chrome above it, so the
+    /// strip shrinks to the height of its own text and sits underneath.
+    var compact: Bool = false
 
     var body: some View {
         if let savedPCG {
@@ -28,13 +31,13 @@ struct InputStatusBanner: View {
                     Text(L("input.saved"))
                     Text("\(savedPCG >= 0 ? "+" : "")\(String(format: "%.2f", savedPCG)) \(L("stats.pcg"))")
                 }
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(size: compact ? 11 : 13, weight: .bold))
                 .foregroundStyle(tint)
             }
         } else if isEditing {
             strip(tint: Theme.accent) {
                 Text(L("input.editing"))
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: compact ? 11 : 13, weight: .semibold))
                     .foregroundStyle(Theme.accent)
             }
         }
@@ -43,7 +46,7 @@ struct InputStatusBanner: View {
     private func strip<Content: View>(tint: Color, @ViewBuilder _ content: () -> Content) -> some View {
         content()
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            .padding(.vertical, compact ? 3 : 8)
             // Opaque base under the tint, since this sits over live content.
             .background(tint.opacity(0.15))
             .background(Theme.surface)

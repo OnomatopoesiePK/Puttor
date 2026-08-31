@@ -45,7 +45,7 @@
 "coach.trend.steadySolid" = "Holding steady at %2$+.2f strokes a round: no swing either way lately.";
 "coach.trend.steadyWeak" = "Holding steady at %2$+.2f strokes a round — steady, but steadily losing strokes.";
 "coach.trend.method" = "Your last %1$ld rounds against the average of all %2$ld being read.";
-"coach.costliestBand" = "MOST STROKES LOST";
+"coach.costliestBand" = "PCG LOST";
 "coach.reason.idle" = "Last played %ld days ago — worth another turn.";
 "tab.settings" = "Settings";
 
@@ -600,3 +600,4 @@ CONVERSION RATE";
 "split.holedMore" = "On %1$@, %2$@%% of your putts drop — on %3$@ %4$@%%.";
 "split.holedLess" = "On %1$@, %2$@%% of your putts stay out — on %3$@ %4$@%%.";
 "split.threePutts" = "On %1$@ you three-putt %2$@ times a round — on %3$@ %4$@, from the same sort of distance.";
+"coach.trendMetric" = "CHANGE IN SG / ROUND";
