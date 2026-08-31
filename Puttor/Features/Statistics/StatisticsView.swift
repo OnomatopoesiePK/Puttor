@@ -94,9 +94,14 @@ private struct StatisticsPane: View {
     /// Empty for the single view, "B" for the second column, so the two panes
     /// remember their own filters.
     private let storageSuffix: String
+    /// True when two panes share the screen: half a screen is a portrait
+    /// column, so the drawn parts go back to their portrait sizes and the
+    /// padding tightens.
+    private let dense: Bool
 
-    init(storageSuffix: String = "") {
+    init(storageSuffix: String = "", dense: Bool = false) {
         self.storageSuffix = storageSuffix
+        self.dense = dense
         _filterModeRaw = AppStorage(wrappedValue: FilterMode.last5.rawValue, "statsFilterMode\(storageSuffix)")
         _customCount = AppStorage(wrappedValue: 7, AppStorageKeys.statsCustomRoundCount + storageSuffix)
         _selectedRoundIDsRaw = AppStorage(wrappedValue: "", AppStorageKeys.statsSelectedRoundIDs + storageSuffix)
@@ -126,7 +131,7 @@ private struct StatisticsPane: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     /// Bars double in landscape rather than leaving the extra width empty.
-    private var leaveBarWidth: CGFloat { verticalSizeClass == .compact ? 176 : 88 }
+    private var leaveBarWidth: CGFloat { verticalSizeClass == .compact && !dense ? 176 : 88 }
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -362,7 +367,8 @@ private struct StatisticsPane: View {
     }
 
     private var playingStatColumns: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 3)
+        // Three tiles across half a screen leaves each of them a stub.
+        Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: dense ? 2 : 3)
     }
 
     private func decimalText(_ value: Double?) -> String {
@@ -401,7 +407,7 @@ private struct StatisticsPane: View {
                             filterChip(L(mode.labelKey), selected: filterMode == mode) { filterMode = mode }
                         }
                     }
-                    .padding(.horizontal, Theme.Spacing.lg)
+                    .padding(.horizontal, dense ? Theme.Spacing.sm : Theme.Spacing.lg)
                     // Breathing room inside the scroll view, so the capsule
                     // outlines aren't clipped by its bounds.
                     .padding(.vertical, 6)
@@ -470,7 +476,7 @@ private struct StatisticsPane: View {
                             CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained", infoKey: "stats.sgPutting.info") {
                                 VStack(spacing: 4) {
                                     Text("\(data.sgAverage > 0 ? "+" : "")\(String(format: "%.2f", data.sgAverage))")
-                                        .font(.system(size: 40, weight: .black))
+                                        .font(.system(size: dense ? 30 : 40, weight: .black))
                                         .foregroundStyle(data.sgAverage > 0.5 ? Theme.primary : (data.sgAverage < -0.5 ? Theme.error : Theme.warning))
                                     Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
 
@@ -569,13 +575,14 @@ private struct StatisticsPane: View {
                                         toText: dispersionToText,
                                         useFeet: useFeet,
                                         fullRangeMaxM: longestPuttDistance(data.allPutts)
-                                    )
+                                    ),
+                                    size: dense ? 224 : 268
                                 )
                             }
 
                             if !data.aggregated.makeByDistance.isEmpty {
                                 CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance", infoKey: "chart.makeVsTour.info") {
-                                    DistanceMakeChartView(data: data.aggregated.makeByDistance, pcgDivisor: max(1, filteredRounds.count), showsTitle: false)
+                                    DistanceMakeChartView(data: data.aggregated.makeByDistance, pcgDivisor: max(1, filteredRounds.count), showsTitle: false, dense: dense)
                                 }
                             }
 
@@ -588,7 +595,7 @@ private struct StatisticsPane: View {
 
                             if !data.aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
                                 CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency", infoKey: "summary.missTendency.info") {
-                                    MissDonutView(missCounts: data.aggregated.missCounts)
+                                    MissDonutView(missCounts: data.aggregated.missCounts, size: dense ? 210 : 260)
                                 }
                             }
 
@@ -642,7 +649,7 @@ private struct StatisticsPane: View {
                                 }
                             }
                         }
-                        .padding(Theme.Spacing.lg)
+                        .padding(dense ? Theme.Spacing.sm : Theme.Spacing.lg)
                     }
                 }
         }
@@ -901,9 +908,9 @@ struct StatisticsView: View {
 
                 if canCompare && comparing {
                     HStack(spacing: 0) {
-                        StatisticsPane(storageSuffix: "")
+                        StatisticsPane(storageSuffix: "", dense: true)
                         Rectangle().fill(Theme.border).frame(width: 1)
-                        StatisticsPane(storageSuffix: "B")
+                        StatisticsPane(storageSuffix: "B", dense: true)
                     }
                 } else {
                     StatisticsPane(storageSuffix: "")

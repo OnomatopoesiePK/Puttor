@@ -102,7 +102,8 @@ struct MissDispersionPlotView: View {
     /// that follow-up is outside the band.
     var distanceRange: ClosedRange<Double>?
 
-    private let size: CGFloat = 268
+    /// Smaller when two panes share a screen.
+    var size: CGFloat = 268
     /// The outer ring, and how far a dot may stray beyond it before the plot
     /// runs out of room.
     private let maxR: CGFloat = 100

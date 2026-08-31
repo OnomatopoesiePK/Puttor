@@ -18,7 +18,8 @@ struct MissDonutView: View {
     /// still fresh enough to mean something.
     var lipOutCount: Int = 0
 
-    private let size: CGFloat = 260
+    /// Smaller when two of these share a screen.
+    var size: CGFloat = 260
 
     private var directional: [PuttResult: Int] {
         var out: [PuttResult: Int] = [:]

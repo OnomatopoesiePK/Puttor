@@ -18,9 +18,11 @@ struct DistanceMakeChartView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     private var visible: [DistanceBracket] { data.filter { $0.total > 0 } }
+    /// Half a screen wide is a portrait column, whatever the device is doing.
+    var dense: Bool = false
     /// Twice the length in landscape, where the width is there for the taking
-    /// and an 84pt bar reads as a stub.
-    private var barsWidth: CGFloat { verticalSizeClass == .compact ? 168 : 84 }
+    /// and an 84pt bar reads as a stub — but not when two charts share it.
+    private var barsWidth: CGFloat { verticalSizeClass == .compact && !dense ? 168 : 84 }
 
     var body: some View {
         if visible.isEmpty {
