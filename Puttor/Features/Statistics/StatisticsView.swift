@@ -631,17 +631,6 @@ private struct StatisticsPane: View {
                                 }
                             }
 
-                            if data.aggregated.missReasonCounts.total > 0 {
-                                CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons", infoKey: "summary.missReasons.info") {
-                                    HStack(spacing: Theme.Spacing.md) {
-                                        if data.aggregated.missReasonCounts.missRead > 0 { reasonStat("\(data.aggregated.missReasonCounts.missRead)", L("input.missRead")) }
-                                        if data.aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(data.aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
-                                        if data.aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(data.aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
-                                        if data.aggregated.missReasonCounts.multiple > 0 { reasonStat("\(data.aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
-                                    }
-                                }
-                            }
-
                             let leave = data.leaveByMiss
                             if !leave.isEmpty {
                                 CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss", infoKey: "summary.leaveByMiss.info") {
@@ -680,6 +669,17 @@ private struct StatisticsPane: View {
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
+                            if data.aggregated.missReasonCounts.total > 0 {
+                                CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons", infoKey: "summary.missReasons.info") {
+                                    HStack(spacing: Theme.Spacing.md) {
+                                        if data.aggregated.missReasonCounts.missRead > 0 { reasonStat("\(data.aggregated.missReasonCounts.missRead)", L("input.missRead")) }
+                                        if data.aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(data.aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
+                                        if data.aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(data.aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
+                                        if data.aggregated.missReasonCounts.multiple > 0 { reasonStat("\(data.aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
+                                    }
+                                }
+                            }
+
                         }
                         .padding(dense ? Theme.Spacing.sm : Theme.Spacing.lg)
                     }
