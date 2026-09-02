@@ -36,12 +36,16 @@ struct StreakFlameView: View {
     var body: some View {
         VStack(spacing: 1) {
             if weeks > 0 {
-                Image(systemName: "flame.fill")
-                    .font(.system(size: size, weight: .black))
-                    .foregroundStyle(flame)
-                Text("\(weeks)")
-                    .font(.system(size: 15, weight: .black))
-                    .foregroundStyle(Theme.text)
+                // Side by side: the flame reads as the unit belonging to the
+                // number rather than as a picture sitting above it.
+                HStack(spacing: 4) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: size, weight: .black))
+                        .foregroundStyle(flame)
+                    Text("\(weeks)")
+                        .font(.system(size: size, weight: .black))
+                        .foregroundStyle(Theme.text)
+                }
                 Text(L(weeks == 1 ? "game.streak.week" : "game.streak.weeks"))
                     .font(.system(size: 9, weight: .bold))
                     .foregroundStyle(Theme.textMuted)
