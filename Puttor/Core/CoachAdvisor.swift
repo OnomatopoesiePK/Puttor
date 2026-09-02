@@ -386,7 +386,9 @@ enum CoachAdvisor {
         if distance <= 1.2 { return .gate }
         if distance <= 3 { return .aroundTheHole }
         if distance <= 6 { return .clock }
-        return .ninePutt
+        // From range nothing is holed on purpose any more: what is being
+        // trained is where the ball stops, which is the ladder.
+        return .ladder
     }
 
     /// The last few rounds held against the whole window, rather than one half

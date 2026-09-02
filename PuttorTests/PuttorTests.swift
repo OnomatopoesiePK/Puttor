@@ -16,7 +16,8 @@ struct PuttorTests {
 
     @Test func gameTypeLowerScoreIsBetterOnlyForCyclesStrokesAndTime() async throws {
         for gameType in GameType.allCases {
-            let expected = gameType == .ninePutt || gameType == .aroundTheWorld || gameType == .aroundTheHole
+            let expected = gameType == .ninePutt || gameType == .aroundTheWorld
+                || gameType == .aroundTheHole || gameType == .ladder
             #expect(gameType.lowerScoreIsBetter == expected)
         }
     }
@@ -1433,7 +1434,57 @@ struct PuttorTests {
         #expect(CoachAdvisor.drill(forDistanceM: 0.8) == .gate)
         #expect(CoachAdvisor.drill(forDistanceM: 2.5) == .aroundTheHole)
         #expect(CoachAdvisor.drill(forDistanceM: 5) == .clock)
-        #expect(CoachAdvisor.drill(forDistanceM: 12) == .ninePutt)
+        #expect(CoachAdvisor.drill(forDistanceM: 12) == .ladder)
+    }
+
+    /// The ladder's rungs: whole metres out to lag range, half metres close
+    /// in, and never a rung outside the ladder it belongs to.
+    @Test func ladderRungsFollowTheModeTheyBelongTo() async throws {
+        let large = LadderPlan.distances(mode: .large, fromM: 5, toM: 20)
+        #expect(large.first == 5)
+        #expect(large.last == 20)
+        #expect(large.count == 16)
+
+        let fine = LadderPlan.distances(mode: .fine, fromM: 5, toM: 10)
+        #expect(fine.count == 11)
+        #expect(fine.contains(7.5))
+        // Half metres add up cleanly rather than drifting.
+        #expect(fine.allSatisfy { ($0 * 2).rounded() == $0 * 2 })
+
+        // A range outside the mode is pulled back onto its own ladder.
+        #expect(LadderPlan.clamp(30, mode: .fine) == 10)
+        #expect(LadderPlan.clamp(1, mode: .large) == 5)
+        #expect(LadderPlan.clamp(7.3, mode: .fine) == 7.5)
+    }
+
+    /// The weekly streak counts weeks in a row, and the week you are standing
+    /// in cannot break it before it is over.
+    @MainActor
+    @Test func streakCountsWeeksInARowAndSparesTheCurrentOne() async throws {
+        let context = try Self.makeInMemoryContext()
+        let calendar = Calendar.current
+
+        func session(weeksAgo: Int, complete: Bool = true) -> GameSession {
+            let session = GameSession(gameType: .ladder)
+            session.date = calendar.date(byAdding: .weekOfYear, value: -weeksAgo, to: Date()) ?? Date()
+            session.isComplete = complete
+            context.insert(session)
+            return session
+        }
+
+        // Nothing this week, but the three before it: the streak stands at
+        // three rather than nothing.
+        let recent = [session(weeksAgo: 1), session(weeksAgo: 2, complete: false), session(weeksAgo: 3)]
+        try context.save()
+        #expect(GameScoring.streakWeeks(for: .ladder, in: recent) == 3)
+
+        // A missed week ends it, however much was played before.
+        let broken = recent + [session(weeksAgo: 5), session(weeksAgo: 6)]
+        try context.save()
+        #expect(GameScoring.streakWeeks(for: .ladder, in: broken) == 3)
+
+        // Another drill's sessions are not this drill's streak.
+        #expect(GameScoring.streakWeeks(for: .gate, in: broken) == 0)
     }
 
     /// A drill nobody has played comes before one that is merely overdue, and

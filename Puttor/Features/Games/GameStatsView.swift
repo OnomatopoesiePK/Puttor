@@ -92,7 +92,7 @@ struct GameStatsView: View {
             Text(L("game.activity.title"))
                 .font(.system(size: 10, weight: .bold)).tracking(1.2)
                 .foregroundStyle(Theme.textMuted)
-            ActivityBoardView(sessions: history)
+            ActivityBoardView(sessions: GameScoring.allSessions(for: gameType, in: allSessions))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Theme.Spacing.md)
@@ -102,24 +102,54 @@ struct GameStatsView: View {
 
     private var headerCard: some View {
         HStack(spacing: Theme.Spacing.sm) {
+            if gameType.isTrainingDrill {
+                streakBox
+                statBox(
+                    value: "\(GameScoring.allSessions(for: gameType, in: allSessions).count)",
+                    label: L("game.stats.sessions"),
+                    color: Theme.accent,
+                    unit: nil
+                )
+            } else {
+                scoreBoxes
+            }
+        }
+    }
+
+    /// The weeks in a row, which is the only score a drill measured by turning
+    /// up can have.
+    private var streakBox: some View {
+        VStack(spacing: 2) {
+            StreakFlameView(weeks: GameScoring.streakWeeks(for: gameType, in: allSessions), baseSize: 26)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Theme.Spacing.md)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
+    }
+
+    private var scoreBoxes: some View {
+        Group {
             statBox(
                 value: best.map { GameScoreFormat.text($0.score, for: gameType) } ?? "–",
                 label: L("game.best"),
-                color: Theme.primary
+                color: Theme.primary,
+                unit: L(gameType.scoreUnitKey)
             )
             statBox(
                 value: average.map { GameScoreFormat.preciseText($0, for: gameType) } ?? "–",
                 label: L("game.stats.avgLast5"),
-                color: Theme.accent
+                color: Theme.accent,
+                unit: L(gameType.scoreUnitKey)
             )
         }
     }
 
-    private func statBox(value: String, label: String, color: Color) -> some View {
+    private func statBox(value: String, label: String, color: Color, unit: String? = nil) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.system(size: 26, weight: .black)).foregroundStyle(color)
             Text(label).font(.system(size: 10, weight: .bold)).tracking(0.8).foregroundStyle(Theme.textMuted)
-            Text(L(gameType.scoreUnitKey)).font(.system(size: 9)).foregroundStyle(Theme.textMuted)
+            if let unit { Text(unit).font(.system(size: 9)).foregroundStyle(Theme.textMuted) }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Theme.Spacing.md)

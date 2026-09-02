@@ -16,6 +16,8 @@ struct GameCard: View {
     let gameType: GameType
     let bestSession: GameSession?
     let recentAverage: Double?
+    /// Weeks in a row with practice, for the drills counted by turning up.
+    var streakWeeks: Int = 0
     let action: () -> Void
     let onShowStats: () -> Void
 
@@ -26,7 +28,9 @@ struct GameCard: View {
                     Text(gameType.icon).font(.system(size: 34))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(L(gameType.titleKey)).font(.system(size: 16, weight: .bold)).foregroundStyle(Theme.text)
-                        Text(L(gameType.goalKey)).font(.system(size: 12)).foregroundStyle(Theme.textSecondary).lineLimit(2)
+                        Text(L(gameType.categoryKey))
+                            .font(.system(size: 11, weight: .bold)).tracking(0.8)
+                            .foregroundStyle(Theme.textMuted)
                     }
                     Spacer(minLength: 0)
                 }
@@ -39,7 +43,11 @@ struct GameCard: View {
             Button(action: onShowStats) {
                 HStack(spacing: 6) {
                     VStack(spacing: 2) {
-                        if let bestSession {
+                        // A drill you either finish or don't has no score to
+                        // beat; what it has is a run of weeks.
+                        if gameType.isTrainingDrill {
+                            StreakFlameView(weeks: streakWeeks)
+                        } else if let bestSession {
                             Text(GameScoreFormat.text(bestSession.score, for: gameType))
                                 .font(.system(size: 18, weight: .black))
                                 .foregroundStyle(Theme.primary)

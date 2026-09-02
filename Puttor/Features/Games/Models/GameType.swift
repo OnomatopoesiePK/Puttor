@@ -12,6 +12,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
     case ninePutt
     case routine
     case aroundTheWorld
+    case ladder
 
     var id: String { rawValue }
 
@@ -23,6 +24,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .routine: return "📋"
         case .aroundTheWorld: return "🌍"
         case .aroundTheHole: return "🎯"
+        case .ladder: return "🪜"
         }
     }
 
@@ -34,6 +36,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .routine: return "game.routine.title"
         case .aroundTheWorld: return "game.aroundTheWorld.title"
         case .aroundTheHole: return "game.aroundTheHole.title"
+        case .ladder: return "game.ladder.title"
         }
     }
 
@@ -45,6 +48,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .routine: return "game.routine.goal"
         case .aroundTheWorld: return "game.aroundTheWorld.goal"
         case .aroundTheHole: return "game.aroundTheHole.goal"
+        case .ladder: return "game.ladder.goal"
         }
     }
 
@@ -56,6 +60,17 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
         case .routine: return "game.routine.explanation"
         case .aroundTheWorld: return "game.aroundTheWorld.explanation"
         case .aroundTheHole: return "game.aroundTheHole.explanation"
+        case .ladder: return "game.ladder.explanation"
+        }
+    }
+
+    /// What kind of practice this is, in two words — the line under the name
+    /// on the games list.
+    var categoryKey: String {
+        switch self {
+        case .gate: return "game.category.startLine"
+        case .ladder: return "game.category.speed"
+        default: return "game.category.game"
         }
     }
 
@@ -63,7 +78,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
     /// number is the better result.
     var lowerScoreIsBetter: Bool {
         switch self {
-        case .ninePutt, .aroundTheWorld, .aroundTheHole: return true
+        case .ninePutt, .aroundTheWorld, .aroundTheHole, .ladder: return true
         default: return false
         }
     }
@@ -71,7 +86,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
     var scoreUnitKey: String {
         switch self {
         case .aroundTheWorld: return "game.unit.strokes"
-        case .aroundTheHole, .ninePutt: return "game.unit.minutes"
+        case .aroundTheHole, .ninePutt, .ladder: return "game.unit.minutes"
         default: return "game.unit.percent"
         }
     }
@@ -82,7 +97,7 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
     /// a scoreboard.
     var isTrainingDrill: Bool {
         switch self {
-        case .aroundTheHole, .ninePutt: return true
+        case .aroundTheHole, .ninePutt, .ladder: return true
         default: return false
         }
     }

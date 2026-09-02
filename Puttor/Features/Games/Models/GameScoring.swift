@@ -40,6 +40,44 @@ enum GameScoring {
         return recent.reduce(0) { $0 + $1.score } / Double(recent.count)
     }
 
+    /// Weeks in a row with at least one session of this drill, counting back
+    /// from this week. The week you are standing in doesn't break a streak
+    /// while it is still running — it only starts counting once something is
+    /// played in it — so a Monday morning never looks like a lapse.
+    ///
+    /// Abandoned sessions count: the streak is about turning up, and a drill
+    /// given up on happened.
+    static func streakWeeks(for gameType: GameType, in sessions: [GameSession], now: Date = Date()) -> Int {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // Monday
+
+        func weekStart(_ date: Date) -> Date {
+            calendar.dateInterval(of: .weekOfYear, for: date)?.start ?? calendar.startOfDay(for: date)
+        }
+
+        let played = Set(sessions.filter { $0.gameType == gameType }.map { weekStart($0.date) })
+        guard !played.isEmpty else { return 0 }
+
+        var cursor = weekStart(now)
+        if !played.contains(cursor) {
+            cursor = calendar.date(byAdding: .weekOfYear, value: -1, to: cursor) ?? cursor
+        }
+
+        var streak = 0
+        while played.contains(cursor) {
+            streak += 1
+            guard let previous = calendar.date(byAdding: .weekOfYear, value: -1, to: cursor) else { break }
+            cursor = previous
+        }
+        return streak
+    }
+
+    /// Everything played of a drill, finished or not — what the activity board
+    /// and the streak are drawn from.
+    static func allSessions(for gameType: GameType, in sessions: [GameSession]) -> [GameSession] {
+        sessions.filter { $0.gameType == gameType }.sorted { $0.date > $1.date }
+    }
+
     static func isNewBest(_ session: GameSession, among sessions: [GameSession]) -> Bool {
         let others = sessions.filter { $0.isComplete && $0.id != session.id && $0.gameType == session.gameType }
         guard let best = bestSession(for: session.gameType, in: others) else { return true }

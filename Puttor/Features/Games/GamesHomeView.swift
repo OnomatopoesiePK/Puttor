@@ -36,6 +36,7 @@ struct GamesHomeView: View {
                             gameType: gameType,
                             bestSession: GameScoring.bestSession(for: gameType, in: allSessions),
                             recentAverage: GameScoring.recentAverage(for: gameType, in: allSessions),
+                            streakWeeks: GameScoring.streakWeeks(for: gameType, in: allSessions),
                             action: { route = .play(gameType) },
                             onShowStats: { route = .stats(gameType) }
                         )

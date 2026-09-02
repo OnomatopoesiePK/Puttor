@@ -605,3 +605,26 @@
 "coach.whatIsHappening.info" = "Muster in deinen Misses: eine Seite, an der sie immer wieder vorbeigehen, eine Länge, die immer wieder fehlt, ein Break, unter dem sie immer wieder durchlaufen.\n\nJede Zeile braucht mindestens acht Misses dieser Art, von denen sechs von zehn in dieselbe Richtung gehen, bevor daraus ein Muster wird. Ein schlechter Putt ist ein schlechter Putt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.";
 "coach.conditions.info" = "Jede Bedingung, die eine Runde mitbringt — Grüngeschwindigkeit, Regen, Wind, Kälte, Grain — und jede, die ein Putt mitbringt — Break, Neigung, Doppelbreak — wird an deinen eigenen Putts gegen ihr Gegenteil verglichen.\n\nEin Unterschied wird nur aufgeführt, wenn er vier Prüfungen übersteht: genug Putts auf beiden Seiten, vergleichbare Distanzen auf beiden Seiten, ein statistischer Test, dass sich die beiden Anteile wirklich unterscheiden, und eine Korrektur dafür, wie viele Vergleiche für den Fund nötig waren. Wer genug Aufteilungen durchsucht, findet auch in Zufallsdaten Unterschiede; genau die hält diese Prüfung von der Karte fern.\n\nGelesen wird das aus deinen letzten dreißig Runden statt aus zehn. Wie du bei Regen puttest, ist eine Eigenschaft und keine Form — und Regen ist selten.";
 "coach.plan.info" = "In dieser Reihenfolge: die Distanz, die dich am meisten Schläge kostet, der Drill gegen das, was deine Misses immer wieder tun, der Drill, in dem du am schlechtesten konvertierst, und alles, was seit zwei Wochen liegen geblieben ist.\n\nDie Zahl neben jedem Drill ist die angepeilte Anzahl Einheiten bis zur nächsten Auswertung — drei, wenn der Trend nach unten zeigt, eine, wenn er nach oben zeigt, sonst zwei.";
+
+// Ladder drill and the weekly streak
+"game.category.startLine" = "START LINE";
+"game.category.game" = "GAME DRILL";
+"game.category.speed" = "SPEED DRILL";
+"game.streak.week" = "WOCHE IN FOLGE";
+"game.streak.weeks" = "WOCHEN IN FOLGE";
+"game.streak.none" = "DIESE WOCHE NOCH NICHT";
+"game.stats.sessions" = "EINHEITEN";
+"game.ladder.title" = "Ladder-Drill";
+"game.ladder.goal" = "Trainiert reines Tempo: der Ball muss nur richtig liegen bleiben, damit ist die Längenkontrolle die ganze Prüfung.";
+"game.ladder.explanation" = "Von einem festen Ort auf eine Reihe von Zieldistanzen putten, die Leiter hinauf. Ein Putt zählt, wenn der Ball innerhalb von 30 cm um seine Sprosse liegen bleibt — davor oder dahinter — es muss also nichts gelocht werden, und die Linie spielt keine Rolle.\n\nZwei Leitern stehen zur Wahl. Die große geht in Meterschritten von 5 m bis 20 m, also bis in die Lag-Distanz. Die feine geht in Halbmeterschritten zwischen 5 und 10 m, wo die Abstände so klein sind, dass der Schlag gemessen und nicht mehr nur gefühlt werden muss.\n\nEine verfehlte Sprosse wird wiederholt, bevor es weitergeht. Wie bei den anderen Trainings-Drills fragt die App nur, ob du ihn geschafft oder abgebrochen hast — festgehalten wird, dass du da warst, und wie lange es gedauert hat.";
+"game.ladder.mode" = "LEITER";
+"game.ladder.mode.large" = "Große Schritte";
+"game.ladder.mode.fine" = "Feine Schritte";
+"game.ladder.stepNote" = "%@ Abstand";
+"game.ladder.from" = "Von";
+"game.ladder.to" = "Bis";
+"game.ladder.window" = "Ein Putt zählt, wenn der Ball innerhalb von %@ um seine Sprosse liegen bleibt — davor oder dahinter. Gelocht werden muss nichts.";
+"game.ladder.rungs" = "Sprossen";
+"game.ladder.rungCount" = "%ld Sprossen, die nächste unten.";
+"game.ladder.startSpot" = "EIN ORT FÜR ALLE";
+"game.ladder.targetReminder" = "%1$ld Sprossen, jede innerhalb von %2$@ um ihre Distanz.";

@@ -605,3 +605,26 @@
 "coach.whatIsHappening.info" = "Habits in your misses: a side they keep going, a length they keep coming up, a break they keep missing below.\n\nEach line needs at least eight misses of that kind, with six in ten going the same way, before it is called a habit. One bad putt is a bad putt.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.";
 "coach.conditions.info" = "Every condition a round carries — the pace of the greens, rain, wind, cold, grain — and every condition a putt carries — break, slope, double break — is compared with its opposite over your own putts.\n\nA difference is only listed when it survives four checks: enough putts on both sides, both sides putting from comparable distances, a statistical test that the two shares really differ, and a correction for how many comparisons were made to find it. Search enough splits and random data throws up differences on its own; this is what keeps those off the card.\n\nThese are read from your last thirty rounds rather than ten. How you putt in the rain is a trait rather than a form, and rain is rare.";
 "coach.plan.info" = "In order: the distance costing you the most strokes, the drill that answers whatever your misses keep doing, the drill you convert worst in, and whatever has been left untouched for a fortnight.\n\nThe number beside each drill is how many sessions to aim for before the next read — three when the trend is slipping, one when it is climbing, two otherwise.";
+
+// Ladder drill and the weekly streak
+"game.category.startLine" = "START LINE";
+"game.category.game" = "GAME DRILL";
+"game.category.speed" = "SPEED DRILL";
+"game.streak.week" = "WEEK IN A ROW";
+"game.streak.weeks" = "WEEKS IN A ROW";
+"game.streak.none" = "NOT THIS WEEK";
+"game.stats.sessions" = "SESSIONS";
+"game.ladder.title" = "Ladder Drill";
+"game.ladder.goal" = "Trains pace on its own: the ball only has to stop in the right place, so distance control is the whole test.";
+"game.ladder.explanation" = "Putt from one spot to a row of target distances, working up the ladder. A putt counts when the ball finishes within 30 cm of its rung — short or long — so nothing has to be holed and the line never comes into it.\n\nTwo ladders to choose from. The large one goes in whole metres from 5 m out to 20 m, which is lag range. The fine one goes in half metres between 5 and 10 m, where the gaps are small enough that the stroke has to be measured rather than felt.\n\nMiss a rung and play it again before moving up. Like the other training drills, the app only asks whether you finished it or gave up — what it keeps is that you turned up and how long it took.";
+"game.ladder.mode" = "LADDER";
+"game.ladder.mode.large" = "Large steps";
+"game.ladder.mode.fine" = "Fine steps";
+"game.ladder.stepNote" = "%@ apart";
+"game.ladder.from" = "From";
+"game.ladder.to" = "To";
+"game.ladder.window" = "A putt counts when the ball finishes within %@ of its rung, short or long. Nothing has to be holed.";
+"game.ladder.rungs" = "rungs";
+"game.ladder.rungCount" = "%ld rungs, nearest at the bottom.";
+"game.ladder.startSpot" = "ONE SPOT FOR ALL OF THEM";
+"game.ladder.targetReminder" = "%1$ld rungs, each within %2$@ of its distance.";
