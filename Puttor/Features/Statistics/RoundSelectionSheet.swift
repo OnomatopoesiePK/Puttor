@@ -133,6 +133,14 @@ struct RoundSelectionSheet: View {
         }
     }
 
+    /// Summed over holes, the way strokes gained is defined — the same figure
+    /// the round list shows.
+    private func strokesGained(_ round: Round) -> Double {
+        Set(round.putts.map(\.holeNumber)).compactMap { hole in
+            RoundStats.holeStrokesGained(round.putts.filter { $0.holeNumber == hole })
+        }.reduce(0, +)
+    }
+
     private func row(_ round: Round, isSelected: Bool) -> some View {
         HStack(spacing: 10) {
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
@@ -140,10 +148,31 @@ struct RoundSelectionSheet: View {
                 .foregroundStyle(isSelected ? Theme.primary : Theme.textMuted)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Theme.text)
-                    .lineLimit(1)
+                HStack(spacing: 1) {
+                    Text(round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Theme.text)
+                        .lineLimit(1)
+                    // The same two marks the round list carries, so a round is
+                    // recognised here as the same round there.
+                    if round.holeCount == 9 {
+                        Text("*")
+                            .font(.system(size: 14, weight: .heavy))
+                            .foregroundStyle(Theme.accent)
+                            .accessibilityLabel(L("onCourse.nineHoleRound"))
+                    }
+                    if round.isTournament {
+                        Text(L("onCourse.tournamentTag"))
+                            .font(.system(size: 10, weight: .black))
+                            .foregroundStyle(Theme.primary)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Capsule().fill(Theme.primary.opacity(0.14)))
+                            .overlay(Capsule().stroke(Theme.primary.opacity(0.5), lineWidth: 1))
+                            .padding(.leading, 5)
+                            .accessibilityLabel(L("setup.tournament"))
+                    }
+                }
                 HStack(spacing: 6) {
                     Text(round.date.formatted(date: .abbreviated, time: .omitted))
                     Text("·")
@@ -158,6 +187,14 @@ struct RoundSelectionSheet: View {
             }
 
             Spacer(minLength: 0)
+
+            // What the round was worth, plain — the tick and the card's own
+            // tint already carry the colour in this list.
+            let sg = strokesGained(round)
+            Text("\(sg > 0 ? "+" : "")\(String(format: "%.2f", sg)) \(L("summary.sg"))")
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(sg >= 0 ? Theme.primary : Theme.error)
+                .lineLimit(1)
         }
         .padding(Theme.Spacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)
