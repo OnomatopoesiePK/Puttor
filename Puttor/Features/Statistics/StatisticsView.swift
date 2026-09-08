@@ -502,16 +502,17 @@ private struct StatisticsPane: View {
 
                             CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained", infoKey: "stats.sgPutting.info") {
                                 VStack(spacing: 4) {
-                                    Text("\(data.sgAverage > 0 ? "+" : "")\(String(format: "%.2f", data.sgAverage))")
-                                        .font(.system(size: dense ? 30 : 40, weight: .black))
-                                        .foregroundStyle(data.sgAverage > 0.5 ? Theme.primary : (data.sgAverage < -0.5 ? Theme.error : Theme.warning))
+                                    MetricValue(
+                                        value: data.sgAverage,
+                                        metric: .sg,
+                                        size: dense ? 30 : 40,
+                                        colour: data.sgAverage > 0.5 ? Theme.primary : (data.sgAverage < -0.5 ? Theme.error : Theme.warning)
+                                    )
                                     Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
 
                                     Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
 
-                                    Text("\(L("stats.pcg")) \(data.pcgAverage > 0 ? "+" : "")\(String(format: "%.2f", data.pcgAverage))")
-                                        .font(.system(size: 20, weight: .black))
-                                        .foregroundStyle(data.pcgAverage > 0 ? Theme.primary : (data.pcgAverage < 0 ? Theme.error : Theme.textSecondary))
+                                    MetricValue(value: data.pcgAverage, metric: .pcg, size: 20)
                                     Text(L("stats.pcgSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
                                 }
                                 .frame(maxWidth: .infinity)
@@ -711,7 +712,11 @@ private struct StatisticsPane: View {
                 let color: Color = sg == nil ? Theme.textMuted : (sg! > 0.5 ? Theme.primary : (sg! < -0.5 ? Theme.error : Theme.warning))
                 VStack(spacing: 2) {
                     Text(r.date.formatted(.dateTime.day().month(.abbreviated))).font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textMuted)
-                    Text(sg == nil ? "…" : "\(sg! > 0 ? "+" : "")\(String(format: "%.1f", sg!))").font(.system(size: 14, weight: .black)).foregroundStyle(color)
+                    if let sg {
+                        MetricValue(value: sg, metric: .sg, size: 14, colour: color, decimals: 1)
+                    } else {
+                        Text("…").font(.system(size: 14, weight: .black)).foregroundStyle(color)
+                    }
                     Text(r.courseName.isEmpty ? "—" : r.courseName).font(.system(size: 8)).foregroundStyle(Theme.textMuted).lineLimit(1)
                 }
                 .frame(minHeight: 60)

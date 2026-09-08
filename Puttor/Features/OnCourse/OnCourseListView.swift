@@ -219,10 +219,7 @@ struct OnCourseListView: View {
                         .background(Capsule().fill((round.isComplete ? Theme.primary : Theme.accent).opacity(0.13)))
 
                     if round.isComplete {
-                        let sg = strokesGained(round)
-                        Text("\(sg > 0 ? "+" : "")\(String(format: "%.2f", sg)) \(L("summary.sg"))")
-                            .font(.system(size: 11, weight: .heavy))
-                            .foregroundStyle(sg >= 0 ? Theme.primary : Theme.error)
+                        MetricValue(value: strokesGained(round), metric: .sg, size: 12)
                     }
                 }
 

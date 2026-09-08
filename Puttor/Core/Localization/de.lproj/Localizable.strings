@@ -21,7 +21,6 @@
 "coach.practice" = "TRAINING";
 "coach.practice.sessions" = "EINHEITEN";
 "coach.practice.putts" = "PUTTS";
-"coach.practice.pcgPerPutt" = "PKR / PUTT";
 "coach.reason.weakestDrill" = "Der Drill, in dem du am schlechtesten konvertierst — gemessen an der Lochwahrscheinlichkeit dieser Distanzen.";
 "coach.threePuttRate" = "3-PUTTS PRO RUNDE";
 "coach.whatIsHappening" = "WAS IMMER WIEDER PASSIERT";
@@ -593,9 +592,9 @@
 "split.holedMore" = "Bei %1$@ fallen %2$@%% deiner Putts — bei %3$@ %4$@%%.";
 "split.holedLess" = "Bei %1$@ bleiben %2$@%% deiner Putts draußen — bei %3$@ %4$@%%.";
 "split.threePutts" = "Bei %1$@ sind es %2$@ 3-Putts pro Runde — bei %3$@ %4$@, aus vergleichbaren Distanzen.";
-"coach.trendMetric" = "VERÄNDERUNG SG / RUNDE";
+"coach.trendMetric" = "VERÄNDERUNG / RUNDE";
 "coach.readingTitle" = "WIE ES LÄUFT";
-"coach.pcgTrendMetric" = "VERÄNDERUNG PKR / RUNDE";
+"coach.pcgTrendMetric" = "VERÄNDERUNG / RUNDE";
 "coach.summary.info" = "Der Trend sind deine letzten drei Runden gegen den Schnitt aller hier gelesenen Runden — höchstens zehn, und nur beendete.\n\nErst ab einem halben Schlag pro Runde in eine Richtung wird von einer Richtung gesprochen; alles darunter ist dasselbe Putten an verschiedenen Tagen.\n\nBewegt sich nichts, hängt die Formulierung davon ab, wo du stehen bleibst: über +0,5 pro Runde ist ein guter Platz dafür, unter −0,5 nicht.";
 "coach.numbers.info" = "Die ersten beiden Kacheln zeigen die Veränderung, nicht das Niveau: deine letzten drei Runden gegen den Schnitt aller. Grün ist gewonnener Boden, rot verlorener — unabhängig davon, wie viel.\n\nDie kleine Ø-Zeile darunter ist dieser Schnitt selbst, also der Ausgangspunkt der Veränderung. Was dein Putten insgesamt wert ist, steht im Statistik-Tab; hier geht es darum, wohin es sich bewegt.\n\nSG sind die Strokes Gained über eine ganze Runde: pro Loch die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist dasselbe pro Putt, gemessen an der Tour-Trefferquote aus dieser Distanz.\n\n3-Putts werden pro Runde gezählt, nicht als Anteil der Löcher. Die letzte Kachel ist der Distanzbereich, der dich am meisten kostet: der Bereich, darunter die dort gegenüber der Tour verlorene Konversion.\n\nAlles davon stammt aus deinen beendeten Runden auf dem Platz. Die Drills werden getrennt gezählt, weiter unten.";
 "coach.practice.info" = "Gelesen aus den abgeschlossenen Drills im Games-Tab — und bewusst getrennt von den Platz-Zahlen: Training ohne Karte in der Hand ist keine Runde, und ein Mittelwert aus beidem beschriebe keines von beiden.\n\nDie PKR pro Putt erscheint für die Drills, die die Distanz jedes Versuchs mitschreiben; die auf dem Grün ohne App gezählten haben keine.";
@@ -640,7 +639,7 @@
 "coach.tournament.wilder" = "Deine Turnierrunden streuen um %.2f Schläge weiter als die normalen: gute und schlechte Tage liegen dort weiter auseinander.";
 "coach.tournament.sameSpread" = "Beide Gruppen streuen gleich weit — eine zählende Karte ändert also nichts an deiner Verlässlichkeit.";
 "coach.tournament.outliers" = "RUNDEN, DIE HERAUSSTECHEN";
-"coach.tournament.outlier" = "%1$@ (%2$@): SG %3$@ — %4$.1f Standardabweichungen vom Schnitt dieser Gruppe.";
+"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG — %4$.1f Standardabweichungen vom Schnitt dieser Gruppe.";
 "coach.tournament.info" = "Deine letzten fünf Turnierrunden gegen deine letzten fünf normalen Runden, und das Ergebnis steht hier, egal wie es ausfällt — es geht darum zu wissen, was deine Karte sagt, wenn sie zählt, und „kein Unterschied\" ist darauf eine Antwort.\n\nBeide Werte stehen da, damit klar ist, was gezählt wird. SG sind die Strokes Gained beim Putten über eine Runde: die Putts, die die Tour erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist die Konversion derselben Runde, also jeder Putt gemessen an der Tour-Trefferquote aus seiner Distanz.\n\nDas ± darunter ist die Standardabweichung — wie weit eine Runde üblicherweise von diesem Schnitt abweicht. Das ist der Unterschied zwischen verlässlich und nur an guten Tagen gut. Sie erscheint ab drei Runden.\n\nAls Ausreißer gilt eine Runde, deren SG mindestens 1,8 Standardabweichungen vom Schnitt der fünf Runden abweicht, zu denen sie gehört.";
 
 // Legal
@@ -658,6 +657,8 @@
 "game.benchmark" = "GEGEN DIE TOUR";
 "game.benchmark.you" = "DU";
 "game.benchmark.tourAt" = "TOUR AUS %@";
-"game.benchmark.perRound" = "SCHLÄGE / RUNDE";
+"game.benchmark.perRound" = "PRO RUNDE";
 "game.benchmark.basis" = "Geschätzt auf rund %1$.1f Putts pro Runde, die innerhalb eines halben Meters um %2$@ liegen.";
 "game.benchmark.info" = "Deine Trefferquote neben der Tour-Quote aus derselben Distanz — und was der Unterschied über achtzehn Löcher wert ist.\n\nJeder Putt, den du über der Tour-Quote lochst, ist ein gewonnener Schlag. Der Abstand wird deshalb damit multipliziert, wie viele Putts dieser Länge in einer Runde überhaupt vorkommen: ein Drill aus 1 m betrifft rund zehn Putts pro Runde, einer aus 8 m nur zwei.\n\nDiese Häufigkeit ist eine Schätzung für eine Clubspieler-Runde mit etwa 32 Putts, keine Messung deiner eigenen. Die Zahl ist als Größenordnung gemeint: sie sagt, ob ein Drill-Ergebnis auf der Karte etwas ausmacht — nicht, was deine nächste Runde bringt.";
+"coach.perRound" = "PRO RUNDE";
+"coach.practice.perPutt" = "PRO PUTT";

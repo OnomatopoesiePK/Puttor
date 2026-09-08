@@ -190,11 +190,7 @@ struct RoundSelectionSheet: View {
 
             // What the round was worth, plain — the tick and the card's own
             // tint already carry the colour in this list.
-            let sg = strokesGained(round)
-            Text("\(sg > 0 ? "+" : "")\(String(format: "%.2f", sg)) \(L("summary.sg"))")
-                .font(.system(size: 12, weight: .heavy))
-                .foregroundStyle(sg >= 0 ? Theme.primary : Theme.error)
-                .lineLimit(1)
+            MetricValue(value: strokesGained(round), metric: .sg, size: 13)
         }
         .padding(Theme.Spacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)

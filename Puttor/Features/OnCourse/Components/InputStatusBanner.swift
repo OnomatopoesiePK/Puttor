@@ -29,7 +29,7 @@ struct InputStatusBanner: View {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
                     Text(L("input.saved"))
-                    Text("\(savedPCG >= 0 ? "+" : "")\(String(format: "%.2f", savedPCG)) \(L("stats.pcg"))")
+                    MetricValue(value: savedPCG, metric: .pcg, size: compact ? 12 : 14, colour: tint)
                 }
                 .font(.system(size: compact ? 11 : 13, weight: .bold))
                 .foregroundStyle(tint)

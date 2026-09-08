@@ -69,16 +69,12 @@ struct RoundSummaryView: View {
                 // Two different questions, so they get their own row: strokes
                 // gained scores whole holes, PCG scores single putts.
                 HStack(spacing: Theme.Spacing.xs) {
-                    bigStat(L("summary.sg"),
-                            "\(stats.sgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.sgTotal))",
-                            caption: L("summary.sgCaption"),
-                            color: sgColor(stats.sgTotal),
-                            highlighted: RoundHighlights.strongStrokesGained(stats.sgTotal))
-                    bigStat(L("stats.pcg"),
-                            "\(stats.pcgTotal > 0 ? "+" : "")\(String(format: "%.2f", stats.pcgTotal))",
-                            caption: L("summary.pcgCaption"),
-                            color: sgColor(stats.pcgTotal),
-                            highlighted: RoundHighlights.strongPCG(stats.pcgTotal))
+                    bigMetric(stats.sgTotal, metric: .sg,
+                              caption: L("summary.sgCaption"),
+                              highlighted: RoundHighlights.strongStrokesGained(stats.sgTotal))
+                    bigMetric(stats.pcgTotal, metric: .pcg,
+                              caption: L("summary.pcgCaption"),
+                              highlighted: RoundHighlights.strongPCG(stats.pcgTotal))
                 }
 
                 if let highlight {
@@ -281,6 +277,26 @@ struct RoundSummaryView: View {
         }
     }
 
+    /// The same box, for the two numbers that carry their own name: the unit
+    /// sits beside the figure instead of under it.
+    private func bigMetric(
+        _ value: Double,
+        metric: MetricValue.Metric,
+        caption: String,
+        highlighted: Bool = false
+    ) -> some View {
+        VStack(spacing: 2) {
+            MetricValue(value: value, metric: metric, size: 20, colour: sgColor(value))
+            Text(caption).font(.system(size: 9)).foregroundStyle(Theme.textMuted.opacity(0.8))
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Theme.Spacing.sm)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+        .pulsingHighlight(highlighted)
+    }
+
     private func bigStat(_ label: String, _ value: String, caption: String? = nil, color: Color = Theme.text, highlighted: Bool = false) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.system(size: 20, weight: .black)).foregroundStyle(color)
@@ -303,9 +319,7 @@ struct RoundSummaryView: View {
             Text("\(L("summary.holeAbbr")) \(putt.holeNumber) · \(UnitConverter.formatDistance(putt.distanceM, useFeet: useFeet)) \(L("result.holed"))")
                 .font(.system(size: 16, weight: .heavy))
                 .foregroundStyle(Theme.text)
-            Text("+\(String(format: "%.2f", putt.pcg)) \(L("stats.pcg"))")
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(Theme.primary)
+            MetricValue(value: putt.pcg, metric: .pcg, size: 14, colour: Theme.primary)
         }
         .frame(maxWidth: .infinity)
         .padding(Theme.Spacing.md)
@@ -437,9 +451,7 @@ struct RoundSummaryView: View {
                 // Strokes gained belongs to the hole, so it sits in the hole's
                 // own header rather than among the per-putt numbers.
                 if let holeSG = RoundStats.holeStrokesGained(holeRecords) {
-                    Text("\(L("summary.sg")) \(holeSG > 0 ? "+" : "")\(String(format: "%.2f", holeSG))")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(holeSG > 0 ? Theme.primary : (holeSG < 0 ? Theme.error : Theme.textSecondary))
+                    MetricValue(value: holeSG, metric: .sg, size: 13)
                         .padding(.trailing, 4)
                 }
                 Button {

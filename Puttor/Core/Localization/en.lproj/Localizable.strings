@@ -21,7 +21,6 @@
 "coach.practice" = "PRACTICE";
 "coach.practice.sessions" = "SESSIONS";
 "coach.practice.putts" = "PUTTS";
-"coach.practice.pcgPerPutt" = "PCG / PUTT";
 "coach.reason.weakestDrill" = "The drill you convert worst in, measured against the odds of holing from those distances.";
 "coach.threePuttRate" = "3-PUTTS PER ROUND";
 "coach.whatIsHappening" = "WHAT KEEPS HAPPENING";
@@ -593,9 +592,9 @@
 "split.holedMore" = "On %1$@, %2$@%% of your putts drop — on %3$@ %4$@%%.";
 "split.holedLess" = "On %1$@, %2$@%% of your putts stay out — on %3$@ %4$@%%.";
 "split.threePutts" = "On %1$@ you three-putt %2$@ times a round — on %3$@ %4$@, from the same sort of distance.";
-"coach.trendMetric" = "CHANGE IN SG / ROUND";
+"coach.trendMetric" = "CHANGE / ROUND";
 "coach.readingTitle" = "HOW IT IS GOING";
-"coach.pcgTrendMetric" = "CHANGE IN PCG / ROUND";
+"coach.pcgTrendMetric" = "CHANGE / ROUND";
 "coach.summary.info" = "The trend is your last three rounds against the average of every round read here — up to ten, and only rounds that were finished.\n\nIt takes half a stroke a round either way before a direction is called; anything smaller is the same putting on different days.\n\nWhen nothing is moving, the wording depends on where you are standing still: above +0.5 a round is a good place to stand, below −0.5 is not.";
 "coach.numbers.info" = "The first two tiles show change, not level: your last three rounds against the average of all of them. Green is ground made, red is ground lost, whatever the size.\n\nThe small Ø line underneath is that average itself — where the change is measured from. What your putting is worth overall belongs in the Statistics tab; here the question is which way it is moving.\n\nSG is strokes gained over a whole round: for every hole, the putts the tour would expect from where the first putt stood, less the putts you took. PCG is the same idea per putt, against the tour's odds of holing from that distance.\n\n3-putts are counted per round rather than as a share of holes. The last tile is the distance band costing you the most: the band, then the conversion gain lost there against the tour.\n\nAll of it is read from your finished rounds on the course. The drills are counted separately, further down.";
 "coach.practice.info" = "Read from the completed drills in the Games tab, and kept apart from the course numbers on purpose: practice without a card in your hand is not a round, and averaging the two would describe neither.\n\nPCG per putt appears for the drills that record the distance of each attempt; the ones counted on the green without the app do not have one.";
@@ -640,7 +639,7 @@
 "coach.tournament.wilder" = "Your competition rounds are %.2f strokes further apart than your casual ones: the good days and bad days pull further away from each other.";
 "coach.tournament.sameSpread" = "Both sets are equally spread out, so a card counting changes nothing about how reliable you are.";
 "coach.tournament.outliers" = "ROUNDS THAT STOOD OUT";
-"coach.tournament.outlier" = "%1$@ (%2$@): SG %3$@ — %4$.1f standard deviations from that set's average.";
+"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG — %4$.1f standard deviations from that set's average.";
 "coach.tournament.info" = "Your last five tournament rounds against your last five casual ones, reported whichever way it falls — the point is to know what your card says when it counts, and \"no difference\" is an answer to that.\n\nBoth measures are shown so it is clear what is being counted. SG is strokes gained putting over a round: the putts the tour would expect, less the putts you took. PCG is the same round's conversion gain, each putt against the tour's odds of holing it from where it stood.\n\nThe ± underneath is the standard deviation — how far a round typically strays from that average, which is the difference between reliable and merely good on the day. It appears once three rounds stand behind it.\n\nA round is listed as standing out when its SG is at least 1.8 standard deviations from the average of the five it belongs to.";
 
 // Legal
@@ -658,6 +657,8 @@
 "game.benchmark" = "AGAINST THE TOUR";
 "game.benchmark.you" = "YOU";
 "game.benchmark.tourAt" = "TOUR AT %@";
-"game.benchmark.perRound" = "STROKES / ROUND";
+"game.benchmark.perRound" = "PER ROUND";
 "game.benchmark.basis" = "Estimated on about %1$.1f putts a round landing within half a metre of %2$@.";
 "game.benchmark.info" = "Your make rate next to the tour's from the same distance, and what the difference between them is worth over eighteen holes.\n\nEvery putt holed above the tour's rate is a stroke gained, so the gap is multiplied by how many putts of that length a round actually contains — a drill at 1 m answers for ten putts a round, one at 8 m for two.\n\nThat frequency is an estimate of a club player's round of roughly 32 putts, not a measurement of yours. The figure is meant as an order of magnitude: it says whether a drill result matters on the card, not what your next round will score.";
+"coach.perRound" = "PER ROUND";
+"coach.practice.perPutt" = "PER PUTT";

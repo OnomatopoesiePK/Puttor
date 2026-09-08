@@ -125,10 +125,19 @@ struct CoachView: View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 2), spacing: Theme.Spacing.sm) {
                 ForEach(report.metrics) { metric in
                     VStack(spacing: 2) {
-                        Text(metric.value)
-                            .font(.system(size: 22, weight: .black))
-                            .foregroundStyle(colour(for: metric.tone))
-                            .lineLimit(1).minimumScaleFactor(0.6)
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(metric.value)
+                                .font(.system(size: 22, weight: .black))
+                                .foregroundStyle(colour(for: metric.tone))
+                                .lineLimit(1).minimumScaleFactor(0.6)
+                            // Named beside the figure, the way every other
+                            // strokes-gained number in the app is written.
+                            if let unitKey = metric.unitKey {
+                                Text(L(unitKey))
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundStyle(colour(for: metric.tone))
+                            }
+                        }
                         if let detail = metric.detail {
                             Text(detail)
                                 .font(.system(size: 13, weight: .bold))
@@ -161,11 +170,27 @@ struct CoachView: View {
                 practiceStat("\(report.practice.attempts)", L("coach.practice.putts"))
                 practiceStat("\(Int(report.practice.makePercent.rounded()))%", L("chart.made"))
                 if let pcg = report.practice.pcgPerAttempt {
-                    practiceStat("\(pcg > 0 ? "+" : "")\(String(format: "%.2f", pcg))", L("coach.practice.pcgPerPutt"))
+                    practiceMetric(pcg, label: L("coach.practice.perPutt"))
                 }
             }
 
         }
+    }
+
+    /// The same box as the others, for the one figure in it that has a name.
+    private func practiceMetric(_ value: Double, label: String) -> some View {
+        VStack(spacing: 2) {
+            MetricValue(value: value, metric: .pcg, size: 18)
+            Text(label)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(Theme.textMuted)
+                .multilineTextAlignment(.center)
+                .lineLimit(2).minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, minHeight: 56)
+        .padding(.vertical, 6)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
     private func practiceStat(_ value: String, _ label: String) -> some View {
@@ -291,8 +316,18 @@ struct CoachView: View {
 
             // Both measures, named — otherwise a number on its own leaves the
             // reader guessing which one it is.
-            metricLine(L("summary.sg"), summary.sg, hasSpread: summary.hasEnoughForSpread)
-            metricLine(L("stats.pcg"), summary.pcg, hasSpread: summary.hasEnoughForSpread)
+            MetricValue(
+                value: summary.sg.mean,
+                metric: .sg,
+                spread: summary.hasEnoughForSpread ? summary.sg.standardDeviation : nil,
+                size: 19
+            )
+            MetricValue(
+                value: summary.pcg.mean,
+                metric: .pcg,
+                spread: summary.hasEnoughForSpread ? summary.pcg.standardDeviation : nil,
+                size: 19
+            )
 
             Text(String(format: L("coach.tournament.rounds"), summary.count))
                 .font(.system(size: 10))
@@ -303,26 +338,6 @@ struct CoachView: View {
         .padding(.vertical, Theme.Spacing.sm)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-    }
-
-    /// One measure: what it averages, and — right underneath — how far a round
-    /// typically strays from that.
-    private func metricLine(_ name: String, _ metric: MetricSummary, hasSpread: Bool) -> some View {
-        VStack(spacing: 0) {
-            Text(name)
-                .font(.system(size: 9, weight: .bold))
-                .foregroundStyle(Theme.textMuted)
-            Text(signed(metric.mean))
-                .font(.system(size: 19, weight: .black))
-                .foregroundStyle(metric.mean > 0 ? Theme.primary : (metric.mean < 0 ? Theme.error : Theme.text))
-                .lineLimit(1).minimumScaleFactor(0.6)
-            if hasSpread {
-                Text("±\(String(format: "%.2f", metric.standardDeviation))")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Theme.textMuted)
-                    .lineLimit(1).minimumScaleFactor(0.7)
-            }
-        }
     }
 
     private func deltaKey(_ delta: Double) -> String {

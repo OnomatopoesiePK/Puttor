@@ -20,13 +20,17 @@ struct CoachMetric: Identifiable {
     /// A second line under the value: the average behind a change, the
     /// strokes behind a distance band.
     var detail: String?
+    /// What the figure is, written beside it — "SG", "PCG" — where it has a
+    /// name of its own.
+    var unitKey: String?
     let tone: Tone
 
-    init(id: String, labelKey: String, value: String, detail: String? = nil, tone: Tone) {
+    init(id: String, labelKey: String, value: String, detail: String? = nil, unitKey: String? = nil, tone: Tone) {
         self.id = id
         self.labelKey = labelKey
         self.value = value
         self.detail = detail
+        self.unitKey = unitKey
         self.tone = tone
     }
 }
@@ -238,8 +242,9 @@ enum CoachAdvisor {
             trend == nil
                 ? CoachMetric(
                     id: "sg",
-                    labelKey: "summary.sg",
+                    labelKey: "coach.perRound",
                     value: signed(sgPerRound),
+                    unitKey: "summary.sg",
                     tone: tone(sgPerRound)
                 )
                 : CoachMetric(
@@ -247,6 +252,7 @@ enum CoachAdvisor {
                     labelKey: "coach.trendMetric",
                     value: signed(delta),
                     detail: "Ø \(signed(baseline))",
+                    unitKey: "summary.sg",
                     tone: tone(delta)
                 ),
             // The same for conversion gain: which way it is moving, with the
@@ -257,12 +263,14 @@ enum CoachAdvisor {
                     labelKey: "coach.pcgTrendMetric",
                     value: signed(change.delta),
                     detail: "Ø \(signed(change.baseline))",
+                    unitKey: "stats.pcg",
                     tone: tone(change.delta)
                 )
             } ?? CoachMetric(
                 id: "pcg",
-                labelKey: "stats.pcg",
+                labelKey: "coach.perRound",
                 value: signed(pcgPerRound),
+                unitKey: "stats.pcg",
                 tone: tone(pcgPerRound)
             ),
             // Per round rather than as a share of holes: nobody plays a

@@ -38,11 +38,18 @@ struct DrillBenchmarkCard: View {
                     ),
                     colour: Theme.text
                 )
-                box(
-                    value: "\(gained ? "+" : "")\(String(format: "%.2f", benchmark.strokesPerRound))",
-                    label: L("game.benchmark.perRound"),
-                    colour: gained ? Theme.primary : Theme.error
-                )
+                VStack(spacing: 2) {
+                    MetricValue(value: benchmark.strokesPerRound, metric: .sg, size: 20)
+                    Text(L("game.benchmark.perRound"))
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(Theme.textMuted)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2).minimumScaleFactor(0.7)
+                }
+                .frame(maxWidth: .infinity, minHeight: 58)
+                .padding(.vertical, 6)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
             }
 
             Text(String(
