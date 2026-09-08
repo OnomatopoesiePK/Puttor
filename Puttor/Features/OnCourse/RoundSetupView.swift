@@ -27,6 +27,7 @@ struct RoundSetupView: View {
     @State private var weather: WeatherTemp
     @State private var precipitation: Precipitation
     @State private var grainyGreens: Bool
+    @State private var isTournament: Bool
     @State private var startingHole: Int
     @State private var inputMode: InputMode
 
@@ -54,6 +55,7 @@ struct RoundSetupView: View {
         _weather = State(initialValue: existingRound?.weather ?? .warm)
         _precipitation = State(initialValue: existingRound?.precipitation ?? .sun)
         _grainyGreens = State(initialValue: existingRound?.grainyGreens ?? false)
+        _isTournament = State(initialValue: existingRound?.isTournament ?? false)
         _startingHole = State(initialValue: existingRound?.startingHole ?? 1)
         // New rounds start on whichever mode was used last, so a player who
         // always uses the same one never has to re-pick it.
@@ -108,6 +110,18 @@ struct RoundSetupView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(L("setup.grainyGreens")).foregroundStyle(Theme.text)
                             Text(L("setup.grainyGreens.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+                    .tint(Theme.primary)
+                    .padding(Theme.Spacing.md)
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+
+                    label(L("setup.roundType"))
+                    Toggle(isOn: $isTournament) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L("setup.tournament")).foregroundStyle(Theme.text)
+                            Text(L("setup.tournament.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
                         }
                     }
                     .tint(Theme.primary)
@@ -361,6 +375,7 @@ struct RoundSetupView: View {
             existingRound.weather = weather
             existingRound.precipitation = precipitation
             existingRound.grainyGreens = grainyGreens
+            existingRound.isTournament = isTournament
             existingRound.startingHole = startingHole
             existingRound.inputMode = inputMode
             try? modelContext.save()
@@ -377,6 +392,7 @@ struct RoundSetupView: View {
             weather: weather,
             precipitation: precipitation,
             grainyGreens: grainyGreens,
+            isTournament: isTournament,
             startingHole: startingHole,
             inputMode: inputMode
         )

@@ -1,0 +1,46 @@
+# Privacy Policy
+Last updated: September 2026
+
+# In short
+Puttor keeps everything on your device. There are no user accounts, no KNDR lab servers, no analytics or tracking services, no advertising and no sharing with third parties. We do not see your rounds.
+
+# Controller
+KNDR lab, Linzerstraße 119, 4600 Wels, Austria
+Email: office@kndr-lab.com
+
+# What data is processed
+The app stores only what you enter or set yourself:
+
+- Rounds: course name, date, green speed, weather, wind, precipitation, grain, round type (tournament or casual), notes
+- Putts: distance, slope, break, result, miss direction and miss reasons
+- Practice: drills played, duration, results
+- Putters and app settings (language, appearance, units)
+
+This data sits in a local database on your device. The app does not transmit it. The app only opens a network connection when you follow a link yourself — for example the research paper linked in the reference screen.
+
+# Legal basis
+As no data is transmitted to us, we carry out no processing of your personal data in that respect. Processing on your own device is under your control.
+
+# Contacting us
+If you write to office@kndr-lab.com we process your email address and the content of your message in order to answer it. The legal basis is Art 6(1)(b) GDPR (pre-contractual or contractual measures) or Art 6(1)(f) GDPR (legitimate interest in answering enquiries). We delete correspondence once it is no longer needed and no statutory retention period applies.
+
+# iCloud backup
+If you have Apple's iCloud device backup enabled, the app's data is included in that backup. Apple is the controller for it under Apple's privacy policy; we have no access to it.
+
+# App Store
+The app is distributed through the App Store. Apple processes data such as downloads, purchases and crash reports as its own controller. We receive only aggregated, non-personal statistics from Apple. Apple's privacy policy applies.
+
+# Retention and deletion
+Data stays on your device until you delete it in the app or remove the app. Deleting the app deletes the local database with it; an existing iCloud backup may still contain it until that backup is overwritten.
+
+# Your rights
+Under the GDPR you have the right of access (Art 15), rectification (Art 16), erasure (Art 17), restriction of processing (Art 18), data portability (Art 20) and objection (Art 21). Since we hold no data about you, we cannot provide information about your rounds — that data is yours alone.
+
+You have the right to lodge a complaint with the supervisory authority:
+Austrian Data Protection Authority, Barichgasse 40-42, 1030 Vienna, dsb@dsb.gv.at
+
+# Children
+The app is not directed at children and collects no data about its users.
+
+# Changes
+If features are added later that do transmit data — a website, leaderboards or synchronisation between devices — this policy will be updated accordingly beforehand. The version included in the app you are running is the one that applies.

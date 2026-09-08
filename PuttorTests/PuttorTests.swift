@@ -1584,6 +1584,67 @@ struct PuttorTests {
         #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
     }
 
+    // MARK: - Tournament rounds
+
+    /// Competition against practice: the average, the spread around it, and
+    /// the rounds that sat a long way from either — reported whichever way it
+    /// falls, including when it falls the same way.
+    @MainActor
+    @Test func tournamentRoundsAreComparedWithCasualOnes() async throws {
+        let context = try Self.makeInMemoryContext()
+
+        /// A round of `holes` two-putts from `distance`, which fixes its
+        /// strokes gained: one hole is worth E(d) - 2.
+        func round(tournament: Bool, daysAgo: Int, distance: Double, holes: Int = 4) -> Round {
+            let round = Round(courseName: "T", isTournament: tournament)
+            round.date = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date()
+            round.isComplete = true
+            context.insert(round)
+            for hole in 1...holes {
+                for number in 1...2 {
+                    let putt = Putt(
+                        holeNumber: hole,
+                        puttNumber: number,
+                        distanceM: number == 1 ? distance : 1,
+                        result: number == 2 ? .holed : .short
+                    )
+                    putt.round = round
+                    round.putts.append(putt)
+                    context.insert(putt)
+                }
+            }
+            return round
+        }
+
+        // Casual rounds from range (two putts is par there), tournament rounds
+        // from close in (two putts is a stroke handed back).
+        var rounds = (1...4).map { round(tournament: false, daysAgo: $0, distance: 9) }
+        rounds += (5...8).map { round(tournament: true, daysAgo: $0, distance: 2) }
+        try context.save()
+
+        let comparison = TournamentInsight.compare(rounds: rounds)
+        #expect(comparison.hasBoth)
+        #expect(comparison.tournament.count == 4)
+        #expect(comparison.casual.count == 4)
+        #expect(comparison.meanDelta < 0) // worse when it counts
+        // Every round of a set is identical here, so neither set has a spread.
+        #expect(comparison.tournament.standardDeviation < 0.001)
+        #expect(comparison.outliers.isEmpty)
+
+        // One tournament round far above the rest is named, and named against
+        // the tournament rounds rather than against everything.
+        let standout = round(tournament: true, daysAgo: 9, distance: 12)
+        try context.save()
+        let withOutlier = TournamentInsight.compare(rounds: rounds + [standout])
+        let named = try #require(withOutlier.outliers.first)
+        #expect(named.point.id == standout.id)
+        #expect(named.sigma > 0)
+        #expect(named.point.isTournament)
+
+        // Without both kinds there is nothing to compare.
+        #expect(!TournamentInsight.compare(rounds: Array(rounds.prefix(4))).hasBoth)
+    }
+
     // MARK: - Conditions
 
     /// A condition is only named when the same player's misses behave

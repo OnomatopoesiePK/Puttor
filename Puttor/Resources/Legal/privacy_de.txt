@@ -1,0 +1,46 @@
+# Datenschutzerklärung
+Stand: September 2026
+
+# Kurzfassung
+Puttor speichert alles ausschließlich auf deinem Gerät. Es gibt keine Benutzerkonten, keine Server von KNDR lab, keine Analyse- oder Tracking-Dienste, keine Werbung und keine Weitergabe an Dritte. Wir sehen deine Runden nicht.
+
+# Verantwortlicher
+KNDR lab, Linzerstraße 119, 4600 Wels, Österreich
+E-Mail: office@kndr-lab.com
+
+# Welche Daten verarbeitet werden
+Die App speichert nur, was du selbst eingibst oder einstellst:
+
+- Runden: Platzname, Datum, Grüngeschwindigkeit, Wetter, Wind, Niederschlag, Grain, Rundenart (Turnier oder normale Runde), Notizen
+- Putts: Distanz, Neigung, Break, Ergebnis, Miss-Richtung und Miss-Gründe
+- Trainingseinheiten: gespielte Drills, Dauer, Ergebnisse
+- Schläger und App-Einstellungen (Sprache, Erscheinungsbild, Einheiten)
+
+Diese Daten liegen in einer lokalen Datenbank auf deinem Gerät. Sie werden von der App nicht übertragen. Eine Netzwerkverbindung stellt die App nur her, wenn du selbst einen Link öffnest — etwa das verlinkte Fachpaper in der Referenz.
+
+# Rechtsgrundlage
+Da keine Daten an uns übermittelt werden, findet insoweit keine Verarbeitung personenbezogener Daten durch uns statt. Für die Verarbeitung auf deinem Gerät bist du selbst verantwortlich.
+
+# Kontaktaufnahme
+Schreibst du uns an office@kndr-lab.com, verarbeiten wir deine E-Mail-Adresse und den Inhalt deiner Nachricht, um sie zu beantworten. Rechtsgrundlage ist Art 6 Abs 1 lit b DSGVO (vorvertragliche oder vertragliche Maßnahmen) bzw. Art 6 Abs 1 lit f DSGVO (berechtigtes Interesse an der Beantwortung von Anfragen). Wir löschen den Schriftverkehr, sobald er nicht mehr benötigt wird und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.
+
+# iCloud-Backup
+Wenn du die iCloud-Gerätesicherung von Apple aktiviert hast, wird der Datenbestand der App in dieses Backup einbezogen. Verantwortlich dafür ist Apple nach den Apple-Datenschutzbestimmungen; wir haben darauf keinen Zugriff.
+
+# App Store
+Der Bezug der App läuft über den App Store. Apple verarbeitet dabei eigenverantwortlich Daten wie Downloads, Käufe und Absturzberichte. Wir erhalten von Apple ausschließlich zusammengefasste, nicht personenbezogene Statistiken. Es gelten die Datenschutzbestimmungen von Apple.
+
+# Speicherdauer und Löschung
+Die Daten bleiben so lange auf deinem Gerät, bis du sie in der App löschst oder die App entfernst. Beim Löschen der App wird der lokale Datenbestand mitgelöscht; in einem bestehenden iCloud-Backup kann er noch enthalten sein, bis dieses überschrieben wird.
+
+# Deine Rechte
+Dir stehen nach der DSGVO die Rechte auf Auskunft (Art 15), Berichtigung (Art 16), Löschung (Art 17), Einschränkung der Verarbeitung (Art 18), Datenübertragbarkeit (Art 20) und Widerspruch (Art 21) zu. Da wir keine Daten über dich speichern, können wir zu deinen Runden keine Auskunft erteilen — diese Daten hast ausschließlich du.
+
+Du hast das Recht auf Beschwerde bei der Aufsichtsbehörde:
+Österreichische Datenschutzbehörde, Barichgasse 40-42, 1030 Wien, dsb@dsb.gv.at
+
+# Kinder
+Die App richtet sich nicht gezielt an Kinder und erhebt keine Daten über ihre Nutzer.
+
+# Änderungen
+Kommen später Funktionen dazu, die Daten übertragen — etwa eine Website, Bestenlisten oder eine Synchronisierung zwischen Geräten — wird diese Erklärung vorher entsprechend ergänzt. Maßgeblich ist die in der jeweiligen App-Version enthaltene Fassung.

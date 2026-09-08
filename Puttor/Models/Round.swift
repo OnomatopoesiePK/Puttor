@@ -17,6 +17,9 @@ final class Round {
     var weatherRaw: String = WeatherTemp.warm.rawValue
     var precipitationRaw: String = Precipitation.sun.rawValue
     var grainyGreens: Bool = false
+    /// Whether the round was played in a competition. Defaults to false so
+    /// rounds recorded before the flag existed stay what they were: practice.
+    var isTournament: Bool = false
     var startingHole: Int = 1
     var inputModeRaw: String = InputMode.pro.rawValue
     var holeCount: Int = 18
@@ -74,6 +77,7 @@ final class Round {
         weather: WeatherTemp = .warm,
         precipitation: Precipitation = .sun,
         grainyGreens: Bool = false,
+        isTournament: Bool = false,
         startingHole: Int = 1,
         inputMode: InputMode = .pro
     ) {
@@ -86,6 +90,7 @@ final class Round {
         self.weatherRaw = weather.rawValue
         self.precipitationRaw = precipitation.rawValue
         self.grainyGreens = grainyGreens
+        self.isTournament = isTournament
         self.startingHole = startingHole
         self.inputModeRaw = inputMode.rawValue
         self.holeCount = 18

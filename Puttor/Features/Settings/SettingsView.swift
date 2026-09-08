@@ -172,6 +172,35 @@ struct SettingsView: View {
                         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
+
+                    sectionHeader(L("settings.legal"))
+                    VStack(spacing: 8) {
+                        ForEach(LegalDocument.allCases) { document in
+                            NavigationLink {
+                                LegalDocumentView(document: document)
+                            } label: {
+                                HStack {
+                                    Image(systemName: document.icon).foregroundStyle(Theme.primary)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(L(document.titleKey)).foregroundStyle(Theme.text)
+                                        Text(L(document.subtitleKey)).font(.caption).foregroundStyle(Theme.textSecondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right").foregroundStyle(Theme.textMuted)
+                                }
+                                .padding(Theme.Spacing.md)
+                                .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+                                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    Text(L("settings.legal.footer"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(Theme.textMuted)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 4)
                 }
                 .padding(.horizontal, Theme.Spacing.lg)
                 .padding(.bottom, 40)

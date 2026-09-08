@@ -127,6 +127,8 @@ struct CoachReport {
     var costliest: CoachWeakness?
     /// The drills, counted separately from the rounds.
     var practice = CoachPractice()
+    /// Competition against practice — reported whichever way it falls.
+    var tournament = TournamentComparison()
 }
 
 enum CoachAdvisor {
@@ -180,6 +182,9 @@ enum CoachAdvisor {
             CoachFinding(key: $0.key, count: $0.count, total: $0.total)
         }
         report.conditions = SplitInsight.findings(in: conditionRounds ?? rounds)
+        // Read from the same long window as the conditions: competition rounds
+        // are rare, and ten rounds rarely hold enough of them.
+        report.tournament = TournamentInsight.compare(rounds: conditionRounds ?? rounds)
 
         let reading = self.trend(in: rounds)
         report.trend = reading.trend

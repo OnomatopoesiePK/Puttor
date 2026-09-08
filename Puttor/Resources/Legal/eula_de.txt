@@ -1,0 +1,48 @@
+# Endbenutzer-Lizenzvertrag (EULA)
+Stand: September 2026
+
+Dieser Vertrag wird zwischen dir und KNDR lab, Linzerstraße 119, 4600 Wels, Österreich, geschlossen — nicht mit Apple. KNDR lab allein ist für die App Puttor und deren Inhalte verantwortlich.
+
+# Lizenz
+Du erhältst ein einfaches, nicht ausschließliches, nicht übertragbares und widerrufliches Recht, Puttor auf den Geräten zu nutzen, die du besitzt oder kontrollierst, und zwar nach Maßgabe der Nutzungsbestimmungen der Apple Media Services. Die App wird lizenziert, nicht verkauft.
+
+# Was nicht erlaubt ist
+- Zurückentwicklung, Dekompilierung oder Disassemblierung, soweit nicht gesetzlich zwingend gestattet
+- Vermietung, Verleih, Weiterverkauf, Unterlizenzierung oder sonstige Weitergabe der App
+- Entfernen oder Verändern von Urheberrechtshinweisen
+- Nutzung der App zu rechtswidrigen Zwecken
+
+# Rechte an der App
+Alle Rechte an Puttor, an ihrem Quellcode, ihrer Gestaltung und ihren Inhalten verbleiben bei KNDR lab. Die von dir eingegebenen Daten gehören dir; sie verbleiben auf deinem Gerät.
+
+# Wartung und Support
+Für Wartung und Support ist ausschließlich KNDR lab zuständig, erreichbar unter office@kndr-lab.com. Apple trifft insoweit keine Verpflichtung.
+
+# Gewährleistung
+Es gelten die gesetzlichen Gewährleistungsbestimmungen. Sollte die App die geltende Gewährleistung nicht erfüllen, kannst du Apple hiervon verständigen; Apple erstattet dir dann gegebenenfalls den Kaufpreis. Darüber hinaus trifft Apple im gesetzlich zulässigen Umfang keine weitere Gewährleistungspflicht.
+
+# Genauigkeit der Auswertungen
+Puttor ist ein Trainingswerkzeug. Die Berechnungen beruhen auf veröffentlichten Tour-Referenzwerten und auf den Daten, die du selbst eingibst. Sie stellen keine Beratung dar, und es wird keine Gewähr dafür übernommen, dass sie zu einem bestimmten Ergebnis oder zu einer Verbesserung deines Spiels führen.
+
+# Haftung
+KNDR lab haftet für Vorsatz und grobe Fahrlässigkeit sowie nach dem Produkthaftungsgesetz und bei Verletzung von Leben, Körper oder Gesundheit unbeschränkt. Bei leichter Fahrlässigkeit wird die Haftung auf den vorhersehbaren, vertragstypischen Schaden begrenzt; die Haftung für entgangenen Gewinn, Datenverlust und Folgeschäden ist in diesem Rahmen ausgeschlossen. Zwingende Rechte von Verbraucherinnen und Verbrauchern bleiben unberührt.
+
+Für Datensicherungen bist du selbst verantwortlich.
+
+# Ansprüche Dritter
+Für die Behandlung von Ansprüchen Dritter im Zusammenhang mit der App — einschließlich Ansprüchen wegen Verletzung von Schutzrechten — ist ausschließlich KNDR lab zuständig, nicht Apple.
+
+# Export und Rechtsvorschriften
+Du sicherst zu, dich in keinem Land aufzuhalten, das einem Embargo der Vereinigten Staaten unterliegt oder von der US-Regierung als staatlicher Unterstützer des Terrorismus eingestuft wird, und auf keiner Liste verbotener oder beschränkter Parteien der US-Regierung zu stehen.
+
+# Beendigung
+Der Vertrag endet, sobald du die App löschst. Bei erheblichem Verstoß gegen diese Bedingungen erlischt deine Lizenz automatisch.
+
+# Apple als Drittbegünstigter
+Apple und die Tochtergesellschaften von Apple sind Drittbegünstigte dieses Vertrags und berechtigt, ihn dir gegenüber durchzusetzen.
+
+# Anwendbares Recht
+Es gilt österreichisches Recht unter Ausschluss der Verweisungsnormen des internationalen Privatrechts und des UN-Kaufrechts. Für Verbraucherinnen und Verbraucher gelten die zwingenden Bestimmungen ihres gewöhnlichen Aufenthaltsstaates sowie deren Gerichtsstände; im Übrigen ist Wels Gerichtsstand.
+
+# Kontakt
+KNDR lab, Linzerstraße 119, 4600 Wels, Österreich — office@kndr-lab.com

@@ -628,3 +628,32 @@
 "game.ladder.rungCount" = "%ld Sprossen, die nächste unten.";
 "game.ladder.startSpot" = "EIN ORT FÜR ALLE";
 "game.ladder.targetReminder" = "%1$ld Sprossen, jede innerhalb von %2$@ um ihre Distanz.";
+
+// Tournament rounds against casual ones
+"setup.roundType" = "RUNDE";
+"setup.tournament" = "Turnierrunde";
+"setup.tournament.desc" = "Wird vom Coach getrennt ausgewertet: Turnier gegen Übungsrunde";
+"coach.tournament" = "WENN ES ZÄHLT";
+"coach.tournament.competition" = "TURNIER";
+"coach.tournament.practice" = "NORMAL";
+"coach.tournament.rounds" = "%1$ld Runden";
+"coach.tournament.roundsAndSpread" = "%1$ld Runden · σ %2$.2f";
+"coach.tournament.better" = "Im Turnier gewinnst du %.2f Schläge pro Runde mehr als in einer normalen Runde.";
+"coach.tournament.worse" = "Im Turnier verlierst du %.2f Schläge pro Runde gegenüber deinen normalen Runden.";
+"coach.tournament.same" = "Turnier und normale Runde kommen auf dasselbe heraus — der Unterschied liegt bei %.2f Schlägen pro Runde.";
+"coach.tournament.steadier" = "Deine Turnierrunden liegen um %.2f Schläge enger beisammen — wenn es zählt, puttest du berechenbarer.";
+"coach.tournament.wilder" = "Deine Turnierrunden streuen um %.2f Schläge weiter als die normalen: gute und schlechte Tage liegen dort weiter auseinander.";
+"coach.tournament.sameSpread" = "Beide Gruppen streuen gleich weit — eine zählende Karte ändert also nichts an deiner Verlässlichkeit.";
+"coach.tournament.outliers" = "RUNDEN, DIE HERAUSSTECHEN";
+"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ — %4$.1f Standardabweichungen vom Schnitt dieser Gruppe.";
+"coach.tournament.info" = "Jede Turnierrunde wird mit jeder normalen verglichen, und das Ergebnis steht hier, egal wie es ausfällt — es geht darum zu wissen, was deine Karte sagt, wenn sie zählt, und „kein Unterschied\" ist darauf eine Antwort.\n\nDie große Zahl sind die Strokes Gained beim Putten pro Runde. Das σ darunter ist die Standardabweichung: wie weit eine Runde üblicherweise von diesem Schnitt entfernt liegt — der Unterschied zwischen verlässlich und nur an guten Tagen gut. Sie wird erst ab drei Runden angegeben.\n\nEine Runde sticht heraus, wenn sie mindestens 1,8 Standardabweichungen vom Schnitt ihrer eigenen Gruppe entfernt liegt — Turnierrunden werden an Turnierrunden gemessen.\n\nGelesen wird das aus deinen letzten dreißig Runden, weil Turniere seltener sind als Übungsrunden.";
+
+// Legal
+"settings.legal" = "RECHTLICHES";
+"settings.legal.footer" = "KNDR lab · Linzerstraße 119, 4600 Wels, Österreich · office@kndr-lab.com";
+"legal.impressum" = "Impressum";
+"legal.impressum.desc" = "Angaben gemäß § 5 ECG";
+"legal.privacy" = "Datenschutzerklärung";
+"legal.privacy.desc" = "Alles bleibt auf deinem Gerät";
+"legal.eula" = "Lizenzvertrag";
+"legal.eula.desc" = "Nutzungsbedingungen der App";

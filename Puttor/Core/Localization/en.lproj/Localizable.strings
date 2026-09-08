@@ -628,3 +628,32 @@
 "game.ladder.rungCount" = "%ld rungs, nearest at the bottom.";
 "game.ladder.startSpot" = "ONE SPOT FOR ALL OF THEM";
 "game.ladder.targetReminder" = "%1$ld rungs, each within %2$@ of its distance.";
+
+// Tournament rounds against casual ones
+"setup.roundType" = "ROUND";
+"setup.tournament" = "Tournament round";
+"setup.tournament.desc" = "Counted separately by the coach: competition against practice";
+"coach.tournament" = "WHEN IT COUNTS";
+"coach.tournament.competition" = "TOURNAMENT";
+"coach.tournament.practice" = "CASUAL";
+"coach.tournament.rounds" = "%1$ld rounds";
+"coach.tournament.roundsAndSpread" = "%1$ld rounds · σ %2$.2f";
+"coach.tournament.better" = "In competition you gain %.2f strokes a round more than in a casual round.";
+"coach.tournament.worse" = "In competition you lose %.2f strokes a round against your casual rounds.";
+"coach.tournament.same" = "Competition and casual rounds come out the same, within %.2f strokes a round.";
+"coach.tournament.steadier" = "Your competition rounds sit closer together, by %.2f strokes — you putt more predictably when it counts.";
+"coach.tournament.wilder" = "Your competition rounds are %.2f strokes further apart than your casual ones: the good days and bad days pull further away from each other.";
+"coach.tournament.sameSpread" = "Both sets are equally spread out, so a card counting changes nothing about how reliable you are.";
+"coach.tournament.outliers" = "ROUNDS THAT STOOD OUT";
+"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ — %4$.1f standard deviations from that set's average.";
+"coach.tournament.info" = "Every tournament round is compared with every casual one, and reported whichever way it falls — the point is to know what your card says when it counts, and \"no difference\" is an answer to that.\n\nThe big number is strokes gained putting per round. σ underneath is the standard deviation: how far a round typically sits from that average, which is the difference between reliable and merely good on your day. It is only quoted once three rounds are behind it.\n\nA round is listed as standing out when it sits at least 1.8 standard deviations from the average of its own set — tournament rounds are measured against tournament rounds.\n\nRead from your last thirty rounds, since competition is rarer than practice.";
+
+// Legal
+"settings.legal" = "LEGAL";
+"settings.legal.footer" = "KNDR lab · Linzerstraße 119, 4600 Wels, Austria · office@kndr-lab.com";
+"legal.impressum" = "Legal Notice";
+"legal.impressum.desc" = "Provider details under § 5 ECG";
+"legal.privacy" = "Privacy Policy";
+"legal.privacy.desc" = "Everything stays on your device";
+"legal.eula" = "Licence Agreement";
+"legal.eula.desc" = "Terms of use for the app";

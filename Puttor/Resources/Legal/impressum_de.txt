@@ -1,0 +1,37 @@
+# Impressum
+Angaben gemäß § 5 E-Commerce-Gesetz (ECG) und § 25 Mediengesetz.
+
+# Diensteanbieter und Medieninhaber
+KNDR lab
+Linzerstraße 119
+4600 Wels
+Österreich
+
+# Kontakt
+E-Mail: office@kndr-lab.com
+Web: www.kndr-lab.com
+
+# Unternehmensgegenstand
+Entwicklung und Vertrieb von Software und mobilen Anwendungen.
+
+# Unternehmensdaten
+Rechtsform: [ERGÄNZEN]
+Firmenbuchnummer: [ERGÄNZEN oder streichen, falls nicht im Firmenbuch eingetragen]
+Firmenbuchgericht: [ERGÄNZEN oder streichen]
+UID-Nummer: [ERGÄNZEN oder streichen, falls Kleinunternehmerregelung]
+
+# Aufsichtsbehörde und Kammer
+Gewerbebehörde: Magistrat der Stadt Wels
+Mitgliedschaft: Wirtschaftskammer Oberösterreich, Fachgruppe für Unternehmensberatung, Buchhaltung und Informationstechnologie (UBIT)
+Anwendbare Rechtsvorschrift: Gewerbeordnung (GewO), abrufbar unter www.ris.bka.gv.at
+
+# Blattlinie
+Information über die App Puttor und die Leistungen von KNDR lab.
+
+# Streitbeilegung
+Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+
+# Urheberrecht
+Die Inhalte dieser App — Texte, Grafiken, Layout und Quellcode — sind urheberrechtlich geschützt. Jede Verwertung außerhalb der Grenzen des Urheberrechts bedarf der vorherigen schriftlichen Zustimmung von KNDR lab.
+
+Die verwendeten Referenzwerte für den Tour-Durchschnitt beruhen auf den veröffentlichten Arbeiten von Mark Broadie (Columbia University); die Quellenangabe findet sich in der App unter Einstellungen › Strokes Gained & PKR.

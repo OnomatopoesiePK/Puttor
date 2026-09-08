@@ -42,6 +42,7 @@ struct CoachView: View {
                         if report.practice.sessions > 0 { practiceCard }
                         if !report.findings.isEmpty { findingsCard }
                         if !report.conditions.isEmpty { conditionsCard }
+                        if report.tournament.hasBoth { tournamentCard }
                     } else {
                         notEnoughYetCard
                     }
@@ -224,6 +225,112 @@ struct CoachView: View {
                 }
             }
         }
+    }
+
+    /// Competition against practice. Everything gets reported here — better,
+    /// worse or the same — because the question is what the card says when it
+    /// counts, and "no difference" is an answer to it.
+    private var tournamentCard: some View {
+        let comparison = report.tournament
+        return card {
+            cardHeader(L("coach.tournament"), info: "coach.tournament.info")
+
+            HStack(spacing: Theme.Spacing.sm) {
+                groupBox(L("coach.tournament.competition"), comparison.tournament, tone: .primary)
+                groupBox(L("coach.tournament.practice"), comparison.casual, tone: .secondary)
+            }
+
+            Text(String(
+                format: L(deltaKey(comparison.meanDelta)),
+                abs(comparison.meanDelta)
+            ))
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(Theme.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+
+            // The spread is only quoted where there are enough rounds behind
+            // it for it to mean anything.
+            if comparison.tournament.hasEnoughForSpread, comparison.casual.hasEnoughForSpread {
+                Text(String(
+                    format: L(spreadKey(comparison.spreadDelta)),
+                    abs(comparison.spreadDelta)
+                ))
+                .font(.system(size: 13))
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !comparison.outliers.isEmpty {
+                Text(L("coach.tournament.outliers"))
+                    .font(.system(size: 10, weight: .bold)).tracking(1.2)
+                    .foregroundStyle(Theme.textMuted)
+                    .padding(.top, 2)
+
+                ForEach(comparison.outliers) { outlier in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: outlier.sigma > 0 ? "arrow.up.forward.circle" : "arrow.down.forward.circle")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(outlier.sigma > 0 ? Theme.primary : Theme.error)
+                            .padding(.top, 1)
+                        Text(outlierText(outlier))
+                            .font(.system(size: 12))
+                            .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+    }
+
+    private func groupBox(_ title: String, _ summary: RoundGroupSummary, tone: Color) -> some View {
+        VStack(spacing: 2) {
+            Text(signed(summary.mean))
+                .font(.system(size: 20, weight: .black))
+                .foregroundStyle(summary.mean > 0 ? Theme.primary : (summary.mean < 0 ? Theme.error : Theme.text))
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text(title)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(Theme.textMuted)
+                .lineLimit(1).minimumScaleFactor(0.7)
+            Text(String(
+                format: L(summary.hasEnoughForSpread ? "coach.tournament.roundsAndSpread" : "coach.tournament.rounds"),
+                summary.count,
+                summary.standardDeviation
+            ))
+            .font(.system(size: 10))
+            .foregroundStyle(Theme.textMuted)
+            .lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, minHeight: 74)
+        .padding(.vertical, Theme.Spacing.sm)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    private func deltaKey(_ delta: Double) -> String {
+        if delta >= 0.15 { return "coach.tournament.better" }
+        if delta <= -0.15 { return "coach.tournament.worse" }
+        return "coach.tournament.same"
+    }
+
+    private func spreadKey(_ delta: Double) -> String {
+        if delta >= 0.15 { return "coach.tournament.steadier" }
+        if delta <= -0.15 { return "coach.tournament.wilder" }
+        return "coach.tournament.sameSpread"
+    }
+
+    private func outlierText(_ outlier: RoundOutlier) -> String {
+        String(
+            format: L("coach.tournament.outlier"),
+            outlier.point.date.formatted(.dateTime.day().month(.twoDigits).year(.twoDigits)),
+            L(outlier.point.isTournament ? "coach.tournament.competition" : "coach.tournament.practice"),
+            signed(outlier.point.strokesGained),
+            abs(outlier.sigma)
+        )
+    }
+
+    private func signed(_ value: Double) -> String {
+        "\(value > 0 ? "+" : "")\(String(format: "%.2f", value))"
     }
 
     private var notEnoughYetCard: some View {
