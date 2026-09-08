@@ -236,8 +236,8 @@ struct CoachView: View {
             cardHeader(L("coach.tournament"), info: "coach.tournament.info")
 
             HStack(spacing: Theme.Spacing.sm) {
-                groupBox(L("coach.tournament.competition"), comparison.tournament, tone: .primary)
-                groupBox(L("coach.tournament.practice"), comparison.casual, tone: .secondary)
+                groupBox(L("coach.tournament.competition"), comparison.tournament)
+                groupBox(L("coach.tournament.practice"), comparison.casual)
             }
 
             Text(String(
@@ -282,29 +282,47 @@ struct CoachView: View {
         }
     }
 
-    private func groupBox(_ title: String, _ summary: RoundGroupSummary, tone: Color) -> some View {
-        VStack(spacing: 2) {
-            Text(signed(summary.mean))
-                .font(.system(size: 20, weight: .black))
-                .foregroundStyle(summary.mean > 0 ? Theme.primary : (summary.mean < 0 ? Theme.error : Theme.text))
-                .lineLimit(1).minimumScaleFactor(0.6)
+    private func groupBox(_ title: String, _ summary: RoundGroupSummary) -> some View {
+        VStack(spacing: 6) {
             Text(title)
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(size: 10, weight: .bold)).tracking(0.8)
                 .foregroundStyle(Theme.textMuted)
                 .lineLimit(1).minimumScaleFactor(0.7)
-            Text(String(
-                format: L(summary.hasEnoughForSpread ? "coach.tournament.roundsAndSpread" : "coach.tournament.rounds"),
-                summary.count,
-                summary.standardDeviation
-            ))
-            .font(.system(size: 10))
-            .foregroundStyle(Theme.textMuted)
-            .lineLimit(1).minimumScaleFactor(0.7)
+
+            // Both measures, named — otherwise a number on its own leaves the
+            // reader guessing which one it is.
+            metricLine(L("summary.sg"), summary.sg, hasSpread: summary.hasEnoughForSpread)
+            metricLine(L("stats.pcg"), summary.pcg, hasSpread: summary.hasEnoughForSpread)
+
+            Text(String(format: L("coach.tournament.rounds"), summary.count))
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.textMuted)
+                .lineLimit(1).minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity, minHeight: 74)
+        .frame(maxWidth: .infinity)
         .padding(.vertical, Theme.Spacing.sm)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    /// One measure: what it averages, and — right underneath — how far a round
+    /// typically strays from that.
+    private func metricLine(_ name: String, _ metric: MetricSummary, hasSpread: Bool) -> some View {
+        VStack(spacing: 0) {
+            Text(name)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(Theme.textMuted)
+            Text(signed(metric.mean))
+                .font(.system(size: 19, weight: .black))
+                .foregroundStyle(metric.mean > 0 ? Theme.primary : (metric.mean < 0 ? Theme.error : Theme.text))
+                .lineLimit(1).minimumScaleFactor(0.6)
+            if hasSpread {
+                Text("±\(String(format: "%.2f", metric.standardDeviation))")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Theme.textMuted)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+        }
     }
 
     private func deltaKey(_ delta: Double) -> String {

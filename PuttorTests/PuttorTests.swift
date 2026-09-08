@@ -1584,6 +1584,68 @@ struct PuttorTests {
         #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
     }
 
+    // MARK: - Drill results against the tour
+
+    /// A drill percentage is only worth something once it is set against the
+    /// tour's rate from the same distance and the number of putts that length
+    /// actually turns up in a round.
+    @MainActor
+    @Test func drillResultsAreWorthMoreWhereThePuttsAreCommon() async throws {
+        let context = try Self.makeInMemoryContext()
+
+        func session(distance: Double, attempts: Int, made: Int) -> GameSession {
+            let session = GameSession(gameType: .clock)
+            session.isComplete = true
+            context.insert(session)
+            for index in 0..<attempts {
+                let attempt = GameAttempt(
+                    groupIndex: 0, index: index, label: "",
+                    distanceM: distance, success: index < made
+                )
+                attempt.session = session
+                session.attempts.append(attempt)
+                context.insert(attempt)
+            }
+            return session
+        }
+
+        // Half of twenty from 2 m, where the tour holes about two thirds.
+        let close = session(distance: 2, attempts: 20, made: 10)
+        try context.save()
+        let benchmark = try #require(DrillBenchmarkCalculator.benchmark(for: close))
+        #expect(abs(benchmark.yourMakePct - 50) < 0.001)
+        #expect(benchmark.tourMakePct > 50)
+        #expect(benchmark.strokesPerRound < 0)
+
+        // The same gap from further out is worth less, because those putts
+        // hardly come up.
+        let far = session(distance: 9, attempts: 20, made: 10)
+        try context.save()
+        let farBenchmark = try #require(DrillBenchmarkCalculator.benchmark(for: far))
+        #expect(farBenchmark.yourMakePct > farBenchmark.tourMakePct)
+        #expect(farBenchmark.puttsPerRound < benchmark.puttsPerRound)
+
+        // Too few attempts to say anything.
+        #expect(DrillBenchmarkCalculator.benchmark(for: session(distance: 2, attempts: 3, made: 3)) == nil)
+
+        // A timed drill has no make rate to compare.
+        let timed = GameSession(gameType: .ladder)
+        timed.isComplete = true
+        context.insert(timed)
+        try context.save()
+        #expect(DrillBenchmarkCalculator.benchmark(for: timed) == nil)
+    }
+
+    /// The frequency estimate: short putts come up several times a round, long
+    /// ones barely at all, and the whole distribution is a round's worth.
+    @Test func puttFrequencyFallsAwayWithDistance() async throws {
+        #expect(PuttFrequency.puttsPerRound(around: 1) > PuttFrequency.puttsPerRound(around: 4))
+        #expect(PuttFrequency.puttsPerRound(around: 4) > PuttFrequency.puttsPerRound(around: 12))
+        #expect(PuttFrequency.puttsPerRound(around: 40) == 0)
+        // Roughly a club player's round, which is what the estimate claims.
+        #expect(PuttFrequency.puttsPerRound > 28 && PuttFrequency.puttsPerRound < 36)
+    }
+
     // MARK: - Tournament rounds
 
     /// Competition against practice: the average, the spread around it, and
@@ -1628,7 +1690,7 @@ struct PuttorTests {
         #expect(comparison.casual.count == 4)
         #expect(comparison.meanDelta < 0) // worse when it counts
         // Every round of a set is identical here, so neither set has a spread.
-        #expect(comparison.tournament.standardDeviation < 0.001)
+        #expect(comparison.tournament.sg.standardDeviation < 0.001)
         #expect(comparison.outliers.isEmpty)
 
         // One tournament round far above the rest is named, and named against

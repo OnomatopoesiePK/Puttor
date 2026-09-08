@@ -77,10 +77,7 @@
 "setup.slow" = "LANGSAM";
 "setup.medium" = "MITTEL";
 "setup.fast" = "SCHNELL";
-"setup.wind" = "WIND";
 "setup.weather" = "WETTER";
-"setup.precipitation" = "REGEN ODER SONNE";
-"setup.greens" = "GRÜNS";
 "setup.grainyGreens" = "Grainy Grüns";
 "setup.grainyGreens.desc" = "Grüns haben sichtbare Grain";
 "setup.startingHole" = "START-LOCH";
@@ -88,9 +85,9 @@
 "setup.startRound" = "Runde starten";
 
 /* Wind / weather / precipitation */
-"wind.none" = "Kein";
-"wind.medium" = "Mittel";
-"wind.high" = "Stark";
+"wind.none" = "Windstill";
+"wind.medium" = "Windig";
+"wind.high" = "Sturm";
 "weather.cold" = "Kalt";
 "weather.warm" = "Warm";
 "weather.hot" = "Heiß";
@@ -630,14 +627,12 @@
 "game.ladder.targetReminder" = "%1$ld Sprossen, jede innerhalb von %2$@ um ihre Distanz.";
 
 // Tournament rounds against casual ones
-"setup.roundType" = "RUNDE";
 "setup.tournament" = "Turnierrunde";
 "setup.tournament.desc" = "Wird vom Coach getrennt ausgewertet: Turnier gegen Übungsrunde";
 "coach.tournament" = "WENN ES ZÄHLT";
 "coach.tournament.competition" = "TURNIER";
 "coach.tournament.practice" = "NORMAL";
-"coach.tournament.rounds" = "%1$ld Runden";
-"coach.tournament.roundsAndSpread" = "%1$ld Runden · σ %2$.2f";
+"coach.tournament.rounds" = "letzte %1$ld Runden";
 "coach.tournament.better" = "Im Turnier gewinnst du %.2f Schläge pro Runde mehr als in einer normalen Runde.";
 "coach.tournament.worse" = "Im Turnier verlierst du %.2f Schläge pro Runde gegenüber deinen normalen Runden.";
 "coach.tournament.same" = "Turnier und normale Runde kommen auf dasselbe heraus — der Unterschied liegt bei %.2f Schlägen pro Runde.";
@@ -645,8 +640,8 @@
 "coach.tournament.wilder" = "Deine Turnierrunden streuen um %.2f Schläge weiter als die normalen: gute und schlechte Tage liegen dort weiter auseinander.";
 "coach.tournament.sameSpread" = "Beide Gruppen streuen gleich weit — eine zählende Karte ändert also nichts an deiner Verlässlichkeit.";
 "coach.tournament.outliers" = "RUNDEN, DIE HERAUSSTECHEN";
-"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ — %4$.1f Standardabweichungen vom Schnitt dieser Gruppe.";
-"coach.tournament.info" = "Jede Turnierrunde wird mit jeder normalen verglichen, und das Ergebnis steht hier, egal wie es ausfällt — es geht darum zu wissen, was deine Karte sagt, wenn sie zählt, und „kein Unterschied\" ist darauf eine Antwort.\n\nDie große Zahl sind die Strokes Gained beim Putten pro Runde. Das σ darunter ist die Standardabweichung: wie weit eine Runde üblicherweise von diesem Schnitt entfernt liegt — der Unterschied zwischen verlässlich und nur an guten Tagen gut. Sie wird erst ab drei Runden angegeben.\n\nEine Runde sticht heraus, wenn sie mindestens 1,8 Standardabweichungen vom Schnitt ihrer eigenen Gruppe entfernt liegt — Turnierrunden werden an Turnierrunden gemessen.\n\nGelesen wird das aus deinen letzten dreißig Runden, weil Turniere seltener sind als Übungsrunden.";
+"coach.tournament.outlier" = "%1$@ (%2$@): SG %3$@ — %4$.1f Standardabweichungen vom Schnitt dieser Gruppe.";
+"coach.tournament.info" = "Deine letzten fünf Turnierrunden gegen deine letzten fünf normalen Runden, und das Ergebnis steht hier, egal wie es ausfällt — es geht darum zu wissen, was deine Karte sagt, wenn sie zählt, und „kein Unterschied\" ist darauf eine Antwort.\n\nBeide Werte stehen da, damit klar ist, was gezählt wird. SG sind die Strokes Gained beim Putten über eine Runde: die Putts, die die Tour erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist die Konversion derselben Runde, also jeder Putt gemessen an der Tour-Trefferquote aus seiner Distanz.\n\nDas ± darunter ist die Standardabweichung — wie weit eine Runde üblicherweise von diesem Schnitt abweicht. Das ist der Unterschied zwischen verlässlich und nur an guten Tagen gut. Sie erscheint ab drei Runden.\n\nAls Ausreißer gilt eine Runde, deren SG mindestens 1,8 Standardabweichungen vom Schnitt der fünf Runden abweicht, zu denen sie gehört.";
 
 // Legal
 "settings.legal" = "RECHTLICHES";
@@ -657,3 +652,12 @@
 "legal.privacy.desc" = "Alles bleibt auf deinem Gerät";
 "legal.eula" = "Lizenzvertrag";
 "legal.eula.desc" = "Nutzungsbedingungen der App";
+"onCourse.tournamentTag" = "TR";
+
+// Drill results against the tour
+"game.benchmark" = "GEGEN DIE TOUR";
+"game.benchmark.you" = "DU";
+"game.benchmark.tourAt" = "TOUR AUS %@";
+"game.benchmark.perRound" = "SCHLÄGE / RUNDE";
+"game.benchmark.basis" = "Geschätzt auf rund %1$.1f Putts pro Runde, die innerhalb eines halben Meters um %2$@ liegen.";
+"game.benchmark.info" = "Deine Trefferquote neben der Tour-Quote aus derselben Distanz — und was der Unterschied über achtzehn Löcher wert ist.\n\nJeder Putt, den du über der Tour-Quote lochst, ist ein gewonnener Schlag. Der Abstand wird deshalb damit multipliziert, wie viele Putts dieser Länge in einer Runde überhaupt vorkommen: ein Drill aus 1 m betrifft rund zehn Putts pro Runde, einer aus 8 m nur zwei.\n\nDiese Häufigkeit ist eine Schätzung für eine Clubspieler-Runde mit etwa 32 Putts, keine Messung deiner eigenen. Die Zahl ist als Größenordnung gemeint: sie sagt, ob ein Drill-Ergebnis auf der Karte etwas ausmacht — nicht, was deine nächste Runde bringt.";

@@ -75,31 +75,31 @@ struct OnCourseListView: View {
         }
     }
 
-    /// Title and the one action on this screen share a line, which gives the
-    /// list of rounds back the height a full-width button used to take.
     private var header: some View {
-        HStack(alignment: .center, spacing: Theme.Spacing.md) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             ScreenTitle(text: "On Course")
-            Spacer(minLength: 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
             startButton
         }
         .screenHeaderPadding()
     }
 
+    /// Across the screen rather than beside the title: German needs the width,
+    /// and a shallow button costs the list almost nothing.
     private var startButton: some View {
         Button {
             showingSetup = true
         } label: {
             HStack(spacing: 8) {
-                Text("⛳").font(.system(size: 18))
+                Text("⛳").font(.system(size: 17))
                 Text(L("onCourse.startNewRound"))
                     .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.8)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 9)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary))
         }
         .buttonStyle(.plain)
@@ -146,6 +146,18 @@ struct OnCourseListView: View {
                                 .font(.system(size: 16, weight: .heavy))
                                 .foregroundStyle(Theme.accent)
                                 .accessibilityLabel(L("onCourse.nineHoleRound"))
+                        }
+                        // A round that counted, marked where the list is read.
+                        if round.isTournament {
+                            Text(L("onCourse.tournamentTag"))
+                                .font(.system(size: 11, weight: .black))
+                                .foregroundStyle(Theme.primary)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 1)
+                                .background(Capsule().fill(Theme.primary.opacity(0.14)))
+                                .overlay(Capsule().stroke(Theme.primary.opacity(0.5), lineWidth: 1))
+                                .padding(.leading, 5)
+                                .accessibilityLabel(L("setup.tournament"))
                         }
                     }
                     HStack(spacing: 6) {

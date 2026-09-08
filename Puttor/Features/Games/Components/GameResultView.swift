@@ -14,6 +14,8 @@ struct GameResultView<Breakdown: View>: View {
     var onDone: () -> Void
     @ViewBuilder var breakdown: () -> Breakdown
 
+    @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
+
     private var scoreText: String {
         switch gameType.scoreUnitKey {
         case "game.unit.cycles", "game.unit.strokes":
@@ -54,6 +56,12 @@ struct GameResultView<Breakdown: View>: View {
                         .font(.system(size: 12))
                         .foregroundStyle(Theme.textMuted)
                         .multilineTextAlignment(.center)
+                }
+
+                // What the percentage is worth on a course, rather than on a
+                // practice green.
+                if let benchmark = DrillBenchmarkCalculator.benchmark(for: session) {
+                    DrillBenchmarkCard(benchmark: benchmark, useFeet: unitsPref == "imperial")
                 }
 
                 breakdown()

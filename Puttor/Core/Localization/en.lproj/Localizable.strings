@@ -77,10 +77,7 @@
 "setup.slow" = "SLOW";
 "setup.medium" = "MEDIUM";
 "setup.fast" = "FAST";
-"setup.wind" = "WIND";
 "setup.weather" = "WEATHER";
-"setup.precipitation" = "RAIN OR SUN";
-"setup.greens" = "GREENS";
 "setup.grainyGreens" = "Grainy greens";
 "setup.grainyGreens.desc" = "Greens have visible grain";
 "setup.startingHole" = "STARTING HOLE";
@@ -88,9 +85,9 @@
 "setup.startRound" = "Start Round";
 
 /* Wind / weather / precipitation */
-"wind.none" = "None";
-"wind.medium" = "Medium";
-"wind.high" = "High";
+"wind.none" = "Calm";
+"wind.medium" = "Breezy";
+"wind.high" = "Stormy";
 "weather.cold" = "Cold";
 "weather.warm" = "Warm";
 "weather.hot" = "Hot";
@@ -630,14 +627,12 @@
 "game.ladder.targetReminder" = "%1$ld rungs, each within %2$@ of its distance.";
 
 // Tournament rounds against casual ones
-"setup.roundType" = "ROUND";
 "setup.tournament" = "Tournament round";
 "setup.tournament.desc" = "Counted separately by the coach: competition against practice";
 "coach.tournament" = "WHEN IT COUNTS";
 "coach.tournament.competition" = "TOURNAMENT";
 "coach.tournament.practice" = "CASUAL";
-"coach.tournament.rounds" = "%1$ld rounds";
-"coach.tournament.roundsAndSpread" = "%1$ld rounds · σ %2$.2f";
+"coach.tournament.rounds" = "last %1$ld rounds";
 "coach.tournament.better" = "In competition you gain %.2f strokes a round more than in a casual round.";
 "coach.tournament.worse" = "In competition you lose %.2f strokes a round against your casual rounds.";
 "coach.tournament.same" = "Competition and casual rounds come out the same, within %.2f strokes a round.";
@@ -645,8 +640,8 @@
 "coach.tournament.wilder" = "Your competition rounds are %.2f strokes further apart than your casual ones: the good days and bad days pull further away from each other.";
 "coach.tournament.sameSpread" = "Both sets are equally spread out, so a card counting changes nothing about how reliable you are.";
 "coach.tournament.outliers" = "ROUNDS THAT STOOD OUT";
-"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ — %4$.1f standard deviations from that set's average.";
-"coach.tournament.info" = "Every tournament round is compared with every casual one, and reported whichever way it falls — the point is to know what your card says when it counts, and \"no difference\" is an answer to that.\n\nThe big number is strokes gained putting per round. σ underneath is the standard deviation: how far a round typically sits from that average, which is the difference between reliable and merely good on your day. It is only quoted once three rounds are behind it.\n\nA round is listed as standing out when it sits at least 1.8 standard deviations from the average of its own set — tournament rounds are measured against tournament rounds.\n\nRead from your last thirty rounds, since competition is rarer than practice.";
+"coach.tournament.outlier" = "%1$@ (%2$@): SG %3$@ — %4$.1f standard deviations from that set's average.";
+"coach.tournament.info" = "Your last five tournament rounds against your last five casual ones, reported whichever way it falls — the point is to know what your card says when it counts, and \"no difference\" is an answer to that.\n\nBoth measures are shown so it is clear what is being counted. SG is strokes gained putting over a round: the putts the tour would expect, less the putts you took. PCG is the same round's conversion gain, each putt against the tour's odds of holing it from where it stood.\n\nThe ± underneath is the standard deviation — how far a round typically strays from that average, which is the difference between reliable and merely good on the day. It appears once three rounds stand behind it.\n\nA round is listed as standing out when its SG is at least 1.8 standard deviations from the average of the five it belongs to.";
 
 // Legal
 "settings.legal" = "LEGAL";
@@ -657,3 +652,12 @@
 "legal.privacy.desc" = "Everything stays on your device";
 "legal.eula" = "Licence Agreement";
 "legal.eula.desc" = "Terms of use for the app";
+"onCourse.tournamentTag" = "TR";
+
+// Drill results against the tour
+"game.benchmark" = "AGAINST THE TOUR";
+"game.benchmark.you" = "YOU";
+"game.benchmark.tourAt" = "TOUR AT %@";
+"game.benchmark.perRound" = "STROKES / ROUND";
+"game.benchmark.basis" = "Estimated on about %1$.1f putts a round landing within half a metre of %2$@.";
+"game.benchmark.info" = "Your make rate next to the tour's from the same distance, and what the difference between them is worth over eighteen holes.\n\nEvery putt holed above the tour's rate is a stroke gained, so the gap is multiplied by how many putts of that length a round actually contains — a drill at 1 m answers for ten putts a round, one at 8 m for two.\n\nThat frequency is an estimate of a club player's round of roughly 32 putts, not a measurement of yours. The figure is meant as an order of magnitude: it says whether a drill result matters on the card, not what your next round will score.";

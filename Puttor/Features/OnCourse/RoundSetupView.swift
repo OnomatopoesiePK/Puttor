@@ -87,47 +87,28 @@ struct RoundSetupView: View {
                     label(L("setup.stimp"))
                     stimpCard
 
-                    label(L("setup.wind"))
-                    threeToggle(
-                        selection: $wind,
-                        options: WindLevel.allCases
-                    )
-
+                    // Wind, temperature and precipitation are one question
+                    // asked three ways, so they sit under one heading.
                     label(L("setup.weather"))
-                    threeToggle(
-                        selection: $weather,
-                        options: WeatherTemp.allCases
-                    )
-
-                    label(L("setup.precipitation"))
-                    twoToggle(
-                        selection: $precipitation,
-                        options: Precipitation.allCases
-                    )
-
-                    label(L("setup.greens"))
-                    Toggle(isOn: $grainyGreens) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(L("setup.grainyGreens")).foregroundStyle(Theme.text)
-                            Text(L("setup.grainyGreens.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
-                        }
+                    VStack(spacing: 8) {
+                        threeToggle(selection: $wind, options: WindLevel.allCases)
+                        threeToggle(selection: $weather, options: WeatherTemp.allCases)
+                        twoToggle(selection: $precipitation, options: Precipitation.allCases)
                     }
-                    .tint(Theme.primary)
-                    .padding(Theme.Spacing.md)
-                    .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
 
-                    label(L("setup.roundType"))
-                    Toggle(isOn: $isTournament) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(L("setup.tournament")).foregroundStyle(Theme.text)
-                            Text(L("setup.tournament.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
-                        }
-                    }
-                    .tint(Theme.primary)
-                    .padding(Theme.Spacing.md)
-                    .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+                    switchRow(
+                        isOn: $isTournament,
+                        title: L("setup.tournament"),
+                        subtitle: L("setup.tournament.desc")
+                    )
+                    .padding(.top, 16)
+
+                    switchRow(
+                        isOn: $grainyGreens,
+                        title: L("setup.grainyGreens"),
+                        subtitle: L("setup.grainyGreens.desc")
+                    )
+                    .padding(.top, 8)
 
                     label(L("setup.startingHole"))
                     HStack(spacing: 10) {
@@ -180,6 +161,21 @@ struct RoundSetupView: View {
             .toolbarBackground(Theme.background, for: .navigationBar)
         }
         .preferredColorScheme(ThemeManager.shared.colorScheme)
+    }
+
+    /// A labelled switch in its own card — used for the two questions that
+    /// are answered yes or no, and need no heading above them to say so.
+    private func switchRow(isOn: Binding<Bool>, title: String, subtitle: String) -> some View {
+        Toggle(isOn: isOn) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).foregroundStyle(Theme.text)
+                Text(subtitle).font(.caption).foregroundStyle(Theme.textSecondary)
+            }
+        }
+        .tint(Theme.primary)
+        .padding(Theme.Spacing.md)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
     private func label(_ text: String) -> some View {

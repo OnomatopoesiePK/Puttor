@@ -15,6 +15,7 @@ struct GameStatsView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \GameSession.date, order: .reverse) private var allSessions: [GameSession]
+    @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
 
     @State private var sessionToDelete: GameSession?
     @State private var showResetConfirm = false
@@ -34,6 +35,9 @@ struct GameStatsView: View {
         ScrollView {
             VStack(spacing: Theme.Spacing.md) {
                 headerCard
+                if let benchmark = DrillBenchmarkCalculator.benchmark(for: recent) {
+                    DrillBenchmarkCard(benchmark: benchmark, useFeet: unitsPref == "imperial")
+                }
                 if history.isEmpty {
                     emptyState
                 } else {
