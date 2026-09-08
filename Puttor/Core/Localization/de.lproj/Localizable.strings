@@ -242,8 +242,6 @@
 "stats.last5" = "Letzte 5";
 "stats.last10" = "Letzte 10";
 "stats.allRounds" = "Alle Runden";
-"stats.byPutter" = "Nach Putter";
-"stats.byWeather" = "Nach Wetter";
 "stats.compare" = "Vergleichen";
 "stats.noRounds" = "Noch keine abgeschlossenen Runden.";
 "stats.noMatch" = "Keine Runden für diesen Filter.";
@@ -662,3 +660,16 @@
 "game.benchmark.info" = "Deine Trefferquote neben der Tour-Quote aus derselben Distanz — und was der Unterschied über achtzehn Löcher wert ist.\n\nJeder Putt, den du über der Tour-Quote lochst, ist ein gewonnener Schlag. Der Abstand wird deshalb damit multipliziert, wie viele Putts dieser Länge in einer Runde überhaupt vorkommen: ein Drill aus 1 m betrifft rund zehn Putts pro Runde, einer aus 8 m nur zwei.\n\nDiese Häufigkeit ist eine Schätzung für eine Clubspieler-Runde mit etwa 32 Putts, keine Messung deiner eigenen. Die Zahl ist als Größenordnung gemeint: sie sagt, ob ein Drill-Ergebnis auf der Karte etwas ausmacht — nicht, was deine nächste Runde bringt.";
 "coach.perRound" = "PRO RUNDE";
 "coach.practice.perPutt" = "PRO PUTT";
+
+// Statistics filter
+"stats.filter" = "Filter";
+"stats.filter.none" = "Alle Runden in diesem Zeitraum";
+"stats.filter.any" = "Egal";
+"stats.filter.yes" = "Ja";
+"stats.filter.no" = "Nein";
+"stats.filter.putter" = "Putter";
+"stats.filter.roundType" = "Rundenart";
+"stats.filter.clear" = "Filter zurücksetzen";
+"stats.filter.from" = "VON";
+"stats.filter.to" = "BIS";
+"stats.filter.open" = "offen";

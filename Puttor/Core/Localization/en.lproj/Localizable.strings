@@ -242,8 +242,6 @@
 "stats.last5" = "Last 5";
 "stats.last10" = "Last 10";
 "stats.allRounds" = "All Rounds";
-"stats.byPutter" = "By Putter";
-"stats.byWeather" = "By Weather";
 "stats.compare" = "Compare";
 "stats.noRounds" = "No completed rounds yet.";
 "stats.noMatch" = "No rounds match this filter.";
@@ -662,3 +660,16 @@
 "game.benchmark.info" = "Your make rate next to the tour's from the same distance, and what the difference between them is worth over eighteen holes.\n\nEvery putt holed above the tour's rate is a stroke gained, so the gap is multiplied by how many putts of that length a round actually contains — a drill at 1 m answers for ten putts a round, one at 8 m for two.\n\nThat frequency is an estimate of a club player's round of roughly 32 putts, not a measurement of yours. The figure is meant as an order of magnitude: it says whether a drill result matters on the card, not what your next round will score.";
 "coach.perRound" = "PER ROUND";
 "coach.practice.perPutt" = "PER PUTT";
+
+// Statistics filter
+"stats.filter" = "Filter";
+"stats.filter.none" = "All rounds in this stretch";
+"stats.filter.any" = "Any";
+"stats.filter.yes" = "Yes";
+"stats.filter.no" = "No";
+"stats.filter.putter" = "Putter";
+"stats.filter.roundType" = "Round type";
+"stats.filter.clear" = "Clear filter";
+"stats.filter.from" = "FROM";
+"stats.filter.to" = "TO";
+"stats.filter.open" = "open";

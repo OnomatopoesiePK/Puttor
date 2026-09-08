@@ -1584,6 +1584,90 @@ struct PuttorTests {
         #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
     }
 
+    // MARK: - Statistics filter
+
+    /// The filter says which rounds count; the preset says how far back to
+    /// look. Asked together, the filter narrows first and the preset counts
+    /// through what is left.
+    @MainActor
+    @Test func theFilterNarrowsBeforeTheCountIsTaken() async throws {
+        let context = try Self.makeInMemoryContext()
+        let putter = Putter(name: "Newport")
+        context.insert(putter)
+
+        func round(daysAgo: Int, stimp: Double = 9, tournament: Bool = false,
+                   grain: Bool = false, rain: Bool = false, withPutter: Bool = false) -> Round {
+            let round = Round(
+                courseName: "T", stimp: stimp,
+                precipitation: rain ? .rain : .sun,
+                grainyGreens: grain, isTournament: tournament
+            )
+            round.date = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date()
+            round.isComplete = true
+            if withPutter { round.putter = putter }
+            context.insert(round)
+            return round
+        }
+
+        let rounds = [
+            round(daysAgo: 1, stimp: 11, tournament: true, withPutter: true),
+            round(daysAgo: 2, stimp: 8),
+            round(daysAgo: 3, stimp: 11.5, grain: true, rain: true),
+            round(daysAgo: 4, stimp: 12, tournament: true),
+        ]
+        try context.save()
+
+        var filter = RoundFilter()
+        #expect(!filter.isActive)
+        #expect(rounds.allSatisfy(filter.matches))
+
+        filter.tournament = .yes
+        #expect(rounds.filter(filter.matches).count == 2)
+
+        // A range with one end open still keeps the other end.
+        filter = RoundFilter()
+        filter.stimpEnabled = true
+        filter.stimpMin = 11
+        #expect(rounds.filter(filter.matches).count == 3)
+        filter.stimpMax = 11.5
+        #expect(rounds.filter(filter.matches).count == 2)
+        // Enabled with both ends open asks nothing.
+        filter.stimpMin = nil
+        filter.stimpMax = nil
+        #expect(!filter.isActive)
+        #expect(rounds.filter(filter.matches).count == 4)
+
+        // Conditions stack rather than replace each other.
+        filter = RoundFilter()
+        filter.grain = .yes
+        filter.weather = .rain
+        #expect(rounds.filter(filter.matches).count == 1)
+        filter.tournament = .yes
+        #expect(rounds.filter(filter.matches).isEmpty)
+
+        // And the putter is matched by its own id.
+        filter = RoundFilter()
+        filter.putterID = putter.id.uuidString
+        #expect(rounds.filter(filter.matches).count == 1)
+    }
+
+    /// A pane remembers its filter, so it has to survive the round trip
+    /// through storage — including the ends that are deliberately open.
+    @Test func filtersSurviveBeingStored() async throws {
+        var filter = RoundFilter()
+        filter.grain = .no
+        filter.tournament = .yes
+        filter.weather = .windHigh
+        filter.stimpEnabled = true
+        filter.stimpMax = 10.5
+        filter.putterID = "ABC"
+
+        let restored = RoundFilter.decode(filter.encoded)
+        #expect(restored == filter)
+        #expect(restored.stimpMin == nil)
+        #expect(RoundFilter.decode("") == RoundFilter())
+    }
+
     // MARK: - Drill results against the tour
 
     /// A drill percentage is only worth something once it is set against the

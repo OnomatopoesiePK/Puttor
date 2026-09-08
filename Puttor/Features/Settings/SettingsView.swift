@@ -53,7 +53,7 @@ struct SettingsView: View {
                     sectionHeader(L("settings.units"))
                     HStack(spacing: 10) {
                         unitButton(L("settings.metres"), emoji: "📏", active: unitsPref == "metric") { unitsPref = "metric" }
-                        unitButton(L("settings.feet"), emoji: "🦶", active: unitsPref == "imperial") { unitsPref = "imperial" }
+                        unitButton(L("settings.feet"), emoji: "🇺🇸", active: unitsPref == "imperial") { unitsPref = "imperial" }
                     }
                     .padding(.bottom, 8)
 

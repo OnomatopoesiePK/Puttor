@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 private enum FilterMode: String, CaseIterable, Identifiable {
-    case last1, last3, last5, last10, custom, thisMonth, dateRange, choose, all, byPutter, byWeather
+    case last1, last3, last5, last10, custom, thisMonth, dateRange, choose, all
     var id: String { rawValue }
 
     var labelKey: String {
@@ -23,8 +23,6 @@ private enum FilterMode: String, CaseIterable, Identifiable {
         case .dateRange: return "stats.dateRange"
         case .choose: return "stats.choose"
         case .all: return "stats.allRounds"
-        case .byPutter: return "stats.byPutter"
-        case .byWeather: return "stats.byWeather"
         }
     }
 
@@ -36,41 +34,7 @@ private enum FilterMode: String, CaseIterable, Identifiable {
         case .last3: return 3
         case .last5: return 5
         case .last10: return 10
-        case .custom, .thisMonth, .dateRange, .choose, .all, .byPutter, .byWeather: return nil
-        }
-    }
-}
-
-/// One condition a round was played in. Wind, warmth and rain live on the
-/// round as three separate fields; for filtering they read better as one list
-/// of "what was it like out there".
-private enum WeatherFilter: String, CaseIterable, Identifiable {
-    case sun, rain, windNone, windMedium, windHigh, cold, warm, hot
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .sun: return "\(Precipitation.sun.emoji) \(L(Precipitation.sun.labelKey))"
-        case .rain: return "\(Precipitation.rain.emoji) \(L(Precipitation.rain.labelKey))"
-        case .windNone: return "\(WindLevel.none.emoji) \(L(WindLevel.none.labelKey))"
-        case .windMedium: return "\(WindLevel.medium.emoji) \(L(WindLevel.medium.labelKey))"
-        case .windHigh: return "\(WindLevel.high.emoji) \(L(WindLevel.high.labelKey))"
-        case .cold: return "\(WeatherTemp.cold.emoji) \(L(WeatherTemp.cold.labelKey))"
-        case .warm: return "\(WeatherTemp.warm.emoji) \(L(WeatherTemp.warm.labelKey))"
-        case .hot: return "\(WeatherTemp.hot.emoji) \(L(WeatherTemp.hot.labelKey))"
-        }
-    }
-
-    func matches(_ round: Round) -> Bool {
-        switch self {
-        case .sun: return round.precipitation == .sun
-        case .rain: return round.precipitation == .rain
-        case .windNone: return round.wind == .none
-        case .windMedium: return round.wind == .medium
-        case .windHigh: return round.wind == .high
-        case .cold: return round.weather == .cold
-        case .warm: return round.weather == .warm
-        case .hot: return round.weather == .hot
+        case .custom, .thisMonth, .dateRange, .choose, .all: return nil
         }
     }
 }
@@ -84,12 +48,11 @@ private struct StatisticsPane: View {
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
     @AppStorage private var filterModeRaw: String
     @AppStorage private var customCount: Int
-    @State private var selectedPutterID: PersistentIdentifier?
     @AppStorage private var selectedRoundIDsRaw: String
     @AppStorage private var rangeStartStamp: Double
     @AppStorage private var rangeEndStamp: Double
     @AppStorage private var roundSortRaw: String
-    @AppStorage private var weatherFilterRaw: String
+    @AppStorage private var filterRaw: String
 
     /// Empty for the single view, "B" for the second column, so the two panes
     /// remember their own filters.
@@ -108,7 +71,7 @@ private struct StatisticsPane: View {
         _rangeStartStamp = AppStorage(wrappedValue: 0, AppStorageKeys.statsRangeStart + storageSuffix)
         _rangeEndStamp = AppStorage(wrappedValue: 0, AppStorageKeys.statsRangeEnd + storageSuffix)
         _roundSortRaw = AppStorage(wrappedValue: RoundSort.newest.rawValue, AppStorageKeys.statsRoundSort + storageSuffix)
-        _weatherFilterRaw = AppStorage(wrappedValue: WeatherFilter.sun.rawValue, "statsWeatherFilter\(storageSuffix)")
+        _filterRaw = AppStorage(wrappedValue: "", "statsRoundFilter\(storageSuffix)")
     }
 
     private var filterMode: FilterMode {
@@ -116,9 +79,9 @@ private struct StatisticsPane: View {
         nonmutating set { filterModeRaw = newValue.rawValue }
     }
 
-    private var weatherFilter: WeatherFilter {
-        get { WeatherFilter(rawValue: weatherFilterRaw) ?? .sun }
-        nonmutating set { weatherFilterRaw = newValue.rawValue }
+    private var filter: RoundFilter {
+        get { RoundFilter.decode(filterRaw) }
+        nonmutating set { filterRaw = newValue.encoded }
     }
     @State private var showRoundPicker = false
     @State private var dispersionFilter: DispersionFilter = .all
@@ -158,14 +121,22 @@ private struct StatisticsPane: View {
 
     private var completeRounds: [Round] { allRounds.filter { $0.isComplete } }
 
+    /// The rounds the presets count through: everything that matches the
+    /// conditions asked for. Hand-picked rounds ignore the filter — picking a
+    /// round by hand is already saying which rounds you meant.
+    private var eligibleRounds: [Round] {
+        filterMode == .choose ? completeRounds : completeRounds.filter { filter.matches($0) }
+    }
+
     private var filteredRounds: [Round] {
+        let pool = eligibleRounds
         if let count = filterMode.fixedCount {
-            return Array(completeRounds.prefix(count))
+            return Array(pool.prefix(count))
         }
         switch filterMode {
-        case .custom: return Array(completeRounds.prefix(customCount))
+        case .custom: return Array(pool.prefix(customCount))
         case .thisMonth:
-            return completeRounds.filter {
+            return pool.filter {
                 Calendar.current.isDate($0.date, equalTo: Date(), toGranularity: .month)
             }
         case .dateRange:
@@ -174,16 +145,11 @@ private struct StatisticsPane: View {
             let first = min(rangeStart, rangeEnd), last = max(rangeStart, rangeEnd)
             let from = calendar.startOfDay(for: first)
             let to = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: last)) ?? last
-            return completeRounds.filter { $0.date >= from && $0.date < to }
+            return pool.filter { $0.date >= from && $0.date < to }
         case .choose:
             let picked = selectedRoundIDs
-            return completeRounds.filter { picked.contains($0.id.uuidString) }
-        case .byPutter:
-            guard let id = selectedPutterID else { return completeRounds }
-            return completeRounds.filter { $0.putter?.persistentModelID == id }
-        case .byWeather:
-            return completeRounds.filter { weatherFilter.matches($0) }
-        default: return completeRounds
+            return pool.filter { picked.contains($0.id.uuidString) }
+        default: return pool
         }
     }
 
@@ -453,34 +419,8 @@ private struct StatisticsPane: View {
                     chooseRoundsRow
                 }
 
-                if filterMode == .byWeather {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(WeatherFilter.allCases) { option in
-                                filterChip(option.label, selected: weatherFilter == option, color: Theme.accent) {
-                                    weatherFilter = option
-                                }
-                            }
-                        }
-                        .padding(.horizontal, Theme.Spacing.lg)
-                        .padding(.vertical, 6)
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-                }
-
-                if filterMode == .byPutter && !putters.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(putters) { p in
-                                filterChip("🏌️ \(p.name)", selected: selectedPutterID == p.persistentModelID, color: Theme.accent) {
-                                    selectedPutterID = p.persistentModelID
-                                }
-                            }
-                        }
-                        .padding(.horizontal, Theme.Spacing.lg)
-                        .padding(.vertical, 6)
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
+                if filterMode != .choose {
+                    conditionFilterBox
                 }
 
                 ScrollView {
@@ -697,9 +637,6 @@ private struct StatisticsPane: View {
                 sort: Binding(get: { roundSort }, set: { roundSort = $0 })
             )
         }
-        .onAppear {
-            if selectedPutterID == nil { selectedPutterID = putters.first?.persistentModelID }
-        }
     }
 
     private func roundsGrid(_ statsByRound: [PersistentIdentifier: RoundStats]) -> some View {
@@ -777,6 +714,203 @@ private struct StatisticsPane: View {
         }
         .padding(.horizontal, Theme.Spacing.lg)
         .padding(.bottom, 6)
+    }
+
+    // MARK: - Conditions
+
+    /// The conditions the counted rounds have to meet. One menu holds every
+    /// question — putter, grain, competition, weather, green speed — and what
+    /// has been answered shows as chips beside it, each one tappable to drop.
+    private var conditionFilterBox: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
+                filterMenu
+
+                if filter.isActive {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(activeFilterChips, id: \.0) { label, clear in
+                                Button(action: clear) {
+                                    HStack(spacing: 4) {
+                                        Text(label)
+                                        Image(systemName: "xmark")
+                                            .font(.system(size: 8, weight: .black))
+                                    }
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundStyle(Theme.accent)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 5)
+                                    .background(Capsule().fill(Theme.accent.opacity(0.13)))
+                                    .overlay(Capsule().stroke(Theme.accent.opacity(0.5), lineWidth: 1))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.vertical, 1)
+                    }
+                } else {
+                    Text(L("stats.filter.none"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(Theme.textMuted)
+                        .padding(.top, 6)
+                    Spacer(minLength: 0)
+                }
+            }
+
+            // Asked for by name, so it gets its two ends here rather than in
+            // the menu — a range is two answers, not one.
+            if filter.stimpEnabled {
+                HStack(spacing: 8) {
+                    stimpBoundMenu(L("stats.filter.from"), isLower: true)
+                    stimpBoundMenu(L("stats.filter.to"), isLower: false)
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+        .padding(.horizontal, dense ? Theme.Spacing.sm : Theme.Spacing.md)
+        .padding(.vertical, Theme.Spacing.sm)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+        .padding(.horizontal, dense ? Theme.Spacing.sm : Theme.Spacing.lg)
+        .padding(.bottom, 6)
+    }
+
+    private var filterMenu: some View {
+        Menu {
+            if !putters.isEmpty {
+                Menu(L("stats.filter.putter")) {
+                    Button(L("stats.filter.any")) { filter.putterID = nil }
+                    ForEach(putters) { putter in
+                        Button(putter.name) { filter.putterID = putter.id.uuidString }
+                    }
+                }
+            }
+
+            Menu(L("setup.grainyGreens")) {
+                triStateButtons(current: filter.grain) { filter.grain = $0 }
+            }
+
+            Menu(L("stats.filter.roundType")) {
+                Button(L("stats.filter.any")) { filter.tournament = .any }
+                Button(L("setup.tournament")) { filter.tournament = .yes }
+                Button(L("coach.tournament.practice")) { filter.tournament = .no }
+            }
+
+            Menu(L("setup.weather")) {
+                Button(L("stats.filter.any")) { filter.weather = nil }
+                ForEach(WeatherFilter.allCases) { option in
+                    Button(option.label) { filter.weather = option }
+                }
+            }
+
+            Button(L("setup.stimp")) {
+                var updated = filter
+                updated.stimpEnabled = true
+                filter = updated
+            }
+
+            if filter.isActive || filter.stimpEnabled {
+                Divider()
+                Button(L("stats.filter.clear"), role: .destructive) { filter = RoundFilter() }
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: filter.isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                Text(L("stats.filter"))
+                Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold))
+            }
+            .font(.system(size: 12, weight: .bold))
+            .foregroundStyle(Theme.primary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Capsule().fill(Theme.primary.opacity(0.12)))
+            .overlay(Capsule().stroke(Theme.primary.opacity(0.45), lineWidth: 1))
+        }
+    }
+
+    @ViewBuilder
+    private func triStateButtons(current: FilterTriState, set: @escaping (FilterTriState) -> Void) -> some View {
+        Button(L("stats.filter.any")) { set(.any) }
+        Button(L("stats.filter.yes")) { set(.yes) }
+        Button(L("stats.filter.no")) { set(.no) }
+    }
+
+    /// One end of the green-speed range. Both ends can stay open, which is why
+    /// they are two menus rather than a slider.
+    private func stimpBoundMenu(_ title: String, isLower: Bool) -> some View {
+        let value = isLower ? filter.stimpMin : filter.stimpMax
+        return Menu {
+            Button(L("stats.filter.open")) {
+                var updated = filter
+                if isLower { updated.stimpMin = nil } else { updated.stimpMax = nil }
+                filter = updated
+            }
+            ForEach(RoundFilter.stimpSteps, id: \.self) { step in
+                Button(String(format: "%.1f", step)) {
+                    var updated = filter
+                    if isLower {
+                        updated.stimpMin = step
+                        if let upper = updated.stimpMax, upper < step { updated.stimpMax = step }
+                    } else {
+                        updated.stimpMax = step
+                        if let lower = updated.stimpMin, lower > step { updated.stimpMin = step }
+                    }
+                    filter = updated
+                }
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Text(title)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(Theme.textMuted)
+                Text(value.map { String(format: "%.1f", $0) } ?? L("stats.filter.open"))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Theme.text)
+                Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.textMuted)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Capsule().fill(Theme.surfaceElevated))
+            .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
+        }
+    }
+
+    /// What is being asked for right now, each with the way to drop it.
+    private var activeFilterChips: [(String, () -> Void)] {
+        var chips: [(String, () -> Void)] = []
+
+        if let putterID, let putter = putters.first(where: { $0.id.uuidString == putterID }) {
+            chips.append(("🏌️ \(putter.name)", { filter.putterID = nil }))
+        }
+        if filter.grain != .any {
+            let label = filter.grain == .yes ? L("setup.grainyGreens") : "\(L("stats.filter.no")): \(L("setup.grainyGreens"))"
+            chips.append((label, { filter.grain = .any }))
+        }
+        if filter.tournament != .any {
+            chips.append((filter.tournament == .yes ? L("setup.tournament") : L("coach.tournament.practice"),
+                          { filter.tournament = .any }))
+        }
+        if let weather = filter.weather {
+            chips.append((weather.label, { filter.weather = nil }))
+        }
+        if filter.stimpEnabled {
+            chips.append((stimpChipLabel, {
+                var updated = filter
+                updated.stimpEnabled = false
+                updated.stimpMin = nil
+                updated.stimpMax = nil
+                filter = updated
+            }))
+        }
+        return chips
+    }
+
+    private var putterID: String? { filter.putterID }
+
+    private var stimpChipLabel: String {
+        let lower = filter.stimpMin.map { String(format: "%.1f", $0) } ?? L("stats.filter.open")
+        let upper = filter.stimpMax.map { String(format: "%.1f", $0) } ?? L("stats.filter.open")
+        return "\(L("setup.stimp")) \(lower)–\(upper)"
     }
 
     /// Stepper for the "Custom" preset, mirroring how the putter filter reveals
