@@ -44,11 +44,8 @@ struct SettingsView: View {
                     .padding(.bottom, 8)
 
                     sectionHeader(L("settings.language"))
-                    HStack(spacing: 10) {
-                        langButton("English", code: "en")
-                        langButton("Deutsch", code: "de")
-                    }
-                    .padding(.bottom, 8)
+                    languageMenu
+                        .padding(.bottom, 8)
 
                     sectionHeader(L("settings.units"))
                     HStack(spacing: 10) {
@@ -236,20 +233,36 @@ struct SettingsView: View {
             .padding(.bottom, 6)
     }
 
-    private func langButton(_ title: String, code: String) -> some View {
-        let active = localization.languageCode == code
-        return Button {
-            localization.setLanguage(code)
+    /// One row that opens the list, rather than a button per language: a row
+    /// of them only works while there are two.
+    private var languageMenu: some View {
+        Menu {
+            ForEach(LocalizationManager.supportedLanguages, id: \.self) { code in
+                Button {
+                    localization.setLanguage(code)
+                } label: {
+                    if localization.languageCode == code {
+                        Label(LocalizationManager.languageName(code), systemImage: "checkmark")
+                    } else {
+                        Text(LocalizationManager.languageName(code))
+                    }
+                }
+            }
         } label: {
-            Text(title)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(active ? Theme.primary : Theme.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(active ? Theme.primary.opacity(0.13) : Theme.surface))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(active ? Theme.primary : Theme.border, lineWidth: 1.5))
+            HStack {
+                Image(systemName: "globe").foregroundStyle(Theme.primary)
+                Text(LocalizationManager.languageName(localization.languageCode))
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Theme.text)
+                Spacer()
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(Theme.textMuted)
+            }
+            .padding(Theme.Spacing.md)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
         }
-        .buttonStyle(.plain)
     }
 
     private func appearanceButton(_ title: String, icon: String, active: Bool, action: @escaping () -> Void) -> some View {

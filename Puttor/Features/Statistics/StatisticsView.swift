@@ -406,6 +406,7 @@ private struct StatisticsPane: View {
                     .padding(.vertical, 6)
                 }
                 .fixedSize(horizontal: false, vertical: true)
+                .horizontalScrollHint()
 
                 if filterMode == .custom {
                     customCountRow
@@ -726,7 +727,10 @@ private struct StatisticsPane: View {
             HStack(alignment: .top, spacing: 8) {
                 filterMenu
 
-                if filter.isActive {
+                // Not `filter.isActive`: a green-speed range with both ends
+                // open filters nothing yet, and its chip is the way to close
+                // it again.
+                if !activeFilterChips.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
                             ForEach(activeFilterChips, id: \.0) { label, clear in
@@ -748,6 +752,7 @@ private struct StatisticsPane: View {
                         }
                         .padding(.vertical, 1)
                     }
+                    .horizontalScrollHint(fade: Theme.surface)
                 } else {
                     Text(L("stats.filter.none"))
                         .font(.system(size: 11))
@@ -786,26 +791,30 @@ private struct StatisticsPane: View {
                 }
             }
 
-            Menu(L("setup.grainyGreens")) {
+            Menu(L("stats.filter.grain")) {
                 triStateButtons(current: filter.grain) { filter.grain = $0 }
             }
 
             Menu(L("stats.filter.roundType")) {
                 Button(L("stats.filter.any")) { filter.tournament = .any }
                 Button(L("setup.tournament")) { filter.tournament = .yes }
-                Button(L("coach.tournament.practice")) { filter.tournament = .no }
+                Button(L("stats.filter.casual")) { filter.tournament = .no }
             }
 
-            Menu(L("setup.weather")) {
+            Menu(L("stats.filter.weather")) {
                 Button(L("stats.filter.any")) { filter.weather = nil }
                 ForEach(WeatherFilter.allCases) { option in
                     Button(option.label) { filter.weather = option }
                 }
             }
 
-            Button(L("setup.stimp")) {
+            Button(L("stats.filter.greenSpeed")) {
                 var updated = filter
-                updated.stimpEnabled = true
+                updated.stimpEnabled.toggle()
+                if !updated.stimpEnabled {
+                    updated.stimpMin = nil
+                    updated.stimpMax = nil
+                }
                 filter = updated
             }
 
@@ -883,11 +892,11 @@ private struct StatisticsPane: View {
             chips.append(("🏌️ \(putter.name)", { filter.putterID = nil }))
         }
         if filter.grain != .any {
-            let label = filter.grain == .yes ? L("setup.grainyGreens") : "\(L("stats.filter.no")): \(L("setup.grainyGreens"))"
-            chips.append((label, { filter.grain = .any }))
+            let answer = filter.grain == .yes ? L("stats.filter.yes") : L("stats.filter.no")
+            chips.append(("\(L("stats.filter.grain")): \(answer)", { filter.grain = .any }))
         }
         if filter.tournament != .any {
-            chips.append((filter.tournament == .yes ? L("setup.tournament") : L("coach.tournament.practice"),
+            chips.append((filter.tournament == .yes ? L("setup.tournament") : L("stats.filter.casual"),
                           { filter.tournament = .any }))
         }
         if let weather = filter.weather {
@@ -910,7 +919,7 @@ private struct StatisticsPane: View {
     private var stimpChipLabel: String {
         let lower = filter.stimpMin.map { String(format: "%.1f", $0) } ?? L("stats.filter.open")
         let upper = filter.stimpMax.map { String(format: "%.1f", $0) } ?? L("stats.filter.open")
-        return "\(L("setup.stimp")) \(lower)–\(upper)"
+        return "\(L("stats.filter.greenSpeed")) \(lower)–\(upper)"
     }
 
     /// Stepper for the "Custom" preset, mirroring how the putter filter reveals

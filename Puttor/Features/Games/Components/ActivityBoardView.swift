@@ -58,6 +58,7 @@ struct ActivityBoardView: View {
                     }
                     .padding(.vertical, 2)
                 }
+                .horizontalScrollHint(fade: Theme.surface)
                 // Opens on this week, the way a contribution graph does.
                 .onAppear { proxy.scrollTo(weeks - 1, anchor: .trailing) }
             }

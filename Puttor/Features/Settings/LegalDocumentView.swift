@@ -42,10 +42,12 @@ enum LegalDocument: String, Identifiable, CaseIterable {
         }
     }
 
-    /// The document in the app's current language, falling back to German —
-    /// these are Austrian documents, and the German wording is the binding one.
+    /// The document in the app's current language, then English, then German.
+    /// These are Austrian documents and the German wording is the binding one,
+    /// but a reader who chose Spanish is better served by the English text
+    /// than by a German one they cannot read.
     func text(languageCode: String) -> String {
-        load("\(rawValue)_\(languageCode)") ?? load("\(rawValue)_de") ?? ""
+        load("\(rawValue)_\(languageCode)") ?? load("\(rawValue)_en") ?? load("\(rawValue)_de") ?? ""
     }
 
     private func load(_ name: String) -> String? {

@@ -39,6 +39,7 @@ struct ScoreCategoryRow: View {
                             }
                         }
                     }
+                    .horizontalScrollHint(fade: Theme.surface)
                     .scrollClipDisabled(false)
                 }
                 .frame(height: 34)

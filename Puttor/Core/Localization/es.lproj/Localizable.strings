@@ -1,0 +1,679 @@
+/* Common */
+"common.add" = "Añadir";
+"common.cancel" = "Cancelar";
+"common.done" = "Listo";
+"common.edit" = "Editar";
+"common.back" = "Atrás";
+"common.save" = "Guardar";
+
+/* Tabs */
+"tab.course" = "Campo";
+"tab.games" = "Juegos";
+"tab.stats" = "Estad.";
+"tab.coach" = "Coach";
+"coach.summary" = "Leído de tus últimas %1$ld rondas y %2$ld putts.";
+"coach.weakestDistance" = "Tu distancia más débil ahora mismo es %@: ahí es donde estás más por debajo del tour.";
+"coach.numbers" = "LOS NÚMEROS";
+"coach.mistakes" = "NO DEBERÍA HABER PASADO";
+"coach.mistakes.threePutts" = "%1$ld tres putts en %2$ld hoyos desde una distancia que el tour resuelve en dos: %3$.1f golpes regalados.";
+"coach.mistakes.sureThings" = "%1$ld de %2$ld putts fallados desde donde la bola entra el %3$ld%% de las veces.";
+"coach.mistakes.worstMiss" = "El que más duele: %1$@, un putt del %2$ld%%.";
+"coach.practice" = "ENTRENAMIENTO";
+"coach.practice.sessions" = "SESIONES";
+"coach.practice.putts" = "PUTTS";
+"coach.reason.weakestDrill" = "El ejercicio en el que peor conviertes, medido contra la probabilidad de embocar desde esas distancias.";
+"coach.threePuttRate" = "3 PUTTS POR RONDA";
+"coach.whatIsHappening" = "LO QUE SE REPITE";
+"coach.workOnThis" = "TU PLAN";
+"coach.startWith" = "EMPIEZA POR AQUÍ";
+"coach.notEnough.title" = "Aún no hay base suficiente";
+"coach.notEnough.body" = "Para una lectura hacen falta %1$ld rondas terminadas y %2$ld putts; por ahora hay %3$ld rondas y %4$ld putts. Hasta entonces, estos tres ejercicios cubren lo que todo putter necesita.";
+"coach.reason.weakDistance" = "Entrena la distancia en la que estás más flojo, alrededor de %@.";
+"coach.reason.lowSide" = "Tus putts con caída siguen fallando por el lado bajo: este ejercicio son cuatro putts con caída y uno recto.";
+"coach.reason.startLine" = "Tus putts cortos se van siempre hacia el mismo lado, y eso es la línea de salida.";
+"coach.reason.pace" = "Tus fallos son un problema de velocidad antes que de línea.";
+"coach.reason.threePutts" = "Los tres putts te están costando golpes; aquí se trata de dejar cerca el primer putt.";
+"coach.reason.neverPlayed" = "Este todavía no lo has probado.";
+"coach.reason.startHere" = "Un punto de partida mientras la app aprende tu putt.";
+"coach.trend.improving" = "Tus últimas rondas están %1$.2f golpes por ronda por encima de tu media de %2$+.2f: vas hacia arriba.";
+"coach.trend.steady" = "Tu putt se mantiene estable a lo largo de estas rondas.";
+"coach.trend.slipping" = "Tus últimas rondas están %1$.2f golpes por ronda por debajo de tu media de %2$+.2f: algo se ha escapado.";
+"coach.trend.steadyStrong" = "Estable en %2$+.2f golpes por ronda, y ese es un buen sitio donde quedarse.";
+"coach.trend.steadySolid" = "Estable en %2$+.2f golpes por ronda: últimamente sin desvíos en ninguna dirección.";
+"coach.trend.steadyWeak" = "Estable en %2$+.2f golpes por ronda: estable, pero cediendo golpes de forma constante.";
+"coach.trend.method" = "Tus últimas %1$ld rondas frente a la media de las %2$ld leídas.";
+"coach.costliestBand" = "PCG PERDIDO";
+"coach.reason.idle" = "Jugado por última vez hace %ld días: toca otra vez.";
+"tab.settings" = "Ajustes";
+
+/* On Course list */
+"onCourse.title" = "En el campo";
+"onCourse.startNewRound" = "Nueva ronda";
+"onCourse.recentRounds" = "RONDAS RECIENTES";
+"onCourse.unnamedCourse" = "Campo sin nombre";
+"onCourse.complete" = "Terminada";
+"onCourse.inProgress" = "En curso";
+"onCourse.noRounds" = "Aún no hay rondas.";
+"onCourse.noRoundsHint" = "Toca «Nueva ronda» para empezar a registrar.";
+"onCourse.edit" = "Editar";
+"onCourse.editSettings" = "Editar datos de la ronda";
+"onCourse.open" = "Abrir";
+"onCourse.resume" = "Continuar";
+"onCourse.delete" = "Eliminar";
+
+/* Round setup */
+"setup.newRound" = "Nueva ronda";
+"setup.editRound" = "Editar ronda";
+"setup.saveChanges" = "Guardar cambios";
+"setup.course" = "CAMPO";
+"setup.courseNamePlaceholder" = "Nombre del campo (opcional)";
+"setup.date" = "FECHA Y HORA";
+"setup.putter" = "PUTTER";
+"setup.noPutters" = "Añade putters aquí o en Ajustes → Mis putters";
+"setup.addPutter" = "Añadir putter";
+"setup.putterNamePlaceholder" = "Nombre del putter…";
+"setup.stimp" = "VELOCIDAD DEL GREEN";
+"setup.slow" = "LENTO";
+"setup.medium" = "MEDIO";
+"setup.fast" = "RÁPIDO";
+"setup.weather" = "TIEMPO";
+"setup.grainyGreens" = "Greens con grano";
+"setup.grainyGreens.desc" = "Los greens tienen grano visible";
+"setup.startingHole" = "HOYO DE SALIDA";
+"setup.inputMode" = "MODO DE ENTRADA";
+"setup.startRound" = "Empezar ronda";
+
+/* Wind / weather / precipitation */
+"wind.none" = "Sin viento";
+"wind.medium" = "Con viento";
+"wind.high" = "Tormenta";
+"weather.cold" = "Frío";
+"weather.warm" = "Templado";
+"weather.hot" = "Calor";
+"precipitation.sun" = "Sol";
+"precipitation.rain" = "Lluvia";
+
+/* Input mode */
+"inputMode.pro" = "Pro";
+"inputMode.pro.desc" = "Todo el detalle: pendiente, diana de fallo, motivos del fallo";
+"inputMode.quick" = "Rápido";
+"inputMode.quick.desc" = "Solo distancia, putt para y dentro/fuera";
+"inputMode.custom" = "Personalizado";
+"inputMode.custom.desc" = "Tu propia selección de campos, configurada en Ajustes";
+
+/* Putt input */
+"input.result" = "RESULTADO";
+"input.hole" = "HOYO";
+"input.total" = "TOTAL";
+"input.end" = "Fin";
+"input.editing" = "EDITANDO";
+"input.saved" = "GUARDADO";
+"input.deleteHoleConfirm" = "¿Eliminar todos los putts del hoyo %ld?";
+"input.distanceLabel" = "DISTANCIA AL HOYO";
+"input.puttFor" = "PUTT PARA";
+"input.slopeGrid" = "REJILLA DE PENDIENTE";
+"input.slopeGrid.info" = "Toca la casilla que corresponda a la caída y la pendiente del putt, visto desde detrás de la bola mirando al hoyo.\n\nIzquierda/derecha = caída lateral, arriba/abajo = cuesta arriba/abajo.";
+"input.uphill" = "CUESTA ARRIBA";
+"input.downhill" = "CUESTA ABAJO";
+"input.left" = "IZQUIERDA";
+"input.straight" = "RECTO";
+"input.right" = "DERECHA";
+"input.flat" = "Llano";
+"input.rl" = "D-I";
+"input.lr" = "I-D";
+"input.up" = "A";
+"input.down" = "B";
+"input.doubleBreak" = "DOBLE CAÍDA";
+"input.missBoard" = "DIANA DE FALLO";
+"input.missBoard.info" = "Toca el centro si entró, o el anillo alrededor si fue un lip-out.\n\nUn sector exterior registra la dirección y la distancia del fallo respecto al hoyo.";
+"input.lip" = "BORDE";
+"input.missRead" = "Mala lectura";
+"input.badStroke" = "Mal golpe";
+"input.wrongAim" = "Mala orientación";
+"input.tapIn" = "Tap-in (0,3 m)";
+"input.tapInShort" = "Tap-in";
+"input.recordShort" = "Registrar";
+"input.saveEditShort" = "Guardar";
+"input.holedNextShort" = "Hoyo siguiente";
+"input.recorded" = "registrado";
+"input.saveEdit" = "Guardar cambios";
+"input.holedNext" = "¡Dentro! Hoyo siguiente";
+"input.recordPutt" = "Registrar putt";
+"input.holeCompleteTitle" = "⛳ ¡Ronda completa!";
+"input.holeCompleteMessage" = "¿Quieres terminar la ronda?";
+"input.endRound" = "Terminar ronda";
+"input.continueFromStart" = "Continuar (hoyo 1)";
+"input.endRoundTitle" = "Terminar ronda";
+"input.endRoundMessage" = "¿Terminar la ronda tras %ld putts en %ld hoyo(s)?";
+"input.save9Or18Title" = "¿Guardar como ronda de 9 hoyos?";
+"input.save9" = "Guardar 9 hoyos";
+"input.save18" = "Guardar 18 hoyos";
+"input.save9Or18Message" = "¿Quieres guardar esta ronda como 9 hoyos o como una ronda completa de 18?";
+"input.missed" = "Fallado";
+"input.holedBtn" = "Dentro";
+"input.jumpToHole" = "Ir al hoyo";
+
+/* Score categories */
+"score.eagle" = "Eagle";
+"score.birdie" = "Birdie";
+"score.par" = "Par";
+"score.bogey" = "Bogey";
+"score.doubleOrWorse" = "Doble+";
+"score.eagle.short" = "EAGLE";
+"score.birdie.short" = "BIRDIE";
+"score.par.short" = "PAR";
+"score.bogey.short" = "BOGEY";
+"score.doubleOrWorse.short" = "DB+";
+
+/* Putt results */
+"result.holed" = "Dentro";
+"result.short" = "Corto";
+"result.long" = "Largo";
+"result.left" = "Izquierda";
+"result.right" = "Derecha";
+"result.shortLeft" = "Corto izq.";
+"result.shortRight" = "Corto der.";
+"result.longLeft" = "Largo izq.";
+"result.longRight" = "Largo der.";
+"result.holeHigh" = "A la altura";
+"result.missedGeneric" = "Fallado";
+"result.lipOut" = "Lip out";
+
+/* Double break */
+"doubleBreak.rlLr" = "D→I y luego I→D";
+"doubleBreak.lrRl" = "I→D y luego D→I";
+
+/* Round summary */
+"summary.title" = "Resumen de la ronda";
+"summary.done" = "Listo";
+"summary.putts" = "Putts";
+"summary.holes" = "Hoyos";
+"summary.avgPerHole" = "Ø putts/hoyo";
+"summary.sg" = "SG";
+"summary.highlight" = "LO MEJOR";
+"summary.holeAbbr" = "Hoyo";
+"summary.puttAbbr" = "Putt";
+"summary.puttsAbbr" = "putts";
+"summary.onePutt" = "1 putt";
+"summary.twoPutts" = "2 putts";
+"summary.threePlusPutts" = "3+ putts";
+"summary.missTendency" = "TENDENCIA DE FALLO";
+"summary.mostCommonMiss" = "Fallo más frecuente";
+"summary.missReasons" = "MOTIVOS DEL FALLO";
+"summary.multipleReasons" = "Varios";
+"summary.leaveByMiss" = "DISTANCIA RESTANTE POR FALLO";
+"summary.leaveScale" = "Barras escaladas a %@";
+"summary.holedOut" = "Embocado desde fuera del green: 0 putts";
+"summary.editHole" = "Editar";
+"summary.addPutts" = "Añadir putts";
+"summary.notPlayed" = "Aún sin jugar: toca Añadir putts para registrar este hoyo.";
+
+/* GIR / Scramble */
+"stats.playingStats" = "ESTADÍSTICAS DE JUEGO";
+"stats.scoreCoverage" = "* Solo %1$ld de las %2$ld rondas de esta selección se registraron con referencia de score. Todo lo relativo al score cuenta solo esas rondas; las estadísticas de putt siguen usando todas.";
+"stats.gir" = "GIR";
+"stats.conversion" = "CONVERSIÓN\nDE BIRDIE";
+"stats.puttsGir" = "Ø PUTTS · GIR";
+"stats.puttsNoGir" = "Ø PUTTS · SIN GIR";
+"stats.girProximity" = "Ø PROXIMIDAD TRAS ACERTAR GREEN";
+"stats.firstPutt" = "primer putt";
+"stats.girFull" = "Greens en regulación";
+"stats.scramble" = "Scramble";
+"stats.scrambleFull" = "Tasa de scramble";
+
+/* Charts */
+"chart.makeVsTour" = "% ACIERTO VS TOUR";
+"chart.tour" = "Tour";
+"chart.youAheadOfTour" = "Tú (≥ tour)";
+"chart.youBehindTour" = "Tú (< tour)";
+"chart.tourToYou" = "Tour → Tú";
+"chart.made" = "Dentro";
+"chart.you" = "Tú";
+"chart.tourAbbr" = "Tour";
+"chart.birdiePutts" = "PUTTS DE BIRDIE";
+"chart.parPutts" = "PUTTS DE PAR";
+"chart.bogeyPutts" = "PUTTS DE BOGEY";
+"stats.makeBySituation" = "% ACIERTO POR SITUACIÓN";
+
+/* Statistics */
+"stats.title" = "Estadísticas";
+"stats.last1" = "Última 1";
+"stats.last3" = "Últimas 3";
+"stats.last5" = "Últimas 5";
+"stats.last10" = "Últimas 10";
+"stats.allRounds" = "Todas las rondas";
+"stats.compare" = "Comparar";
+"stats.noRounds" = "Aún no hay rondas terminadas.";
+"stats.noMatch" = "Ninguna ronda cumple este filtro.";
+"stats.rounds" = "RONDAS";
+"stats.sgPutting" = "GOLPES GANADOS EN PUTT";
+"stats.sgSubtitle" = "media / ronda frente a la base del PGA Tour";
+"stats.pcgSubtitle" = "media / ronda a partir de las tasas de acierto del tour";
+"stats.scoreVsPutting" = "SCORE VS PUTT";
+"stats.svp.scoreLegend" = "score jugado";
+"stats.svp.withoutLegend" = "con putt estandarizado";
+"stats.svp.gapLegend" = "lo que hizo el putt";
+"stats.svp.avgScore" = "Ø SCORE";
+"stats.svp.avgWithout" = "Ø SCORE · PUTT ESTANDARIZADO";
+"stats.svp.perRound" = "por ronda";
+"stats.svp.needMore" = "Hacen falta %ld rondas terminadas antes de poder comparar score y putt.";
+"stats.svp.note" = "Cada ronda cuenta tal como se jugó. El «putt estandarizado» devuelve tus golpes ganados a la tarjeta: el score que habría hecho ese mismo juego largo con un putt de media del tour.\n\nCada banda cubre una desviación estándar a cada lado de la media de esa serie.\n\nSi se estrecha dos quintos o más, es tu putt lo que separa unas rondas de otras; entre un décimo y dos quintos, tiene su parte; por debajo, tus rondas se diferencian por otros motivos.";
+"stats.svp.bandLegend" = "media del score ± dispersión";
+"stats.svp.bandLegendPro" = "media con putt estandarizado ± dispersión";
+"stats.svp.impactHigh" = "EL PUTT DECIDE TU SCORE";
+"stats.svp.impactMedium" = "EL PUTT MUEVE TU SCORE";
+"stats.svp.impactLow" = "EL PUTT NO ES EL MOTIVO";
+"stats.svp.impactNone" = "SIN EFECTO CLARO";
+"stats.svp.tighter" = "más estrecho con putt estandarizado";
+"stats.svp.wider" = "más amplio con putt estandarizado";
+"stats.dispersion" = "DISPERSIÓN DE FALLOS";
+"stats.rounds.info" = "Una casilla por ronda del filtro actual, con los golpes ganados en putt de esa ronda.\n\nPor cada hoyo: los putts que el tour esperaría desde donde estaba el primer putt, menos los putts realmente usados.";
+"stats.sgPutting.info" = "Golpes ganados por hoyo, sumados a lo largo de la ronda y promediados entre las rondas filtradas.\n\nEl PCG de debajo es la cifra por putt de esas mismas rondas: cómo se compara cada resultado con la probabilidad del tour de embocar desde esa distancia.";
+"stats.playingStats.info" = "El score es la media de golpes sobre par por ronda.\n\nGIR cuenta los hoyos jugados para eagle o birdie; la conversión de birdie, cuántos de esos greens acabaron en birdie o eagle con uno o dos putts; el scramble, los pares salvados entre los hoyos jugados para par con el green fallado.\n\nLas tres cifras de putts cuentan solo los hoyos en los que realmente se puteó.\n\nTodo ello necesita la referencia de score («putt para»): la tienen todos los modos salvo Personalizado sin ese campo.";
+"stats.dispersion.info" = "Cada putt fallado se coloca en la dirección en la que falló, tan lejos del hoyo como quedó de él. Los anillos marcan 1, 2 y 3 metros de distancia restante.\n\nEl primer menú elige qué direcciones de caída se muestran; el segundo, qué significan los colores: la fuerza de la caída, la longitud del putt o cuánto subía o bajaba la pendiente; los dos últimos necesitan también el campo de pendiente.\n\nLos dos campos de debajo limitan el gráfico a putts golpeados dentro de un rango de distancias, ambos extremos incluidos, para poder leer un filtro de pendiente distancia por distancia.\n\nUn punto más grande significa más fallos en el mismo sitio y, con un filtro de color activo, cada punto se tiñe según la clase a la que pertenece.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.";
+"pattern.title" = "LO QUE HACEN SIEMPRE TUS FALLOS";
+"pattern.missLeft" = "%1$ld de %2$ld fallos se van por la izquierda del hoyo.";
+"pattern.missRight" = "%1$ld de %2$ld fallos se van por la derecha del hoyo.";
+"pattern.missShort" = "%1$ld de %2$ld fallos se quedan cortos.";
+"pattern.missLong" = "%1$ld de %2$ld fallos se pasan del hoyo.";
+"pattern.missLowSide" = "En putts con caída fallas por el lado bajo %1$ld de %2$ld veces: el lado que nunca tuvo opción.";
+"pattern.missHighSide" = "En putts con caída fallas por encima del hoyo %1$ld de %2$ld veces.";
+"pattern.longPuttsShort" = "Desde 6 m o más, %1$ld de %2$ld fallos se quedan cortos.";
+"pattern.longPuttsLong" = "Desde 6 m o más, %1$ld de %2$ld fallos se pasan.";
+"pattern.shortPuttsLeft" = "Dentro de 1,5 m, %1$ld de %2$ld fallos se van a la izquierda.";
+"pattern.shortPuttsRight" = "Dentro de 1,5 m, %1$ld de %2$ld fallos se van a la derecha.";
+"chart.makeVsTour.info" = "Una fila por tramo de distancia: los putts embocados sobre los intentados desde ahí, frente a la tasa media de acierto del tour en ese mismo tramo.\n\nLa columna de la derecha suma el PCG de ese tramo, dividido entre el número de rondas.\n\nLa columna del tour es una media plana de todo el tramo, mientras que el PCG mide cada putt contra la curva en su propia distancia. Por eso, si tus putts se concentran en el extremo corto de un tramo, el PCG puede salir negativo aunque tu % de acierto esté por encima de la columna del tour.";
+"stats.makeBySituation.info" = "Los mismos tramos de distancia, separados según el score para el que iba cada putt, para poder comparar un putt de birdie con uno de par desde la misma distancia.\n\nNecesita la referencia de score («putt para»), que el modo Personalizado puede omitir.";
+"summary.missTendency.info" = "Cada fallo colocado en la dirección con la que se registró. Un sector se vuelve más rojo cuanto más se repite esa dirección, y el centro muestra el total.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo; un simple «fallado» no tiene dirección que colocar.";
+"summary.missReasons.info" = "Con qué frecuencia se marcó cada motivo en un putt fallado. Un putt con varios motivos cuenta una vez, bajo «varios».\n\nNecesita el campo de motivos del fallo: modo Pro, o Personalizado con ese campo añadido.";
+"summary.leaveByMiss.info" = "Distancia media que queda tras un fallo, agrupada por la dirección en la que se fue, medida a partir de la distancia del siguiente putt de ese hoyo. Las barras se escalan a la mayor de esas medias.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.";
+
+/* Dispersion */
+"dispersion.all" = "Todas las pendientes";
+"dispersion.distanceRange" = "Longitud del putt";
+"dispersion.shading.none" = "Sin color";
+"dispersion.shading.break" = "Fuerza de la caída";
+"dispersion.shading.breakLegend" = "Caída en porcentaje, en las clases de la rejilla de entrada";
+"dispersion.shading.length" = "Longitud del putt";
+"dispersion.shading.slope" = "Cuesta arriba / abajo";
+"dispersion.shading.flat" = "Llano";
+"dispersion.shading.uphill" = "Cuesta arriba";
+"dispersion.shading.downhill" = "Cuesta abajo";
+"dispersion.shading.noValues" = "Ninguno de estos putts lleva ese dato, así que no hay nada que colorear.";
+"dispersion.rl" = "Derecha-izquierda";
+"dispersion.lr" = "Izquierda-derecha";
+"dispersion.up" = "Cuesta arriba";
+"dispersion.down" = "Cuesta abajo";
+"dispersion.left" = "IZQUIERDA";
+"dispersion.right" = "DERECHA";
+"dispersion.long" = "LARGO";
+"dispersion.short" = "CORTO";
+"dispersion.noData" = "No hay datos de fallos para este filtro.";
+
+/* Games */
+"games.title" = "Juegos";
+"games.subtitle" = "Juegos de práctica de putt próximamente.";
+"games.hint" = "• Reloj\n• Puerta\n• Juego de 9 puntos\n• X seguidos";
+
+/* Settings */
+"settings.title" = "Ajustes";
+"settings.appearance" = "APARIENCIA";
+"settings.dark" = "Oscuro";
+"settings.light" = "Claro";
+"settings.language" = "IDIOMA";
+"settings.units" = "UNIDADES";
+"settings.metres" = "Metros";
+"settings.feet" = "Pies";
+"settings.defaultDistance" = "DISTANCIA POR DEFECTO DEL PRIMER PUTT";
+"settings.defaultDistance.value" = "Distancia por defecto: %.1f m";
+"settings.defaultDistance.value.ft" = "Distancia por defecto: %.0f ft";
+"settings.inputMode" = "MODO DE ENTRADA";
+"settings.customMode" = "Campos del modo personalizado";
+"settings.customMode.desc" = "Elige qué campos muestra el modo de entrada Personalizado";
+"settings.feedback" = "RESPUESTA";
+"settings.haptics" = "Respuesta háptica";
+"settings.haptics.desc" = "Vibrar al encajar el deslizador";
+"settings.myPutters" = "MIS PUTTERS";
+"settings.deletePutterTitle" = "Eliminar putter";
+"settings.deletePutterMessage" = "¿Quitar «%@»?";
+
+/* Distance / units */
+"distance.lessThan0_5m" = "<0,5 m";
+"distance.lessThan1ft" = "<1 ft";
+"distance.moreThan60ft" = ">60 ft";
+"unit.m" = "m";
+"unit.ft" = "ft";
+
+/* Games — titles */
+"game.gate.title" = "Ejercicio de puerta";
+"game.clock.title" = "Ejercicio del reloj";
+"game.ninePutt.title" = "Ejercicio de 9 putts";
+"game.routine.title" = "Ejercicio de rutina";
+"game.aroundTheWorld.title" = "Around the World";
+
+/* Games — goals */
+"game.gate.goal" = "Controlar la línea de salida y un golpe recto y limpio, sin girar la cara del putter.";
+"game.clock.goal" = "Practicar caídas distintas desde la misma distancia sin que cambie tu sensación de longitud.";
+"game.ninePutt.goal" = "Ganar constancia bajo algo de presión y asegurar los putts cortos y medios.";
+"game.routine.goal" = "Simula situaciones reales de campo y entrena tu rutina y tu concentración en cada putt, todos distintos.";
+"game.aroundTheWorld.goal" = "Simula una ronda completa y te enseña dónde siguen estando tus debilidades.";
+
+/* Games — full explanations */
+"game.gate.explanation" = "Clava dos tees en el suelo justo delante de la bola, separados lo justo para que pase la cabeza del putter y la bola (una «puerta»). Después putea a través de esa puerta hacia tu línea objetivo.";
+"game.clock.explanation" = "Coloca bolas en círculo alrededor del hoyo, como las horas de un reloj (por ejemplo a las 12, 3, 6 y 9), todas a la misma distancia. Después putea cada bola por turno, avanzando en el sentido de las agujas del reloj.";
+"game.ninePutt.explanation" = "Elige tres posiciones a distintas distancias (por ejemplo 1 m, 2 m, 3 m) y putea 3 bolas desde cada una: 9 putts en total. Las 9 tienen que entrar o vuelves a empezar desde el principio.";
+"game.routine.explanation" = "Putts marcados al azar: elige qué distancias y qué caídas pueden salir. Juega esos putts uno tras otro exactamente como vienen, cada uno con tu rutina completa, sin putts de prueba ni repeticiones.";
+"game.aroundTheWorld.explanation" = "Monta un recorrido de 9 o 18 putts distintos en el green y juégalos como una mini ronda: cada putt cuenta como un hoyo. Anota tus golpes por «hoyo» y súmalos al final.";
+
+/* Games — score units */
+"game.unit.percent" = "TASA DE ACIERTO";
+"game.unit.cycles" = "Vueltas necesarias";
+"game.unit.strokes" = "Golpes";
+"game.aroundTheHole.title" = "Around The Hole";
+"game.aroundTheHole.goal" = "Cinco tees alrededor del hoyo: emboca todos, vuelta tras vuelta, sin un solo fallo.";
+"game.aroundTheHole.explanation" = "Coloca cinco tees a la misma distancia alrededor del hoyo: un putt recto cuesta arriba para empezar, después derecha-izquierda cuesta arriba, derecha-izquierda cuesta abajo, izquierda-derecha cuesta arriba e izquierda-derecha cuesta abajo. Emboca los cinco y la vuelta está hecha. Falla uno y vuelves al primer tee: las vueltas solo cuentan si son seguidas. Los putts más cortos piden más vueltas: cinco a 1 m, tres a 1,3 m, dos a 2 m, una a 2,5 m. Puedes cambiarlo y, si después marcas el ejercicio como demasiado fácil, la siguiente configuración ofrecerá una vuelta más. Es un ejercicio que se termina, no un score que se persigue: lo que se guarda es cuánto tardaste y con qué frecuencia apareciste.";
+"game.unit.minutes" = "Tiempo";
+"game.ath.tees" = "tees";
+"game.ath.rounds" = "vueltas";
+"game.ath.puttsTotal" = "%ld putts seguidos";
+"game.ath.suggestion" = "Sugerencia: %ld vueltas";
+"game.ath.suggestionFromLast" = "Sugerido por tu última sesión: %ld vueltas";
+"game.ath.targetReminder" = "%1$ld vueltas limpias a %2$@";
+"game.ath.roundsTarget" = "VUELTAS";
+"game.ath.mapHint" = "Los putts cuesta arriba debajo del hoyo, los de cuesta abajo encima; el número del tee es el orden de juego.";
+"game.ath.uphill" = "cuesta arriba";
+"game.ath.station.straight" = "1 · Recto cuesta arriba";
+"game.ath.station.rlUp" = "2 · Derecha-izquierda cuesta arriba";
+"game.ath.station.rlDown" = "3 · Derecha-izquierda cuesta abajo";
+"game.ath.station.lrUp" = "4 · Izquierda-derecha cuesta arriba";
+"game.ath.station.lrDown" = "5 · Izquierda-derecha cuesta abajo";
+"game.drill.finished" = "Ejercicio terminado";
+"game.drill.stopped" = "Interrumpido";
+"game.drill.timeTaken" = "TIEMPO EMPLEADO";
+"game.drill.succeeded" = "Conseguido";
+"game.drill.giveUp" = "Abandonar";
+"game.ninePutt.reminder" = "Los 9 putts seguidos · %@";
+"game.drill.howWasIt" = "¿Qué tal ha ido?";
+"game.difficulty.tooEasy" = "Muy fácil";
+"game.difficulty.justRight" = "En su punto";
+"game.difficulty.tooHard" = "Muy difícil";
+"game.ath.willAddRound" = "La próxima vez a esta distancia el ejercicio pedirá una vuelta más.";
+"game.activity.title" = "ACTIVIDAD DE ENTRENAMIENTO";
+"game.activity.less" = "menos";
+"game.activity.more" = "más";
+"game.activity.total" = "%ld sesiones";
+
+/* Games — info sheet */
+"game.info.goal" = "OBJETIVO";
+"game.info.howTo" = "CÓMO SE JUEGA";
+
+/* Games — home / card */
+"game.best" = "Mejor";
+"game.noScoreYet" = "Aún sin marca";
+
+/* Games — shared play chrome */
+"game.attempt" = "Intento";
+"game.attempts" = "Intentos";
+"game.made" = "Dentro";
+"game.missed" = "Fallados";
+"game.start" = "Empezar";
+"game.done" = "Listo";
+"game.newBest" = "¡Nueva mejor marca!";
+"game.giveUp" = "Abandonar";
+"game.distance" = "Distancia";
+
+/* Gate Drill */
+"game.gate.reps" = "Repeticiones";
+"game.gate.howMany" = "¿Cuántos has metido?";
+"game.gate.outOf" = "de %ld";
+/* Clock Drill */
+"game.clock.positions" = "Posiciones";
+"game.clock.laps" = "Vueltas";
+"game.clock.round" = "Vuelta";
+"game.clock.oclock" = "en punto";
+"game.clock.hardest" = "POSICIÓN MÁS DIFÍCIL";
+
+/* 9-Putt Drill */
+"game.ninePutt.distance" = "Distancia";
+"game.ninePutt.ball" = "Bola";
+"game.ninePutt.cycle" = "Ciclo";
+
+/* Routine Putt Drill */
+"game.routine.putts" = "Putts";
+"game.routine.putt" = "Putt";
+"game.routine.minDistance" = "Distancia mín.";
+"game.routine.maxDistance" = "Distancia máx.";
+"game.routine.maxBreak" = "Caída máx.";
+"game.routine.rangeError" = "La distancia máxima debe ser ≥ la mínima";
+
+/* Around the World */
+"game.aroundTheWorld.holeCount" = "Número de hoyos";
+"game.aroundTheWorld.strokeCount" = "golpe actual";
+"game.aroundTheWorld.missed" = "Fallado";
+"game.aroundTheWorld.best" = "Mejor";
+"game.aroundTheWorld.worst" = "Peor";
+
+/* Custom mode field editor */
+"custom.title" = "Modo personalizado";
+"custom.alwaysIncluded" = "SIEMPRE INCLUIDOS";
+"custom.optionalFields" = "CAMPOS OPCIONALES";
+"custom.reorderHint" = "Toca Editar para reordenar o quitar campos. Aparecen en este orden entre Distancia y Resultado.";
+"custom.unsavedTitle" = "¿Guardar los cambios?";
+"custom.unsavedMessage" = "Has añadido o quitado un campo y aún no lo has guardado.";
+"custom.discardChanges" = "Descartar cambios";
+"custom.addField" = "Añadir campo";
+"custom.complexity.simple" = "Simple";
+"custom.complexity.complex" = "Complejo";
+"custom.field.distance" = "Distancia";
+"custom.field.distance.desc" = "A qué distancia estaba el putt; siempre se muestra primero";
+"custom.field.result" = "Resultado";
+"custom.result.desc" = "Simple = solo dentro/fallado.\n\nComplejo = diana con dirección y lip-out, como en el modo Pro.";
+"custom.field.puttFor" = "Categoría de putt para";
+"custom.field.puttFor.desc" = "Eagle/birdie/par/bogey/doble o peor, con descenso automático tras un fallo";
+"custom.field.slope" = "Rejilla de pendiente";
+"custom.field.slope.desc" = "Simple = rejilla de 9 casillas (arriba/abajo/llano x izquierda/recto/derecha).\n\nComplejo = la rejilla profesional completa.";
+"custom.field.doubleBreak" = "Doble caída";
+"custom.field.doubleBreak.desc" = "Marca un putt que cae hacia un lado y después hacia el otro";
+"custom.field.missReasons" = "Motivos del fallo";
+"custom.field.missReasons.desc" = "Mala lectura, mal golpe o mala orientación";
+
+/* Game statistics */
+"game.stats.avgLast5" = "Media últimas 5";
+"game.stats.lastRounds" = "ÚLTIMAS 10 VUELTAS";
+"game.stats.tapToDelete" = "Toca una vuelta para eliminarla.";
+"game.stats.noRounds" = "Aún no se ha jugado ninguna vuelta.";
+"game.stats.playAgain" = "Jugar este ejercicio";
+"game.stats.deleteRoundTitle" = "¿Eliminar esta vuelta?";
+"game.stats.resetTitle" = "¿Reiniciar la mejor marca?";
+"game.stats.resetMessage" = "Quita solo la vuelta récord, para que pase a valer la siguiente mejor. O borra todo el historial de este ejercicio.";
+"game.stats.deleteRecordOnly" = "Eliminar la vuelta récord";
+"game.stats.deleteAll" = "Eliminar todas las vueltas";
+
+"numpad.enter" = "Intro";
+"custom.distance.desc" = "Deslizador = la lista de distancias desplazable.\n\nTeclado = un teclado numérico para escribir una distancia exacta con un decimal; pulsa Intro para guardarla.";
+
+"custom.distance.slider" = "Deslizador";
+"custom.distance.numpad" = "Teclado";
+"summary.missesLabel" = "FALLOS";
+"summary.lipOuts" = "%ld× lip out";
+"summary.missNoDirection" = "%ld más sin dirección registrada";
+
+"stats.customCount" = "Personalizado";
+"stats.thisMonth" = "Este mes";
+"stats.dateRange" = "Rango de fechas";
+"stats.choose" = "Elegir rondas";
+"stats.chooseOpen" = "Elegir";
+"stats.chooseCount" = "%1$ld de %2$ld rondas seleccionadas";
+"stats.selectAll" = "Todas";
+"stats.selectNone" = "Ninguna";
+"stats.sort" = "Orden";
+"stats.sortNewest" = "Más recientes primero";
+"stats.sortOldest" = "Más antiguas primero";
+"stats.rangeFrom" = "DESDE";
+"stats.rangeTo" = "HASTA";
+"stats.noneSelected" = "Aún no has elegido rondas. Abre «Elegir» y toca las rondas que deben usar las estadísticas.";
+"stats.roundsCounted" = "RONDAS";
+"stats.ofAvailable" = "de %ld disponibles";
+
+"score.double" = "Doble bogey";
+"score.double.short" = "DB";
+"input.badStroke.pull" = "Tirado";
+"input.badStroke.misshit" = "Mal contacto";
+"input.badStroke.push" = "Empujado";
+"input.holedOutFor" = "EMBOCADO PARA";
+"input.holeOutHint" = "En este hoyo no se registró ningún putt. El score elegido aquí es el score del hoyo y decide si cuenta como green en regulación o como scramble salvado. Registrar un putt arriba lo sustituye.";
+"summary.holedOutFor" = "Embocado para %@ (0 putts)";
+"summary.puttForLabel" = "Putt de %@";
+"summary.holeScore" = "Score del hoyo: %@";
+"stats.score" = "Score";
+"stats.overHoles" = "en %ld hoyos";
+
+"score.plus3" = "+3";
+"score.plus4" = "+4";
+"score.plus5" = "+5";
+"score.plus6" = "+6";
+
+"onCourse.nineHoleRound" = "Ronda de nueve hoyos";
+
+/* Stats reference */
+"stats.pcg" = "PCG";
+"summary.sgCaption" = "por hoyo";
+"summary.pcgCaption" = "por putt";
+"settings.reference" = "CÓMO FUNCIONAN LOS NÚMEROS";
+"settings.reference.desc" = "Golpes ganados, PCG y la base del tour";
+"reference.title" = "Golpes ganados y PCG";
+"reference.expectedPutts" = "PUTTS ESP.";
+"reference.intro" = "Dos números, ambos medidos contra la media del PGA Tour, pero que responden a preguntas distintas.";
+"reference.sgText" = "Los golpes ganados juzgan un hoyo entero: los putts que el tour necesitaría desde tu primera distancia, menos los que realmente usaste. Un putt suelto no tiene los suyos, porque lo bueno que fue un lag solo se ve cuando el hoyo termina.";
+"reference.pcgText" = "El PCG juzga un solo golpe frente a la probabilidad de embocar desde esa distancia. Meter un putt que casi nadie mete vale casi un punto entero; fallar un tap-in cuesta casi uno.";
+"reference.example" = "EJEMPLO";
+"reference.version" = "Puttor v1.0";
+"reference.sgTitle" = "GOLPES GANADOS POR HOYO";
+"reference.sgLegend" = "E(d₁) = putts esperados desde la distancia del primer putt · n = putts usados";
+"reference.sgExample" = "Desde 6 m el tour promedia 1,86 putts. Dos putts: −0,14. Meterlo: +0,86.";
+"reference.pcgTitle" = "GANANCIA DE CONVERSIÓN PORCENTUAL (PCG)";
+"reference.pcgLegend" = "p = probabilidad del tour de embocar a esa distancia · la primera fórmula si entra, la segunda si falla";
+"reference.pcgExample" = "Un putt de 2,5 m entra el 49% de las veces: meterlo es +0,51 y fallarlo −0,49. Desde 20 m: +0,97 o −0,03.";
+"reference.tableNote" = "Los putts esperados pasan de 2 más allá de unos 9 m. Las filas se leen de dos curvas ajustadas, así que cada distancia intermedia tiene su propio valor.";
+"reference.tableTitle" = "BASE DEL TOUR";
+"reference.sourceTitle" = "DE DÓNDE SALEN ESTOS NÚMEROS";
+"reference.sourceText" = "La referencia es la media del PGA Tour del trabajo sobre putts ganados de Mark Broadie, medida con ShotLink sobre millones de putts. Las curvas de arriba están ajustadas a sus cifras; el PCG es una aportación propia de Puttor.";
+"reference.sourceLink" = "Broadie: Putts Gained — Measuring Putting on the PGA TOUR (PDF)";
+"reference.curvesTitle" = "LAS CURVAS DETRÁS DE LA TABLA";
+"reference.curvesText" = "Ambas columnas se leen de curvas ajustadas, con x = ln(distancia en metros), de 0,3 m a 40 m.";
+"reference.curvesMake" = "PROBABILIDAD DE EMBOCAR";
+"reference.curvesExpected" = "PUTTS ESPERADOS";
+
+// Conditions the numbers depend on
+"coach.conditions" = "CUANDO LAS CONDICIONES SON ASÍ";
+"split.cond.fastGreens" = "greens rápidos";
+"split.cond.slowGreens" = "greens lentos";
+"split.cond.rain" = "lluvia";
+"split.cond.dry" = "tiempo seco";
+"split.cond.wind" = "viento fuerte";
+"split.cond.calm" = "días sin viento";
+"split.cond.cold" = "días fríos";
+"split.cond.warm" = "días templados";
+"split.cond.grain" = "greens con grano";
+"split.cond.noGrain" = "greens sin grano";
+"split.cond.strongBreak" = "caída fuerte";
+"split.cond.flat" = "putts llanos";
+"split.cond.downhill" = "putts cuesta abajo";
+"split.cond.uphill" = "putts cuesta arriba";
+"split.cond.doubleBreak" = "dobles caídas";
+"split.cond.singleBreak" = "caídas simples";
+"split.missLong" = "Con %1$@, el %2$@%% de tus fallos se pasa del hoyo; con %3$@, el %4$@%%.";
+"split.missShort" = "Con %1$@, el %2$@%% de tus fallos se queda corto; con %3$@, el %4$@%%.";
+"split.missHighSide" = "Con %1$@, el %2$@%% de tus fallos con caída se queda por encima del hoyo; con %3$@, el %4$@%%.";
+"split.missLowSide" = "Con %1$@, el %2$@%% de tus fallos con caída se va por debajo del hoyo; con %3$@, el %4$@%%.";
+"split.missRead" = "Con %1$@, el %2$@%% de tus fallos se debe a la lectura; con %3$@, el %4$@%%.";
+"split.holedMore" = "Con %1$@ entra el %2$@%% de tus putts; con %3$@, el %4$@%%.";
+"split.holedLess" = "Con %1$@ se queda fuera el %2$@%% de tus putts; con %3$@, el %4$@%%.";
+"split.threePutts" = "Con %1$@ haces %2$@ tres putts por ronda; con %3$@, %4$@, desde distancias parecidas.";
+"coach.trendMetric" = "CAMBIO / RONDA";
+"coach.readingTitle" = "CÓMO VA LA COSA";
+"coach.pcgTrendMetric" = "CAMBIO / RONDA";
+"coach.summary.info" = "La tendencia son tus últimas tres rondas frente a la media de todas las rondas leídas aquí: hasta diez, y solo rondas terminadas.\n\nHace falta medio golpe por ronda en un sentido u otro para hablar de dirección; por debajo de eso es el mismo putt en días distintos.\n\nCuando no se mueve nada, la redacción depende de dónde te has quedado quieto: por encima de +0,5 por ronda es un buen sitio; por debajo de −0,5, no.";
+"coach.numbers.info" = "Las dos primeras casillas muestran el cambio, no el nivel: tus últimas tres rondas frente a la media de todas. Verde es terreno ganado, rojo terreno perdido, sea cual sea el tamaño.\n\nLa pequeña línea Ø de debajo es esa media, el punto desde el que se mide el cambio. Lo que vale tu putt en conjunto es cosa de la pestaña de estadísticas; aquí la pregunta es hacia dónde se mueve.\n\nSG son los golpes ganados en una ronda entera: por cada hoyo, los putts que el tour esperaría desde donde estaba el primer putt, menos los que usaste. El PCG es lo mismo por putt, frente a la probabilidad del tour de embocar desde esa distancia.\n\nLos 3 putts se cuentan por ronda y no como porcentaje de hoyos. La última casilla es el tramo de distancia que más te cuesta: el tramo y, debajo, la conversión perdida ahí frente al tour.\n\nTodo se lee de tus rondas terminadas en el campo. Los ejercicios se cuentan aparte, más abajo.";
+"coach.practice.info" = "Leído de los ejercicios completados en la pestaña de Juegos, y separado a propósito de los números del campo: entrenar sin tarjeta en la mano no es una ronda, y promediar ambos no describiría ninguno.\n\nEl PCG por putt aparece en los ejercicios que registran la distancia de cada intento; los que se cuentan en el green sin la app no lo tienen.";
+"coach.whatIsHappening.info" = "Costumbres en tus fallos: un lado al que se van, una longitud que se repite, una caída por debajo de la cual siguen pasando.\n\nCada línea necesita al menos ocho fallos de ese tipo, con seis de cada diez en la misma dirección, antes de llamarse costumbre. Un mal putt es solo un mal putt.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.";
+"coach.conditions.info" = "Cada condición que trae una ronda —la velocidad de los greens, la lluvia, el viento, el frío, el grano— y cada una que trae un putt —caída, pendiente, doble caída— se compara con su opuesta usando tus propios putts.\n\nUna diferencia solo se muestra si supera cuatro filtros: putts suficientes en ambos lados, distancias comparables en ambos lados, una prueba estadística de que las dos proporciones realmente difieren y una corrección por el número de comparaciones hechas para encontrarla. Si se buscan bastantes divisiones, hasta unos datos aleatorios producen diferencias; esto es lo que las mantiene fuera de la tarjeta.\n\nEsto se lee de tus últimas treinta rondas, no de diez. Cómo puteas bajo la lluvia es un rasgo, no una forma, y la lluvia es rara.";
+"coach.plan.info" = "En orden: la distancia que más golpes te cuesta, el ejercicio que responde a lo que repiten tus fallos, el ejercicio en el que peor conviertes y lo que lleve dos semanas sin tocarse.\n\nEl número junto a cada ejercicio son las sesiones a las que apuntar antes de la siguiente lectura: tres si la tendencia baja, una si sube, dos en el resto de los casos.";
+
+// Ladder drill and the weekly streak
+"game.category.startLine" = "LÍNEA DE SALIDA";
+"game.category.game" = "EJERCICIO DE JUEGO";
+"game.category.speed" = "EJERCICIO DE VELOCIDAD";
+"game.streak.week" = "SEMANA SEGUIDA";
+"game.streak.weeks" = "SEMANAS SEGUIDAS";
+"game.streak.none" = "ESTA SEMANA AÚN NO";
+"game.stats.sessions" = "SESIONES";
+"game.ladder.title" = "Ejercicio de escalera";
+"game.ladder.goal" = "Entrena solo la velocidad: la bola únicamente tiene que pararse en el sitio correcto, así que el control de distancia es toda la prueba.";
+"game.ladder.explanation" = "Putea desde un único sitio hacia una serie de distancias objetivo, subiendo la escalera. Un putt cuenta cuando la bola se para a menos de 30 cm de su peldaño —corta o larga—, así que no hay que embocar nada y la línea no entra en juego.\n\nHay dos escaleras. La grande va de metro en metro desde 5 m hasta 20 m, que es distancia de lag. La fina va de medio en medio metro entre 5 y 10 m, donde las diferencias son tan pequeñas que el golpe hay que medirlo y no solo sentirlo.\n\nSi fallas un peldaño, repítelo antes de subir. Como en los demás ejercicios de entrenamiento, la app solo pregunta si lo terminaste o lo dejaste: lo que guarda es que apareciste y cuánto tardaste.";
+"game.ladder.mode" = "ESCALERA";
+"game.ladder.mode.large" = "Pasos grandes";
+"game.ladder.mode.fine" = "Pasos finos";
+"game.ladder.stepNote" = "%@ de separación";
+"game.ladder.from" = "Desde";
+"game.ladder.to" = "Hasta";
+"game.ladder.window" = "Un putt cuenta cuando la bola se para a menos de %@ de su peldaño, corta o larga. No hay que embocar nada.";
+"game.ladder.rungs" = "peldaños";
+"game.ladder.rungCount" = "%ld peldaños, el más cercano abajo.";
+"game.ladder.startSpot" = "UN SOLO SITIO PARA TODOS";
+"game.ladder.targetReminder" = "%1$ld peldaños, cada uno dentro de %2$@ de su distancia.";
+
+// Tournament rounds against casual ones
+"setup.tournament" = "Ronda de torneo";
+"setup.tournament.desc" = "El coach la cuenta aparte: competición frente a entrenamiento";
+"coach.tournament" = "CUANDO CUENTA";
+"coach.tournament.competition" = "TORNEO";
+"coach.tournament.practice" = "AMISTOSA";
+"coach.tournament.rounds" = "últimas %1$ld rondas";
+"coach.tournament.better" = "En competición ganas %.2f golpes por ronda más que en una ronda amistosa.";
+"coach.tournament.worse" = "En competición pierdes %.2f golpes por ronda frente a tus rondas amistosas.";
+"coach.tournament.same" = "Competición y rondas amistosas salen igual, con %.2f golpes por ronda de diferencia.";
+"coach.tournament.steadier" = "Tus rondas de competición están %.2f golpes más juntas: cuando cuenta, puteas de forma más previsible.";
+"coach.tournament.wilder" = "Tus rondas de competición están %.2f golpes más separadas que las amistosas: los días buenos y los malos se alejan más entre sí.";
+"coach.tournament.sameSpread" = "Ambos grupos se dispersan igual, así que una tarjeta que cuenta no cambia nada en tu fiabilidad.";
+"coach.tournament.outliers" = "RONDAS QUE DESTACAN";
+"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG — %4$.1f desviaciones estándar respecto a la media de ese grupo.";
+"coach.tournament.info" = "Tus últimas cinco rondas de torneo frente a tus últimas cinco amistosas, con el resultado tal cual salga: la idea es saber qué dice tu tarjeta cuando cuenta, y «ninguna diferencia» también es una respuesta.\n\nSe muestran ambas medidas para que quede claro qué se cuenta. SG son los golpes ganados en putt a lo largo de una ronda: los putts que el tour esperaría menos los que usaste. El PCG es la conversión de esa misma ronda, cada putt frente a la probabilidad del tour de embocarlo desde donde estaba.\n\nEl ± de debajo es la desviación estándar: cuánto se aleja normalmente una ronda de esa media, que es la diferencia entre ser fiable y ser bueno solo en un buen día. Aparece a partir de tres rondas.\n\nUna ronda destaca cuando su SG está al menos a 1,8 desviaciones estándar de la media de las cinco a las que pertenece.";
+
+// Legal
+"settings.legal" = "AVISOS LEGALES";
+"settings.legal.footer" = "KNDR lab · Linzerstraße 119, 4600 Wels, Austria · office@kndr-lab.com";
+"legal.impressum" = "Aviso legal";
+"legal.impressum.desc" = "Datos del proveedor según el § 5 ECG";
+"legal.privacy" = "Política de privacidad";
+"legal.privacy.desc" = "Todo se queda en tu dispositivo";
+"legal.eula" = "Contrato de licencia";
+"legal.eula.desc" = "Condiciones de uso de la app";
+"onCourse.tournamentTag" = "TR";
+
+// Drill results against the tour
+"game.benchmark" = "FRENTE AL TOUR";
+"game.benchmark.you" = "TÚ";
+"game.benchmark.tourAt" = "TOUR DESDE %@";
+"game.benchmark.perRound" = "POR RONDA";
+"game.benchmark.basis" = "Estimado sobre unos %1$.1f putts por ronda que caen a menos de medio metro de %2$@.";
+"game.benchmark.info" = "Tu tasa de acierto junto a la del tour desde la misma distancia, y lo que vale la diferencia entre ambas a lo largo de dieciocho hoyos.\n\nCada putt embocado por encima de la tasa del tour es un golpe ganado, así que la diferencia se multiplica por cuántos putts de esa longitud contiene realmente una ronda: un ejercicio a 1 m afecta a diez putts por ronda, uno a 8 m solo a dos.\n\nEsa frecuencia es una estimación de la ronda de un jugador de club, de unos 32 putts, no una medición de la tuya. La cifra es un orden de magnitud: dice si el resultado de un ejercicio se nota en la tarjeta, no lo que va a marcar tu próxima ronda.";
+"coach.perRound" = "POR RONDA";
+"coach.practice.perPutt" = "POR PUTT";
+
+// Statistics filter
+"stats.filter" = "Filtro";
+"stats.filter.none" = "Todas las rondas de este periodo";
+"stats.filter.any" = "Indiferente";
+"stats.filter.yes" = "Sí";
+"stats.filter.no" = "No";
+"stats.filter.putter" = "Putter";
+"stats.filter.roundType" = "Tipo de ronda";
+"stats.filter.clear" = "Quitar el filtro";
+"stats.filter.from" = "Desde";
+"stats.filter.to" = "Hasta";
+"stats.filter.open" = "abierto";
+"stats.filter.grain" = "Grano";
+"stats.filter.weather" = "Tiempo";
+"stats.filter.greenSpeed" = "Velocidad del green";
+"stats.filter.casual" = "Ronda amistosa";

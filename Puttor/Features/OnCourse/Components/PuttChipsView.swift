@@ -35,6 +35,7 @@ struct PuttChipsView: View {
                 }
             }
         }
+        .horizontalScrollHint(fade: Theme.surface)
     }
 
     private func chip(number: Int, isHoled: Bool, isActive: Bool, action: @escaping () -> Void) -> some View {

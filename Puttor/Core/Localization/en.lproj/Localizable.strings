@@ -72,7 +72,7 @@
 "setup.noPutters" = "Add putters here or in Settings → My Putters";
 "setup.addPutter" = "Add Putter";
 "setup.putterNamePlaceholder" = "Putter name…";
-"setup.stimp" = "STIMPMETER";
+"setup.stimp" = "GREEN SPEED";
 "setup.slow" = "SLOW";
 "setup.medium" = "MEDIUM";
 "setup.fast" = "FAST";
@@ -670,6 +670,10 @@
 "stats.filter.putter" = "Putter";
 "stats.filter.roundType" = "Round type";
 "stats.filter.clear" = "Clear filter";
-"stats.filter.from" = "FROM";
-"stats.filter.to" = "TO";
+"stats.filter.from" = "From";
+"stats.filter.to" = "To";
 "stats.filter.open" = "open";
+"stats.filter.grain" = "Grain";
+"stats.filter.weather" = "Weather";
+"stats.filter.greenSpeed" = "Green speed";
+"stats.filter.casual" = "Casual round";
