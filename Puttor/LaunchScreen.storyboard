@@ -26,7 +26,7 @@
                             <constraint firstItem="img-putt-01" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="ctr-x-01"/>
                             <constraint firstItem="img-putt-01" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="ctr-y-01"/>
                             <constraint firstItem="img-putt-01" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.61" id="wid-01"/>
-                            <constraint firstItem="img-putt-01" firstAttribute="height" secondItem="img-putt-01" secondAttribute="width" multiplier="392:1215" id="asp-01"/>
+                            <constraint firstItem="img-putt-01" firstAttribute="height" secondItem="img-putt-01" secondAttribute="width" multiplier="396:1215" id="asp-01"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -36,6 +36,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="PuttorWordmark" width="1215" height="392"/>
+        <image name="PuttorWordmark" width="1215" height="396"/>
     </resources>
 </document>
