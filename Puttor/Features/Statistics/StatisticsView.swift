@@ -394,37 +394,14 @@ private struct StatisticsPane: View {
         let data = bundle
 
         return VStack(spacing: 0) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(FilterMode.allCases) { mode in
-                            filterChip(L(mode.labelKey), selected: filterMode == mode) { filterMode = mode }
-                        }
-                    }
-                    .padding(.horizontal, dense ? Theme.Spacing.sm : Theme.Spacing.lg)
-                    // Breathing room inside the scroll view, so the capsule
-                    // outlines aren't clipped by its bounds.
-                    .padding(.vertical, 6)
-                }
-                .fixedSize(horizontal: false, vertical: true)
-                .horizontalScrollHint()
-
-                if filterMode == .custom {
-                    customCountRow
-                }
-
-                if filterMode == .dateRange {
-                    dateRangeRow
-                }
-
-                if filterMode == .choose {
-                    chooseRoundsRow
-                }
-
-                if filterMode != .choose {
-                    conditionFilterBox
-                }
+                // Portrait keeps the filters in reach at the top. Landscape has
+                // barely three hundred points of height, and a pinned header
+                // eats a third of it — so there it scrolls away with the rest.
+                if !isLandscape { filterHeader }
 
                 ScrollView {
+                    if isLandscape { filterHeader }
+
                     if completeRounds.isEmpty {
                         emptyState(L("stats.noRounds"), "📊")
                     } else if filteredRounds.isEmpty {
@@ -716,6 +693,42 @@ private struct StatisticsPane: View {
         .padding(.horizontal, Theme.Spacing.lg)
         .padding(.bottom, 6)
     }
+
+    /// The preset row, whatever that preset needs, and the conditions box.
+    @ViewBuilder
+    private var filterHeader: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(FilterMode.allCases) { mode in
+                    filterChip(L(mode.labelKey), selected: filterMode == mode) { filterMode = mode }
+                }
+            }
+            .padding(.horizontal, dense ? Theme.Spacing.sm : Theme.Spacing.lg)
+            // Breathing room inside the scroll view, so the capsule outlines
+            // aren't clipped by its bounds.
+            .padding(.vertical, 6)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .horizontalScrollHint()
+
+        if filterMode == .custom {
+            customCountRow
+        }
+
+        if filterMode == .dateRange {
+            dateRangeRow
+        }
+
+        if filterMode == .choose {
+            chooseRoundsRow
+        }
+
+        if filterMode != .choose {
+            conditionFilterBox
+        }
+    }
+
+    private var isLandscape: Bool { verticalSizeClass == .compact }
 
     // MARK: - Conditions
 

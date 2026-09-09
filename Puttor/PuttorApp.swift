@@ -28,6 +28,10 @@ enum LaunchClock {
 
 @main
 struct PuttorApp: App {
+    /// Created once per launch, so the title screen shows on a cold start and
+    /// never again when the app comes back from the background.
+    @State private var showingTitle = true
+
     let container: ModelContainer = {
         let schema = Schema([Putter.self, Round.self, Putt.self, GameSession.self, GameAttempt.self])
         let config = ModelConfiguration(schema: schema)
@@ -44,6 +48,15 @@ struct PuttorApp: App {
                 #if DEBUG
                 .onAppear { LaunchClock.mark("first screen on") }
                 #endif
+                .overlay {
+                    if showingTitle {
+                        SplashView().transition(.opacity)
+                    }
+                }
+                .task {
+                    try? await Task.sleep(for: .seconds(SplashView.hold))
+                    withAnimation(.easeInOut(duration: SplashView.fade)) { showingTitle = false }
+                }
         }
         .modelContainer(container)
     }
