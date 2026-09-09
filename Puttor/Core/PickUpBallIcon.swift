@@ -34,26 +34,38 @@ struct PickUpBallIcon: Shape {
 
         var result = Path()
 
-        // The back of the hand, arched over the ball.
-        result.addPath(limb(point(21, 45), point(49, 12), point(75, 42), 11))
+        /// Straight, for the back of the hand and the wrist behind it.
+        func bone(_ from: CGPoint, _ to: CGPoint, _ width: CGFloat) -> Path {
+            var stroke = Path()
+            stroke.move(to: from)
+            stroke.addLine(to: to)
+            return stroke.strokedPath(StrokeStyle(lineWidth: width * scale, lineCap: .round))
+        }
 
-        // Three fingers curling down, and a thumb on the far side.
+        // Seen from the side: the wrist comes in from the upper right and the
+        // hand reaches down, which is what picking something up looks like —
+        // a hand facing the reader is a hand waving.
+        result.addPath(bone(point(82, 27), point(44, 39), 16))
+
+        // Four fingers hanging with a hand's own stagger — short, long, long,
+        // short — and a thumb closing from behind.
         let fingers: [(CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = [
-            (25, 35, 19, 50, 22, 61, 6),
-            (38, 21, 31, 48, 34, 62, 6),
-            (53, 22, 48, 48, 49, 62, 6),
-            (73, 44, 79, 52, 75, 60, 6.5),
+            (37, 43, 29, 55, 30, 67, 6),
+            (45, 46, 38, 59, 39, 73, 6),
+            (53, 49, 47, 61, 48, 73, 6),
+            (61, 52, 56, 61, 57, 67, 5.5),
+            (70, 42, 76, 53, 68, 60, 7),
         ]
         for (x1, y1, cx, cy, x2, y2, width) in fingers {
             result.addPath(limb(point(x1, y1), point(cx, cy), point(x2, y2), width))
         }
 
-        // The ball, just under the fingertips.
+        // The ball, under the fingertips.
         result.addEllipse(in: CGRect(
-            x: originX + 35 * scale,
-            y: originY + 69 * scale,
-            width: 20 * scale,
-            height: 20 * scale
+            x: originX + 29.5 * scale,
+            y: originY + 74.5 * scale,
+            width: 19 * scale,
+            height: 19 * scale
         ))
 
         return result
