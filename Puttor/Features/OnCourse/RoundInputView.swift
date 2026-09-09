@@ -273,6 +273,7 @@ struct RoundInputView: View {
         HStack(spacing: 8) {
             holeButton(session)
             PuttChipsView(session: session)
+            PickUpHoleButton(session: session) { handleOutcome($0, session) }
             deleteHoleButton(session)
             totalCount(session)
             endButton()
@@ -293,6 +294,7 @@ struct RoundInputView: View {
                 // Capped, or the chips' scroll view stretches the island into
                 // a bar across a row that has nothing else in it.
                 PuttChipsView(session: session).frame(maxWidth: 132)
+                PickUpHoleButton(session: session) { handleOutcome($0, session) }
                 deleteHoleButton(session)
             }
             Spacer(minLength: 0)

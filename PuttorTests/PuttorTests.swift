@@ -1584,6 +1584,124 @@ struct PuttorTests {
         #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
     }
 
+    // MARK: - Picking the ball up
+
+    /// A hole given up is out of every putting figure and on the card as a
+    /// double bogey: eighteen holes played, seventeen with putts in them.
+    @MainActor
+    @Test func aPickedUpHoleLeavesThePuttingFiguresAlone() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "T")
+        context.insert(round)
+
+        // Seventeen holes two-putted from 4 m for birdie, so each is a par
+        // and the card reads level.
+        for hole in 1...17 {
+            for number in 1...2 {
+                let putt = Putt(
+                    holeNumber: hole, puttNumber: number,
+                    distanceM: number == 1 ? 4 : 1,
+                    puttFor: number == 1 ? .birdie : .par,
+                    result: number == 2 ? .holed : .short
+                )
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+            }
+        }
+        try context.save()
+
+        let played = RoundStats.compute(putts: round.putts)
+        #expect(played.holes == 17)
+        #expect(played.scoreRelativeToPar == 0)
+
+        // The eighteenth is picked up.
+        let pickUp = Putt(
+            holeNumber: 18, puttNumber: Putt.pickedUpPuttNumber,
+            distanceM: 0, puttFor: .par, result: .missedGeneric
+        )
+        pickUp.round = round
+        round.putts.append(pickUp)
+        context.insert(pickUp)
+        try context.save()
+
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.pickedUpHoles == 1)
+        #expect(stats.pickedUpHoleNumbers == [18])
+        // The averages divide by the holes that were putted, not by the round.
+        #expect(stats.holes == 17)
+        #expect(stats.totalPutts == 34)
+        #expect(abs(stats.avgPuttsPerHole - 2) < 0.0001)
+        // The round is still eighteen holes long.
+        #expect(stats.playedHoles == 18)
+        // And the card carries a double bogey for it.
+        #expect(stats.scoreRelativeToPar == 2)
+        #expect(stats.scoredHoles == 18)
+        // Nothing about putting comes from that hole.
+        #expect(stats.sgTotal == RoundStats.compute(putts: round.putts.filter { !$0.isPickUp }).sgTotal)
+        #expect(stats.girCount == played.girCount)
+    }
+
+    /// The sentinel is not a putt, so nothing that counts putts may see it.
+    @MainActor
+    @Test func aPickUpIsNeverCountedAsAPutt() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "T")
+        context.insert(round)
+        let pickUp = Putt(
+            holeNumber: 1, puttNumber: Putt.pickedUpPuttNumber,
+            distanceM: 0, puttFor: .par, result: .missedGeneric
+        )
+        pickUp.round = round
+        round.putts.append(pickUp)
+        context.insert(pickUp)
+        try context.save()
+
+        #expect(pickUp.isPickUp)
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.totalPutts == 0)
+        #expect(stats.holes == 0)
+        #expect(stats.avgPuttsPerHole == 0)
+        #expect(stats.sgTotal == 0)
+        #expect(CoachAdvisor.roundStrokesGained(round) == 0)
+    }
+
+    // MARK: - Score against putting
+
+    /// Which half of the game moves the scores is settled by the two spreads,
+    /// and the direction is not a matter of taste: rounds that sit closer
+    /// together than the long game alone would leave them can only mean the
+    /// putter gained most where the rest went worst.
+    @Test func theSpreadComparisonSaysWhichWayThePutterWorks() async throws {
+        func analysis(_ pairs: [(score: Double, sg: Double)]) -> ScorePuttingAnalysis {
+            let rounds = pairs.enumerated().map { index, pair in
+                ScorePuttingAnalysis.Round(
+                    id: index, slot: index, date: Date(), courseName: "T",
+                    score: pair.score, sg: pair.sg
+                )
+            }
+            return ScorePuttingAnalysis(rounds: rounds, slotCount: rounds.count)
+        }
+
+        // Putting swings with the card: good rounds were the well-putted ones.
+        // Taking putting out leaves the rounds nearly level.
+        let driven = analysis([(-4, 4), (0, 0), (4, -4), (8, -8)])
+        #expect(driven.spreadChangePercent! < -40)
+        #expect(driven.role == .separates)
+
+        // Putting against the card: the worse the rest went, the more the
+        // putter gained — the played rounds sit closer than the standardized.
+        let evened = analysis([(2, 1), (3, 3), (2, 5), (3, 7)])
+        #expect(evened.spreadChangePercent! > 10)
+        #expect(evened.role == .evensOut)
+        #expect(evened.avgSG > 0.5)
+
+        // Putting steady round to round: the spreads barely move.
+        let neutral = analysis([(0, 1), (4, 1), (8, 1), (2, 1)])
+        #expect(abs(neutral.spreadChangePercent!) < 10)
+        #expect(neutral.role == .neutral)
+    }
+
     // MARK: - Statistics filter
 
     /// The filter says which rounds count; the preset says how far back to

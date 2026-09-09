@@ -63,6 +63,16 @@ final class Putt {
     ///
     /// Unlike strokes gained it judges a single stroke rather than a hole, so it
     /// never depends on what happened next.
+    /// Sentinels live in the same table as putts, distinguished by their putt
+    /// number: 0 is a hole holed out from off the green, -1 a hole where the
+    /// ball was picked up. Everything that counts putts filters for `> 0`.
+    static let holeOutPuttNumber = 0
+    static let pickedUpPuttNumber = -1
+
+    /// A hole that was given up rather than played out: no putts, no putting
+    /// statistics, and a double bogey on the card.
+    var isPickUp: Bool { puttNumber == Self.pickedUpPuttNumber }
+
     var pcg: Double {
         let makeProbability = StrokesGained.baseline(at: distanceM).makeProbability
         return result.isHoled ? 1 - makeProbability : -makeProbability

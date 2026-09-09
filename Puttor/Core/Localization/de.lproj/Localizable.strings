@@ -257,12 +257,12 @@
 "stats.svp.avgWithout" = "Ø SCORE · STANDARDISIERTES PUTTEN";
 "stats.svp.perRound" = "pro Runde";
 "stats.svp.needMore" = "Für den Vergleich von Score und Putten braucht es %ld beendete Runden.";
-"stats.svp.note" = "Jede Runde zählt so, wie sie gespielt wurde. „Standardisiertes Putten“ rechnet deine Shots Gained wieder auf die Karte: der Score, den dasselbe lange Spiel mit Tour-Durchschnitt beim Putten ergeben hätte.\n\nJedes Band deckt eine Standardabweichung um den Schnitt der Reihe ab.\n\nIst das standardisierte Band um zwei Fünftel oder mehr schmaler, zieht dein Putten die Runden auseinander; bei einem Zehntel bis zwei Fünfteln hat es seinen Anteil; darunter unterscheiden sich deine Runden aus anderen Gründen.";
+"stats.svp.note" = "Jede Runde zählt so, wie sie gespielt wurde. „Standardisiertes Putten“ rechnet deine Shots Gained wieder auf die Karte: der Score, den dasselbe lange Spiel mit Tour-Durchschnitt beim Putten ergeben hätte.\n\nJedes Band deckt eine Standardabweichung um den Schnitt der Reihe ab; der Prozentwert vergleicht die beiden.\n\nEin schmaleres standardisiertes Band heißt: der Putter zieht deine Runden auseinander — nimmt man ihn heraus, rücken sie zusammen. Ein breiteres heißt das Gegenteil, und das kann nur auf einem Weg entstehen: der Putter hat genau auf den Runden am meisten gewonnen, auf denen das übrige Spiel am schlechtesten lief. Das ist Putten, das das lange Spiel auffängt — nicht Putten, das keine Rolle spielt.\n\nDer Schnitt der Shots Gained ist eine eigene Frage: er sagt, ob der Putter unterm Strich gewinnt oder kostet, nicht ob er den Unterschied zwischen deinen Runden macht.";
 "stats.svp.bandLegend" = "Score-Mittel ± Streuung";
 "stats.svp.bandLegendPro" = "standardisiertes Putten: Mittel ± Streuung";
 "stats.svp.impactHigh" = "PUTTEN ENTSCHEIDET DEINEN SCORE";
-"stats.svp.impactMedium" = "PUTTEN BEEINFLUSST DEINEN SCORE";
-"stats.svp.impactLow" = "PUTTEN IST NICHT DER GRUND";
+"stats.svp.impactMedium" = "PUTTEN BEWEGT DEINEN SCORE";
+"stats.svp.impactLow" = "PUTTEN MACHT NICHT DEN UNTERSCHIED";
 "stats.svp.impactNone" = "KEIN KLARER EFFEKT";
 "stats.svp.tighter" = "enger mit standardisiertem Putten";
 "stats.svp.wider" = "breiter mit standardisiertem Putten";
@@ -677,3 +677,17 @@
 "stats.filter.weather" = "Wetter";
 "stats.filter.greenSpeed" = "Grüngeschwindigkeit";
 "stats.filter.casual" = "Normale Runde";
+
+// Picking the ball up
+"input.pickUp" = "Ball aufheben";
+"input.pickUpConfirm" = "Auf Loch %ld aufheben?";
+"input.pickUpMessage" = "Das Loch bleibt aus allen Putt-Werten heraus und wird als Doppelbogey gewertet. Die Runde zählt dann fürs Putten, aber nicht für den Score.";
+"stats.gbe" = "GBE";
+"summary.pickedUp" = "🖐 Ball aufgehoben — als Doppelbogey gewertet, aus den Putt-Werten heraus.";
+"summary.puttedHoles" = "%ld mit Putts";
+"stats.svp.impactEvens" = "PUTTEN GLEICHT DEINE RUNDEN AUS";
+"stats.svp.note.separates" = "Mit Tour-Schnitt beim Putten lägen deine Runden enger beisammen — was eine gute Runde gut macht, ist also vor allem der Putter.";
+"stats.svp.note.evensGain" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe: an den Tagen, an denen das lange Spiel schlechter lief, hat der Putter am meisten gewonnen und die Karte zurückgeholt.";
+"stats.svp.note.evensLoss" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe: an den Tagen mit dem besten langen Spiel hat der Putter am meisten zurückgegeben.";
+"stats.svp.note.evensFlat" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe — der Putter gleicht die Ausschläge des langen Spiels aus.";
+"stats.svp.note.neutral" = "Beide Hälften schwanken ähnlich stark; was deine Runden unterscheidet, liegt also nicht am Putten allein.";

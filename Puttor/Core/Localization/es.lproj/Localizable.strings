@@ -257,12 +257,12 @@
 "stats.svp.avgWithout" = "Ø SCORE · PUTT ESTANDARIZADO";
 "stats.svp.perRound" = "por ronda";
 "stats.svp.needMore" = "Hacen falta %ld rondas terminadas antes de poder comparar score y putt.";
-"stats.svp.note" = "Cada ronda cuenta tal como se jugó. El «putt estandarizado» devuelve tus golpes ganados a la tarjeta: el score que habría hecho ese mismo juego largo con un putt de media del tour.\n\nCada banda cubre una desviación estándar a cada lado de la media de esa serie.\n\nSi se estrecha dos quintos o más, es tu putt lo que separa unas rondas de otras; entre un décimo y dos quintos, tiene su parte; por debajo, tus rondas se diferencian por otros motivos.";
+"stats.svp.note" = "Cada ronda cuenta tal como se jugó. El «putt estandarizado» devuelve tus golpes ganados a la tarjeta: el score que habría hecho ese mismo juego largo con un putt de media del tour.\n\nCada banda cubre una desviación estándar a cada lado de la media de esa serie, y el porcentaje compara ambas.\n\nUna banda estandarizada más estrecha significa que el putter es lo que separa tus rondas: si lo quitas, se juntan. Una más ancha significa lo contrario, y solo puede darse de una manera: el putter ganó más justo en las rondas en las que el resto del juego fue peor. Eso es un putt que cubre al juego largo, no un putt irrelevante.\n\nLa media de golpes ganados es otra pregunta: dice si el putter gana o cuesta en conjunto, no si es lo que hace que tus rondas se diferencien.";
 "stats.svp.bandLegend" = "media del score ± dispersión";
 "stats.svp.bandLegendPro" = "media con putt estandarizado ± dispersión";
 "stats.svp.impactHigh" = "EL PUTT DECIDE TU SCORE";
 "stats.svp.impactMedium" = "EL PUTT MUEVE TU SCORE";
-"stats.svp.impactLow" = "EL PUTT NO ES EL MOTIVO";
+"stats.svp.impactLow" = "EL PUTT NO ES LA DIFERENCIA";
 "stats.svp.impactNone" = "SIN EFECTO CLARO";
 "stats.svp.tighter" = "más estrecho con putt estandarizado";
 "stats.svp.wider" = "más amplio con putt estandarizado";
@@ -677,3 +677,17 @@
 "stats.filter.weather" = "Tiempo";
 "stats.filter.greenSpeed" = "Velocidad del green";
 "stats.filter.casual" = "Ronda amistosa";
+
+// Picking the ball up
+"input.pickUp" = "Recoger la bola";
+"input.pickUpConfirm" = "¿Recoger en el hoyo %ld?";
+"input.pickUpMessage" = "El hoyo queda fuera de todos los datos de putt y se anota como doble bogey. La ronda cuenta entonces para el putt, pero no para el score.";
+"stats.gbe" = "RBA";
+"summary.pickedUp" = "🖐 Bola recogida: anotada como doble bogey y fuera de los datos de putt.";
+"summary.puttedHoles" = "%ld con putts";
+"stats.svp.impactEvens" = "EL PUTT IGUALA TUS RONDAS";
+"stats.svp.note.separates" = "Con un putt de media del tour tus rondas quedarían más juntas, así que lo que hace buena a una buena ronda es sobre todo el putter.";
+"stats.svp.note.evensGain" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: los días en que el juego largo falló, el putter fue el que más ganó y recuperó la tarjeta.";
+"stats.svp.note.evensLoss" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: los días de mejor juego largo, el putter fue el que más devolvió.";
+"stats.svp.note.evensFlat" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: el putter compensa las oscilaciones del juego largo.";
+"stats.svp.note.neutral" = "Ambas mitades oscilan de forma parecida, así que lo que separa tus rondas no es solo el putt.";

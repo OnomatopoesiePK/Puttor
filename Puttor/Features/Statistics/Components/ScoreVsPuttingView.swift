@@ -12,14 +12,27 @@ import SwiftUI
 
 struct ScoreVsPuttingView: View {
     let analysis: ScorePuttingAnalysis
+    /// True when the pane is one of two on a landscape screen: half the width,
+    /// so the legend keeps its portrait shape there.
+    var dense: Bool = false
+
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     private let chartHeight: CGFloat = 150
+
+    /// A wide, short screen has room for the whole key on one line.
+    private var spreadsLegend: Bool { verticalSizeClass == .compact && !dense }
 
     var body: some View {
         VStack(spacing: 12) {
             chart
             legend
             summaryBoxes
+            Text(L(roleNoteKey))
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
             if analysis.hasRoundsWithoutScore {
                 // The gaps in the line need saying out loud.
                 Text(String(format: L("stats.scoreCoverage"), analysis.rounds.count, analysis.slotCount))
@@ -192,36 +205,59 @@ struct ScoreVsPuttingView: View {
     }
 
     private var legend: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 14) {
-                legendItem(L("stats.svp.scoreLegend")) {
-                    Circle().fill(Theme.text).frame(width: 8, height: 8)
-                }
-                legendItem(L("stats.svp.withoutLegend")) {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 10))
-                        .foregroundStyle(Theme.textMuted)
-                }
-                legendItem(L("stats.svp.gapLegend")) {
-                    // Green where putting gained, red where it cost — both
-                    // appear in the chart, so both belong in the key.
-                    HStack(spacing: 2) {
-                        Capsule().fill(Theme.primary).frame(width: 3, height: 10)
-                        Capsule().fill(Theme.error).frame(width: 3, height: 10)
+        Group {
+            if spreadsLegend {
+                // One line across the whole width rather than a block in the
+                // corner: landscape has the width to spare and not the height.
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(0..<legendItems.count, id: \.self) { index in
+                        legendItems[index]
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                Spacer(minLength: 0)
-            }
-            // The average line and its band belong to one another, so one key
-            // covers both.
-            legendItem(L("stats.svp.bandLegend")) {
-                bandMarker(color: Theme.textMuted, dashed: false)
-            }
-            legendItem(L("stats.svp.bandLegendPro")) {
-                bandMarker(color: Theme.warning, dashed: true)
+            } else {
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(spacing: 14) {
+                        legendItems[0]
+                        legendItems[1]
+                        legendItems[2]
+                        Spacer(minLength: 0)
+                    }
+                    // The average line and its band belong to one another, so
+                    // one key covers both.
+                    legendItems[3]
+                    legendItems[4]
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var legendItems: [AnyView] {
+        [
+            AnyView(legendItem(L("stats.svp.scoreLegend")) {
+                Circle().fill(Theme.text).frame(width: 8, height: 8)
+            }),
+            AnyView(legendItem(L("stats.svp.withoutLegend")) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.textMuted)
+            }),
+            AnyView(legendItem(L("stats.svp.gapLegend")) {
+                // Green where putting gained, red where it cost — both appear
+                // in the chart, so both belong in the key.
+                HStack(spacing: 2) {
+                    Capsule().fill(Theme.primary).frame(width: 3, height: 10)
+                    Capsule().fill(Theme.error).frame(width: 3, height: 10)
+                }
+            }),
+            AnyView(legendItem(L("stats.svp.bandLegend")) {
+                bandMarker(color: Theme.textMuted, dashed: false)
+            }),
+            AnyView(legendItem(L("stats.svp.bandLegendPro")) {
+                bandMarker(color: Theme.warning, dashed: true)
+            }),
+        ]
     }
 
     /// A slice of the chart in miniature: the band with its average through it.
@@ -248,7 +284,12 @@ struct ScoreVsPuttingView: View {
     private func legendItem<Marker: View>(_ label: String, @ViewBuilder marker: () -> Marker) -> some View {
         HStack(spacing: 5) {
             marker()
-            Text(label).font(.system(size: 10)).foregroundStyle(Theme.textSecondary)
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.textSecondary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -318,16 +359,46 @@ struct ScoreVsPuttingView: View {
     @ViewBuilder
     private var spreadBox: some View {
         if let change = analysis.spreadChangePercent, abs(change) >= 1 {
-            let tighter = change < 0
             box(
-                L(tighter ? "stats.svp.impactHigh" : "stats.svp.impactLow"),
+                L(roleLabelKey),
                 "\(Int(abs(change).rounded()))%",
-                caption: L(tighter ? "stats.svp.tighter" : "stats.svp.wider"),
+                caption: L(change < 0 ? "stats.svp.tighter" : "stats.svp.wider"),
                 captionAbove: true,
-                color: tighter ? Theme.primary : Theme.textSecondary
+                color: roleColour
             )
         } else {
             box(L("stats.svp.impactNone"), "—", color: Theme.textSecondary)
+        }
+    }
+
+    private var roleLabelKey: String {
+        switch analysis.role {
+        case .separates: return "stats.svp.impactHigh"
+        case .movesSome: return "stats.svp.impactMedium"
+        case .evensOut: return "stats.svp.impactEvens"
+        case .neutral: return "stats.svp.impactLow"
+        }
+    }
+
+    private var roleColour: Color {
+        switch analysis.role {
+        case .separates, .movesSome: return Theme.primary
+        case .evensOut: return Theme.accent
+        case .neutral: return Theme.textSecondary
+        }
+    }
+
+    /// The sentence under the boxes: what the spread comparison means, and —
+    /// where the putter is clearly gaining or clearly costing — which way round
+    /// the compensation runs.
+    private var roleNoteKey: String {
+        switch analysis.role {
+        case .separates, .movesSome: return "stats.svp.note.separates"
+        case .neutral: return "stats.svp.note.neutral"
+        case .evensOut:
+            if analysis.avgSG >= 0.5 { return "stats.svp.note.evensGain" }
+            if analysis.avgSG <= -0.5 { return "stats.svp.note.evensLoss" }
+            return "stats.svp.note.evensFlat"
         }
     }
 

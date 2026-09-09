@@ -168,6 +168,8 @@ struct RoundInputQuickView: View {
 
             PuttChipsView(session: session)
 
+            PickUpHoleButton(session: session) { handleOutcome($0, session) }
+
             if !session.puttsOnHole(session.displayHole).isEmpty {
                 Button {
                     showDeleteHoleConfirm = true

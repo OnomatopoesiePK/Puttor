@@ -474,15 +474,50 @@ final class RoundSession {
         return true
     }
 
+    /// True while the displayed hole has nothing on it at all — the only time
+    /// the ball can still be picked up on it.
+    var canPickUpBall: Bool {
+        puttsOnHole(displayHole).isEmpty
+    }
+
+    var isDisplayingPickUp: Bool {
+        puttsOnHole(displayHole).contains(where: \.isPickUp)
+    }
+
+    /// Gives the hole up: no putts, no putting statistics, and a double bogey
+    /// where the score would be. Moves on the way holing out does, because
+    /// there is nothing further to enter on this hole.
+    @discardableResult
+    func pickUpBall() -> RoundOutcome {
+        guard puttsOnHole(currentHole).isEmpty else { return .edited }
+        let sentinel = Putt(
+            holeNumber: currentHole,
+            puttNumber: Putt.pickedUpPuttNumber,
+            distanceM: 0,
+            puttFor: .par,
+            result: .missedGeneric
+        )
+        sentinel.round = round
+        round.putts.append(sentinel)
+        modelContext.insert(sentinel)
+        try? modelContext.save()
+
+        let outcome = advanceAfterHole()
+        resetDraft()
+        return outcome
+    }
+
     /// True when the displayed hole is recorded as a hole-out with no real putts,
     /// so the screen should offer the hole-out's category rather than putt entry.
     var isDisplayingHoleOut: Bool {
-        realPuttsOnHole(displayHole).isEmpty && !puttsOnHole(displayHole).isEmpty
+        realPuttsOnHole(displayHole).isEmpty
+            && !puttsOnHole(displayHole).isEmpty
+            && !isDisplayingPickUp
     }
 
     var displayedHoleOutCategory: ScoreCategory? {
         guard isDisplayingHoleOut else { return nil }
-        return puttsOnHole(displayHole).first { $0.puttNumber == 0 }?.puttFor
+        return puttsOnHole(displayHole).first { $0.puttNumber == Putt.holeOutPuttNumber }?.puttFor
     }
 
     private func advanceAfterHole() -> RoundOutcome {
@@ -494,8 +529,10 @@ final class RoundSession {
         return .advancedToNextHole
     }
 
+    /// Clears both kinds of sentinel — a recorded putt supersedes a hole-out
+    /// and a pick-up alike.
     private func deleteSentinel(forHole hole: Int) {
-        let sentinels = round.putts.filter { $0.holeNumber == hole && $0.puttNumber == 0 }
+        let sentinels = round.putts.filter { $0.holeNumber == hole && $0.puttNumber <= 0 }
         for s in sentinels {
             round.putts.removeAll { $0.id == s.id }
             modelContext.delete(s)

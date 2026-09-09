@@ -51,6 +51,45 @@ struct ScorePuttingAnalysis {
         return (sdScoreWithoutPutting - sdScore) / sdScore * 100
     }
 
+    /// Average strokes gained putting per round — whether the putter is a net
+    /// gain or a net cost, which is a different question from whether it is
+    /// what separates one round from another.
+    var avgSG: Double { mean(rounds.map(\.sg)) }
+
+    /// What the putter is doing to the *differences* between rounds.
+    ///
+    /// The two spreads settle it, and the direction is not a matter of taste.
+    /// With S = score played, P = score with tour putting and G = strokes
+    /// gained, S = P − G, so Var(S) < Var(P) can only happen when G and P move
+    /// together: the worse the rest of the game went, the more the putter
+    /// gained. That is compensation, and it is the case a bare "putting is not
+    /// the reason" used to hide.
+    enum PuttingRole {
+        /// Rounds would sit much closer together with tour putting: the putter
+        /// is what makes a good round good and a bad one bad.
+        case separates
+        /// The same, less pronounced.
+        case movesSome
+        /// Rounds sit closer together *because* of the putter: it is covering
+        /// for how much the rest of the game swings.
+        case evensOut
+        /// Both halves swing about as much either way.
+        case neutral
+    }
+
+    /// Percentage points of spread change that count as a difference at all,
+    /// and the point where it becomes the main story.
+    static let noticeableSpreadChange = 10.0
+    static let strongSpreadChange = 40.0
+
+    var role: PuttingRole {
+        guard let change = spreadChangePercent else { return .neutral }
+        if change <= -Self.strongSpreadChange { return .separates }
+        if change <= -Self.noticeableSpreadChange { return .movesSome }
+        if change >= Self.noticeableSpreadChange { return .evensOut }
+        return .neutral
+    }
+
     /// Below this there is no spread worth decomposing.
     static let minimumRounds = 3
 

@@ -257,12 +257,12 @@
 "stats.svp.avgWithout" = "Ø SCORE · STANDARDIZED PUTTING";
 "stats.svp.perRound" = "per round";
 "stats.svp.needMore" = "%ld finished rounds are needed before scores and putting can be compared.";
-"stats.svp.note" = "Each round counts as it was played. “Standardized putting” adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting.\n\nEach band covers one standard deviation either side of that series' average.\n\nNarrower by two fifths or more and the putter is what pulls your rounds apart; a tenth to two fifths and it has a hand in it; below that your rounds differ for reasons other than putting.";
+"stats.svp.note" = "Each round counts as it was played. “Standardized putting” adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting.\n\nEach band covers one standard deviation either side of that series' average, and the percentage compares the two.\n\nA narrower standardized band means the putter is what pulls your rounds apart: take it out and they converge. A wider one means the opposite, and it can only happen one way — the putter gained most on the rounds where the rest of the game went worst. That is putting covering for the long game, not putting being irrelevant.\n\nThe average strokes gained is a separate question: it says whether the putter is a net gain or a net cost, not whether it is what makes your rounds differ.";
 "stats.svp.bandLegend" = "score average ± spread";
 "stats.svp.bandLegendPro" = "standardized putting average ± spread";
 "stats.svp.impactHigh" = "PUTTING DRIVES YOUR SCORE";
 "stats.svp.impactMedium" = "PUTTING MOVES YOUR SCORE";
-"stats.svp.impactLow" = "PUTTING IS NOT THE REASON";
+"stats.svp.impactLow" = "PUTTING IS NOT THE DIFFERENCE";
 "stats.svp.impactNone" = "NO CLEAR EFFECT";
 "stats.svp.tighter" = "tighter with standardized putting";
 "stats.svp.wider" = "wider with standardized putting";
@@ -677,3 +677,17 @@
 "stats.filter.weather" = "Weather";
 "stats.filter.greenSpeed" = "Green speed";
 "stats.filter.casual" = "Casual round";
+
+// Picking the ball up
+"input.pickUp" = "Pick up ball";
+"input.pickUpConfirm" = "Pick up on hole %ld?";
+"input.pickUpMessage" = "The hole is left out of every putting figure and written down as a double bogey. The round then counts for putting, but not for score.";
+"stats.gbe" = "ADJ. GROSS";
+"summary.pickedUp" = "🖐 Ball picked up — counted as a double bogey, left out of the putting figures.";
+"summary.puttedHoles" = "%ld with putts";
+"stats.svp.impactEvens" = "PUTTING EVENS YOUR ROUNDS OUT";
+"stats.svp.note.separates" = "With tour-average putting your rounds would sit closer together, so what makes a good round good is largely the putter.";
+"stats.svp.note.evensGain" = "Your rounds sit closer together than the rest of your game alone would leave them: on the days the long game was off, the putter gained the most and pulled the card back.";
+"stats.svp.note.evensLoss" = "Your rounds sit closer together than the rest of your game alone would leave them: on the days the long game was best, the putter gave the most back.";
+"stats.svp.note.evensFlat" = "Your rounds sit closer together than the rest of your game alone would leave them — the putter is evening out how much the long game swings.";
+"stats.svp.note.neutral" = "Both halves swing about as much, so what separates your rounds is not the putting on its own.";

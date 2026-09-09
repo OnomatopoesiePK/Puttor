@@ -58,7 +58,15 @@ struct RoundSummaryView: View {
 
                 HStack(spacing: Theme.Spacing.xs) {
                     bigStat(L("summary.putts"), "\(stats.totalPutts)")
-                    bigStat(L("summary.holes"), "\(stats.holes)")
+                    // The round's own size, picked-up holes included — the
+                    // averages beside it are the ones that leave them out.
+                    bigStat(
+                        L("summary.holes"),
+                        "\(stats.playedHoles)",
+                        caption: stats.pickedUpHoles > 0
+                            ? String(format: L("summary.puttedHoles"), stats.holes)
+                            : nil
+                    )
                     bigStat(
                         L("summary.avgPerHole"),
                         String(format: "%.1f", stats.avgPuttsPerHole),
@@ -88,7 +96,8 @@ struct RoundSummaryView: View {
                     Text(L("stats.playingStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.sm), count: 3), spacing: Theme.Spacing.sm) {
                         playingStat(
-                            L("stats.score"), stats.scoreRelativeToParText,
+                            L(stats.pickedUpHoles > 0 ? "stats.gbe" : "stats.score"),
+                            stats.scoreRelativeToParText,
                             subtitle: String(format: L("stats.overHoles"), stats.scoredHoles),
                             color: scoreColor(stats.scoreRelativeToPar),
                             highlighted: RoundHighlights.scoreUnderPar(stats.scoreRelativeToPar)
@@ -414,9 +423,10 @@ struct RoundSummaryView: View {
     }
 
     private func holeCell(_ hole: Int) -> some View {
+        let pickedUp = stats.pickedUpHoleNumbers.contains(hole)
         let played = stats.puttsByHole[hole] != nil
         let count = stats.puttsByHole[hole] ?? 0
-        let bg: Color = !played ? Theme.borderLight : (count == 0 ? Theme.accent.opacity(0.25) : (count == 1 ? Theme.primary.opacity(0.2) : (count >= 3 ? Theme.error.opacity(0.2) : Theme.surface)))
+        let bg: Color = pickedUp ? Theme.accent.opacity(0.15) : !played ? Theme.borderLight : (count == 0 ? Theme.accent.opacity(0.25) : (count == 1 ? Theme.primary.opacity(0.2) : (count >= 3 ? Theme.error.opacity(0.2) : Theme.surface)))
         let fg: Color = !played ? Theme.textMuted : (count == 0 ? Theme.accent : (count == 1 ? Theme.primary : (count >= 3 ? Theme.error : Theme.text)))
         let isOpen = expandedHole == hole
 
@@ -427,7 +437,14 @@ struct RoundSummaryView: View {
         } label: {
             VStack(spacing: 2) {
                 Text("\(hole)").font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textMuted)
-                Text(played ? "\(count)" : "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
+                if pickedUp {
+                    Image(systemName: "hand.raised.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Theme.accent)
+                        .frame(height: 22)
+                } else {
+                    Text(played ? "\(count)" : "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
+                }
             }
             .frame(maxWidth: .infinity, minHeight: holeCount == 9 ? 64 : 48)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(bg))
@@ -441,7 +458,8 @@ struct RoundSummaryView: View {
         // No putt records at all means the hole was never played; a hole with
         // only the 0-putt sentinel was played but holed out from off the green.
         let neverPlayed = stats.puttsByHole[hole] == nil
-        let isHoleOut = holePutts.isEmpty && !neverPlayed
+        let isPickedUp = stats.pickedUpHoleNumbers.contains(hole)
+        let isHoleOut = holePutts.isEmpty && !neverPlayed && !isPickedUp
 
         return VStack(alignment: .leading, spacing: 6) {
             let holeRecords = putts.filter { $0.holeNumber == hole }
@@ -471,6 +489,11 @@ struct RoundSummaryView: View {
                 Text(L("summary.notPlayed"))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.textMuted)
+            }
+            if isPickedUp {
+                Text(L("summary.pickedUp"))
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
             }
             if isHoleOut {
                 let category = putts.first { $0.holeNumber == hole && $0.puttNumber == 0 }?.puttFor ?? .par

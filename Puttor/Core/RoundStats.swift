@@ -95,6 +95,16 @@ struct RoundStats {
     var avgPuttsOffGir: Double? { nonGirPuttedHoles > 0 ? Double(nonGirPutts) / Double(nonGirPuttedHoles) : nil }
     var avgGirProximityM: Double? { girProximityCount > 0 ? girProximitySumM / Double(girProximityCount) : nil }
 
+    /// Holes where the ball was picked up: no putts, no putting statistics,
+    /// and a double bogey on the card. They are counted here so an average can
+    /// leave them out and the score can say it is an adjusted one.
+    var pickedUpHoles: Int = 0
+    /// Which holes those were — per round only, like `puttsByHole`.
+    var pickedUpHoleNumbers: Set<Int> = []
+    /// Holes actually walked, picked-up ones included: what a scorecard is
+    /// read over, as opposed to what the putting averages divide by.
+    var playedHoles: Int { holes + pickedUpHoles }
+
     /// Total strokes over/under par across the scored holes.
     var scoreRelativeToPar: Int = 0
     /// Holes the score could be derived for — the divisor behind any average.
@@ -205,7 +215,13 @@ struct RoundStats {
         let realPutts = putts.filter { $0.puttNumber > 0 }
         stats.totalPutts = realPutts.count
 
-        let holeSet = Set(putts.map { $0.holeNumber })
+        // A hole given up has no putting in it at all, so it is out of every
+        // putting average — that is the whole point of marking it.
+        let pickedUp = Set(putts.filter(\.isPickUp).map(\.holeNumber))
+        stats.pickedUpHoles = pickedUp.count
+        stats.pickedUpHoleNumbers = pickedUp
+
+        let holeSet = Set(putts.map { $0.holeNumber }).subtracting(pickedUp)
         stats.holes = holeSet.count
         stats.avgPuttsPerHole = stats.holes > 0 ? Double(stats.totalPutts) / Double(stats.holes) : 0
         // Summed per hole rather than per putt — see holeStrokesGained.
@@ -231,6 +247,11 @@ struct RoundStats {
 
         stats.missReasonCounts = computeMissReasonCounts(realPutts)
         stats.leaveByMissDirection = computeLeaveByMissDirection(realPutts)
+
+        // A picked-up hole still has a score: the double bogey it is written
+        // down as. It has nothing else — no GIR, no scramble, no putts.
+        stats.scoreRelativeToPar += 2 * pickedUp.count
+        stats.scoredHoles += pickedUp.count
 
         // Scoring, GIR and scramble are per hole rather than per putt, so that a
         // hole holed out from off the green counts under the category it was
@@ -359,6 +380,7 @@ struct RoundStats {
         var merged = RoundStats()
         merged.totalPutts = list.reduce(0) { $0 + $1.totalPutts }
         merged.holes = list.reduce(0) { $0 + $1.holes }
+        merged.pickedUpHoles = list.reduce(0) { $0 + $1.pickedUpHoles }
         merged.sgTotal = list.reduce(0) { $0 + $1.sgTotal }
         merged.pcgTotal = list.reduce(0) { $0 + $1.pcgTotal }
         merged.threePuttHoles = list.reduce(0) { $0 + $1.threePuttHoles }

@@ -193,7 +193,10 @@ private struct StatisticsPane: View {
                 let stats = RoundStats.compute(putts: r.putts, useFeet: useFeet)
                 byRound[r.persistentModelID] = stats
                 perRound.append(stats)
-                if r.tracksScoreCategory && stats.scoredHoles > 0 {
+                // A round with a picked-up hole carries an adjusted card
+                // rather than a score, so it stays out of the score figures —
+                // the same way a round entered without the score reference does.
+                if r.tracksScoreCategory && stats.scoredHoles > 0 && stats.pickedUpHoles == 0 {
                     scoreBearing.append(stats)
                 }
             }
@@ -214,7 +217,12 @@ private struct StatisticsPane: View {
 
             scorePutting = ScorePuttingAnalysis.make(rounds: rounds.compactMap { r in
                 guard let stats = byRound[r.persistentModelID] else { return nil }
-                return (date: r.date, courseName: r.courseName, stats: stats, tracksScore: r.tracksScoreCategory)
+                return (
+                    date: r.date,
+                    courseName: r.courseName,
+                    stats: stats,
+                    tracksScore: r.tracksScoreCategory && stats.pickedUpHoles == 0
+                )
             })
 
             allPutts = rounds.flatMap { $0.putts }
@@ -479,7 +487,7 @@ private struct StatisticsPane: View {
 
                             CollapsibleStatSection(title: sectionTitle(L("stats.scoreVsPutting"), marked: data.hasRoundsWithoutScore), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
                                 if let analysis = data.scorePutting {
-                                    ScoreVsPuttingView(analysis: analysis)
+                                    ScoreVsPuttingView(analysis: analysis, dense: dense)
                                 } else {
                                     Text(String(format: L("stats.svp.needMore"), ScorePuttingAnalysis.minimumRounds))
                                         .font(.system(size: 12))
