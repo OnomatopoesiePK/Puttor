@@ -20,6 +20,9 @@ final class Round {
     /// Whether the round was played in a competition. Defaults to false so
     /// rounds recorded before the flag existed stay what they were: practice.
     var isTournament: Bool = false
+    /// Stroke play unless said otherwise — the format rounds were recorded in
+    /// before the question was asked.
+    var playFormatRaw: String = PlayFormat.strokePlay.rawValue
     var startingHole: Int = 1
     var inputModeRaw: String = InputMode.pro.rawValue
     var holeCount: Int = 18
@@ -38,6 +41,11 @@ final class Round {
 
     @Relationship(deleteRule: .cascade, inverse: \Putt.round)
     var putts: [Putt] = []
+
+    var playFormat: PlayFormat {
+        get { PlayFormat(rawValue: playFormatRaw) ?? .strokePlay }
+        set { playFormatRaw = newValue.rawValue }
+    }
 
     var wind: WindLevel {
         get { WindLevel(rawValue: windRaw) ?? .none }
@@ -78,6 +86,7 @@ final class Round {
         precipitation: Precipitation = .sun,
         grainyGreens: Bool = false,
         isTournament: Bool = false,
+        playFormat: PlayFormat = .strokePlay,
         startingHole: Int = 1,
         inputMode: InputMode = .pro
     ) {
@@ -91,6 +100,7 @@ final class Round {
         self.precipitationRaw = precipitation.rawValue
         self.grainyGreens = grainyGreens
         self.isTournament = isTournament
+        self.playFormatRaw = playFormat.rawValue
         self.startingHole = startingHole
         self.inputModeRaw = inputMode.rawValue
         self.holeCount = 18

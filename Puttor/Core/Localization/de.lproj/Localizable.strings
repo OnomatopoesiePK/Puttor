@@ -697,3 +697,8 @@
 "input.pickUpScore" = "SCORE AUF DIESEM LOCH";
 "input.pickUpHint" = "Ein aufgehobenes Loch kann nicht besser als ein Doppelbogey sein. Ohne Score wird es als solches gewertet, und die Runde bleibt aus der Score-Statistik heraus.";
 "summary.pickedUpScored" = "Ball aufgehoben — als %@ gewertet, aus den Putt-Werten heraus.";
+
+// Stroke play or match play
+"setup.format" = "SPIELFORM";
+"format.strokePlay" = "Zählspiel";
+"format.matchPlay" = "Lochspiel";

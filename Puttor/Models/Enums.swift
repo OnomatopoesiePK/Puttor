@@ -84,6 +84,26 @@ enum DoubleBreakType: String, Codable, CaseIterable {
     }
 }
 
+/// How the round was scored. Match play is decided hole by hole, so putts get
+/// conceded and holes given up — which is worth knowing before reading a card.
+enum PlayFormat: String, Codable, CaseIterable {
+    case strokePlay, matchPlay
+
+    var labelKey: String {
+        switch self {
+        case .strokePlay: return "format.strokePlay"
+        case .matchPlay: return "format.matchPlay"
+        }
+    }
+
+    var emoji: String {
+        switch self {
+        case .strokePlay: return "🧮"
+        case .matchPlay: return "⚔️"
+        }
+    }
+}
+
 enum WindLevel: String, Codable, CaseIterable {
     case none, medium, high
 

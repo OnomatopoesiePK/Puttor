@@ -697,3 +697,8 @@
 "input.pickUpScore" = "SCORE FOR THIS HOLE";
 "input.pickUpHint" = "A picked-up hole cannot be better than a double bogey. Without a score it is written down as one, and the round stays out of the score statistics.";
 "summary.pickedUpScored" = "Ball picked up — counted as %@, out of the putting figures.";
+
+// Stroke play or match play
+"setup.format" = "FORMAT";
+"format.strokePlay" = "Stroke play";
+"format.matchPlay" = "Match play";

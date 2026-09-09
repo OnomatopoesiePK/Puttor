@@ -69,6 +69,8 @@ struct RoundFilter: Equatable {
     var tournament: FilterTriState = .any
     /// nil for any weather.
     var weather: WeatherFilter?
+    /// nil for either format.
+    var format: PlayFormat?
     /// Whether the green-speed range is being asked about at all. Its two
     /// bounds are separately open, so "enabled with both ends open" is a
     /// perfectly good state — it just filters nothing yet.
@@ -81,7 +83,7 @@ struct RoundFilter: Equatable {
     static let stimpSteps: [Double] = Array(stride(from: 6.5, through: 12.5, by: 0.5))
 
     var isActive: Bool {
-        putterID != nil || grain != .any || tournament != .any || weather != nil
+        putterID != nil || grain != .any || tournament != .any || weather != nil || format != nil
             || (stimpEnabled && (stimpMin != nil || stimpMax != nil))
     }
 
@@ -90,6 +92,7 @@ struct RoundFilter: Equatable {
         guard grain.matches(round.grainyGreens) else { return false }
         guard tournament.matches(round.isTournament) else { return false }
         if let weather, !weather.matches(round) { return false }
+        if let format, round.playFormat != format { return false }
         if stimpEnabled {
             if let stimpMin, round.stimp < stimpMin - 0.001 { return false }
             if let stimpMax, round.stimp > stimpMax + 0.001 { return false }
@@ -107,6 +110,7 @@ struct RoundFilter: Equatable {
         if grain != .any { parts.append("grain=\(grain.rawValue)") }
         if tournament != .any { parts.append("tr=\(tournament.rawValue)") }
         if let weather { parts.append("weather=\(weather.rawValue)") }
+        if let format { parts.append("format=\(format.rawValue)") }
         if stimpEnabled {
             parts.append("stimp=1")
             if let stimpMin { parts.append("smin=\(stimpMin)") }
@@ -126,6 +130,7 @@ struct RoundFilter: Equatable {
             case "grain": filter.grain = FilterTriState(rawValue: value) ?? .any
             case "tr": filter.tournament = FilterTriState(rawValue: value) ?? .any
             case "weather": filter.weather = WeatherFilter(rawValue: value)
+            case "format": filter.format = PlayFormat(rawValue: value)
             case "stimp": filter.stimpEnabled = value == "1"
             case "smin": filter.stimpMin = Double(value)
             case "smax": filter.stimpMax = Double(value)

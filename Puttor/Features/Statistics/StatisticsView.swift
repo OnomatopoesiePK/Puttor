@@ -822,6 +822,13 @@ private struct StatisticsPane: View {
                 Button(L("stats.filter.casual")) { filter.tournament = .no }
             }
 
+            Menu(L("setup.format")) {
+                Button(L("stats.filter.any")) { filter.format = nil }
+                ForEach(PlayFormat.allCases, id: \.self) { option in
+                    Button("\(option.emoji) \(L(option.labelKey))") { filter.format = option }
+                }
+            }
+
             Menu(L("stats.filter.weather")) {
                 Button(L("stats.filter.any")) { filter.weather = nil }
                 ForEach(WeatherFilter.allCases) { option in
@@ -922,6 +929,9 @@ private struct StatisticsPane: View {
         }
         if let weather = filter.weather {
             chips.append((weather.label, { filter.weather = nil }))
+        }
+        if let format = filter.format {
+            chips.append(("\(format.emoji) \(L(format.labelKey))", { filter.format = nil }))
         }
         if filter.stimpEnabled {
             chips.append((stimpChipLabel, {

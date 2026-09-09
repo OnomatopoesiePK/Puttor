@@ -697,3 +697,8 @@
 "input.pickUpScore" = "SCORE DE ESTE HOYO";
 "input.pickUpHint" = "Un hoyo recogido no puede ser mejor que un doble bogey. Sin score se anota como tal y la ronda queda fuera de las estadísticas de score.";
 "summary.pickedUpScored" = "Bola recogida: anotada como %@ y fuera de los datos de putt.";
+
+// Stroke play or match play
+"setup.format" = "MODALIDAD";
+"format.strokePlay" = "Stroke play";
+"format.matchPlay" = "Match play";

@@ -1813,6 +1813,18 @@ struct PuttorTests {
         filter = RoundFilter()
         filter.putterID = putter.id.uuidString
         #expect(rounds.filter(filter.matches).count == 1)
+
+        // Rounds recorded before the format was asked about are stroke play.
+        filter = RoundFilter()
+        filter.format = .strokePlay
+        #expect(filter.isActive)
+        #expect(rounds.filter(filter.matches).count == 4)
+        rounds[0].playFormat = .matchPlay
+        try context.save()
+        #expect(rounds.filter(filter.matches).count == 3)
+        filter.format = .matchPlay
+        #expect(rounds.filter(filter.matches).count == 1)
+        #expect(RoundFilter.decode(filter.encoded).format == .matchPlay)
     }
 
     /// A pane remembers its filter, so it has to survive the round trip
