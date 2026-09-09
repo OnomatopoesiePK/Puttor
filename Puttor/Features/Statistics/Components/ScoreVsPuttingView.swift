@@ -160,14 +160,31 @@ struct ScoreVsPuttingView: View {
                 gap.addLine(to: CGPoint(x: px, y: scoreY))
                 context.stroke(gap, with: .color(gapColor.opacity(0.75)), lineWidth: 3)
 
-                let hollow = CGRect(x: px - 3.5, y: withoutY - 3.5, width: 7, height: 7)
-                context.stroke(Path(ellipseIn: hollow), with: .color(Theme.textMuted), lineWidth: 1.5)
+                // A star for the round that was never played: a second circle
+                // read as another measurement rather than as the imagined one.
+                context.fill(star(at: CGPoint(x: px, y: withoutY), radius: 5.5),
+                             with: .color(Theme.textMuted))
 
                 let filled = CGRect(x: px - 4, y: scoreY - 4, width: 8, height: 8)
                 context.fill(Path(ellipseIn: filled), with: .color(Theme.text))
             }
         }
         .frame(height: chartHeight)
+    }
+
+    /// A five-pointed star, centred on the point it marks.
+    private func star(at center: CGPoint, radius: CGFloat) -> Path {
+        var path = Path()
+        let points = 5
+        let inner = radius * 0.45
+        for index in 0..<(points * 2) {
+            let angle = -CGFloat.pi / 2 + CGFloat(index) * .pi / CGFloat(points)
+            let reach = index.isMultiple(of: 2) ? radius : inner
+            let point = CGPoint(x: center.x + cos(angle) * reach, y: center.y + sin(angle) * reach)
+            if index == 0 { path.move(to: point) } else { path.addLine(to: point) }
+        }
+        path.closeSubpath()
+        return path
     }
 
     private func tickLabel(_ value: Double) -> String {
@@ -181,7 +198,9 @@ struct ScoreVsPuttingView: View {
                     Circle().fill(Theme.text).frame(width: 8, height: 8)
                 }
                 legendItem(L("stats.svp.withoutLegend")) {
-                    Circle().stroke(Theme.textMuted, lineWidth: 1.5).frame(width: 8, height: 8)
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(Theme.textMuted)
                 }
                 legendItem(L("stats.svp.gapLegend")) {
                     // Green where putting gained, red where it cost — both
