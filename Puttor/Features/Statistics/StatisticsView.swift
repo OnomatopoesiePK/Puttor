@@ -196,7 +196,7 @@ private struct StatisticsPane: View {
                 // A round with a picked-up hole carries an adjusted card
                 // rather than a score, so it stays out of the score figures —
                 // the same way a round entered without the score reference does.
-                if r.tracksScoreCategory && stats.scoredHoles > 0 && stats.pickedUpHoles == 0 {
+                if r.tracksScoreCategory && stats.scoredHoles > 0 && stats.pickedUpWithoutScore == 0 {
                     scoreBearing.append(stats)
                 }
             }
@@ -221,7 +221,7 @@ private struct StatisticsPane: View {
                     date: r.date,
                     courseName: r.courseName,
                     stats: stats,
-                    tracksScore: r.tracksScoreCategory && stats.pickedUpHoles == 0
+                    tracksScore: r.tracksScoreCategory && stats.pickedUpWithoutScore == 0
                 )
             })
 

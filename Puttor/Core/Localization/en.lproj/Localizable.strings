@@ -681,9 +681,9 @@
 // Picking the ball up
 "input.pickUp" = "Pick up ball";
 "input.pickUpConfirm" = "Pick up on hole %ld?";
-"input.pickUpMessage" = "The hole is left out of every putting figure and written down as a double bogey. The round then counts for putting, but not for score.";
+"input.pickUpMessage" = "The hole is left out of every putting figure. Give it the score it would have gone down as — a double bogey at worst — and it counts as a score everywhere, this round included in the score statistics. Left without one, it is written down as a double bogey and the round counts for putting only.";
 "stats.gbe" = "ADJ. GROSS";
-"summary.pickedUp" = "Ball picked up — counted as a double bogey, left out of the putting figures.";
+"summary.pickedUp" = "Ball picked up — out of the putting figures.";
 "summary.puttedHoles" = "%ld with putts";
 "stats.svp.impactEvens" = "PUTTING EVENS YOUR ROUNDS OUT";
 "stats.svp.note.separates" = "With tour-average putting your rounds would sit closer together, so what makes a good round good is largely the putter.";
@@ -691,3 +691,9 @@
 "stats.svp.note.evensLoss" = "Your rounds sit closer together than the rest of your game alone would leave them: on the days the long game was best, the putter gave the most back.";
 "stats.svp.note.evensFlat" = "Your rounds sit closer together than the rest of your game alone would leave them — the putter is evening out how much the long game swings.";
 "stats.svp.note.neutral" = "Both halves swing about as much, so what separates your rounds is not the putting on its own.";
+"input.pickUpWith" = "Pick up · %@";
+"input.pickUpNoScore" = "No score";
+"input.pickedUpHole" = "Ball picked up";
+"input.pickUpScore" = "SCORE FOR THIS HOLE";
+"input.pickUpHint" = "A picked-up hole cannot be better than a double bogey. Without a score it is written down as one, and the round stays out of the score statistics.";
+"summary.pickedUpScored" = "Ball picked up — counted as %@, out of the putting figures.";

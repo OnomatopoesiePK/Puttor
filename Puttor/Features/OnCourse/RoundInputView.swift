@@ -133,6 +133,11 @@ struct RoundInputView: View {
                     session.updateHoleOutCategory(session.displayHole, to: newCategory)
                 }
             }
+            if session.isDisplayingPickUp {
+                PickUpScoreCard(category: session.displayedPickUpScore) { newScore in
+                    session.updatePickUpScore(session.displayHole, to: newScore)
+                }
+            }
         }
     }
 

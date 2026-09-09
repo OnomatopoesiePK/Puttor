@@ -681,9 +681,9 @@
 // Picking the ball up
 "input.pickUp" = "Ball aufheben";
 "input.pickUpConfirm" = "Auf Loch %ld aufheben?";
-"input.pickUpMessage" = "Das Loch bleibt aus allen Putt-Werten heraus und wird als Doppelbogey gewertet. Die Runde zählt dann fürs Putten, aber nicht für den Score.";
+"input.pickUpMessage" = "Das Loch bleibt aus allen Putt-Werten heraus. Gib ihm den Score, mit dem es auf der Karte gestanden hätte — schlechtestenfalls ein Doppelbogey — dann zählt er überall, und die Runde ist auch in der Score-Statistik dabei. Ohne Score wird sie als Doppelbogey gewertet und die Runde zählt nur fürs Putten.";
 "stats.gbe" = "GBE";
-"summary.pickedUp" = "Ball aufgehoben — als Doppelbogey gewertet, aus den Putt-Werten heraus.";
+"summary.pickedUp" = "Ball aufgehoben — aus den Putt-Werten heraus.";
 "summary.puttedHoles" = "%ld mit Putts";
 "stats.svp.impactEvens" = "PUTTEN GLEICHT DEINE RUNDEN AUS";
 "stats.svp.note.separates" = "Mit Tour-Schnitt beim Putten lägen deine Runden enger beisammen — was eine gute Runde gut macht, ist also vor allem der Putter.";
@@ -691,3 +691,9 @@
 "stats.svp.note.evensLoss" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe: an den Tagen mit dem besten langen Spiel hat der Putter am meisten zurückgegeben.";
 "stats.svp.note.evensFlat" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe — der Putter gleicht die Ausschläge des langen Spiels aus.";
 "stats.svp.note.neutral" = "Beide Hälften schwanken ähnlich stark; was deine Runden unterscheidet, liegt also nicht am Putten allein.";
+"input.pickUpWith" = "Aufheben · %@";
+"input.pickUpNoScore" = "Ohne Score";
+"input.pickedUpHole" = "Ball aufgehoben";
+"input.pickUpScore" = "SCORE AUF DIESEM LOCH";
+"input.pickUpHint" = "Ein aufgehobenes Loch kann nicht besser als ein Doppelbogey sein. Ohne Score wird es als solches gewertet, und die Runde bleibt aus der Score-Statistik heraus.";
+"summary.pickedUpScored" = "Ball aufgehoben — als %@ gewertet, aus den Putt-Werten heraus.";

@@ -69,9 +69,29 @@ final class Putt {
     static let holeOutPuttNumber = 0
     static let pickedUpPuttNumber = -1
 
-    /// A hole that was given up rather than played out: no putts, no putting
-    /// statistics, and a double bogey on the card.
+    /// A hole that was given up rather than played out: no putts and no
+    /// putting statistics.
     var isPickUp: Bool { puttNumber == Self.pickedUpPuttNumber }
+
+    /// The lowest score a picked-up hole can be written down as. Anything
+    /// better would have been holed out.
+    static let lowestPickUpScore = ScoreCategory.double
+
+    /// A pick-up's chosen score, or nil where none was given. Stored in the
+    /// sentinel's own `puttFor`, so nothing had to be added to the table:
+    /// anything better than a double bogey means "not chosen".
+    var pickUpScore: ScoreCategory? {
+        guard isPickUp,
+              puttFor.strokesRelativeToPar >= Self.lowestPickUpScore.strokesRelativeToPar
+        else { return nil }
+        return puttFor
+    }
+
+    /// What to store for a chosen score — `.par` stands for "none given".
+    static func pickUpCategory(_ score: ScoreCategory?) -> ScoreCategory {
+        guard let score, score.strokesRelativeToPar >= lowestPickUpScore.strokesRelativeToPar else { return .par }
+        return score
+    }
 
     var pcg: Double {
         let makeProbability = StrokesGained.baseline(at: distanceM).makeProbability

@@ -681,9 +681,9 @@
 // Picking the ball up
 "input.pickUp" = "Recoger la bola";
 "input.pickUpConfirm" = "¿Recoger en el hoyo %ld?";
-"input.pickUpMessage" = "El hoyo queda fuera de todos los datos de putt y se anota como doble bogey. La ronda cuenta entonces para el putt, pero no para el score.";
+"input.pickUpMessage" = "El hoyo queda fuera de todos los datos de putt. Dale el score con el que habría quedado en la tarjeta —doble bogey como mejor caso— y contará en todas partes, con la ronda incluida en las estadísticas de score. Sin score se anota como doble bogey y la ronda cuenta solo para el putt.";
 "stats.gbe" = "RBA";
-"summary.pickedUp" = "Bola recogida: anotada como doble bogey y fuera de los datos de putt.";
+"summary.pickedUp" = "Bola recogida: fuera de los datos de putt.";
 "summary.puttedHoles" = "%ld con putts";
 "stats.svp.impactEvens" = "EL PUTT IGUALA TUS RONDAS";
 "stats.svp.note.separates" = "Con un putt de media del tour tus rondas quedarían más juntas, así que lo que hace buena a una buena ronda es sobre todo el putter.";
@@ -691,3 +691,9 @@
 "stats.svp.note.evensLoss" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: los días de mejor juego largo, el putter fue el que más devolvió.";
 "stats.svp.note.evensFlat" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: el putter compensa las oscilaciones del juego largo.";
 "stats.svp.note.neutral" = "Ambas mitades oscilan de forma parecida, así que lo que separa tus rondas no es solo el putt.";
+"input.pickUpWith" = "Recoger · %@";
+"input.pickUpNoScore" = "Sin score";
+"input.pickedUpHole" = "Bola recogida";
+"input.pickUpScore" = "SCORE DE ESTE HOYO";
+"input.pickUpHint" = "Un hoyo recogido no puede ser mejor que un doble bogey. Sin score se anota como tal y la ronda queda fuera de las estadísticas de score.";
+"summary.pickedUpScored" = "Bola recogida: anotada como %@ y fuera de los datos de putt.";

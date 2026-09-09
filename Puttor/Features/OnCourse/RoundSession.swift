@@ -484,17 +484,38 @@ final class RoundSession {
         puttsOnHole(displayHole).contains(where: \.isPickUp)
     }
 
+    /// The score chosen for the displayed picked-up hole, if any.
+    var displayedPickUpScore: ScoreCategory? {
+        puttsOnHole(displayHole).first(where: \.isPickUp)?.pickUpScore
+    }
+
+    /// Sets or clears the score on a picked-up hole after the fact.
+    @discardableResult
+    func updatePickUpScore(_ hole: Int, to score: ScoreCategory?) -> Bool {
+        let sentinels = round.putts.filter { $0.holeNumber == hole && $0.isPickUp }
+        guard !sentinels.isEmpty else { return false }
+        for sentinel in sentinels {
+            sentinel.puttFor = Putt.pickUpCategory(score)
+        }
+        try? modelContext.save()
+        return true
+    }
+
     /// Gives the hole up: no putts, no putting statistics, and a double bogey
     /// where the score would be. Moves on the way holing out does, because
     /// there is nothing further to enter on this hole.
+    /// `score` is the score the hole would have gone down as, and is only
+    /// taken when it is a double bogey or worse — a hole worth finishing was
+    /// finished. Left out, the hole is written as a double bogey and the round
+    /// keeps out of the score statistics.
     @discardableResult
-    func pickUpBall() -> RoundOutcome {
+    func pickUpBall(score: ScoreCategory? = nil) -> RoundOutcome {
         guard puttsOnHole(currentHole).isEmpty else { return .edited }
         let sentinel = Putt(
             holeNumber: currentHole,
             puttNumber: Putt.pickedUpPuttNumber,
             distanceM: 0,
-            puttFor: .par,
+            puttFor: Putt.pickUpCategory(score),
             result: .missedGeneric
         )
         sentinel.round = round

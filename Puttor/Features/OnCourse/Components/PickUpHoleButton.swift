@@ -39,7 +39,14 @@ struct PickUpHoleButton: View {
                 isPresented: $confirming,
                 titleVisibility: .visible
             ) {
-                Button(L("input.pickUp")) { onPicked(session.pickUpBall()) }
+                // A picked-up hole is a double bogey at best, so the better
+                // scores are not on offer.
+                ForEach([ScoreCategory.double, .plus3, .plus4, .plus5, .plus6]) { score in
+                    Button(String(format: L("input.pickUpWith"), L(score.labelKey))) {
+                        onPicked(session.pickUpBall(score: score))
+                    }
+                }
+                Button(L("input.pickUpNoScore")) { onPicked(session.pickUpBall()) }
                 Button(L("common.cancel"), role: .cancel) {}
             } message: {
                 Text(L("input.pickUpMessage"))

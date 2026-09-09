@@ -1666,6 +1666,52 @@ struct PuttorTests {
         #expect(CoachAdvisor.roundStrokesGained(round) == 0)
     }
 
+    /// A picked-up hole can carry the score it would have gone down as — never
+    /// better than a double bogey — and then it counts like any other score.
+    @MainActor
+    @Test func aPickedUpHoleCanCarryTheScoreItWouldHaveBeen() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "T")
+        context.insert(round)
+
+        let pickUp = Putt(
+            holeNumber: 1, puttNumber: Putt.pickedUpPuttNumber,
+            distanceM: 0, puttFor: .par, result: .missedGeneric
+        )
+        pickUp.round = round
+        round.putts.append(pickUp)
+        context.insert(pickUp)
+        try context.save()
+
+        // No score given: written down as a double bogey, and the round says
+        // so — that is what keeps it out of the score statistics.
+        var stats = RoundStats.compute(putts: round.putts)
+        #expect(pickUp.pickUpScore == nil)
+        #expect(stats.scoreRelativeToPar == 2)
+        #expect(stats.pickedUpWithoutScore == 1)
+
+        // A score of +4: counted as +4, and the round is scored again.
+        pickUp.puttFor = Putt.pickUpCategory(.plus4)
+        try context.save()
+        stats = RoundStats.compute(putts: round.putts)
+        #expect(pickUp.pickUpScore == .plus4)
+        #expect(stats.scoreRelativeToPar == 4)
+        #expect(stats.pickedUpWithoutScore == 0)
+        #expect(stats.pickedUpHoles == 1)
+
+        // Anything better than a double bogey is not a pick-up score: a hole
+        // worth finishing was finished.
+        #expect(Putt.pickUpCategory(.birdie) == .par)
+        #expect(Putt.pickUpCategory(.bogey) == .par)
+        #expect(Putt.pickUpCategory(nil) == .par)
+        #expect(Putt.pickUpCategory(.double) == .double)
+
+        pickUp.puttFor = Putt.pickUpCategory(.bogey)
+        try context.save()
+        #expect(pickUp.pickUpScore == nil)
+        #expect(RoundStats.compute(putts: round.putts).scoreRelativeToPar == 2)
+    }
+
     // MARK: - Score against putting
 
     /// Which half of the game moves the scores is settled by the two spreads,

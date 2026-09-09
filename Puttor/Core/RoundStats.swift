@@ -101,6 +101,10 @@ struct RoundStats {
     var pickedUpHoles: Int = 0
     /// Which holes those were — per round only, like `puttsByHole`.
     var pickedUpHoleNumbers: Set<Int> = []
+    /// Of those, the ones left without a score. They are written down as a
+    /// double bogey, which is a guess — so a round carrying one stays out of
+    /// the score statistics.
+    var pickedUpWithoutScore: Int = 0
     /// Holes actually walked, picked-up ones included: what a scorecard is
     /// read over, as opposed to what the putting averages divide by.
     var playedHoles: Int { holes + pickedUpHoles }
@@ -248,10 +252,17 @@ struct RoundStats {
         stats.missReasonCounts = computeMissReasonCounts(realPutts)
         stats.leaveByMissDirection = computeLeaveByMissDirection(realPutts)
 
-        // A picked-up hole still has a score: the double bogey it is written
-        // down as. It has nothing else — no GIR, no scramble, no putts.
-        stats.scoreRelativeToPar += 2 * pickedUp.count
-        stats.scoredHoles += pickedUp.count
+        // A picked-up hole still has a score — the one entered for it, or the
+        // double bogey it is written down as when none was. It has nothing
+        // else: no GIR, no scramble, no putts.
+        for hole in pickedUp {
+            let sentinel = putts.first { $0.holeNumber == hole && $0.isPickUp }
+            let score = sentinel?.pickUpScore
+            stats.scoreRelativeToPar += score?.strokesRelativeToPar
+                ?? Putt.lowestPickUpScore.strokesRelativeToPar
+            stats.scoredHoles += 1
+            if score == nil { stats.pickedUpWithoutScore += 1 }
+        }
 
         // Scoring, GIR and scramble are per hole rather than per putt, so that a
         // hole holed out from off the green counts under the category it was
@@ -381,6 +392,7 @@ struct RoundStats {
         merged.totalPutts = list.reduce(0) { $0 + $1.totalPutts }
         merged.holes = list.reduce(0) { $0 + $1.holes }
         merged.pickedUpHoles = list.reduce(0) { $0 + $1.pickedUpHoles }
+        merged.pickedUpWithoutScore = list.reduce(0) { $0 + $1.pickedUpWithoutScore }
         merged.sgTotal = list.reduce(0) { $0 + $1.sgTotal }
         merged.pcgTotal = list.reduce(0) { $0 + $1.pcgTotal }
         merged.threePuttHoles = list.reduce(0) { $0 + $1.threePuttHoles }

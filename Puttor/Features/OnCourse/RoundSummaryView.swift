@@ -422,6 +422,13 @@ struct RoundSummaryView: View {
         }
     }
 
+    /// What the hole says: the score it was given, or that it has none.
+    private func pickUpText(_ hole: Int) -> String {
+        let score = putts.first { $0.holeNumber == hole && $0.isPickUp }?.pickUpScore
+        guard let score else { return L("summary.pickedUp") }
+        return String(format: L("summary.pickedUpScored"), L(score.labelKey))
+    }
+
     private func holeCell(_ hole: Int) -> some View {
         let pickedUp = stats.pickedUpHoleNumbers.contains(hole)
         let played = stats.puttsByHole[hole] != nil
@@ -495,7 +502,7 @@ struct RoundSummaryView: View {
                     PickUpBallIcon()
                         .fill(Theme.accent)
                         .frame(width: 15, height: 15)
-                    Text(L("summary.pickedUp"))
+                    Text(pickUpText(hole))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Theme.accent)
                         .fixedSize(horizontal: false, vertical: true)

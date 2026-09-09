@@ -69,6 +69,11 @@ struct RoundInputQuickView: View {
                             session.updateHoleOutCategory(session.displayHole, to: newCategory)
                         }
                     }
+                    if session.isDisplayingPickUp {
+                        PickUpScoreCard(category: session.displayedPickUpScore) { newScore in
+                            session.updatePickUpScore(session.displayHole, to: newScore)
+                        }
+                    }
 
                     DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
 
