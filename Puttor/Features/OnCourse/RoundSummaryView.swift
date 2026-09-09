@@ -438,9 +438,9 @@ struct RoundSummaryView: View {
             VStack(spacing: 2) {
                 Text("\(hole)").font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textMuted)
                 if pickedUp {
-                    Image(systemName: "hand.raised.fill")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(Theme.accent)
+                    PickUpBallIcon()
+                        .fill(Theme.accent)
+                        .frame(width: 18, height: 18)
                         .frame(height: 22)
                 } else {
                     Text(played ? "\(count)" : "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
@@ -491,9 +491,15 @@ struct RoundSummaryView: View {
                     .foregroundStyle(Theme.textMuted)
             }
             if isPickedUp {
-                Text(L("summary.pickedUp"))
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Theme.accent)
+                HStack(spacing: 6) {
+                    PickUpBallIcon()
+                        .fill(Theme.accent)
+                        .frame(width: 15, height: 15)
+                    Text(L("summary.pickedUp"))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             if isHoleOut {
                 let category = putts.first { $0.holeNumber == hole && $0.puttNumber == 0 }?.puttFor ?? .par

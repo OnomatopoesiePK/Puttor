@@ -683,7 +683,7 @@
 "input.pickUpConfirm" = "¿Recoger en el hoyo %ld?";
 "input.pickUpMessage" = "El hoyo queda fuera de todos los datos de putt y se anota como doble bogey. La ronda cuenta entonces para el putt, pero no para el score.";
 "stats.gbe" = "RBA";
-"summary.pickedUp" = "🖐 Bola recogida: anotada como doble bogey y fuera de los datos de putt.";
+"summary.pickedUp" = "Bola recogida: anotada como doble bogey y fuera de los datos de putt.";
 "summary.puttedHoles" = "%ld con putts";
 "stats.svp.impactEvens" = "EL PUTT IGUALA TUS RONDAS";
 "stats.svp.note.separates" = "Con un putt de media del tour tus rondas quedarían más juntas, así que lo que hace buena a una buena ronda es sobre todo el putter.";

@@ -683,7 +683,7 @@
 "input.pickUpConfirm" = "Pick up on hole %ld?";
 "input.pickUpMessage" = "The hole is left out of every putting figure and written down as a double bogey. The round then counts for putting, but not for score.";
 "stats.gbe" = "ADJ. GROSS";
-"summary.pickedUp" = "🖐 Ball picked up — counted as a double bogey, left out of the putting figures.";
+"summary.pickedUp" = "Ball picked up — counted as a double bogey, left out of the putting figures.";
 "summary.puttedHoles" = "%ld with putts";
 "stats.svp.impactEvens" = "PUTTING EVENS YOUR ROUNDS OUT";
 "stats.svp.note.separates" = "With tour-average putting your rounds would sit closer together, so what makes a good round good is largely the putter.";

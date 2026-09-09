@@ -25,9 +25,9 @@ struct PickUpHoleButton: View {
             Button {
                 confirming = true
             } label: {
-                Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Theme.accent)
+                PickUpBallIcon()
+                    .fill(Theme.accent)
+                    .frame(width: 19, height: 19)
                     .frame(width: 32, height: 32)
                     .background(Circle().fill(Theme.accent.opacity(0.13)))
                     .overlay(Circle().stroke(Theme.accent, lineWidth: 1))

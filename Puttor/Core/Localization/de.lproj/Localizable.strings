@@ -683,7 +683,7 @@
 "input.pickUpConfirm" = "Auf Loch %ld aufheben?";
 "input.pickUpMessage" = "Das Loch bleibt aus allen Putt-Werten heraus und wird als Doppelbogey gewertet. Die Runde zählt dann fürs Putten, aber nicht für den Score.";
 "stats.gbe" = "GBE";
-"summary.pickedUp" = "🖐 Ball aufgehoben — als Doppelbogey gewertet, aus den Putt-Werten heraus.";
+"summary.pickedUp" = "Ball aufgehoben — als Doppelbogey gewertet, aus den Putt-Werten heraus.";
 "summary.puttedHoles" = "%ld mit Putts";
 "stats.svp.impactEvens" = "PUTTEN GLEICHT DEINE RUNDEN AUS";
 "stats.svp.note.separates" = "Mit Tour-Schnitt beim Putten lägen deine Runden enger beisammen — was eine gute Runde gut macht, ist also vor allem der Putter.";
