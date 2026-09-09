@@ -16,18 +16,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PUTTOR" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-putt-01">
-                                <rect key="frame" x="20" y="406" width="353" height="41"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="36"/>
-                                <color key="textColor" red="0.23921568627450981" green="0.72941176470588232" blue="0.43529411764705883" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <imageView opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="PuttorWordmark" translatesAutoresizingMaskIntoConstraints="NO" id="img-putt-01">
+                                <rect key="frame" x="76.5" y="387" width="240" height="78"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" red="0.050980392156862744" green="0.10588235294117647" blue="0.16470588235294117" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="lbl-putt-01" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="ctr-x-01"/>
-                            <constraint firstItem="lbl-putt-01" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="ctr-y-01"/>
+                            <constraint firstItem="img-putt-01" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="ctr-x-01"/>
+                            <constraint firstItem="img-putt-01" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="ctr-y-01"/>
+                            <constraint firstItem="img-putt-01" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.61" id="wid-01"/>
+                            <constraint firstItem="img-putt-01" firstAttribute="height" secondItem="img-putt-01" secondAttribute="width" multiplier="392:1215" id="asp-01"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -36,4 +35,7 @@
             <point key="canvasLocation" x="0.0" y="0.0"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="PuttorWordmark" width="1215" height="392"/>
+    </resources>
 </document>
