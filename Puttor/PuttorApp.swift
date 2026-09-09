@@ -28,12 +28,6 @@ enum LaunchClock {
 
 @main
 struct PuttorApp: App {
-    /// Covers the app for one turn of the loader, then fades. The storyboard
-    /// launch screen is still on screen underneath it until the first frame,
-    /// so what the player sees is one continuous screen.
-    @State private var showingSplash = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     let container: ModelContainer = {
         let schema = Schema([Putter.self, Round.self, Putt.self, GameSession.self, GameAttempt.self])
         let config = ModelConfiguration(schema: schema)
@@ -50,17 +44,6 @@ struct PuttorApp: App {
                 #if DEBUG
                 .onAppear { LaunchClock.mark("first screen on") }
                 #endif
-                .overlay {
-                    if showingSplash {
-                        SplashView()
-                            .transition(.opacity)
-                    }
-                }
-                .task {
-                    let seconds = reduceMotion ? SplashView.reducedDuration : SplashView.duration
-                    try? await Task.sleep(for: .seconds(seconds))
-                    withAnimation(.easeOut(duration: 0.35)) { showingSplash = false }
-                }
         }
         .modelContainer(container)
     }
