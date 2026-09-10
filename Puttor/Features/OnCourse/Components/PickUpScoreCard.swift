@@ -26,7 +26,7 @@ struct PickUpScoreCard: View {
         VStack(spacing: 10) {
             HStack(spacing: 6) {
                 PickUpBallIcon()
-                    .fill(Theme.accent)
+                    .foregroundStyle(Theme.accent)
                     .frame(width: 16, height: 16)
                 Text(L("input.pickedUpHole"))
                     .font(.system(size: 13, weight: .semibold))

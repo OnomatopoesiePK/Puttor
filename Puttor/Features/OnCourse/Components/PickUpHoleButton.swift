@@ -26,11 +26,9 @@ struct PickUpHoleButton: View {
                 confirming = true
             } label: {
                 PickUpBallIcon()
-                    .fill(Theme.accent)
-                    .frame(width: 19, height: 19)
+                    .foregroundStyle(Theme.accent)
                     .frame(width: 32, height: 32)
-                    .background(Circle().fill(Theme.accent.opacity(0.13)))
-                    .overlay(Circle().stroke(Theme.accent, lineWidth: 1))
+                    .background(Circle().fill(Theme.accent.opacity(0.13)).padding(2))
             }
             .buttonStyle(.plain)
             .accessibilityLabel(L("input.pickUp"))

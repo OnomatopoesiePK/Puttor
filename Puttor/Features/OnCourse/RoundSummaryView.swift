@@ -446,7 +446,7 @@ struct RoundSummaryView: View {
                 Text("\(hole)").font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textMuted)
                 if pickedUp {
                     PickUpBallIcon()
-                        .fill(Theme.accent)
+                        .foregroundStyle(Theme.accent)
                         .frame(width: 18, height: 18)
                         .frame(height: 22)
                 } else {
@@ -500,7 +500,7 @@ struct RoundSummaryView: View {
             if isPickedUp {
                 HStack(spacing: 6) {
                     PickUpBallIcon()
-                        .fill(Theme.accent)
+                        .foregroundStyle(Theme.accent)
                         .frame(width: 15, height: 15)
                     Text(pickUpText(hole))
                         .font(.system(size: 13, weight: .semibold))
