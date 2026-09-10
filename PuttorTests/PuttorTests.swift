@@ -1564,6 +1564,17 @@ struct PuttorTests {
 
         // Too few rounds to compare against anything.
         #expect(CoachAdvisor.trend(in: Array(good.prefix(2))).trend == nil)
+
+        // The baseline is the last seven rounds, not everything passed in:
+        // seven good rounds in a row are steady, however bad the three before
+        // them were.
+        let recentSeven = (1...7).map { round(daysAgo: $0, distance: 8, putts: 1) }
+        let olderPoor = (8...10).map { round(daysAgo: $0 * 2, distance: 8, putts: 3) }
+        try context.save()
+        let windowed = CoachAdvisor.trend(in: recentSeven + olderPoor)
+        #expect(CoachAdvisor.trendBaselineRounds == 7)
+        #expect(abs(windowed.delta) < CoachAdvisor.trendThreshold)
+        #expect(windowed.trend == .steadyStrong)
     }
 
     /// The costliest band is the one where the most putts were lost against

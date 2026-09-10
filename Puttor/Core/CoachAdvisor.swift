@@ -149,8 +149,11 @@ enum CoachAdvisor {
     static let idleDaysBeforeRepeat = 14
     /// Below this many rounds there is nothing to compare against.
     static let minimumRoundsForTrend = 4
-    /// The recent stretch, held against the whole window.
+    /// The recent stretch, held against the rounds just before and including
+    /// it. Seven rather than the full ten: a baseline reaching back ten rounds
+    /// is slow to notice that the player has already moved on.
     static let recentRoundsForTrend = 3
+    static let trendBaselineRounds = 7
     /// Standing still above this is standing still in a good place; below the
     /// other, a bad one.
     static let steadyStrongLevel = 0.5
@@ -195,7 +198,7 @@ enum CoachAdvisor {
         report.trendDelta = reading.delta
         report.trendBaseline = reading.baseline
         report.trendRecentRounds = reading.recent
-        report.trendWindowRounds = rounds.filter { !$0.putts.isEmpty }.count
+        report.trendWindowRounds = min(trendBaselineRounds, rounds.filter { !$0.putts.isEmpty }.count)
 
         let costliest = costliestBracket(in: stats.makeByDistance)
         report.costliest = costliest
@@ -433,12 +436,13 @@ enum CoachAdvisor {
         guard scored.count >= minimumRoundsForTrend else { return nil }
 
         let recent = Array(scored.prefix(recentRoundsForTrend))
+        let window = Array(scored.prefix(trendBaselineRounds))
         func average(_ list: [Round]) -> Double {
             guard !list.isEmpty else { return 0 }
             return list.reduce(0.0) { $0 + value($1) } / Double(list.count)
         }
 
-        let baseline = average(scored)
+        let baseline = average(window)
         return (average(recent) - baseline, baseline, recent.count)
     }
 
