@@ -537,8 +537,8 @@
 
 /* Stats reference */
 "stats.pcg" = "PCG";
-"summary.sgCaption" = "per hole";
-"summary.pcgCaption" = "per putt";
+"summary.sgCaption" = "this round";
+"summary.pcgCaption" = "this round";
 "settings.reference" = "HOW THE NUMBERS WORK";
 "settings.reference.desc" = "Strokes gained, PCG and the tour baseline";
 "reference.title" = "Strokes Gained & PCG";

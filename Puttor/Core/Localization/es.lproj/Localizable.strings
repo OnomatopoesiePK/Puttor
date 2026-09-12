@@ -537,8 +537,8 @@
 
 /* Stats reference */
 "stats.pcg" = "PCG";
-"summary.sgCaption" = "por hoyo";
-"summary.pcgCaption" = "por putt";
+"summary.sgCaption" = "esta ronda";
+"summary.pcgCaption" = "esta ronda";
 "settings.reference" = "CÓMO FUNCIONAN LOS NÚMEROS";
 "settings.reference.desc" = "Golpes ganados, PCG y la base del tour";
 "reference.title" = "Golpes ganados y PCG";

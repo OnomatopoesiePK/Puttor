@@ -537,8 +537,8 @@
 
 /* Statistik-Referenz */
 "stats.pcg" = "PKR";
-"summary.sgCaption" = "pro Loch";
-"summary.pcgCaption" = "pro Putt";
+"summary.sgCaption" = "diese Runde";
+"summary.pcgCaption" = "diese Runde";
 "settings.reference" = "WIE DIE ZAHLEN FUNKTIONIEREN";
 "settings.reference.desc" = "Strokes Gained, PKR und die Tour-Baseline";
 "reference.title" = "Strokes Gained & PKR";
