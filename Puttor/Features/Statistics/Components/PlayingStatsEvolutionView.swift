@@ -65,6 +65,12 @@ struct PlayingStatsEvolutionView: View {
     @State private var viewportHeight: CGFloat = 0
 
     private static let chartsPerScreen: CGFloat = 3
+    /// Landscape has a third of portrait's height; below this a chart is too
+    /// flat to read, so there a little less than three fit.
+    private static let minimumChartHeight: CGFloat = 135
+    /// Up to this many rounds every point carries its number; beyond it only
+    /// the highest and the lowest do.
+    private static let everyPointLimit = 10
     private static let spacing: CGFloat = Theme.Spacing.md
     /// The strip down the left edge that holds the way back.
     private static let backStripWidth: CGFloat = 20
@@ -112,11 +118,12 @@ struct PlayingStatsEvolutionView: View {
         .background(Theme.background)
     }
 
-    /// A third of the screen each, less the gaps between them.
+    /// A third of the screen each, less the gaps between them, but never
+    /// flatter than the minimum.
     private var chartHeight: CGFloat {
         guard viewportHeight > 0 else { return 160 }
         let free = viewportHeight - Theme.Spacing.sm - Self.spacing * Self.chartsPerScreen
-        return max(80, (free / Self.chartsPerScreen).rounded(.down))
+        return max(Self.minimumChartHeight, (free / Self.chartsPerScreen).rounded(.down))
     }
 
     // MARK: - Pieces
@@ -144,6 +151,7 @@ struct PlayingStatsEvolutionView: View {
             }
 
             let domain = yDomain(series.map(\.value), metric)
+            let everyPoint = points.count <= Self.everyPointLimit
             EvolutionChart(
                 series: series,
                 rounds: points.count,
@@ -152,7 +160,10 @@ struct PlayingStatsEvolutionView: View {
                 gridRounds: roundTicks,
                 colour: colour,
                 axisText: { text($0, metric, onAxis: true) },
-                pointText: { text($0, metric) },
+                // A number at every point leaves no room for a unit after
+                // each; the axis already gives it.
+                pointText: { text($0, metric, withUnit: !everyPoint) },
+                labelsEveryPoint: everyPoint,
                 // The rounds are named once, under the last chart, spread the
                 // same way as in every chart above.
                 roundLabels: showsRounds
@@ -261,7 +272,7 @@ struct PlayingStatsEvolutionView: View {
 
     /// A figure as the chart writes it: whole numbers without decimals, the
     /// putts to two places beside a point and one on the axis.
-    private func text(_ value: Double, _ metric: PlayingStatsMetric, onAxis: Bool = false) -> String {
+    private func text(_ value: Double, _ metric: PlayingStatsMetric, onAxis: Bool = false, withUnit: Bool = true) -> String {
         let whole = abs(value - value.rounded()) < 0.001
         switch metric {
         case .score:
@@ -276,7 +287,7 @@ struct PlayingStatsEvolutionView: View {
             return whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
         case .proximity:
             let number = onAxis && whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
-            return number + (useFeet ? " ft" : " m")
+            return withUnit ? number + (useFeet ? " ft" : " m") : number
         }
     }
 }
@@ -295,13 +306,16 @@ private struct EvolutionChart: View {
     let colour: Color
     let axisText: (Double) -> String
     let pointText: (Double) -> String
+    /// Every point's number, or only the highest's and the lowest's.
+    let labelsEveryPoint: Bool
     let roundLabels: [(index: Int, text: String)]
 
     /// The band at the left edge the values sit in.
     private static let valueBand: CGFloat = 30
-    /// Above and below the line: room for the numbers at its highest and
-    /// lowest points.
-    private static let markRoom: CGFloat = 14
+    /// Above and below the line: room for a number over its highest point
+    /// and under its lowest, the text's full height clear of the chart's
+    /// edge. Less than that, and a nought at the foot of a chart was cut off.
+    private static let markRoom: CGFloat = 20
     /// The band under the plot the dates sit in, on the last chart.
     private static let roundBand: CGFloat = 14
 
@@ -362,21 +376,30 @@ private struct EvolutionChart: View {
                 context.fill(Path(ellipseIn: CGRect(x: point.x - 3.5, y: point.y - 3.5, width: 7, height: 7)), with: .color(colour))
             }
 
-            // The highest value over its point, the lowest under its own, both
-            // kept clear of the chart's sides.
+            // Numbers at the points, kept clear of the chart's sides. Each one
+            // goes on the open side of its point — over a peak, under a
+            // dip — so the line never runs through it.
             var marks: [(item: (index: Int, value: Double), above: Bool)] = []
-            if let highest = series.max(by: { $0.value < $1.value }) {
+            if labelsEveryPoint {
+                for (position, item) in series.enumerated() {
+                    let neighbours = [position - 1, position + 1]
+                        .filter { series.indices.contains($0) }
+                        .map { series[$0].value }
+                    let around = neighbours.isEmpty ? item.value : neighbours.reduce(0, +) / Double(neighbours.count)
+                    marks.append((item, item.value >= around))
+                }
+            } else if let highest = series.max(by: { $0.value < $1.value }) {
                 marks.append((highest, true))
                 if let lowest = series.min(by: { $0.value < $1.value }), lowest.value < highest.value {
                     marks.append((lowest, false))
                 }
             }
             for mark in marks {
-                let x = min(max(xPosition(mark.item.index), plot.minX + 14), size.width - 16)
+                let x = min(max(xPosition(mark.item.index), plot.minX + 12), size.width - 14)
                 let y = yPosition(mark.item.value)
                 context.draw(
-                    Text(pointText(mark.item.value)).font(.system(size: 10, weight: .bold)).foregroundStyle(colour),
-                    at: CGPoint(x: x, y: mark.above ? y - 5 : y + 5),
+                    Text(pointText(mark.item.value)).font(.system(size: labelsEveryPoint ? 9.5 : 10, weight: .bold)).foregroundStyle(colour),
+                    at: CGPoint(x: x, y: mark.above ? y - 6 : y + 6),
                     anchor: mark.above ? .bottom : .top
                 )
             }
