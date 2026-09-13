@@ -33,6 +33,54 @@ final class PuttorUITests: XCTestCase {
         // https://developer.apple.com/documentation/xcuiautomation
     }
 
+    /// Turning to landscape and back must leave the statistics tab as wide as
+    /// it was; it used to come back zoomed past the edge of the screen.
+    @MainActor
+    func testStatisticsKeepTheirWidthAfterRotating() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+
+        let heading = app.staticTexts["STROKES GAINED PUTTING"]
+        XCTAssertTrue(heading.waitForExistence(timeout: 10))
+        sleep(2)
+        let before = heading.frame
+        snapshot("1 portrait")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(3)
+        snapshot("2 landscape")
+
+        XCUIDevice.shared.orientation = .portrait
+        sleep(3)
+        snapshot("3 portrait again")
+
+        // Every element's frame, so a failure says which one is too wide.
+        let hierarchy = XCTAttachment(string: app.debugDescription)
+        hierarchy.name = "hierarchy after rotating back"
+        hierarchy.lifetime = .keepAlways
+        add(hierarchy)
+
+        let after = heading.frame
+        let window = app.windows.firstMatch.frame
+        XCTAssertEqual(after.minX, before.minX, accuracy: 1, "before \(before), after \(after), window \(window)")
+        XCTAssertEqual(after.width, before.width, accuracy: 1, "before \(before), after \(after), window \(window)")
+        XCTAssertLessThanOrEqual(after.maxX, window.maxX + 1, "after \(after), window \(window)")
+    }
+
+    private func snapshot(_ name: String) {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.

@@ -38,6 +38,7 @@ struct PuttorApp: App {
         let container = try! ModelContainer(for: schema, configurations: [config])
         #if DEBUG
         LaunchClock.mark("store opened")
+        DemoData.seedIfRequested(container)
         #endif
         return container
     }()

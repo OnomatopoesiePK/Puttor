@@ -214,10 +214,11 @@ struct MissDispersionPlotView: View {
 
         return VStack(spacing: 0) {
             // The width is read off an empty strip, which takes exactly the
-            // width it is offered. Reading it off the plot's own frame read
-            // back the plot's width instead: after turning to landscape and
-            // back the plot kept its landscape size, and pushed the whole tab
-            // wider than the screen.
+            // width it is offered — and everything below may shrink under
+            // `side` but never grow past what it is offered. A fixed-width plot
+            // left over from landscape made the tab's scroll view as wide as
+            // itself, which then offered that width back to this strip, so the
+            // tab stayed wider than the screen for good.
             Color.clear
                 .frame(height: 0)
                 .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { measuredWidth = $0 }
@@ -235,30 +236,39 @@ struct MissDispersionPlotView: View {
 
             HStack(spacing: 8) {
                 if data.dots.isEmpty {
-                    VStack {
-                        Text(L("dispersion.noData"))
-                            .font(.system(size: 12))
-                            .foregroundStyle(Theme.textMuted)
-                    }
-                    .frame(width: side, height: side)
-                    .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+                    Text(L("dispersion.noData"))
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.textMuted)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+                        .aspectRatio(1, contentMode: .fit)
+                        .frame(maxWidth: side)
                 } else {
-                    ZStack {
-                        plot(data)
+                    plot(data)
                         // Turned to run along their edges, so they take a
                         // label's height from the plot instead of its width.
-                        edgeLabel("dispersion.left")
-                            .rotationEffect(.degrees(-90))
-                            .position(x: Self.edgeLabelBand / 2, y: side / 2)
-                        edgeLabel("dispersion.right")
-                            .rotationEffect(.degrees(90))
-                            .position(x: side - Self.edgeLabelBand / 2, y: side / 2)
-                        edgeLabel("dispersion.long")
-                            .position(x: side / 2, y: Self.edgeLabelBand / 2)
-                        edgeLabel("dispersion.short")
-                            .position(x: side / 2, y: side - Self.edgeLabelBand / 2)
-                    }
-                    .frame(width: side, height: side)
+                        // Pinned to the edges rather than to coordinates, so
+                        // they sit right at whatever size the plot is given.
+                        .overlay(alignment: .leading) {
+                            edgeLabel("dispersion.left")
+                                .rotationEffect(.degrees(-90))
+                                .frame(width: Self.edgeLabelBand)
+                        }
+                        .overlay(alignment: .trailing) {
+                            edgeLabel("dispersion.right")
+                                .rotationEffect(.degrees(90))
+                                .frame(width: Self.edgeLabelBand)
+                        }
+                        .overlay(alignment: .top) {
+                            edgeLabel("dispersion.long")
+                                .frame(height: Self.edgeLabelBand)
+                        }
+                        .overlay(alignment: .bottom) {
+                            edgeLabel("dispersion.short")
+                                .frame(height: Self.edgeLabelBand)
+                        }
+                        .aspectRatio(1, contentMode: .fit)
+                        .frame(maxWidth: side)
                 }
 
                 if filter == .up || filter == .down {
@@ -397,7 +407,7 @@ struct MissDispersionPlotView: View {
                 .foregroundStyle(Theme.textMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(width: side)
+        .frame(maxWidth: side)
     }
 
     private func rampLegend(scale: Double) -> some View {
@@ -424,7 +434,7 @@ struct MissDispersionPlotView: View {
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(Theme.textMuted)
         }
-        .frame(width: side)
+        .frame(maxWidth: side)
     }
 
     private func legendLabel(_ value: Double) -> String {
@@ -560,7 +570,7 @@ struct MissDispersionPlotView: View {
             }
             context.stroke(head, with: .color(Theme.accent), lineWidth: 3)
         }
-        .frame(width: side, height: 24)
+        .frame(maxWidth: side, minHeight: 24, maxHeight: 24)
     }
 
     private var slopeArrowVertical: some View {

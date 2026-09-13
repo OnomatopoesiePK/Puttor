@@ -420,6 +420,10 @@ private struct StatisticsPane: View {
         value.map { String(format: "%.2f", $0) } ?? "—"
     }
 
+    private func girProximityText(_ data: StatsBundle) -> String {
+        data.scoreAggregated.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—"
+    }
+
     private func avgScorePerRoundText(_ average: Double?) -> String {
         guard let average else { return "—" }
         if abs(average) < 0.05 { return "E" }
@@ -519,12 +523,27 @@ private struct StatisticsPane: View {
                                             decimalText(data.scoreAggregated.avgPuttsOffGir),
                                             subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.nonGirPuttedHoles)
                                         )
+                                        // Counted from the putts alone, so every
+                                        // round in the filter counts, scored or not.
+                                        playingStat(
+                                            L("stats.threePuttsAvg"),
+                                            String(format: "%.1f", Double(data.aggregated.threePuttHoles) / Double(max(1, filteredRounds.count))),
+                                            subtitle: String(format: L("stats.totalInRounds"), data.aggregated.threePuttHoles, filteredRounds.count)
+                                        )
+                                        playingStat(
+                                            L("stats.lipOutsAvg"),
+                                            String(format: "%.1f", Double(data.aggregated.lipOutCount) / Double(max(1, filteredRounds.count))),
+                                            subtitle: String(format: L("stats.totalInRounds"), data.aggregated.lipOutCount, filteredRounds.count)
+                                        )
+                                        // A ninth tile completes the three-wide
+                                        // grid; two wide, it would stand alone.
+                                        if !dense {
+                                            playingStat(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
+                                        }
                                     }
-                                    playingStatWide(
-                                        L("stats.girProximity"),
-                                        data.scoreAggregated.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
-                                        subtitle: L("stats.firstPutt")
-                                    )
+                                    if dense {
+                                        playingStatWide(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
+                                    }
                                     scoreCoverageNote(data)
                                 }
                             }
