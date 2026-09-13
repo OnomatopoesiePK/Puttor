@@ -120,6 +120,8 @@ struct CoachReport {
     var findings: [CoachFinding] = []
     /// Reasons that go with a direction or a kind of putt.
     var links: [MissReasonLink] = []
+    /// How misread and mis-aimed putts met the break.
+    var breakReads: [BreakReadFinding] = []
     /// Differences that depend on the conditions rather than on the player:
     /// worth knowing before the next round rather than after it.
     var conditions: [SplitFinding] = []
@@ -198,6 +200,7 @@ enum CoachAdvisor {
             return finding
         }
         report.links = MissReasonLinker.links(in: putts)
+        report.breakReads = BreakReadAnalyzer.findings(in: putts)
         // Only habits come back from the finder, so each can send the coach
         // to a drill.
         let habits = report.findings

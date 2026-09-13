@@ -294,22 +294,23 @@ private struct StatisticsPane: View {
         }
     }
 
-    /// Reasons tied to a direction or a kind of putt, under the reason counts.
+    /// Readings under the reason counts: how the break was read, and reasons
+    /// tied to a direction or a kind of putt.
     @ViewBuilder
-    private func reasonLinks(_ links: [MissReasonLink]) -> some View {
-        if !links.isEmpty {
+    private func reasonInsights(titleKey: String, icon: String, lines: [(id: String, text: String)]) -> some View {
+        if !lines.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
-                Text(L("link.title"))
+                Text(L(titleKey))
                     .font(.system(size: 9, weight: .bold)).tracking(1.0)
                     .foregroundStyle(Theme.textMuted)
 
-                ForEach(links) { link in
+                ForEach(lines, id: \.id) { line in
                     HStack(alignment: .top, spacing: 6) {
-                        Image(systemName: "link")
+                        Image(systemName: icon)
                             .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(Theme.accent)
                             .padding(.top, 2)
-                        Text(link.text)
+                        Text(line.text)
                             .font(.system(size: 12))
                             .foregroundStyle(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -638,7 +639,16 @@ private struct StatisticsPane: View {
                                         if data.aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(data.aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
                                         if data.aggregated.missReasonCounts.multiple > 0 { reasonStat("\(data.aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
                                     }
-                                    reasonLinks(MissReasonLinker.links(in: data.allPutts))
+                                    reasonInsights(
+                                        titleKey: "read.title",
+                                        icon: "eye",
+                                        lines: BreakReadAnalyzer.findings(in: data.allPutts).map { (id: $0.id, text: $0.text) }
+                                    )
+                                    reasonInsights(
+                                        titleKey: "link.title",
+                                        icon: "link",
+                                        lines: MissReasonLinker.links(in: data.allPutts).map { (id: $0.id, text: $0.text) }
+                                    )
                                 }
                             }
 

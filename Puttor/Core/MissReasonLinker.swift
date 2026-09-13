@@ -51,7 +51,7 @@ struct MissCauseNote: Equatable {
     var percent: Int { MissReasonLinker.percent(count, of: total) }
 
     var text: String {
-        String(format: L("cause.note"), count, total, percent, L(cause.predicateKey), restPercent)
+        String(format: L("cause.note"), count, total, percent, L(cause.predicateKey))
     }
 }
 
@@ -79,12 +79,12 @@ struct MissReasonLink: Identifiable {
         case .groupToCause:
             return String(
                 format: L("link.groupToCause"),
-                L("link.group.\(groupID)"), count, total, percent, L(cause.predicateKey), restPercent
+                L("link.group.\(groupID)"), count, total, percent, L(cause.predicateKey)
             )
         case .causeToGroup:
             return String(
                 format: L("link.causeToGroup"),
-                L(cause.subjectKey), count, total, percent, L("link.groupPhrase.\(groupID)"), restPercent
+                L(cause.subjectKey), count, total, percent, L("link.groupPhrase.\(groupID)")
             )
         }
     }
@@ -108,6 +108,9 @@ enum MissReasonLinker {
     struct Group {
         let id: String
         var pool: (Putt) -> Bool = { _ in true }
+        /// The broader groups this one sits inside: a strong right-to-left
+        /// break inside right-to-left and inside strong.
+        var parents: [String] = []
         let includes: (Putt) -> Bool
     }
 
@@ -139,6 +142,27 @@ enum MissReasonLinker {
         }),
         Group(id: "band3to6", includes: {
             $0.distanceM >= MissPatternFinder.midPuttDistanceM && $0.distanceM < MissPatternFinder.longPuttDistanceM
+        }),
+        Group(id: "gentleBreak", includes: { BreakStrength(sideSlopePct: $0.sideSlopePct) == .gentle }),
+        Group(id: "mediumBreak", includes: { BreakStrength(sideSlopePct: $0.sideSlopePct) == .medium }),
+        Group(id: "strongBreak", includes: { BreakStrength(sideSlopePct: $0.sideSlopePct) == .strong }),
+        Group(id: "rightToLeftGentle", parents: ["rightToLeft", "gentleBreak"], includes: {
+            $0.sideSlopePct < 0 && BreakStrength(sideSlopePct: $0.sideSlopePct) == .gentle
+        }),
+        Group(id: "rightToLeftMedium", parents: ["rightToLeft", "mediumBreak"], includes: {
+            $0.sideSlopePct < 0 && BreakStrength(sideSlopePct: $0.sideSlopePct) == .medium
+        }),
+        Group(id: "rightToLeftStrong", parents: ["rightToLeft", "strongBreak"], includes: {
+            $0.sideSlopePct < 0 && BreakStrength(sideSlopePct: $0.sideSlopePct) == .strong
+        }),
+        Group(id: "leftToRightGentle", parents: ["leftToRight", "gentleBreak"], includes: {
+            $0.sideSlopePct > 0 && BreakStrength(sideSlopePct: $0.sideSlopePct) == .gentle
+        }),
+        Group(id: "leftToRightMedium", parents: ["leftToRight", "mediumBreak"], includes: {
+            $0.sideSlopePct > 0 && BreakStrength(sideSlopePct: $0.sideSlopePct) == .medium
+        }),
+        Group(id: "leftToRightStrong", parents: ["leftToRight", "strongBreak"], includes: {
+            $0.sideSlopePct > 0 && BreakStrength(sideSlopePct: $0.sideSlopePct) == .strong
         }),
         Group(id: "doubleBreak", includes: { $0.doubleBreak != nil }),
     ]
@@ -199,8 +223,20 @@ enum MissReasonLinker {
         let specific = found.filter { candidate in
             !found.contains { $0.link.groupID == candidate.link.groupID && $0.link.cause.parent == candidate.link.cause }
         }
+        // A break direction at one strength says nothing new when the
+        // direction or the strength alone already carries the same link.
+        let parentsByGroup = Dictionary(uniqueKeysWithValues: groups.map { ($0.id, $0.parents) })
+        let standing = specific.filter { candidate in
+            let parents = parentsByGroup[candidate.link.groupID] ?? []
+            return !specific.contains { other in
+                parents.contains(other.link.groupID)
+                    && other.link.cause == candidate.link.cause
+                    && candidate.link.percent < other.link.percent + MissPatternFinder.standOutPoints
+            }
+        }
+
         // The best-evidenced are kept, then shown from the highest share down.
-        return specific
+        return standing
             .sorted { ($0.z, $0.link.count) > ($1.z, $1.link.count) }
             .prefix(maximumLinks)
             .map(\.link)
@@ -232,6 +268,18 @@ enum MissReasonLinker {
 
     static func percent(_ count: Int, of total: Int) -> Int {
         total > 0 ? Int((Double(count) / Double(total) * 100).rounded()) : 0
+    }
+
+    /// The lowest share `count` of `total` plausibly stands for (Wilson, 95%).
+    /// Ranks a clear share over many putts above a perfect one over a handful.
+    static func confidenceFloor(_ count: Int, of total: Int) -> Double {
+        guard total > 0 else { return 0 }
+        let n = Double(total)
+        let share = Double(count) / n
+        let z = 1.96
+        let z2 = z * z
+        let spread = z * ((share * (1 - share) + z2 / (4 * n)) / n).squareRoot()
+        return (share + z2 / (2 * n) - spread) / (1 + z2 / n)
     }
 
     // MARK: - One comparison

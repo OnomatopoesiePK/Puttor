@@ -40,7 +40,7 @@ struct CoachView: View {
                         summaryCard
                         if !report.metrics.isEmpty { metricsCard }
                         if report.practice.sessions > 0 { practiceCard }
-                        if !report.findings.isEmpty || !report.links.isEmpty { findingsCard }
+                        if !report.findings.isEmpty || !report.links.isEmpty || !report.breakReads.isEmpty { findingsCard }
                         if !report.conditions.isEmpty { conditionsCard }
                         if report.tournament.hasBoth { tournamentCard }
                     } else {
@@ -233,6 +233,20 @@ struct CoachView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                }
+            }
+
+            // How misread and mis-aimed putts met the break.
+            ForEach(report.breakReads) { read in
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "eye")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(read.text)
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
 

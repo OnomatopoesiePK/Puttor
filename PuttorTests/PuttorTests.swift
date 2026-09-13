@@ -1365,6 +1365,98 @@ struct PuttorTests {
         #expect(MissReasonLinker.links(in: putts).isEmpty)
     }
 
+    // MARK: - Break reads
+
+    @MainActor
+    private static func readMiss(
+        _ result: PuttResult, side: Double = 0, hill: Double = 0,
+        missRead: Bool = false, wrongAim: Bool = false, pull: Bool = false
+    ) -> Putt {
+        Putt(
+            holeNumber: 1, puttNumber: 1, distanceM: 3, sideSlopePct: side, hillSlopePct: hill,
+            puttFor: .par, result: result,
+            missRead: missRead, badStroke: pull, badStrokeType: pull ? .pull : nil, wrongAim: wrongAim
+        )
+    }
+
+    /// Misread breaking putts that finish on the low side had too little
+    /// break played — said once, not again for every narrower cell.
+    @MainActor
+    @Test func misreadLowSideMissesAreTooLittleBreak() async throws {
+        let putts = Array(repeating: Self.readMiss(.left, side: -1, missRead: true), count: 6)
+            + [Self.readMiss(.right, side: -1, missRead: true)]
+        let findings = BreakReadAnalyzer.findings(in: putts)
+
+        let read = try #require(findings.first { $0.cellID == "breaking" })
+        #expect(read.reason == .missRead)
+        #expect(read.outcome == .under)
+        #expect(read.count == 6)
+        #expect(read.total == 7)
+        #expect(!findings.contains { ["gentle", "rightToLeft", "rightToLeftGentle"].contains($0.cellID) })
+    }
+
+    /// A misread straight putt missed right was played as a right-to-left
+    /// break that was not there.
+    @MainActor
+    @Test func aMisreadStraightPuttShowsTheBreakThatWasSeen() async throws {
+        let putts = Array(repeating: Self.readMiss(.right, missRead: true), count: 6)
+            + [Self.readMiss(.left, missRead: true)]
+        let findings = BreakReadAnalyzer.findings(in: putts)
+
+        let read = try #require(findings.first { $0.cellID == "straight" })
+        #expect(read.outcome == .sawRightToLeft)
+        #expect(!findings.contains { $0.cellID == "straightFlat" })
+    }
+
+    /// Strong breaks under-read and gentle ones over-read cancel out over all
+    /// breaking putts, so each strength is named on its own.
+    @MainActor
+    @Test func eachBreakStrengthIsReadOnItsOwn() async throws {
+        let putts = Array(repeating: Self.readMiss(.left, side: -3, missRead: true), count: 6)
+            + Array(repeating: Self.readMiss(.right, side: -1, missRead: true), count: 6)
+        let findings = BreakReadAnalyzer.findings(in: putts)
+
+        #expect(!findings.contains { $0.cellID == "breaking" })
+        #expect(findings.contains { $0.cellID == "strong" && $0.outcome == .under })
+        #expect(findings.contains { $0.cellID == "gentle" && $0.outcome == .over })
+        #expect(!findings.contains { $0.cellID == "rightToLeftStrong" })
+    }
+
+    /// Misread uphill putts that come up short underestimated the slope.
+    @MainActor
+    @Test func misreadUphillPuttsShortUnderestimatedTheSlope() async throws {
+        let putts = Array(repeating: Self.readMiss(.short, hill: 2, missRead: true), count: 6)
+            + [Self.readMiss(.long, hill: 2, missRead: true)]
+        let read = try #require(BreakReadAnalyzer.findings(in: putts).first { $0.cellID == "uphill" })
+        #expect(read.outcome == .uphillUnder)
+        #expect(read.count == 6)
+    }
+
+    /// Wrong aim is read on the line alone.
+    @MainActor
+    @Test func wrongAimOnTheHighSideAimedTooMuchBreak() async throws {
+        let putts = Array(repeating: Self.readMiss(.longLeft, side: 1, wrongAim: true), count: 6)
+        let findings = BreakReadAnalyzer.findings(in: putts)
+
+        let read = try #require(findings.first { $0.cellID == "breaking" })
+        #expect(read.reason == .wrongAim)
+        #expect(read.outcome == .over)
+        #expect(!findings.contains { $0.reason == .missRead })
+        #expect(!findings.contains { $0.cellID == "flat" })
+    }
+
+    /// Pulls on strong breaks are named once, not again for the one break
+    /// direction they all came from.
+    @MainActor
+    @Test func aStrengthLinkIsNotRepeatedForItsDirection() async throws {
+        let putts = Array(repeating: Self.readMiss(.left, side: 3, pull: true), count: 6)
+            + Array(repeating: Self.readMiss(.left, side: 1), count: 6)
+        let links = MissReasonLinker.links(in: putts)
+
+        #expect(links.contains { $0.groupID == "strongBreak" && $0.cause == .pull })
+        #expect(!links.contains { $0.groupID == "leftToRightStrong" })
+    }
+
     /// "Pulled" says more than "bad stroke", so only the pull is named.
     @MainActor
     @Test func aPullIsNamedInsteadOfABadStroke() async throws {

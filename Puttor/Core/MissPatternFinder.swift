@@ -29,14 +29,7 @@ struct MissPattern: Identifiable {
 
     /// The lowest share the misses plausibly lean by (Wilson, 95%). Ranks a
     /// clear lean over many putts above a perfect one over a handful.
-    var confidenceFloor: Double {
-        guard total > 0 else { return 0 }
-        let n = Double(total)
-        let z = 1.96
-        let z2 = z * z
-        let spread = z * ((share * (1 - share) + z2 / (4 * n)) / n).squareRoot()
-        return (share + z2 / (2 * n) - spread) / (1 + z2 / n)
-    }
+    var confidenceFloor: Double { MissReasonLinker.confidenceFloor(count, of: total) }
 }
 
 enum MissPatternFinder {
