@@ -239,17 +239,15 @@ enum MissPatternFinder {
     }
 
     /// Findings by kind of miss — length, line and break, distance left.
-    /// Within a kind only the costliest finding for each direction is kept, so
-    /// five ways of saying "short" come down to one, and no more than
-    /// `maximumPerCategory` of them. The kinds follow each other in the order
-    /// of what their costliest finding costs: that is where most is to be won.
+    /// Within a kind the `maximumPerCategory` costliest are kept, whichever way
+    /// they point: short from 1.5–3 m and short uphill are two things to work
+    /// on, not one said twice. The kinds follow each other in the order of what
+    /// their costliest finding costs: that is where most is to be won.
     static func ranked(_ patterns: [MissPattern]) -> [MissPattern] {
         var groups: [MissCategory: [MissPattern]] = [:]
         for pattern in patterns.sorted(by: { ($0.strokesLost, $0.count) > ($1.strokesLost, $1.count) }) {
             let group = groups[pattern.category, default: []]
-            guard group.count < maximumPerCategory,
-                  !group.contains(where: { $0.direction == pattern.direction })
-            else { continue }
+            guard group.count < maximumPerCategory else { continue }
             groups[pattern.category] = group + [pattern]
         }
         return MissCategory.allCases

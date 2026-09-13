@@ -1334,9 +1334,9 @@ struct PuttorTests {
     }
 
     /// Findings come by kind of miss, the kind with the most to win first,
-    /// and several ways of saying "short" come down to one.
+    /// each kind keeping its costliest few, whichever way they point.
     @MainActor
-    @Test func findingsAreGroupedByKindWithOneFindingEachWay() async throws {
+    @Test func findingsAreGroupedByKindWithUpToThreeEach() async throws {
         let closeShort = Array(repeating: Self.miss(.short, distance: 2), count: 10)
         let lags = (1...6).flatMap { number -> [Putt] in
             [
@@ -1346,7 +1346,8 @@ struct PuttorTests {
         }
         let findings = MissPatternFinder.findings(in: closeShort + lags)
 
-        #expect(findings.filter { $0.direction == "short" }.count == 1)
+        // Short overall, short from 1.5–3 m, short from inside 3 m: all kept.
+        #expect((2...MissPatternFinder.maximumPerCategory).contains(findings.filter { $0.direction == "short" }.count))
         #expect(findings.contains { $0.category == .leave })
 
         let groups = MissCategory.grouped(findings, by: \.category)
