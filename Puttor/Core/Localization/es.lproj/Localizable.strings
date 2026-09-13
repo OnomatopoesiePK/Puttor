@@ -99,8 +99,8 @@
 "coach.reason.startLine" = "Tus putts cortos se van siempre hacia el mismo lado, y eso es la línea de salida.";
 "coach.reason.straightLine" = "Incluso tus putts rectos fallan siempre por el mismo lado, y eso es la línea de salida.";
 "coach.reason.breakSide" = "Con una caída concreta tus fallos se van siempre al mismo lado: este ejercicio tiene putts con caída hacia ambos lados.";
-"coach.reason.slopePace" = "Cuesta arriba o cuesta abajo, tu velocidad falla siempre hacia el mismo lado: el Ladder Drill entrena justo eso.";
-"coach.reason.midRangeLine" = "De 3 a 6 m tus fallos se van siempre hacia el mismo lado: el Clock Drill entrena justo esa distancia.";
+"coach.reason.slopePace" = "Cuesta arriba o cuesta abajo, tu velocidad falla siempre hacia el mismo lado: el ejercicio de escalera entrena justo eso.";
+"coach.reason.midRangeLine" = "De 3 a 6 m tus fallos se van siempre hacia el mismo lado: el ejercicio del reloj entrena justo esa distancia.";
 "coach.reason.pace" = "Tus fallos son un problema de velocidad antes que de línea.";
 "coach.reason.threePutts" = "Los tres putts te están costando golpes; aquí se trata de dejar cerca el primer putt.";
 "coach.reason.neverPlayed" = "Este todavía no lo has probado.";
@@ -247,7 +247,7 @@
 "result.longRight" = "Largo der.";
 "result.holeHigh" = "A la altura";
 "result.missedGeneric" = "Fallado";
-"result.lipOut" = "Lip out";
+"result.lipOut" = "Lip-out";
 
 /* Double break */
 "doubleBreak.rlLr" = "D→I y luego I→D";
@@ -572,7 +572,7 @@
 "game.unit.percent" = "TASA DE ACIERTO";
 "game.unit.cycles" = "Vueltas necesarias";
 "game.unit.strokes" = "Golpes";
-"game.aroundTheHole.title" = "Around The Hole";
+"game.aroundTheHole.title" = "Around the Hole";
 "game.aroundTheHole.goal" = "Cinco tees alrededor del hoyo: emboca todos, vuelta tras vuelta, sin un solo fallo.";
 "game.aroundTheHole.explanation" = "Coloca cinco tees a la misma distancia alrededor del hoyo: un putt recto cuesta arriba para empezar, después derecha-izquierda cuesta arriba, derecha-izquierda cuesta abajo, izquierda-derecha cuesta arriba e izquierda-derecha cuesta abajo. Emboca los cinco y la vuelta está hecha. Falla uno y vuelves al primer tee: las vueltas solo cuentan si son seguidas. Los putts más cortos piden más vueltas: cinco a 1 m, tres a 1,3 m, dos a 2 m, una a 2,5 m. Puedes cambiarlo y, si después marcas el ejercicio como demasiado fácil, la siguiente configuración ofrecerá una vuelta más. Es un ejercicio que se termina, no un score que se persigue: lo que se guarda es cuánto tardaste y con qué frecuencia apareciste.";
 "game.unit.minutes" = "Tiempo";
@@ -698,7 +698,7 @@
 "custom.distance.slider" = "Deslizador";
 "custom.distance.numpad" = "Teclado";
 "summary.missesLabel" = "FALLOS";
-"summary.lipOuts" = "%ld× lip out";
+"summary.lipOuts" = "%ld× lip-out";
 "summary.missNoDirection" = "%ld más sin dirección registrada";
 
 "stats.customCount" = "Personalizado";
@@ -799,7 +799,7 @@
 "coach.summary.info" = "La tendencia son tus últimas tres rondas frente a la media de todas las rondas leídas aquí: las últimas siete, y solo rondas terminadas.\n\nHace falta medio golpe por ronda en un sentido u otro para hablar de dirección; por debajo de eso es el mismo putt en días distintos.\n\nCuando no se mueve nada, la redacción depende de dónde te has quedado quieto: por encima de +0,5 por ronda es un buen sitio; por debajo de −0,5, no.";
 "coach.numbers.info" = "Las dos primeras casillas muestran el cambio, no el nivel: tus últimas tres rondas frente a la media de tus últimas siete. Verde es terreno ganado, rojo terreno perdido, sea cual sea el tamaño.\n\nLa pequeña línea Ø de debajo es esa media, el punto desde el que se mide el cambio. Lo que vale tu putt en conjunto es cosa de la pestaña de estadísticas; aquí la pregunta es hacia dónde se mueve.\n\nSG son los golpes ganados en una ronda entera: por cada hoyo, los putts que el tour esperaría desde donde estaba el primer putt, menos los que usaste. El PCG es lo mismo por putt, frente a la probabilidad del tour de embocar desde esa distancia.\n\nLos 3 putts se cuentan por ronda y no como porcentaje de hoyos. La última casilla es el tramo de distancia que más te cuesta: el tramo y, debajo, la conversión perdida ahí frente al tour.\n\nTodo se lee de tus rondas terminadas en el campo. Los ejercicios se cuentan aparte, más abajo.";
 "coach.practice.info" = "Leído de los ejercicios completados en la pestaña de Juegos, y separado a propósito de los números del campo: entrenar sin tarjeta en la mano no es una ronda, y promediar ambos no describiría ninguno.\n\nEl PCG por putt aparece en los ejercicios que registran la distancia de cada intento; los que se cuentan en el green sin la app no lo tienen.";
-"coach.whatIsHappening.info" = "Costumbres en tus fallos: un lado al que se van, una longitud que se repite, una caída por debajo de la cual siguen pasando.\n\nCada línea necesita al menos ocho fallos de ese tipo, con seis de cada diez en la misma dirección, antes de llamarse costumbre. Un mal putt es solo un mal putt.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.\n\nSi detrás de un patrón destaca un motivo de fallo, aparece debajo. Las líneas con el símbolo de enlace relacionan motivos con direcciones y tipos de putt. En las malas lecturas y malas orientaciones también indica cómo se leyó la caída.";
+"coach.whatIsHappening.info" = "Costumbres en tus fallos: un lado al que se van, una longitud que se repite, una caída por debajo de la cual siguen pasando.\n\nCada línea necesita al menos ocho fallos de ese tipo (seis dentro de un subconjunto), con más de seis de cada diez en la misma dirección, antes de llamarse costumbre. Un mal putt es solo un mal putt.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.\n\nSi detrás de un patrón destaca un motivo de fallo, aparece debajo. Las líneas con el símbolo de enlace relacionan motivos con direcciones y tipos de putt. En las malas lecturas y malas orientaciones también indica cómo se leyó la caída.";
 "coach.conditions.info" = "Cada condición que trae una ronda —la velocidad de los greens, la lluvia, el viento, el frío, el grano— y cada una que trae un putt —caída, pendiente, doble caída— se compara con su opuesta usando tus propios putts.\n\nUna diferencia solo se muestra si supera cuatro filtros: putts suficientes en ambos lados, distancias comparables en ambos lados, una prueba estadística de que las dos proporciones realmente difieren y una corrección por el número de comparaciones hechas para encontrarla. Si se buscan bastantes divisiones, hasta unos datos aleatorios producen diferencias; esto es lo que las mantiene fuera de la tarjeta.\n\nEsto se lee de tus últimas treinta rondas, no de diez. Cómo puteas bajo la lluvia es un rasgo, no una forma, y la lluvia es rara.";
 "coach.plan.info" = "En orden: la distancia que más golpes te cuesta, el ejercicio que responde a lo que repiten tus fallos, el ejercicio en el que peor conviertes y lo que lleve dos semanas sin tocarse.\n\nEl número junto a cada ejercicio son las sesiones a las que apuntar antes de la siguiente lectura: tres si la tendencia baja, una si sube, dos en el resto de los casos.";
 

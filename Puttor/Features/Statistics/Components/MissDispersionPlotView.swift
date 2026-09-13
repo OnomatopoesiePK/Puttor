@@ -212,7 +212,23 @@ struct MissDispersionPlotView: View {
     var body: some View {
         let data = computeData()
 
-        return VStack(spacing: 6) {
+        return VStack(spacing: 0) {
+            // The width is read off an empty strip, which takes exactly the
+            // width it is offered. Reading it off the plot's own frame read
+            // back the plot's width instead: after turning to landscape and
+            // back the plot kept its landscape size, and pushed the whole tab
+            // wider than the screen.
+            Color.clear
+                .frame(height: 0)
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { measuredWidth = $0 }
+
+            content(data)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func content(_ data: DispersionData) -> some View {
+        VStack(spacing: 6) {
             if filter == .rl || filter == .lr {
                 slopeArrowHorizontal
             }
@@ -262,8 +278,6 @@ struct MissDispersionPlotView: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity)
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { measuredWidth = $0 }
     }
 
     private func edgeLabel(_ key: String) -> some View {

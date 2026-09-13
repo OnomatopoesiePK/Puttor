@@ -78,7 +78,7 @@
 "tip.pull.title" = "Pull vermeiden";
 "tip.pull.body" = "%@ ziehst du den Putt nach links. Lass die Schultern den Schlag führen, halt die Handgelenke ruhig und den Kopf bis nach dem Treffmoment unten.";
 "tip.push.title" = "Push vermeiden";
-"tip.push.body" = "%@ schiebst du den Putt nach rechts. Lass den Putter frei durch den Ball schwingen, statt ihn zur Linie zu steuern, und halt die Schlagfläche square.";
+"tip.push.body" = "%@ schiebst du den Putt nach rechts. Lass den Putter frei durch den Ball schwingen, statt ihn zur Linie zu steuern, und halt die Schlagfläche gerade zur Linie.";
 "tip.contact.title" = "Sauber treffen";
 "tip.contact.body" = "%@ triffst du den Ball nicht sauber. Leg den Ball mittig vor die Schlagfläche und halt den Putter während des ganzen Schlags auf derselben Höhe.";
 "tip.badStroke.title" = "Ruhiger schlagen";
@@ -99,8 +99,8 @@
 "coach.reason.startLine" = "Deine kurzen Putts kippen immer zur selben Seite, das ist die Startlinie.";
 "coach.reason.straightLine" = "Sogar deine geraden Putts gehen immer auf derselben Seite vorbei, das ist die Startlinie.";
 "coach.reason.breakSide" = "Bei einer Break-Richtung gehen deine Misses immer zur selben Seite — dieser Drill hat Putts mit Break in beide Richtungen.";
-"coach.reason.slopePace" = "Bergauf oder bergab liegt dein Tempo immer in dieselbe Richtung daneben — genau das trainiert der Ladder Drill.";
-"coach.reason.midRangeLine" = "Von 3 bis 6 m kippen deine Misses immer zur selben Seite — der Clock Drill trainiert genau diesen Bereich.";
+"coach.reason.slopePace" = "Bergauf oder bergab liegt dein Tempo immer in dieselbe Richtung daneben — genau das trainiert der Ladder-Drill.";
+"coach.reason.midRangeLine" = "Von 3 bis 6 m kippen deine Misses immer zur selben Seite — der Uhr-Drill trainiert genau diesen Bereich.";
 "coach.reason.pace" = "Deine Misses sind zuerst ein Tempo-Problem, dann erst ein Linien-Problem.";
 "coach.reason.threePutts" = "Drei-Putts kosten dich Schläge; hier geht es darum, den ersten Putt nah zu legen.";
 "coach.reason.neverPlayed" = "Diesen hast du noch nie gespielt.";
@@ -124,7 +124,7 @@
 "onCourse.complete" = "Fertig";
 "onCourse.inProgress" = "Läuft";
 "onCourse.noRounds" = "Noch keine Runden.";
-"onCourse.noRoundsHint" = "Tippe auf \"Neue Runde starten\", um loszulegen.";
+"onCourse.noRoundsHint" = "Tippe auf „Neue Runde starten“, um loszulegen.";
 "onCourse.edit" = "Bearbeiten";
 "onCourse.editSettings" = "Runden-Einstellungen bearbeiten";
 "onCourse.open" = "Öffnen";
@@ -147,8 +147,8 @@
 "setup.medium" = "MITTEL";
 "setup.fast" = "SCHNELL";
 "setup.weather" = "WETTER";
-"setup.grainyGreens" = "Grainy Grüns";
-"setup.grainyGreens.desc" = "Grüns haben sichtbare Grain";
+"setup.grainyGreens" = "Grüns mit Grain";
+"setup.grainyGreens.desc" = "Grüns haben sichtbares Grain";
 "setup.startingHole" = "START-LOCH";
 "setup.inputMode" = "EINGABEMODUS";
 "setup.startRound" = "Runde starten";
@@ -193,7 +193,7 @@
 "input.lr" = "L-R";
 "input.up" = "B.auf";
 "input.down" = "B.ab";
-"input.doubleBreak" = "DOPPELTER BREAK";
+"input.doubleBreak" = "DOPPELBREAK";
 "input.missBoard" = "MISS-SCHEIBE";
 "input.missBoard.info" = "Tippe in die Mitte für gelocht oder auf den Ring darum für einen Lip-Out.\n\nEin äußerer Bereich hält Richtung und Distanz fest, in der der Putt das Loch verfehlt hat.";
 "input.lip" = "LIP";
@@ -247,7 +247,7 @@
 "result.longRight" = "Lang Rechts";
 "result.holeHigh" = "Lochhöhe";
 "result.missedGeneric" = "Verfehlt";
-"result.lipOut" = "Lip Out";
+"result.lipOut" = "Lip-Out";
 
 /* Double break */
 "doubleBreak.rlLr" = "R→L dann L→R";
@@ -327,7 +327,7 @@
 "stats.svp.avgWithout" = "Ø SCORE · STANDARDISIERTES PUTTEN";
 "stats.svp.perRound" = "pro Runde";
 "stats.svp.needMore" = "Für den Vergleich von Score und Putten braucht es %ld beendete Runden.";
-"stats.svp.note" = "Jede Runde zählt so, wie sie gespielt wurde. „Standardisiertes Putten“ rechnet deine Shots Gained wieder auf die Karte: der Score, den dasselbe lange Spiel mit Tour-Durchschnitt beim Putten ergeben hätte.\n\nJedes Band deckt eine Standardabweichung um den Schnitt der Reihe ab; der Prozentwert vergleicht die beiden.\n\nEin schmaleres standardisiertes Band heißt: der Putter zieht deine Runden auseinander — nimmt man ihn heraus, rücken sie zusammen. Ein breiteres heißt das Gegenteil, und das kann nur auf einem Weg entstehen: der Putter hat genau auf den Runden am meisten gewonnen, auf denen das übrige Spiel am schlechtesten lief. Das ist Putten, das das lange Spiel auffängt — nicht Putten, das keine Rolle spielt.\n\nDer Schnitt der Shots Gained ist eine eigene Frage: er sagt, ob der Putter unterm Strich gewinnt oder kostet, nicht ob er den Unterschied zwischen deinen Runden macht.";
+"stats.svp.note" = "Jede Runde zählt so, wie sie gespielt wurde. „Standardisiertes Putten“ rechnet deine Strokes Gained wieder auf die Karte: der Score, den dasselbe lange Spiel mit Tour-Durchschnitt beim Putten ergeben hätte.\n\nJedes Band deckt eine Standardabweichung um den Schnitt der Reihe ab; der Prozentwert vergleicht die beiden.\n\nEin schmaleres standardisiertes Band heißt: der Putter zieht deine Runden auseinander — nimmt man ihn heraus, rücken sie zusammen. Ein breiteres heißt das Gegenteil, und das kann nur auf einem Weg entstehen: der Putter hat genau auf den Runden am meisten gewonnen, auf denen das übrige Spiel am schlechtesten lief. Das ist Putten, das das lange Spiel auffängt — nicht Putten, das keine Rolle spielt.\n\nDer Schnitt der Strokes Gained ist eine eigene Frage: er sagt, ob der Putter unterm Strich gewinnt oder kostet, nicht ob er den Unterschied zwischen deinen Runden macht.";
 "stats.svp.bandLegend" = "Score-Mittel ± Streuung";
 "stats.svp.bandLegendPro" = "standardisiertes Putten: Mittel ± Streuung";
 "stats.svp.impactHigh" = "PUTTEN ENTSCHEIDET DEINEN SCORE";
@@ -339,7 +339,7 @@
 "stats.dispersion" = "MISS-STREUUNG";
 "stats.rounds.info" = "Eine Kachel je Runde im aktuellen Filter mit ihren Strokes Gained beim Putten.\n\nPro Loch: die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten.";
 "stats.sgPutting.info" = "Strokes Gained pro Loch, über die Runde summiert und über die gefilterten Runden gemittelt.\n\nDie PKR darunter ist der Wert pro Putt: wie das Ergebnis im Vergleich zur Tour-Trefferquote auf dieser Distanz steht.";
-"stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde.\n\nGIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, die Birdie-Konversion, wie viele dieser Grüns mit einem oder zwei Putts zu einem Birdie oder Eagle wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden.\n\nDie drei Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde.\n\nAlles davon braucht den Score-Bezug („Putt für\"): den haben alle Modi außer Custom ohne dieses Feld.";
+"stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde.\n\nGIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, die Birdie-Konversion, wie viele dieser Grüns mit einem oder zwei Putts zu einem Birdie oder Eagle wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden.\n\nDie drei Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde.\n\nAlles davon braucht den Score-Bezug („Putt für“): den haben alle Modi außer Custom ohne dieses Feld.";
 "stats.dispersion.info" = "Jeder verfehlte Putt liegt in der Richtung, in die er vorbeiging, und so weit vom Loch entfernt, wie er liegen geblieben ist. Die Ringe markieren 1, 2 und 3 Meter Restdistanz.\n\nDas erste Menü wählt, welche Break-Richtungen gezeigt werden, das zweite, wofür die Farben stehen: Stärke des Breaks, Länge des Putts oder wie stark es bergauf oder bergab ging — die letzten beiden brauchen zusätzlich das Neigungsfeld.\n\nDie beiden Felder darunter grenzen die Anzeige auf Putts aus einem Distanzbereich ein, beide Grenzen eingeschlossen — so lässt sich ein Neigungsfilter Distanz für Distanz lesen.\n\nEin größerer Punkt heißt mehr Misses an derselben Stelle, und sobald ein Farbfilter aktiv ist, zeigt die Farbe jedes Punktes, in welche Klasse er fällt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.\n\nDie Sätze darunter lesen alle Putts der Auswahl. Eine Richtung wird nur genannt, wenn mehr als 60 Prozent der Misses dorthin gehen: über alle Misses, je Break-Richtung, bei geraden Putts, bergauf, bergab, unter 1,5 m, 1,5–3 m, 3–6 m und ab 6 m. Ein Ausschnitt, der nur wiederholt, was alle Misses zeigen, fällt weg. Steckt hinter einem Muster auffällig oft derselbe Grund, steht er darunter.";
 "pattern.title" = "WAS DEINE MISSES IMMER WIEDER TUN";
 "pattern.missLeft" = "%1$ld von %2$ld (%3$ld%%) Misses gehen links am Loch vorbei.";
@@ -486,9 +486,9 @@
 "link.group.doubleBreak" = "Doppelbreaks";
 "link.groupPhrase.doubleBreak" = "waren Doppelbreaks";
 "chart.makeVsTour.info" = "Eine Zeile je Distanzbereich: deine gelochten Putts gegenüber den Versuchen von dort, verglichen mit der Tour-Trefferquote über denselben Bereich.\n\nDie rechte Spalte summiert die PKR dieses Bereichs, geteilt durch die Anzahl Runden.\n\nDie Tour-Spalte ist ein flacher Schnitt über den ganzen Bereich, während die PKR jeden Putt an der Kurve seiner eigenen Distanz misst. Liegen deine Putts überwiegend am kurzen Ende eines Bereichs, kann die PKR deshalb negativ sein, obwohl deine Trefferquote über der Tour-Spalte liegt.";
-"stats.makeBySituation.info" = "Dieselben Distanzbereiche, aufgeteilt danach, für welchen Score der Putt war — so lassen sich ein Birdie-Putt und ein Par-Putt aus derselben Entfernung vergleichen.\n\nDafür braucht es den Score-Bezug („Putt für\"), den der Custom-Modus weglassen kann.";
-"summary.missTendency.info" = "Jeder Miss in der Richtung, in der er eingetragen wurde. Ein Sektor wird röter, je häufiger diese Richtung vorkam; in der Mitte steht die Gesamtzahl.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex — ein bloßes „verfehlt\" hat keine Richtung.";
-"summary.missReasons.info" = "Wie oft jeder Grund bei einem verfehlten Putt angehakt wurde. Ein Putt mit mehreren Gründen zählt einmal unter „mehrere\".\n\nDafür braucht es das Feld für Miss-Gründe: Pro-Modus oder Custom mit diesem Feld.\n\nDarunter wird jeder Grund mit jeder Richtung und jeder Putt-Art verknüpft: Break-Richtung und -Stärke, gerade, bergauf, bergab, die vier Distanzbereiche, Doppelbreak. Genannt wird ein Zusammenhang nur, wenn mehr als 60 Prozent der Misses einer Gruppe denselben Grund haben, das mindestens 20 Punkte mehr ist als bei den Misses, mit denen verglichen wird, und ein statistischer Test ihn stützt. Gezählt werden nur Runden, in denen Gründe erfasst wurden.\n\nBei „Verlesen“ und „Falsch gezielt“ wird zusätzlich der Break betrachtet: Richtung, Stärke (leicht 1 Prozent, mittel 2, stark ab 3) und bergauf oder bergab. Die Seite des Misses zeigt, ob zu wenig oder zu viel Break gespielt wurde, bei geraden Putts, welcher Break gesehen wurde. Bei „Verlesen“ zeigt die Länge, ob Neigung oder Tempo falsch eingeschätzt wurden. Genannt wird das ab 6 solchen Misses, wenn mehr als 60 Prozent in dieselbe Richtung gingen. Darunter steht der engste Distanzbereich, in dem 80 Prozent dieser Misses liegen.";
+"stats.makeBySituation.info" = "Dieselben Distanzbereiche, aufgeteilt danach, für welchen Score der Putt war — so lassen sich ein Birdie-Putt und ein Par-Putt aus derselben Entfernung vergleichen.\n\nDafür braucht es den Score-Bezug („Putt für“), den der Custom-Modus weglassen kann.";
+"summary.missTendency.info" = "Jeder Miss in der Richtung, in der er eingetragen wurde. Ein Sektor wird röter, je häufiger diese Richtung vorkam; in der Mitte steht die Gesamtzahl.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex — ein bloßes „verfehlt“ hat keine Richtung.";
+"summary.missReasons.info" = "Wie oft jeder Grund bei einem verfehlten Putt angehakt wurde. Ein Putt mit mehreren Gründen zählt einmal unter „mehrere“.\n\nDafür braucht es das Feld für Miss-Gründe: Pro-Modus oder Custom mit diesem Feld.\n\nDarunter wird jeder Grund mit jeder Richtung und jeder Putt-Art verknüpft: Break-Richtung und -Stärke, gerade, bergauf, bergab, die vier Distanzbereiche, Doppelbreak. Genannt wird ein Zusammenhang nur, wenn mehr als 60 Prozent der Misses einer Gruppe denselben Grund haben, das mindestens 20 Punkte mehr ist als bei den Misses, mit denen verglichen wird, und ein statistischer Test ihn stützt. Gezählt werden nur Runden, in denen Gründe erfasst wurden.\n\nBei „Verlesen“ und „Falsch gezielt“ wird zusätzlich der Break betrachtet: Richtung, Stärke (leicht 1 Prozent, mittel 2, stark ab 3) und bergauf oder bergab. Die Seite des Misses zeigt, ob zu wenig oder zu viel Break gespielt wurde, bei geraden Putts, welcher Break gesehen wurde. Bei „Verlesen“ zeigt die Länge, ob Neigung oder Tempo falsch eingeschätzt wurden. Genannt wird das ab 6 solchen Misses, wenn mehr als 60 Prozent in dieselbe Richtung gingen. Darunter steht der engste Distanzbereich, in dem 80 Prozent dieser Misses liegen.";
 "summary.leaveByMiss.info" = "Durchschnittliche Restdistanz nach einem Miss, gruppiert nach Richtung — gemessen an der Distanz des nächsten Putts auf diesem Loch. Die Balken sind auf den längsten dieser Mittelwerte skaliert.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.";
 
 /* Dispersion */
@@ -496,13 +496,13 @@
 "dispersion.distanceRange" = "Putt-Länge";
 "dispersion.shading.none" = "Keine Färbung";
 "dispersion.shading.break" = "Break-Stärke";
-"dispersion.shading.breakLegend" = "Break In Prozent, In Den Klassen Des Eingabe-Grids";
+"dispersion.shading.breakLegend" = "Break in Prozent, in den Klassen des Eingabe-Grids";
 "dispersion.shading.length" = "Putt-Länge";
 "dispersion.shading.slope" = "Bergauf / Bergab";
 "dispersion.shading.flat" = "Eben";
 "dispersion.shading.uphill" = "Bergauf";
 "dispersion.shading.downhill" = "Bergab";
-"dispersion.shading.noValues" = "Bei Diesen Putts Ist Dieser Wert Nicht Erfasst, Es Gibt Also Nichts Einzufärben.";
+"dispersion.shading.noValues" = "Bei diesen Putts ist dieser Wert nicht erfasst, es gibt also nichts einzufärben.";
 "dispersion.rl" = "Rechts-Links";
 "dispersion.lr" = "Links-Rechts";
 "dispersion.up" = "Bergauf";
@@ -511,7 +511,7 @@
 "dispersion.right" = "RECHTS";
 "dispersion.long" = "LANG";
 "dispersion.short" = "KURZ";
-"dispersion.noData" = "Keine Miss-Daten Für Diesen Filter.";
+"dispersion.noData" = "Keine Miss-Daten für diesen Filter.";
 
 /* Games */
 "games.title" = "Spiele";
@@ -531,14 +531,14 @@
 "settings.defaultDistance.value" = "Standard-Distanz: %.1f m";
 "settings.defaultDistance.value.ft" = "Standard-Distanz: %.0f ft";
 "settings.inputMode" = "EINGABEMODUS";
-"settings.customMode" = "Custom-Modus Felder";
+"settings.customMode" = "Custom-Modus-Felder";
 "settings.customMode.desc" = "Wähle, welche Felder der Custom-Eingabemodus zeigt";
 "settings.feedback" = "FEEDBACK";
 "settings.haptics" = "Haptisches Feedback";
 "settings.haptics.desc" = "Vibrieren beim Einrasten";
 "settings.myPutters" = "MEINE PUTTER";
 "settings.deletePutterTitle" = "Putter löschen";
-"settings.deletePutterMessage" = "\"%@\" entfernen?";
+"settings.deletePutterMessage" = "„%@“ entfernen?";
 
 /* Distance / units */
 "distance.lessThan0_5m" = "<0,5 m";
@@ -555,24 +555,24 @@
 "game.aroundTheWorld.title" = "Around the World";
 
 /* Spiele — Ziele */
-"game.gate.goal" = "Kontrolle der Anfangslinie und eines geraden, sauberen Schlags ohne Verziehen des Putterkopfs.";
+"game.gate.goal" = "Kontrolle der Startlinie und eines geraden, sauberen Schlags ohne Verziehen des Putterkopfs.";
 "game.clock.goal" = "Verschiedene Breaks aus derselben Distanz üben, ohne dass sich das Gefühl für die Länge ändert.";
 "game.ninePutt.goal" = "Konstanz unter leichtem Druck aufbauen, kurze bis mittlere Putts absichern.";
 "game.routine.goal" = "Simuliert echte Platzsituationen und trainiert deine Routine und Konzentration bei jedem einzelnen, unterschiedlichen Putt.";
 "game.aroundTheWorld.goal" = "Simuliert eine komplette Runde und zeigt, wo noch Schwächen liegen.";
 
 /* Spiele — vollständige Erklärungen */
-"game.gate.explanation" = "Du steckst zwei Tees kurz vor dem Ball so in den Boden, dass zwischen ihnen gerade so viel Platz ist, dass Putterkopf bzw. Ball hindurchpassen (\"Tor\"). Dann puttest du durch dieses Tor auf die Ziellinie.";
+"game.gate.explanation" = "Du steckst zwei Tees kurz vor dem Ball so in den Boden, dass zwischen ihnen gerade so viel Platz ist, dass Putterkopf bzw. Ball hindurchpassen („Tor“). Dann puttest du durch dieses Tor auf die Ziellinie.";
 "game.clock.explanation" = "Du legst Bälle im Kreis um das Loch, wie Zahlen auf einer Uhr (z. B. auf 12, 3, 6 und 9 Uhr), alle im gleichen Abstand. Dann puttest du jeden Ball der Reihe nach ins Loch – rundherum wie im Uhrzeigersinn.";
 "game.ninePutt.explanation" = "Du wählst drei Positionen mit unterschiedlicher Distanz (z. B. 1 m, 2 m, 3 m) und puttest von jeder Position 3 Bälle – insgesamt 9 Putts. Alle 9 müssen versenkt werden, sonst beginnst du von vorne.";
 "game.routine.explanation" = "Du gibst zufällig Putts vor – wähle, welche Distanzen und Break-Bereiche möglich sein sollen. Diese Putts führst du dann nacheinander genau wie vorgegeben aus – jeweils mit deiner vollständigen Pre-Shot-Routine, ohne Probeputts oder Wiederholungen.";
-"game.aroundTheWorld.explanation" = "Du baust einen Parcours aus 9 oder 18 unterschiedlichen Putts auf dem Grün auf und spielst sie wie ein Mini-Rundenspiel – jeder Putt zählt wie ein Loch. Du schreibst dir die Anzahl der Schläge pro \"Loch\" auf und summierst am Ende.";
+"game.aroundTheWorld.explanation" = "Du baust einen Parcours aus 9 oder 18 unterschiedlichen Putts auf dem Grün auf und spielst sie wie ein Mini-Rundenspiel – jeder Putt zählt wie ein Loch. Du schreibst dir die Anzahl der Schläge pro „Loch“ auf und summierst am Ende.";
 
 /* Spiele — Score-Einheiten */
 "game.unit.percent" = "TREFFERQUOTE";
 "game.unit.cycles" = "Runden bis sauber";
 "game.unit.strokes" = "Schläge";
-"game.aroundTheHole.title" = "Around The Hole";
+"game.aroundTheHole.title" = "Around the Hole";
 "game.aroundTheHole.goal" = "Fünf Tees rund ums Loch — alle lochen, Runde für Runde, ohne einen einzigen Fehler.";
 "game.aroundTheHole.explanation" = "Steck fünf Tees in gleicher Distanz rund ums Loch: einen geraden Bergauf-Putt zum Beginnen, dann rechts-links bergauf, rechts-links bergab, links-rechts bergauf und links-rechts bergab. Alle fünf gelocht heißt Runde geschafft. Ein Fehler schickt dich zurück ans erste Tee — die Runden zählen nur ununterbrochen. Kürzere Putts verlangen mehr Runden: fünf bei 1 m, drei bei 1,3 m, zwei bei 2 m, eine bei 2,5 m. Das lässt sich ändern, und wenn du den Drill danach als zu leicht markierst, schlägt die nächste Einstellung eine Runde mehr vor. Es ist ein Drill zum Abschließen, kein Score zum Jagen — festgehalten wird, wie lange du gebraucht hast und wie oft du da warst.";
 "game.unit.minutes" = "Zeit";
@@ -672,13 +672,13 @@
 "custom.field.result" = "Resultat";
 "custom.result.desc" = "Einfach = nur getroffen/verfehlt.\n\nScheibe = Dartscheibe mit Richtung und Lip-Out, wie im Pro-Modus.\n\nWinkel = ein Ring um das Loch, der in Fünf-Grad-Schritten dorthin gezogen wird, wo der Ball liegen blieb — Lang liegt in der Lücke oben.";
 "custom.field.puttFor" = "Putt-Kategorie";
-"custom.field.puttFor.desc" = "Eagle/Birdie/Par/Bogey/Doppelbogey-oder-schlechter, mit automatischer Stufe nach einem Fehlversuch";
+"custom.field.puttFor.desc" = "Eagle/Birdie/Par/Bogey/Doppelbogey oder schlechter, mit automatischer Stufe nach einem Fehlversuch";
 "custom.field.slope" = "Neigungs-Grid";
 "custom.field.slope.desc" = "Einfach = 9-Punkte-Grid (bergauf/bergab/flach x links/gerade/rechts).\n\nKomplex = das volle professionelle Grid.";
-"custom.field.doubleBreak" = "Doppel-Break";
+"custom.field.doubleBreak" = "Doppelbreak";
 "custom.field.doubleBreak.desc" = "Markiert einen Putt, der erst in die eine, dann in die andere Richtung bricht";
-"custom.field.missReasons" = "Fehlgründe";
-"custom.field.missReasons.desc" = "Fehlgelesen, schlechter Schlag oder falsch gezielt";
+"custom.field.missReasons" = "Miss-Gründe";
+"custom.field.missReasons.desc" = "Verlesen, schlechter Stroke oder falsch gezielt";
 
 /* Spiel-Statistik */
 "game.stats.avgLast5" = "Ø letzte 5";
@@ -698,30 +698,30 @@
 "custom.distance.slider" = "Slider";
 "custom.distance.numpad" = "Numpad";
 "summary.missesLabel" = "MISSES";
-"summary.lipOuts" = "%ld× Lip-out";
+"summary.lipOuts" = "%ld× Lip-Out";
 "summary.missNoDirection" = "%ld weitere ohne erfasste Richtung";
 
 "stats.customCount" = "Eigene";
 "stats.thisMonth" = "Dieser Monat";
 "stats.dateRange" = "Zeitraum";
-"stats.choose" = "Runden Wählen";
+"stats.choose" = "Runden wählen";
 "stats.chooseOpen" = "Auswählen";
-"stats.chooseCount" = "%1$ld Von %2$ld Runden Gewählt";
+"stats.chooseCount" = "%1$ld von %2$ld Runden gewählt";
 "stats.selectAll" = "Alle";
 "stats.selectNone" = "Keine";
 "stats.sort" = "Sortierung";
-"stats.sortNewest" = "Neueste Zuerst";
-"stats.sortOldest" = "Älteste Zuerst";
+"stats.sortNewest" = "Neueste zuerst";
+"stats.sortOldest" = "Älteste zuerst";
 "stats.rangeFrom" = "VON";
 "stats.rangeTo" = "BIS";
-"stats.noneSelected" = "Noch keine Runden gewählt. Öffne „Auswählen\" und tippe die Runden an, mit denen die Statistik rechnen soll.";
+"stats.noneSelected" = "Noch keine Runden gewählt. Öffne „Auswählen“ und tippe die Runden an, mit denen die Statistik rechnen soll.";
 "stats.roundsCounted" = "RUNDEN";
 "stats.ofAvailable" = "von %ld verfügbaren";
 
 "score.double" = "Doppelbogey";
 "score.double.short" = "DB";
 "input.badStroke.pull" = "Pull";
-"input.badStroke.misshit" = "Misshit";
+"input.badStroke.misshit" = "Mishit";
 "input.badStroke.push" = "Push";
 "input.holedOutFor" = "EINGELOCHT FÜR";
 "input.holeOutHint" = "Auf diesem Loch wurde kein Putt erfasst. Der hier gewählte Score ist der Score des Lochs und entscheidet, ob es als Grün in Regulation oder als Scramble-Save zählt. Ein Putt oben ersetzt ihn.";
@@ -785,21 +785,21 @@
 "split.cond.uphill" = "Bergauf-Putts";
 "split.cond.doubleBreak" = "Doppelbreaks";
 "split.cond.singleBreak" = "einfachem Break";
-"split.missLong" = "Bei %1$@ laufen %2$@%% deiner Fehlputts übers Loch hinaus — bei %3$@ %4$@%%.";
-"split.missShort" = "Bei %1$@ bleiben %2$@%% deiner Fehlputts kurz — bei %3$@ %4$@%%.";
+"split.missLong" = "Bei %1$@ laufen %2$@%% deiner Misses übers Loch hinaus — bei %3$@ %4$@%%.";
+"split.missShort" = "Bei %1$@ bleiben %2$@%% deiner Misses kurz — bei %3$@ %4$@%%.";
 "split.missHighSide" = "Bei %1$@ bleiben %2$@%% deiner Break-Misses oberhalb des Lochs — bei %3$@ %4$@%%.";
 "split.missLowSide" = "Bei %1$@ gehen %2$@%% deiner Break-Misses unterhalb des Lochs vorbei — bei %3$@ %4$@%%.";
-"split.missRead" = "Bei %1$@ gehen %2$@%% deiner Misses auf die Leseleistung — bei %3$@ %4$@%%.";
+"split.missRead" = "Bei %1$@ gehen %2$@%% deiner Misses aufs Lesen zurück — bei %3$@ %4$@%%.";
 "split.holedMore" = "Bei %1$@ fallen %2$@%% deiner Putts — bei %3$@ %4$@%%.";
 "split.holedLess" = "Bei %1$@ bleiben %2$@%% deiner Putts draußen — bei %3$@ %4$@%%.";
-"split.threePutts" = "Bei %1$@ sind es %2$@ 3-Putts pro Runde — bei %3$@ %4$@, aus vergleichbaren Distanzen.";
+"split.threePutts" = "Bei %1$@ sind es %2$@ Drei-Putts pro Runde — bei %3$@ %4$@, aus vergleichbaren Distanzen.";
 "coach.trendMetric" = "VERÄNDERUNG / RUNDE";
 "coach.readingTitle" = "WIE ES LÄUFT";
 "coach.pcgTrendMetric" = "VERÄNDERUNG / RUNDE";
 "coach.summary.info" = "Der Trend sind deine letzten drei Runden gegen den Schnitt aller hier gelesenen Runden — die letzten sieben, und nur beendete.\n\nErst ab einem halben Schlag pro Runde in eine Richtung wird von einer Richtung gesprochen; alles darunter ist dasselbe Putten an verschiedenen Tagen.\n\nBewegt sich nichts, hängt die Formulierung davon ab, wo du stehen bleibst: über +0,5 pro Runde ist ein guter Platz dafür, unter −0,5 nicht.";
-"coach.numbers.info" = "Die ersten beiden Kacheln zeigen die Veränderung, nicht das Niveau: deine letzten drei Runden gegen den Schnitt deiner letzten sieben. Grün ist gewonnener Boden, rot verlorener — unabhängig davon, wie viel.\n\nDie kleine Ø-Zeile darunter ist dieser Schnitt selbst, also der Ausgangspunkt der Veränderung. Was dein Putten insgesamt wert ist, steht im Statistik-Tab; hier geht es darum, wohin es sich bewegt.\n\nSG sind die Strokes Gained über eine ganze Runde: pro Loch die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist dasselbe pro Putt, gemessen an der Tour-Trefferquote aus dieser Distanz.\n\n3-Putts werden pro Runde gezählt, nicht als Anteil der Löcher. Die letzte Kachel ist der Distanzbereich, der dich am meisten kostet: der Bereich, darunter die dort gegenüber der Tour verlorene Konversion.\n\nAlles davon stammt aus deinen beendeten Runden auf dem Platz. Die Drills werden getrennt gezählt, weiter unten.";
+"coach.numbers.info" = "Die ersten beiden Kacheln zeigen die Veränderung, nicht das Niveau: deine letzten drei Runden gegen den Schnitt deiner letzten sieben. Grün ist gewonnener Boden, rot verlorener — unabhängig davon, wie viel.\n\nDie kleine Ø-Zeile darunter ist dieser Schnitt selbst, also der Ausgangspunkt der Veränderung. Was dein Putten insgesamt wert ist, steht im Statistik-Tab; hier geht es darum, wohin es sich bewegt.\n\nSG sind die Strokes Gained über eine ganze Runde: pro Loch die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist dasselbe pro Putt, gemessen an der Tour-Trefferquote aus dieser Distanz.\n\nDrei-Putts werden pro Runde gezählt, nicht als Anteil der Löcher. Die letzte Kachel ist der Distanzbereich, der dich am meisten kostet: der Bereich, darunter die dort gegenüber der Tour verlorene Konversion.\n\nAlles davon stammt aus deinen beendeten Runden auf dem Platz. Die Drills werden getrennt gezählt, weiter unten.";
 "coach.practice.info" = "Gelesen aus den abgeschlossenen Drills im Games-Tab — und bewusst getrennt von den Platz-Zahlen: Training ohne Karte in der Hand ist keine Runde, und ein Mittelwert aus beidem beschriebe keines von beiden.\n\nDie PKR pro Putt erscheint für die Drills, die die Distanz jedes Versuchs mitschreiben; die auf dem Grün ohne App gezählten haben keine.";
-"coach.whatIsHappening.info" = "Muster in deinen Misses: eine Seite, an der sie immer wieder vorbeigehen, eine Länge, die immer wieder fehlt, ein Break, unter dem sie immer wieder durchlaufen.\n\nJede Zeile braucht mindestens acht Misses dieser Art, von denen sechs von zehn in dieselbe Richtung gehen, bevor daraus ein Muster wird. Ein schlechter Putt ist ein schlechter Putt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.\n\nSteckt hinter einem Muster auffällig oft derselbe Miss-Grund, steht er darunter. Die Zeilen mit Kettensymbol verknüpfen Gründe mit Richtungen und Putt-Arten. Bei verlesenen und falsch gezielten Putts steht außerdem, wie der Break gelesen wurde.";
+"coach.whatIsHappening.info" = "Muster in deinen Misses: eine Seite, an der sie immer wieder vorbeigehen, eine Länge, die immer wieder fehlt, ein Break, unter dem sie immer wieder durchlaufen.\n\nJede Zeile braucht mindestens acht Misses dieser Art (sechs in einem Ausschnitt), von denen mehr als sechs von zehn in dieselbe Richtung gehen, bevor daraus ein Muster wird. Ein schlechter Putt ist ein schlechter Putt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.\n\nSteckt hinter einem Muster auffällig oft derselbe Miss-Grund, steht er darunter. Die Zeilen mit Kettensymbol verknüpfen Gründe mit Richtungen und Putt-Arten. Bei verlesenen und falsch gezielten Putts steht außerdem, wie der Break gelesen wurde.";
 "coach.conditions.info" = "Jede Bedingung, die eine Runde mitbringt — Grüngeschwindigkeit, Regen, Wind, Kälte, Grain — und jede, die ein Putt mitbringt — Break, Neigung, Doppelbreak — wird an deinen eigenen Putts gegen ihr Gegenteil verglichen.\n\nEin Unterschied wird nur aufgeführt, wenn er vier Prüfungen übersteht: genug Putts auf beiden Seiten, vergleichbare Distanzen auf beiden Seiten, ein statistischer Test, dass sich die beiden Anteile wirklich unterscheiden, und eine Korrektur dafür, wie viele Vergleiche für den Fund nötig waren. Wer genug Aufteilungen durchsucht, findet auch in Zufallsdaten Unterschiede; genau die hält diese Prüfung von der Karte fern.\n\nGelesen wird das aus deinen letzten dreißig Runden statt aus zehn. Wie du bei Regen puttest, ist eine Eigenschaft und keine Form — und Regen ist selten.";
 "coach.plan.info" = "In dieser Reihenfolge: die Distanz, die dich am meisten Schläge kostet, der Drill gegen das, was deine Misses immer wieder tun, der Drill, in dem du am schlechtesten konvertierst, und alles, was seit zwei Wochen liegen geblieben ist.\n\nDie Zahl neben jedem Drill ist die angepeilte Anzahl Einheiten bis zur nächsten Auswertung — drei, wenn der Trend nach unten zeigt, eine, wenn er nach oben zeigt, sonst zwei.";
 
@@ -841,7 +841,7 @@
 "coach.tournament.sameSpread" = "Beide Gruppen streuen gleich weit — eine zählende Karte ändert also nichts an deiner Verlässlichkeit.";
 "coach.tournament.outliers" = "RUNDEN, DIE HERAUSSTECHEN";
 "coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG — %4$.1f Standardabweichungen vom Schnitt dieser Gruppe.";
-"coach.tournament.info" = "Deine letzten fünf Turnierrunden gegen deine letzten fünf normalen Runden, und das Ergebnis steht hier, egal wie es ausfällt — es geht darum zu wissen, was deine Karte sagt, wenn sie zählt, und „kein Unterschied\" ist darauf eine Antwort.\n\nBeide Werte stehen da, damit klar ist, was gezählt wird. SG sind die Strokes Gained beim Putten über eine Runde: die Putts, die die Tour erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist die Konversion derselben Runde, also jeder Putt gemessen an der Tour-Trefferquote aus seiner Distanz.\n\nDas ± darunter ist die Standardabweichung — wie weit eine Runde üblicherweise von diesem Schnitt abweicht. Das ist der Unterschied zwischen verlässlich und nur an guten Tagen gut. Sie erscheint ab drei Runden.\n\nAls Ausreißer gilt eine Runde, deren SG mindestens 1,8 Standardabweichungen vom Schnitt der fünf Runden abweicht, zu denen sie gehört.";
+"coach.tournament.info" = "Deine letzten fünf Turnierrunden gegen deine letzten fünf normalen Runden, und das Ergebnis steht hier, egal wie es ausfällt — es geht darum zu wissen, was deine Karte sagt, wenn sie zählt, und „kein Unterschied“ ist darauf eine Antwort.\n\nBeide Werte stehen da, damit klar ist, was gezählt wird. SG sind die Strokes Gained beim Putten über eine Runde: die Putts, die die Tour erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist die Konversion derselben Runde, also jeder Putt gemessen an der Tour-Trefferquote aus seiner Distanz.\n\nDas ± darunter ist die Standardabweichung — wie weit eine Runde üblicherweise von diesem Schnitt abweicht. Das ist der Unterschied zwischen verlässlich und nur an guten Tagen gut. Sie erscheint ab drei Runden.\n\nAls Ausreißer gilt eine Runde, deren SG mindestens 1,8 Standardabweichungen vom Schnitt der fünf Runden abweicht, zu denen sie gehört.";
 
 // Legal
 "settings.legal" = "RECHTLICHES";
