@@ -528,6 +528,23 @@ struct MissDispersionPlotView: View {
             context.fill(Path(ellipseIn: CGRect(x: c.x - 7, y: c.y - 7, width: 14, height: 14)), with: .color(Theme.primary))
             context.stroke(Path(ellipseIn: CGRect(x: c.x - 7, y: c.y - 7, width: 14, height: 14)), with: .color(.white), lineWidth: 2)
 
+            // The scale straight up from the hole, under the dots: each number
+            // on a plate of the card's colour so the rings and the crosshair
+            // don't run through it, and any miss that finished there drawn
+            // over it rather than hidden by it.
+            for distance in ringDistances {
+                let point = CGPoint(x: c.x, y: c.y - maxR * fraction(forLeave: distance))
+                let plate = CGRect(x: point.x - 15, y: point.y - 7, width: 30, height: 14)
+                context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
+                context.draw(
+                    Text(UnitConverter.formatDistance(distance, useFeet: useFeet))
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(Theme.textMuted),
+                    at: point,
+                    anchor: .center
+                )
+            }
+
             // Strongest first, so the solid markers lie underneath and the
             // pale short-and-straight ones sit on top without hiding them.
             let ordered = shading == .none
@@ -571,21 +588,6 @@ struct MissDispersionPlotView: View {
                 }
             }
 
-            // The scale goes on last, straight up from the hole — few misses
-            // finish right above it — each number on a plate of the card's
-            // colour, so no dot can bury what measures it.
-            for distance in ringDistances {
-                let point = CGPoint(x: c.x, y: c.y - maxR * fraction(forLeave: distance))
-                let plate = CGRect(x: point.x - 15, y: point.y - 7, width: 30, height: 14)
-                context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
-                context.draw(
-                    Text(UnitConverter.formatDistance(distance, useFeet: useFeet))
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(Theme.textMuted),
-                    at: point,
-                    anchor: .center
-                )
-            }
         }
     }
 
