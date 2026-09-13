@@ -5,8 +5,9 @@
 //  The miss board as a dial. Instead of eight sectors, a ring around the hole
 //  that is dragged to where the ball stopped, in five-degree steps: straight
 //  short at the bottom, left and right at the sides, long-left and long-right
-//  at the two ends. The gap at the top is Long. How far the ball ran is not
-//  asked — the next putt's distance already says it.
+//  at the two ends. The ring is split at the top rather than given a Long of
+//  its own, so every miss says which side of the hole it went. How far the
+//  ball ran is not asked — the next putt's distance already says it.
 //
 //  Holed in the centre and the lip ring around it work exactly as on the
 //  board.
@@ -69,6 +70,7 @@ struct CircularMissSliderView: View {
     }
 
     // MARK: - Drawing
+    // Taps: the centre and the lip ring. The split at the top takes none.
 
     private func draw(in context: inout GraphicsContext) {
         let bandInner = lipR
@@ -94,14 +96,12 @@ struct CircularMissSliderView: View {
             context.draw(label, at: PolarGeometry.point(MissAngle.screenDegrees(mark), (bandInner + outerR) / 2, center), anchor: .center)
         }
 
-        // Long, in the gap at the top — its own button, set a little apart.
-        let isLong = result == .long
-        let gap = band(from: MissAngle.trackEndScreen + 4, to: MissAngle.trackStartScreen + 360 - 4, inner: bandInner, outer: outerR)
-        context.fill(gap, with: .color(isLong ? Theme.error.opacity(0.87) : Theme.missSectorBlueB))
-        context.stroke(gap, with: .color(Theme.border), lineWidth: 0.5)
-        var longLabel = context.resolve(Text(L("result.long").uppercased()).font(.system(size: 12, weight: .semibold)))
-        longLabel.shading = .color(isLong ? .white : .white.opacity(0.6))
-        context.draw(longLabel, at: PolarGeometry.point(-90, (bandInner + outerR) / 2, center), anchor: .center)
+        // The split at the top: left ends on one side of it, right on the
+        // other, and nothing sits in between.
+        var split = Path()
+        split.move(to: PolarGeometry.point(-90, bandInner, center))
+        split.addLine(to: PolarGeometry.point(-90, outerR, center))
+        context.stroke(split, with: .color(.white.opacity(active ? 0.7 : 0.4)), lineWidth: 2)
 
         // The chosen direction: a line out from the lip to a handle on the track.
         if let angle {
@@ -165,9 +165,6 @@ struct CircularMissSliderView: View {
             angle = nil
         } else if radius <= lipR {
             lipOut.toggle()
-        } else if radius <= outerR, MissAngle.isInGap(screen: atan2(dy, dx) * 180 / .pi) {
-            result = .long
-            angle = nil
         }
     }
 
@@ -182,7 +179,7 @@ struct CircularMissSliderView: View {
     private var readout: String {
         let direction: String? = {
             if let angle, let result {
-                return "\(result.emoji) \(L(result.labelKey)) · \(Int(abs(angle)))°"
+                return "\(result.emoji) \(L(result.labelKey)) · \(MissAngle.displayDegrees(angle))°"
             }
             if let result { return "\(result.emoji) \(L(result.labelKey))" }
             return nil
@@ -194,7 +191,7 @@ struct CircularMissSliderView: View {
 }
 
 /// The draggable part of the dial: the ring between the lip and the edge, with
-/// the gap at the top left out.
+/// the split at the top left out.
 private struct TrackShape: Shape {
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)

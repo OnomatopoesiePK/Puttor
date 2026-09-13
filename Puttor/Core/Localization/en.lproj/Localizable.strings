@@ -53,6 +53,8 @@
 "tip.where.longPutts" = "From 6 m and further";
 "tip.where.shortPutts" = "Inside 1.5 m";
 "tip.where.doubleBreak" = "On double breakers";
+"tip.where.under3m" = "Inside 3 m";
+"tip.where.from8m" = "From 8 m and further";
 "tip.moreBreak.title" = "Play more break";
 "tip.moreBreak.body" = "%@ the ball stays below the hole too often. Pick the high point of the line and, when in doubt, play more break — from above, the ball can still fall.";
 "tip.lessBreak.title" = "Play less break";
@@ -91,6 +93,8 @@
 "tip.holedLess.body" = "%@ you hole clearly fewer putts. Take your time over the read and your routine, and do not rush.";
 "tip.lag.title" = "Lag long putts close";
 "tip.lag.body" = "%@ you three-putt more often. On the first putt, length matters more than line — aim for a one-metre circle around the hole.";
+"tip.lagDistance.title" = "Work on lag putting";
+"tip.lagDistance.body" = "%@ too many putts finish more than a metre from the hole. On the first putt, put the focus on length and aim for a one-metre circle around the hole.";
 "coach.startWith" = "START WITH THESE";
 "coach.notEnough.title" = "Not enough to go on yet";
 "coach.notEnough.body" = "A read needs %1$ld finished rounds and %2$ld putts; there are %3$ld rounds and %4$ld putts so far. Until then, these three drills cover what every putter needs.";
@@ -101,6 +105,7 @@
 "coach.reason.breakSide" = "On one break direction your misses keep going the same way — this drill has putts breaking both ways.";
 "coach.reason.slopePace" = "Up or down the hill, your pace keeps missing the same way — the Ladder Drill trains exactly that.";
 "coach.reason.midRangeLine" = "From 3 to 6 m your misses keep leaning one way — the Clock Drill trains exactly that range.";
+"coach.reason.lag" = "From 8 m and further too many putts stop outside a metre — the Ladder Drill trains exactly that pace.";
 "coach.reason.pace" = "Your misses are a pace problem before they are a line problem.";
 "coach.reason.threePutts" = "Three-putts are costing you strokes; this one is about getting the first putt close.";
 "coach.reason.neverPlayed" = "You have not tried this one yet.";
@@ -165,7 +170,7 @@
 
 /* Input mode */
 "inputMode.pro" = "Pro";
-"inputMode.pro.desc" = "Full detail: slope, dartboard miss, miss reasons";
+"inputMode.pro.desc" = "Full detail: slope, miss angle, miss reasons";
 "inputMode.quick" = "Quick";
 "inputMode.quick.desc" = "Just distance, putt-for and made/missed";
 "inputMode.custom" = "Custom";
@@ -343,7 +348,7 @@
 "stats.rounds.info" = "One tile per round in the current filter, showing that round's strokes gained putting.\n\nFor each hole: the putts the tour would expect from where the first putt stood, less the putts actually taken.";
 "stats.sgPutting.info" = "Strokes gained per hole, summed over a round and then averaged across the filtered rounds.\n\nPCG underneath is the same rounds' per-putt figure: how each result compares with the tour's odds of holing from that distance.";
 "stats.playingStats.info" = "Score is the average strokes over par per round.\n\nGIR counts holes played for eagle or birdie, birdie conversion how many of those greens were turned into a birdie or an eagle off one or two putts, scramble the par saves among holes played for par with the green missed.\n\nThe putting figures count only holes that were actually putted. 3-putts and lip-outs are averaged per round over every round in the filter; proximity is the length of the first putt on greens hit in regulation.\n\nAll of it needs the score reference (\"putt for\"): every mode has it except Custom without that field.";
-"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. The rings mark 1, 2 and 3 metres of distance left.\n\nThe first menu picks which break directions to show, the second what the colours mean: the strength of the break, the length of the putt, or how much it ran up or down the hill — the last two need the slope field as well.\n\nThe two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time.\n\nA bigger dot means more misses in the same spot, and once a colour filter is on, each dot is shaded by the class it falls into.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nThe sentences underneath read every putt in the selection. A direction is only named when more than 60 percent of the misses go that way: over all misses, per break direction, on straight putts, uphill, downhill, inside 1.5 m, 1.5–3 m, 3–6 m and from 6 m. A slice that only repeats all misses is left out. Where one reason stands out behind a habit, it is named underneath.";
+"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. The rings mark 1, 2 and 3 metres of distance left.\n\nThe first menu picks which break directions to show, the second what the colours mean: the strength of the break, the length of the putt, or how much it ran up or down the hill — the last two need the slope field as well.\n\nThe two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time.\n\nA bigger dot means more misses in the same spot, and once a colour filter is on, each dot is shaded by the class it falls into.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nThe sentences underneath read every putt in the selection. A direction is only named when more than 60 percent of the misses go that way: over all misses, per break direction, on straight putts, uphill, downhill, inside 1.5 m, 1.5–3 m, 3–6 m and from 6 m. A slice that only repeats all misses is left out. Where one reason stands out behind a habit, it is named underneath. A miss only counts as long when the next putt is more than 1 m: a ball that stops just past the hole had the right pace. Two exceptions are named from 30 percent: misses inside 3 m that come up short, and putts from 8 m that finish more than 1 m from the hole.";
 "pattern.title" = "WHAT YOUR MISSES KEEP DOING";
 "pattern.missLeft" = "%1$ld of %2$ld (%3$ld%%) misses go left of the hole.";
 "pattern.missRight" = "%1$ld of %2$ld (%3$ld%%) misses go right of the hole.";
@@ -383,6 +388,8 @@
 "pattern.band3to6.right" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses go right.";
 "pattern.band3to6.short" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses finish short.";
 "pattern.band3to6.long" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses run past.";
+"pattern.shortInside3m" = "Inside 3 m, %1$ld of %2$ld (%3$ld%%) misses come up short — short never goes in.";
+"pattern.lagOutsideMetre" = "From 8 m and further, %1$ld of %2$ld (%3$ld%%) putts finish more than 1 m from the hole — time to work on lag putting.";
 "link.title" = "WHAT GOES TOGETHER";
 "cause.note" = "Of those, %1$ld of %2$ld (%3$ld%%) were %4$@.";
 "link.groupToCause" = "%1$@: %2$ld of %3$ld misses (%4$ld%%) were %5$@.";
@@ -673,7 +680,7 @@
 "custom.field.distance" = "Distance";
 "custom.field.distance.desc" = "How far the putt was, always shown first";
 "custom.field.result" = "Result";
-"custom.result.desc" = "Simple = made/missed only.\n\nBoard = dartboard with direction and lip-out, like Pro mode.\n\nAngle = a ring around the hole, dragged to where the ball stopped in five-degree steps, with Long in the gap at the top.";
+"custom.result.desc" = "Simple = made/missed only.\n\nBoard = dartboard with direction and lip-out.\n\nAngle = a ring around the hole, dragged to where the ball stopped in five-degree steps, split at the top so every miss is either left or right. Pro mode uses this too.";
 "custom.field.puttFor" = "Putt-For Category";
 "custom.field.puttFor.desc" = "Eagle/birdie/par/bogey/double-or-worse, with auto step-down after a miss";
 "custom.field.slope" = "Slope Grid";
@@ -802,7 +809,7 @@
 "coach.summary.info" = "The trend is your last three rounds against the average of every round read here — the last seven, and only rounds that were finished.\n\nIt takes half a stroke a round either way before a direction is called; anything smaller is the same putting on different days.\n\nWhen nothing is moving, the wording depends on where you are standing still: above +0.5 a round is a good place to stand, below −0.5 is not.";
 "coach.numbers.info" = "The first two tiles show change, not level: your last three rounds against the average of your last seven. Green is ground made, red is ground lost, whatever the size.\n\nThe small Ø line underneath is that average itself — where the change is measured from. What your putting is worth overall belongs in the Statistics tab; here the question is which way it is moving.\n\nSG is strokes gained over a whole round: for every hole, the putts the tour would expect from where the first putt stood, less the putts you took. PCG is the same idea per putt, against the tour's odds of holing from that distance.\n\n3-putts are counted per round rather than as a share of holes. The last tile is the distance band costing you the most: the band, then the conversion gain lost there against the tour.\n\nAll of it is read from your finished rounds on the course. The drills are counted separately, further down.";
 "coach.practice.info" = "Read from the completed drills in the Games tab, and kept apart from the course numbers on purpose: practice without a card in your hand is not a round, and averaging the two would describe neither.\n\nPCG per putt appears for the drills that record the distance of each attempt; the ones counted on the green without the app do not have one.";
-"coach.whatIsHappening.info" = "Habits in your misses: a side they keep going, a length they keep coming up, a break they keep missing below.\n\nEach line needs at least eight misses of that kind (six within a slice), with more than six in ten going the same way, before it is called a habit. One bad putt is a bad putt.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nWhere one miss reason stands out behind a habit, it is named underneath. The lines with a link symbol tie reasons to directions and kinds of putts. For misreads and wrong aims it also says how the break was read.";
+"coach.whatIsHappening.info" = "Habits in your misses: a side they keep going, a length they keep coming up, a break they keep missing below.\n\nEach line needs at least eight misses of that kind (six within a slice), with more than six in ten going the same way, before it is called a habit. One bad putt is a bad putt.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nWhere one miss reason stands out behind a habit, it is named underneath. The lines with a link symbol tie reasons to directions and kinds of putts. For misreads and wrong aims it also says how the break was read. A miss only counts as long when the next putt is more than 1 m: a ball that stops just past the hole had the right pace. Two exceptions are named from 30 percent: misses inside 3 m that come up short, and putts from 8 m that finish more than 1 m from the hole.";
 "coach.conditions.info" = "Every condition a round carries — the pace of the greens, rain, wind, cold, grain — and every condition a putt carries — break, slope, double break — is compared with its opposite over your own putts.\n\nA difference is only listed when it survives four checks: enough putts on both sides, both sides putting from comparable distances, a statistical test that the two shares really differ, and a correction for how many comparisons were made to find it. Search enough splits and random data throws up differences on its own; this is what keeps those off the card.\n\nThese are read from your last thirty rounds rather than ten. How you putt in the rain is a trait rather than a form, and rain is rare.";
 "coach.plan.info" = "In order: the distance costing you the most strokes, the drill that answers whatever your misses keep doing, the drill you convert worst in, and whatever has been left untouched for a fortnight.\n\nThe number beside each drill is how many sessions to aim for before the next read — three when the trend is slipping, one when it is climbing, two otherwise.";
 
@@ -915,7 +922,7 @@
 "custom.result.style.angle" = "Angle";
 "input.missAngle" = "MISS ANGLE";
 "input.missAngle.none" = "Drag around the hole";
-"input.missAngle.info" = "Drag around the ring to where the ball stopped, in steps of five degrees: straight short at the bottom, left and right at the sides, up to long-left and long-right at the two ends. The gap at the top is Long.\n\nThe centre is holed and the ring around it a lip-out, as on the board.\n\nOnly the direction is recorded — how far the ball ran is already known from the distance of the next putt.";
+"input.missAngle.info" = "Drag around the ring to where the ball stopped, in steps of five degrees: straight short at the bottom, left and right at the sides, up to long-left and long-right at the two ends. The ring is split at the top, so every miss is either left or right.\n\nThe centre is holed and the ring around it a lip-out, as on the board.\n\nOnly the direction is recorded — how far the ball ran is already known from the distance of the next putt.\n\nBelow the sides of the hole counts as short and above them as long, so 85° is still short. The angle reads 0° straight short, 90° beside the hole, and runs back down towards 0° as the miss goes long.";
 
 // Export and import
 "settings.data" = "DATA";

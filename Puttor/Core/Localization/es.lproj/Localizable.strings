@@ -53,6 +53,8 @@
 "tip.where.longPutts" = "Desde 6 m";
 "tip.where.shortPutts" = "Dentro de 1,5 m";
 "tip.where.doubleBreak" = "En dobles caídas";
+"tip.where.under3m" = "Por debajo de 3 m";
+"tip.where.from8m" = "Desde 8 m";
 "tip.moreBreak.title" = "Juega más caída";
 "tip.moreBreak.body" = "%@, la bola se queda demasiadas veces por debajo del hoyo. Elige el punto más alto de la línea y, en caso de duda, juega más caída: desde arriba la bola aún puede entrar.";
 "tip.lessBreak.title" = "Juega menos caída";
@@ -91,6 +93,8 @@
 "tip.holedLess.body" = "%@, embocas claramente menos. Tómate tu tiempo para la lectura y la rutina, y no tengas prisa.";
 "tip.lag.title" = "Deja cerca los putts largos";
 "tip.lag.body" = "%@, haces más tres putts. En el primer putt importa más la distancia que la línea: apunta a un círculo de un metro alrededor del hoyo.";
+"tip.lagDistance.title" = "Practica el lag";
+"tip.lagDistance.body" = "%@, demasiados putts se quedan a más de un metro del hoyo. En el primer putt céntrate en la distancia y apunta a un círculo de un metro alrededor del hoyo.";
 "coach.startWith" = "EMPIEZA POR AQUÍ";
 "coach.notEnough.title" = "Aún no hay base suficiente";
 "coach.notEnough.body" = "Para una lectura hacen falta %1$ld rondas terminadas y %2$ld putts; por ahora hay %3$ld rondas y %4$ld putts. Hasta entonces, estos tres ejercicios cubren lo que todo putter necesita.";
@@ -101,6 +105,7 @@
 "coach.reason.breakSide" = "Con una caída concreta tus fallos se van siempre al mismo lado: este ejercicio tiene putts con caída hacia ambos lados.";
 "coach.reason.slopePace" = "Cuesta arriba o cuesta abajo, tu velocidad falla siempre hacia el mismo lado: el ejercicio de escalera entrena justo eso.";
 "coach.reason.midRangeLine" = "De 3 a 6 m tus fallos se van siempre hacia el mismo lado: el ejercicio del reloj entrena justo esa distancia.";
+"coach.reason.lag" = "Desde 8 m demasiados putts se quedan a más de un metro: el ejercicio de escalera entrena justo esa velocidad.";
 "coach.reason.pace" = "Tus fallos son un problema de velocidad antes que de línea.";
 "coach.reason.threePutts" = "Los tres putts te están costando golpes; aquí se trata de dejar cerca el primer putt.";
 "coach.reason.neverPlayed" = "Este todavía no lo has probado.";
@@ -165,7 +170,7 @@
 
 /* Input mode */
 "inputMode.pro" = "Pro";
-"inputMode.pro.desc" = "Todo el detalle: pendiente, diana de fallo, motivos del fallo";
+"inputMode.pro.desc" = "Todo el detalle: pendiente, ángulo del fallo, motivos del fallo";
 "inputMode.quick" = "Rápido";
 "inputMode.quick.desc" = "Solo distancia, putt para y dentro/fuera";
 "inputMode.custom" = "Personalizado";
@@ -343,7 +348,7 @@
 "stats.rounds.info" = "Una casilla por ronda del filtro actual, con los golpes ganados en putt de esa ronda.\n\nPor cada hoyo: los putts que el tour esperaría desde donde estaba el primer putt, menos los putts realmente usados.";
 "stats.sgPutting.info" = "Golpes ganados por hoyo, sumados a lo largo de la ronda y promediados entre las rondas filtradas.\n\nEl PCG de debajo es la cifra por putt de esas mismas rondas: cómo se compara cada resultado con la probabilidad del tour de embocar desde esa distancia.";
 "stats.playingStats.info" = "El score es la media de golpes sobre par por ronda.\n\nGIR cuenta los hoyos jugados para eagle o birdie; la conversión de birdie, cuántos de esos greens acabaron en birdie o eagle con uno o dos putts; el scramble, los pares salvados entre los hoyos jugados para par con el green fallado.\n\nLas cifras de putts cuentan solo los hoyos en los que realmente se puteó. Los 3 putts y los lip-outs son medias por ronda sobre todas las rondas del filtro; la proximidad es la longitud del primer putt en los greens en regulación.\n\nTodo ello necesita la referencia de score («putt para»): la tienen todos los modos salvo Personalizado sin ese campo.";
-"stats.dispersion.info" = "Cada putt fallado se coloca en la dirección en la que falló, tan lejos del hoyo como quedó de él. Los anillos marcan 1, 2 y 3 metros de distancia restante.\n\nEl primer menú elige qué direcciones de caída se muestran; el segundo, qué significan los colores: la fuerza de la caída, la longitud del putt o cuánto subía o bajaba la pendiente; los dos últimos necesitan también el campo de pendiente.\n\nLos dos campos de debajo limitan el gráfico a putts golpeados dentro de un rango de distancias, ambos extremos incluidos, para poder leer un filtro de pendiente distancia por distancia.\n\nUn punto más grande significa más fallos en el mismo sitio y, con un filtro de color activo, cada punto se tiñe según la clase a la que pertenece.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.\n\nLas frases de debajo leen todos los putts de la selección. Una dirección solo se nombra cuando más del 60 por ciento de los fallos va hacia ese lado: en todos los fallos, por dirección de caída, en putts rectos, cuesta arriba, cuesta abajo, dentro de 1,5 m, de 1,5 a 3 m, de 3 a 6 m y desde 6 m. Un subconjunto que solo repite lo que muestran todos los fallos se omite. Si detrás de un patrón destaca un motivo, aparece debajo.";
+"stats.dispersion.info" = "Cada putt fallado se coloca en la dirección en la que falló, tan lejos del hoyo como quedó de él. Los anillos marcan 1, 2 y 3 metros de distancia restante.\n\nEl primer menú elige qué direcciones de caída se muestran; el segundo, qué significan los colores: la fuerza de la caída, la longitud del putt o cuánto subía o bajaba la pendiente; los dos últimos necesitan también el campo de pendiente.\n\nLos dos campos de debajo limitan el gráfico a putts golpeados dentro de un rango de distancias, ambos extremos incluidos, para poder leer un filtro de pendiente distancia por distancia.\n\nUn punto más grande significa más fallos en el mismo sitio y, con un filtro de color activo, cada punto se tiñe según la clase a la que pertenece.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.\n\nLas frases de debajo leen todos los putts de la selección. Una dirección solo se nombra cuando más del 60 por ciento de los fallos va hacia ese lado: en todos los fallos, por dirección de caída, en putts rectos, cuesta arriba, cuesta abajo, dentro de 1,5 m, de 1,5 a 3 m, de 3 a 6 m y desde 6 m. Un subconjunto que solo repite lo que muestran todos los fallos se omite. Si detrás de un patrón destaca un motivo, aparece debajo. Un fallo solo cuenta como largo cuando el siguiente putt mide más de 1 m: una bola que se queda justo pasado el hoyo llevaba la velocidad correcta. Dos excepciones se nombran ya desde el 30 por ciento: fallos por debajo de 3 m que se quedan cortos y putts desde 8 m que quedan a más de 1 m del hoyo.";
 "pattern.title" = "LO QUE HACEN SIEMPRE TUS FALLOS";
 "pattern.missLeft" = "%1$ld de %2$ld (%3$ld%%) fallos se van por la izquierda del hoyo.";
 "pattern.missRight" = "%1$ld de %2$ld (%3$ld%%) fallos se van por la derecha del hoyo.";
@@ -383,6 +388,8 @@
 "pattern.band3to6.right" = "De 3 a 6 m, %1$ld de %2$ld (%3$ld%%) fallos se van a la derecha.";
 "pattern.band3to6.short" = "De 3 a 6 m, %1$ld de %2$ld (%3$ld%%) fallos se quedan cortos.";
 "pattern.band3to6.long" = "De 3 a 6 m, %1$ld de %2$ld (%3$ld%%) fallos se pasan.";
+"pattern.shortInside3m" = "Por debajo de 3 m, %1$ld de %2$ld (%3$ld%%) fallos se quedan cortos: corto nunca entra.";
+"pattern.lagOutsideMetre" = "Desde 8 m, %1$ld de %2$ld (%3$ld%%) putts se quedan a más de 1 m del hoyo: toca practicar el lag.";
 "link.title" = "LO QUE VA JUNTO";
 "cause.note" = "De ellos, %1$ld de %2$ld (%3$ld%%) fueron %4$@.";
 "link.groupToCause" = "%1$@: %2$ld de %3$ld fallos (%4$ld%%) fueron %5$@.";
@@ -673,7 +680,7 @@
 "custom.field.distance" = "Distancia";
 "custom.field.distance.desc" = "A qué distancia estaba el putt; siempre se muestra primero";
 "custom.field.result" = "Resultado";
-"custom.result.desc" = "Simple = solo dentro/fallado.\n\nDiana = diana con dirección y lip-out, como en el modo Pro.\n\nÁngulo = un anillo alrededor del hoyo que se arrastra hasta donde se paró la bola, en pasos de cinco grados, con Largo en el hueco de arriba.";
+"custom.result.desc" = "Simple = solo dentro/fallado.\n\nDiana = diana con dirección y lip-out.\n\nÁngulo = un anillo alrededor del hoyo que se arrastra hasta donde se paró la bola, en pasos de cinco grados, dividido arriba para que cada fallo vaya a la izquierda o a la derecha. Es lo que usa también el modo Pro.";
 "custom.field.puttFor" = "Categoría de putt para";
 "custom.field.puttFor.desc" = "Eagle/birdie/par/bogey/doble o peor, con descenso automático tras un fallo";
 "custom.field.slope" = "Rejilla de pendiente";
@@ -802,7 +809,7 @@
 "coach.summary.info" = "La tendencia son tus últimas tres rondas frente a la media de todas las rondas leídas aquí: las últimas siete, y solo rondas terminadas.\n\nHace falta medio golpe por ronda en un sentido u otro para hablar de dirección; por debajo de eso es el mismo putt en días distintos.\n\nCuando no se mueve nada, la redacción depende de dónde te has quedado quieto: por encima de +0,5 por ronda es un buen sitio; por debajo de −0,5, no.";
 "coach.numbers.info" = "Las dos primeras casillas muestran el cambio, no el nivel: tus últimas tres rondas frente a la media de tus últimas siete. Verde es terreno ganado, rojo terreno perdido, sea cual sea el tamaño.\n\nLa pequeña línea Ø de debajo es esa media, el punto desde el que se mide el cambio. Lo que vale tu putt en conjunto es cosa de la pestaña de estadísticas; aquí la pregunta es hacia dónde se mueve.\n\nSG son los golpes ganados en una ronda entera: por cada hoyo, los putts que el tour esperaría desde donde estaba el primer putt, menos los que usaste. El PCG es lo mismo por putt, frente a la probabilidad del tour de embocar desde esa distancia.\n\nLos 3 putts se cuentan por ronda y no como porcentaje de hoyos. La última casilla es el tramo de distancia que más te cuesta: el tramo y, debajo, la conversión perdida ahí frente al tour.\n\nTodo se lee de tus rondas terminadas en el campo. Los ejercicios se cuentan aparte, más abajo.";
 "coach.practice.info" = "Leído de los ejercicios completados en la pestaña de Juegos, y separado a propósito de los números del campo: entrenar sin tarjeta en la mano no es una ronda, y promediar ambos no describiría ninguno.\n\nEl PCG por putt aparece en los ejercicios que registran la distancia de cada intento; los que se cuentan en el green sin la app no lo tienen.";
-"coach.whatIsHappening.info" = "Costumbres en tus fallos: un lado al que se van, una longitud que se repite, una caída por debajo de la cual siguen pasando.\n\nCada línea necesita al menos ocho fallos de ese tipo (seis dentro de un subconjunto), con más de seis de cada diez en la misma dirección, antes de llamarse costumbre. Un mal putt es solo un mal putt.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.\n\nSi detrás de un patrón destaca un motivo de fallo, aparece debajo. Las líneas con el símbolo de enlace relacionan motivos con direcciones y tipos de putt. En las malas lecturas y malas orientaciones también indica cómo se leyó la caída.";
+"coach.whatIsHappening.info" = "Costumbres en tus fallos: un lado al que se van, una longitud que se repite, una caída por debajo de la cual siguen pasando.\n\nCada línea necesita al menos ocho fallos de ese tipo (seis dentro de un subconjunto), con más de seis de cada diez en la misma dirección, antes de llamarse costumbre. Un mal putt es solo un mal putt.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.\n\nSi detrás de un patrón destaca un motivo de fallo, aparece debajo. Las líneas con el símbolo de enlace relacionan motivos con direcciones y tipos de putt. En las malas lecturas y malas orientaciones también indica cómo se leyó la caída. Un fallo solo cuenta como largo cuando el siguiente putt mide más de 1 m: una bola que se queda justo pasado el hoyo llevaba la velocidad correcta. Dos excepciones se nombran ya desde el 30 por ciento: fallos por debajo de 3 m que se quedan cortos y putts desde 8 m que quedan a más de 1 m del hoyo.";
 "coach.conditions.info" = "Cada condición que trae una ronda —la velocidad de los greens, la lluvia, el viento, el frío, el grano— y cada una que trae un putt —caída, pendiente, doble caída— se compara con su opuesta usando tus propios putts.\n\nUna diferencia solo se muestra si supera cuatro filtros: putts suficientes en ambos lados, distancias comparables en ambos lados, una prueba estadística de que las dos proporciones realmente difieren y una corrección por el número de comparaciones hechas para encontrarla. Si se buscan bastantes divisiones, hasta unos datos aleatorios producen diferencias; esto es lo que las mantiene fuera de la tarjeta.\n\nEsto se lee de tus últimas treinta rondas, no de diez. Cómo puteas bajo la lluvia es un rasgo, no una forma, y la lluvia es rara.";
 "coach.plan.info" = "En orden: la distancia que más golpes te cuesta, el ejercicio que responde a lo que repiten tus fallos, el ejercicio en el que peor conviertes y lo que lleve dos semanas sin tocarse.\n\nEl número junto a cada ejercicio son las sesiones a las que apuntar antes de la siguiente lectura: tres si la tendencia baja, una si sube, dos en el resto de los casos.";
 
@@ -915,7 +922,7 @@
 "custom.result.style.angle" = "Ángulo";
 "input.missAngle" = "ÁNGULO DEL FALLO";
 "input.missAngle.none" = "Arrastra alrededor del hoyo";
-"input.missAngle.info" = "Arrastra el anillo hasta donde se paró la bola, en pasos de cinco grados: corto recto abajo, izquierda y derecha a los lados, hasta largo-izquierda y largo-derecha en los dos extremos. El hueco de arriba es Largo.\n\nEl centro es dentro y el anillo alrededor un lip-out, como en la diana.\n\nSolo se registra la dirección: cuánto corrió la bola ya se sabe por la distancia del siguiente putt.";
+"input.missAngle.info" = "Arrastra el anillo hasta donde se paró la bola, en pasos de cinco grados: corto recto abajo, izquierda y derecha a los lados, hasta largo-izquierda y largo-derecha en los dos extremos. Arriba el anillo está dividido, así que cada fallo va a la izquierda o a la derecha.\n\nEl centro es dentro y el anillo alrededor un lip-out, como en la diana.\n\nSolo se registra la dirección: cuánto corrió la bola ya se sabe por la distancia del siguiente putt.\n\nTodo lo que queda por debajo de los lados del hoyo cuenta como corto y lo de arriba como largo, así que 85° sigue siendo corto. El ángulo marca 0° recto corto, 90° al lado del hoyo y vuelve hacia 0° cuando el fallo se va largo.";
 
 // Export and import
 "settings.data" = "DATOS";

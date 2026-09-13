@@ -141,7 +141,7 @@ enum BreakReadAnalyzer {
     }
 
     /// Broader cells come before the ones inside them.
-    private static let cells: [Cell] = {
+    private static func cells(leave: MissLeave) -> [Cell] {
         var cells = [
             Cell(id: "breaking", axis: .side, includes: { !isStraight($0) }, outcome: sideOfBreak),
         ]
@@ -175,21 +175,21 @@ enum BreakReadAnalyzer {
             Cell(id: "straightDownhill", axis: .side, parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct < 0 }, outcome: breakSeen),
             Cell(id: "straightFlat", axis: .side, parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct == 0 }, outcome: breakSeen),
             Cell(id: "uphill", axis: .length, includes: { $0.hillSlopePct > 0 }, outcome: {
-                switch $0.result.lengthBias {
+                switch leave.lengthBias($0) {
                 case ..<0: return .uphillUnder
                 case 1...: return .uphillOver
                 default: return nil
                 }
             }),
             Cell(id: "downhill", axis: .length, includes: { $0.hillSlopePct < 0 }, outcome: {
-                switch $0.result.lengthBias {
+                switch leave.lengthBias($0) {
                 case 1...: return .downhillUnder
                 case ..<0: return .downhillOver
                 default: return nil
                 }
             }),
             Cell(id: "flat", axis: .length, includes: { $0.hillSlopePct == 0 }, outcome: {
-                switch $0.result.lengthBias {
+                switch leave.lengthBias($0) {
                 case ..<0: return .slower
                 case 1...: return .faster
                 default: return nil
@@ -197,12 +197,15 @@ enum BreakReadAnalyzer {
             }),
         ]
         return cells
-    }()
+    }
 
     // MARK: - Reading
 
     static func findings(in putts: [Putt]) -> [BreakReadFinding] {
         let misses = putts.filter { $0.puttNumber > 0 && !$0.result.isHoled }
+        // A misread ball that stopped within a metre past had the pace,
+        // however the slope was read.
+        let cells = Self.cells(leave: MissLeave(putts))
         var found: [BreakReadFinding] = []
 
         for reason in BreakReadFinding.Reason.allCases {

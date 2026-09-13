@@ -131,15 +131,17 @@ enum SplitInsight {
         },
     ]
 
-    static let measures: [Measure] = [
+    static func measures(leave: MissLeave) -> [Measure] {
+        [
         // Pace, over the misses that had a length to them.
         Measure(
             id: "length",
             key: "split.missLong",
             mirrorKey: "split.missShort",
             importance: 1,
-            pool: { !$0.result.isHoled && $0.result.lengthBias != 0 },
-            hit: { $0.result.lengthBias > 0 }
+            // Past the hole only counts once the ball ran more than a metre on.
+            pool: { !$0.result.isHoled && leave.lengthBias($0) != 0 },
+            hit: { leave.lengthBias($0) > 0 }
         ),
         // The side of the break the miss went, over the putts that broke.
         Measure(
@@ -173,11 +175,13 @@ enum SplitInsight {
             pool: { _ in true },
             hit: { $0.result.isHoled }
         ),
-    ]
+        ]
+    }
 
     // MARK: - Reading
 
     static func findings(in rounds: [Round]) -> [SplitFinding] {
+        let measures = Self.measures(leave: MissLeave(rounds.flatMap(\.putts)))
         var tested = 0
         var candidates: [(finding: SplitFinding, p: Double)] = []
 

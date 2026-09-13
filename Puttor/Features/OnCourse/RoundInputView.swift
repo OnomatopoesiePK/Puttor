@@ -168,9 +168,13 @@ struct RoundInputView: View {
 
     private func resultField(_ session: RoundSession, boardSize: CGFloat = 280) -> some View {
         section {
-            DartboardMissView(
+            // The dial rather than the eight-sector board: the angle places
+            // the miss where the ball actually went, and the result still
+            // falls out of it for everything that reads directions.
+            CircularMissSliderView(
                 result: Binding(get: { session.draftResult }, set: { session.draftResult = $0 }),
                 lipOut: Binding(get: { session.draftLipOut }, set: { session.draftLipOut = $0 }),
+                angle: Binding(get: { session.draftMissAngle }, set: { session.draftMissAngle = $0 }),
                 size: boardSize
             )
             missReasonRow(session)

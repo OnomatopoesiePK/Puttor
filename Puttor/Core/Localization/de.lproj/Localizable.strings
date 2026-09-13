@@ -53,6 +53,8 @@
 "tip.where.longPutts" = "Ab 6 m";
 "tip.where.shortPutts" = "Unter 1,5 m";
 "tip.where.doubleBreak" = "Bei Doppelbreaks";
+"tip.where.under3m" = "Unter 3 m";
+"tip.where.from8m" = "Ab 8 m";
 "tip.moreBreak.title" = "Mehr Break spielen";
 "tip.moreBreak.body" = "%@ bleibt der Ball zu oft unterhalb des Lochs. Wähl den höchsten Punkt der Linie und spiel im Zweifel mehr Break – von oberhalb kann der Ball noch fallen.";
 "tip.lessBreak.title" = "Weniger Break spielen";
@@ -91,6 +93,8 @@
 "tip.holedLess.body" = "%@ lochst du deutlich weniger. Nimm dir dann bewusst Zeit für Read und Routine und beeil dich nicht.";
 "tip.lag.title" = "Lange Putts nah legen";
 "tip.lag.body" = "%@ drei-puttest du öfter. Beim ersten Putt zählt die Länge mehr als die Linie – ziel auf einen Kreis von einem Meter um das Loch.";
+"tip.lagDistance.title" = "Lag-Putting üben";
+"tip.lagDistance.body" = "%@ bleiben zu viele Putts mehr als einen Meter vom Loch liegen. Leg beim ersten Putt den Fokus auf die Länge und ziel auf einen Kreis von einem Meter um das Loch.";
 "coach.startWith" = "FANG DAMIT AN";
 "coach.notEnough.title" = "Noch zu wenig Grundlage";
 "coach.notEnough.body" = "Für eine Einschätzung braucht es %1$ld beendete Runden und %2$ld Putts; bisher sind es %3$ld Runden und %4$ld Putts. Bis dahin decken diese drei Drills ab, was jeder Putter braucht.";
@@ -101,6 +105,7 @@
 "coach.reason.breakSide" = "Bei einer Break-Richtung gehen deine Misses immer zur selben Seite — dieser Drill hat Putts mit Break in beide Richtungen.";
 "coach.reason.slopePace" = "Bergauf oder bergab liegt dein Tempo immer in dieselbe Richtung daneben — genau das trainiert der Ladder-Drill.";
 "coach.reason.midRangeLine" = "Von 3 bis 6 m kippen deine Misses immer zur selben Seite — der Uhr-Drill trainiert genau diesen Bereich.";
+"coach.reason.lag" = "Ab 8 m bleiben zu viele Putts außerhalb eines Meters liegen — genau dieses Tempo trainiert der Ladder-Drill.";
 "coach.reason.pace" = "Deine Misses sind zuerst ein Tempo-Problem, dann erst ein Linien-Problem.";
 "coach.reason.threePutts" = "Drei-Putts kosten dich Schläge; hier geht es darum, den ersten Putt nah zu legen.";
 "coach.reason.neverPlayed" = "Diesen hast du noch nie gespielt.";
@@ -165,7 +170,7 @@
 
 /* Input mode */
 "inputMode.pro" = "Pro";
-"inputMode.pro.desc" = "Volle Details: Neigung, Dartscheibe, Miss-Gründe";
+"inputMode.pro.desc" = "Volle Details: Neigung, Miss-Winkel, Miss-Gründe";
 "inputMode.quick" = "Quick";
 "inputMode.quick.desc" = "Nur Distanz, Putt-Kategorie und Treffer/Fehler";
 "inputMode.custom" = "Custom";
@@ -343,7 +348,7 @@
 "stats.rounds.info" = "Eine Kachel je Runde im aktuellen Filter mit ihren Strokes Gained beim Putten.\n\nPro Loch: die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten.";
 "stats.sgPutting.info" = "Strokes Gained pro Loch, über die Runde summiert und über die gefilterten Runden gemittelt.\n\nDie PKR darunter ist der Wert pro Putt: wie das Ergebnis im Vergleich zur Tour-Trefferquote auf dieser Distanz steht.";
 "stats.playingStats.info" = "Der Score ist der Schnitt der Schläge über Par pro Runde.\n\nGIR zählt Löcher, die für Eagle oder Birdie gespielt wurden, die Birdie-Konversion, wie viele dieser Grüns mit einem oder zwei Putts zu einem Birdie oder Eagle wurden, Scramble die geretteten Pars unter den Löchern, die für Par mit verfehltem Grün gespielt wurden.\n\nDie Putt-Werte zählen nur Löcher, auf denen tatsächlich geputtet wurde. 3-Putts und Lip-Outs sind Durchschnitte pro Runde über alle Runden im Filter; die Distanz ist die Länge des ersten Putts auf getroffenen Grüns.\n\nAlles davon braucht den Score-Bezug („Putt für“): den haben alle Modi außer Custom ohne dieses Feld.";
-"stats.dispersion.info" = "Jeder verfehlte Putt liegt in der Richtung, in die er vorbeiging, und so weit vom Loch entfernt, wie er liegen geblieben ist. Die Ringe markieren 1, 2 und 3 Meter Restdistanz.\n\nDas erste Menü wählt, welche Break-Richtungen gezeigt werden, das zweite, wofür die Farben stehen: Stärke des Breaks, Länge des Putts oder wie stark es bergauf oder bergab ging — die letzten beiden brauchen zusätzlich das Neigungsfeld.\n\nDie beiden Felder darunter grenzen die Anzeige auf Putts aus einem Distanzbereich ein, beide Grenzen eingeschlossen — so lässt sich ein Neigungsfilter Distanz für Distanz lesen.\n\nEin größerer Punkt heißt mehr Misses an derselben Stelle, und sobald ein Farbfilter aktiv ist, zeigt die Farbe jedes Punktes, in welche Klasse er fällt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.\n\nDie Sätze darunter lesen alle Putts der Auswahl. Eine Richtung wird nur genannt, wenn mehr als 60 Prozent der Misses dorthin gehen: über alle Misses, je Break-Richtung, bei geraden Putts, bergauf, bergab, unter 1,5 m, 1,5–3 m, 3–6 m und ab 6 m. Ein Ausschnitt, der nur wiederholt, was alle Misses zeigen, fällt weg. Steckt hinter einem Muster auffällig oft derselbe Grund, steht er darunter.";
+"stats.dispersion.info" = "Jeder verfehlte Putt liegt in der Richtung, in die er vorbeiging, und so weit vom Loch entfernt, wie er liegen geblieben ist. Die Ringe markieren 1, 2 und 3 Meter Restdistanz.\n\nDas erste Menü wählt, welche Break-Richtungen gezeigt werden, das zweite, wofür die Farben stehen: Stärke des Breaks, Länge des Putts oder wie stark es bergauf oder bergab ging — die letzten beiden brauchen zusätzlich das Neigungsfeld.\n\nDie beiden Felder darunter grenzen die Anzeige auf Putts aus einem Distanzbereich ein, beide Grenzen eingeschlossen — so lässt sich ein Neigungsfilter Distanz für Distanz lesen.\n\nEin größerer Punkt heißt mehr Misses an derselben Stelle, und sobald ein Farbfilter aktiv ist, zeigt die Farbe jedes Punktes, in welche Klasse er fällt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.\n\nDie Sätze darunter lesen alle Putts der Auswahl. Eine Richtung wird nur genannt, wenn mehr als 60 Prozent der Misses dorthin gehen: über alle Misses, je Break-Richtung, bei geraden Putts, bergauf, bergab, unter 1,5 m, 1,5–3 m, 3–6 m und ab 6 m. Ein Ausschnitt, der nur wiederholt, was alle Misses zeigen, fällt weg. Steckt hinter einem Muster auffällig oft derselbe Grund, steht er darunter. Als zu lang zählt ein Miss nur, wenn der nächste Putt länger als 1 m ist: ein Ball, der knapp hinter dem Loch liegen bleibt, hatte das richtige Tempo. Zwei Ausnahmen werden schon ab 30 Prozent genannt: Misses unter 3 m, die kurz bleiben, und Putts ab 8 m, die mehr als 1 m vom Loch liegen bleiben.";
 "pattern.title" = "WAS DEINE MISSES IMMER WIEDER TUN";
 "pattern.missLeft" = "%1$ld von %2$ld (%3$ld%%) Misses gehen links am Loch vorbei.";
 "pattern.missRight" = "%1$ld von %2$ld (%3$ld%%) Misses gehen rechts am Loch vorbei.";
@@ -383,6 +388,8 @@
 "pattern.band3to6.right" = "Von 3 bis 6 m gehen %1$ld von %2$ld (%3$ld%%) Misses rechts vorbei.";
 "pattern.band3to6.short" = "Von 3 bis 6 m bleiben %1$ld von %2$ld (%3$ld%%) Misses kurz.";
 "pattern.band3to6.long" = "Von 3 bis 6 m laufen %1$ld von %2$ld (%3$ld%%) Misses zu weit.";
+"pattern.shortInside3m" = "Unter 3 m bleiben %1$ld von %2$ld (%3$ld%%) Misses kurz – zu kurz fällt nie.";
+"pattern.lagOutsideMetre" = "Ab 8 m bleiben %1$ld von %2$ld (%3$ld%%) Putts mehr als 1 m vom Loch liegen – Lag-Putting üben.";
 "link.title" = "WAS ZUSAMMENHÄNGT";
 "cause.note" = "Davon %1$ld von %2$ld (%3$ld%%) %4$@.";
 "link.groupToCause" = "%1$@: %2$ld von %3$ld Misses (%4$ld%%) %5$@.";
@@ -673,7 +680,7 @@
 "custom.field.distance" = "Distanz";
 "custom.field.distance.desc" = "Wie weit der Putt war, immer als erstes Feld gezeigt";
 "custom.field.result" = "Resultat";
-"custom.result.desc" = "Einfach = nur getroffen/verfehlt.\n\nScheibe = Dartscheibe mit Richtung und Lip-Out, wie im Pro-Modus.\n\nWinkel = ein Ring um das Loch, der in Fünf-Grad-Schritten dorthin gezogen wird, wo der Ball liegen blieb — Lang liegt in der Lücke oben.";
+"custom.result.desc" = "Einfach = nur getroffen/verfehlt.\n\nScheibe = Dartscheibe mit Richtung und Lip-Out.\n\nWinkel = ein Ring um das Loch, der in Fünf-Grad-Schritten dorthin gezogen wird, wo der Ball liegen blieb — oben ist der Ring geteilt, jeder Miss geht also links oder rechts vorbei. So erfasst auch der Pro-Modus.";
 "custom.field.puttFor" = "Putt-Kategorie";
 "custom.field.puttFor.desc" = "Eagle/Birdie/Par/Bogey/Doppelbogey oder schlechter, mit automatischer Stufe nach einem Fehlversuch";
 "custom.field.slope" = "Neigungs-Grid";
@@ -802,7 +809,7 @@
 "coach.summary.info" = "Der Trend sind deine letzten drei Runden gegen den Schnitt aller hier gelesenen Runden — die letzten sieben, und nur beendete.\n\nErst ab einem halben Schlag pro Runde in eine Richtung wird von einer Richtung gesprochen; alles darunter ist dasselbe Putten an verschiedenen Tagen.\n\nBewegt sich nichts, hängt die Formulierung davon ab, wo du stehen bleibst: über +0,5 pro Runde ist ein guter Platz dafür, unter −0,5 nicht.";
 "coach.numbers.info" = "Die ersten beiden Kacheln zeigen die Veränderung, nicht das Niveau: deine letzten drei Runden gegen den Schnitt deiner letzten sieben. Grün ist gewonnener Boden, rot verlorener — unabhängig davon, wie viel.\n\nDie kleine Ø-Zeile darunter ist dieser Schnitt selbst, also der Ausgangspunkt der Veränderung. Was dein Putten insgesamt wert ist, steht im Statistik-Tab; hier geht es darum, wohin es sich bewegt.\n\nSG sind die Strokes Gained über eine ganze Runde: pro Loch die Putts, die die Tour ab der Distanz des ersten Putts erwarten würde, minus die tatsächlich gebrauchten. Die PKR ist dasselbe pro Putt, gemessen an der Tour-Trefferquote aus dieser Distanz.\n\nDrei-Putts werden pro Runde gezählt, nicht als Anteil der Löcher. Die letzte Kachel ist der Distanzbereich, der dich am meisten kostet: der Bereich, darunter die dort gegenüber der Tour verlorene Konversion.\n\nAlles davon stammt aus deinen beendeten Runden auf dem Platz. Die Drills werden getrennt gezählt, weiter unten.";
 "coach.practice.info" = "Gelesen aus den abgeschlossenen Drills im Games-Tab — und bewusst getrennt von den Platz-Zahlen: Training ohne Karte in der Hand ist keine Runde, und ein Mittelwert aus beidem beschriebe keines von beiden.\n\nDie PKR pro Putt erscheint für die Drills, die die Distanz jedes Versuchs mitschreiben; die auf dem Grün ohne App gezählten haben keine.";
-"coach.whatIsHappening.info" = "Muster in deinen Misses: eine Seite, an der sie immer wieder vorbeigehen, eine Länge, die immer wieder fehlt, ein Break, unter dem sie immer wieder durchlaufen.\n\nJede Zeile braucht mindestens acht Misses dieser Art (sechs in einem Ausschnitt), von denen mehr als sechs von zehn in dieselbe Richtung gehen, bevor daraus ein Muster wird. Ein schlechter Putt ist ein schlechter Putt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.\n\nSteckt hinter einem Muster auffällig oft derselbe Miss-Grund, steht er darunter. Die Zeilen mit Kettensymbol verknüpfen Gründe mit Richtungen und Putt-Arten. Bei verlesenen und falsch gezielten Putts steht außerdem, wie der Break gelesen wurde.";
+"coach.whatIsHappening.info" = "Muster in deinen Misses: eine Seite, an der sie immer wieder vorbeigehen, eine Länge, die immer wieder fehlt, ein Break, unter dem sie immer wieder durchlaufen.\n\nJede Zeile braucht mindestens acht Misses dieser Art (sechs in einem Ausschnitt), von denen mehr als sechs von zehn in dieselbe Richtung gehen, bevor daraus ein Muster wird. Ein schlechter Putt ist ein schlechter Putt.\n\nDafür braucht es das komplexe Resultat-Feld: Pro-Modus oder Custom mit dem Resultat auf komplex.\n\nSteckt hinter einem Muster auffällig oft derselbe Miss-Grund, steht er darunter. Die Zeilen mit Kettensymbol verknüpfen Gründe mit Richtungen und Putt-Arten. Bei verlesenen und falsch gezielten Putts steht außerdem, wie der Break gelesen wurde. Als zu lang zählt ein Miss nur, wenn der nächste Putt länger als 1 m ist: ein Ball, der knapp hinter dem Loch liegen bleibt, hatte das richtige Tempo. Zwei Ausnahmen werden schon ab 30 Prozent genannt: Misses unter 3 m, die kurz bleiben, und Putts ab 8 m, die mehr als 1 m vom Loch liegen bleiben.";
 "coach.conditions.info" = "Jede Bedingung, die eine Runde mitbringt — Grüngeschwindigkeit, Regen, Wind, Kälte, Grain — und jede, die ein Putt mitbringt — Break, Neigung, Doppelbreak — wird an deinen eigenen Putts gegen ihr Gegenteil verglichen.\n\nEin Unterschied wird nur aufgeführt, wenn er vier Prüfungen übersteht: genug Putts auf beiden Seiten, vergleichbare Distanzen auf beiden Seiten, ein statistischer Test, dass sich die beiden Anteile wirklich unterscheiden, und eine Korrektur dafür, wie viele Vergleiche für den Fund nötig waren. Wer genug Aufteilungen durchsucht, findet auch in Zufallsdaten Unterschiede; genau die hält diese Prüfung von der Karte fern.\n\nGelesen wird das aus deinen letzten dreißig Runden statt aus zehn. Wie du bei Regen puttest, ist eine Eigenschaft und keine Form — und Regen ist selten.";
 "coach.plan.info" = "In dieser Reihenfolge: die Distanz, die dich am meisten Schläge kostet, der Drill gegen das, was deine Misses immer wieder tun, der Drill, in dem du am schlechtesten konvertierst, und alles, was seit zwei Wochen liegen geblieben ist.\n\nDie Zahl neben jedem Drill ist die angepeilte Anzahl Einheiten bis zur nächsten Auswertung — drei, wenn der Trend nach unten zeigt, eine, wenn er nach oben zeigt, sonst zwei.";
 
@@ -915,7 +922,7 @@
 "custom.result.style.angle" = "Winkel";
 "input.missAngle" = "MISS-WINKEL";
 "input.missAngle.none" = "Um das Loch ziehen";
-"input.missAngle.info" = "Den Ring um das Loch dorthin ziehen, wo der Ball liegen blieb, in Fünf-Grad-Schritten: gerade kurz unten, links und rechts an den Seiten, bis lang-links und lang-rechts an den beiden Enden. Die Lücke oben ist Lang.\n\nDie Mitte ist gelocht, der Ring darum ein Lip-Out, wie auf der Scheibe.\n\nFestgehalten wird nur die Richtung — wie weit der Ball gelaufen ist, steht schon in der Distanz des nächsten Putts.";
+"input.missAngle.info" = "Den Ring um das Loch dorthin ziehen, wo der Ball liegen blieb, in Fünf-Grad-Schritten: gerade kurz unten, links und rechts an den Seiten, bis lang-links und lang-rechts an den beiden Enden. Oben ist der Ring geteilt, jeder Miss geht also links oder rechts vorbei.\n\nDie Mitte ist gelocht, der Ring darum ein Lip-Out, wie auf der Scheibe.\n\nFestgehalten wird nur die Richtung — wie weit der Ball gelaufen ist, steht schon in der Distanz des nächsten Putts.\n\nAlles unterhalb der Lochseiten zählt als kurz, alles darüber als lang – 85° sind also noch kurz. Der Winkel zeigt 0° gerade kurz, 90° seitlich neben dem Loch und läuft Richtung lang wieder auf 0° zurück.";
 
 // Export and import
 "settings.data" = "DATEN";

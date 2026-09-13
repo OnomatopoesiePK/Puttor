@@ -125,11 +125,13 @@ enum MissReasonLinker {
             || (putt.sideSlopePct > 0 && putt.result.lateralBias > 0)
     }
 
-    static let groups: [Group] = [
+    static func groups(leave: MissLeave) -> [Group] {
+        [
         Group(id: "left", pool: { $0.result.lateralBias != 0 }, includes: { $0.result.lateralBias < 0 }),
         Group(id: "right", pool: { $0.result.lateralBias != 0 }, includes: { $0.result.lateralBias > 0 }),
-        Group(id: "short", pool: { $0.result.lengthBias != 0 }, includes: { $0.result.lengthBias < 0 }),
-        Group(id: "long", pool: { $0.result.lengthBias != 0 }, includes: { $0.result.lengthBias > 0 }),
+        // Past the hole only counts once the ball ran more than a metre on.
+        Group(id: "short", pool: { leave.lengthBias($0) != 0 }, includes: { leave.lengthBias($0) < 0 }),
+        Group(id: "long", pool: { leave.lengthBias($0) != 0 }, includes: { leave.lengthBias($0) > 0 }),
         Group(id: "lowSide", pool: isBreaking, includes: isLowSide),
         Group(id: "highSide", pool: isBreaking, includes: { !isLowSide($0) }),
         Group(id: "rightToLeft", includes: { $0.sideSlopePct < 0 }),
@@ -167,7 +169,8 @@ enum MissReasonLinker {
             $0.sideSlopePct > 0 && BreakStrength(sideSlopePct: $0.sideSlopePct) == .strong
         }),
         Group(id: "doubleBreak", includes: { $0.doubleBreak != nil }),
-    ]
+        ]
+    }
 
     // MARK: - Reading
 
@@ -184,6 +187,7 @@ enum MissReasonLinker {
     static func links(in putts: [Putt]) -> [MissReasonLink] {
         let tracked = trackedMisses(in: putts)
         guard !tracked.isEmpty else { return [] }
+        let groups = Self.groups(leave: MissLeave(putts))
 
         var found: [(link: MissReasonLink, z: Double)] = []
         for group in groups {

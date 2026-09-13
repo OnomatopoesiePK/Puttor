@@ -1314,6 +1314,69 @@ struct PuttorTests {
         #expect(!findings.contains { $0.key.hasPrefix("pattern.band15to3") })
     }
 
+    /// A ball that slides past and stops within a metre had the pace; only
+    /// one that ran on further is a miss long.
+    @MainActor
+    @Test func aPuttThatStopsWithinAMetrePastIsNotLong() async throws {
+        func hole(_ number: Int, leave: Double) -> [Putt] {
+            [
+                Putt(holeNumber: number, puttNumber: 1, distanceM: 6, puttFor: .par, result: .long),
+                Putt(holeNumber: number, puttNumber: 2, distanceM: leave, puttFor: .bogey, result: .holed),
+            ]
+        }
+
+        let settled = (1...9).flatMap { hole($0, leave: 0.6) }
+        #expect(!MissPatternFinder.findings(in: settled).contains { $0.key.hasSuffix("Long") || $0.key.hasSuffix(".long") })
+
+        let ranAway = (1...9).flatMap { hole($0, leave: 1.8) }
+        #expect(MissPatternFinder.findings(in: ranAway).contains { $0.key == "pattern.missLong" })
+    }
+
+    /// Short from inside 3 m is named from 30%, far under a habit's bar.
+    @MainActor
+    @Test func shortMissesFromCloseAreNamedFromThirtyPercent() async throws {
+        let putts = Array(repeating: Self.miss(.short, distance: 2), count: 3)
+            + Array(repeating: Self.miss(.left, distance: 2), count: 4)
+            + Array(repeating: Self.miss(.right, distance: 2), count: 3)
+        let alert = try #require(MissPatternFinder.findings(in: putts).first { $0.key == "pattern.shortInside3m" })
+        #expect(alert.count == 3)
+        #expect(alert.total == 10)
+        #expect(alert.isStrong)
+        #expect(CoachTipAdvisor.tip(for: alert)?.topic == .dieAtHole)
+    }
+
+    /// A lag from 8 m that stops outside a metre is named from 30% too, and
+    /// sends the coach to lag putting.
+    @MainActor
+    @Test func lagsLeftOutsideAMetreAreNamedFromThirtyPercent() async throws {
+        func hole(_ number: Int, leave: Double) -> [Putt] {
+            [
+                Putt(holeNumber: number, puttNumber: 1, distanceM: 10, puttFor: .par, result: .short),
+                Putt(holeNumber: number, puttNumber: 2, distanceM: leave, puttFor: .bogey, result: .holed),
+            ]
+        }
+        let putts = (1...3).flatMap { hole($0, leave: 1.6) } + (4...10).flatMap { hole($0, leave: 0.5) }
+
+        let alert = try #require(MissPatternFinder.findings(in: putts).first { $0.key == "pattern.lagOutsideMetre" })
+        #expect(alert.count == 3)
+        #expect(alert.total == 10)
+        let tip = try #require(CoachTipAdvisor.tip(for: alert))
+        #expect(tip.topic == .lagDistance)
+        #expect(tip.weight > 0)
+    }
+
+    /// The same for a misread up the hill: just past is not a slope overread.
+    @MainActor
+    @Test func aMisreadThatSlidesJustPastIsNoOverRead() async throws {
+        let putts = (1...7).flatMap { number -> [Putt] in
+            [
+                Putt(holeNumber: number, puttNumber: 1, distanceM: 4, hillSlopePct: 2, puttFor: .par, result: .long, missRead: true),
+                Putt(holeNumber: number, puttNumber: 2, distanceM: 0.5, puttFor: .bogey, result: .holed),
+            ]
+        }
+        #expect(!BreakReadAnalyzer.findings(in: putts).contains { $0.cellID == "uphill" })
+    }
+
     // MARK: - Miss reasons
 
     @MainActor
@@ -1406,7 +1469,8 @@ struct PuttorTests {
     @Test func everyFindingHasATip() async throws {
         let slices = ["rightToLeft", "leftToRight", "straight", "uphill", "downhill", "band15to3", "band3to6"]
         let keys = ["missLeft", "missRight", "missShort", "missLong", "missLowSide", "missHighSide",
-                    "longPuttsShort", "longPuttsLong", "shortPuttsLeft", "shortPuttsRight"]
+                    "longPuttsShort", "longPuttsLong", "shortPuttsLeft", "shortPuttsRight",
+                    "shortInside3m", "lagOutsideMetre"]
             + slices.flatMap { slice in ["left", "right", "short", "long"].map { "\(slice).\($0)" } }
         for key in keys {
             #expect(CoachTipAdvisor.tip(for: MissPattern(key: "pattern.\(key)", count: 7, total: 10)) != nil, "\(key)")
@@ -1997,14 +2061,14 @@ struct PuttorTests {
     // MARK: - Miss angle
 
     /// The dial's angles: straight short at 0, left negative, right positive,
-    /// five-degree steps, and a gap at the top that belongs to Long.
+    /// five-degree steps, and a split at the top that belongs to neither side.
     @Test func missAnglesSnapAndReadAsTheBoardsDirections() async throws {
         // Onto the grid, and never past either end of the track.
         #expect(MissAngle.snap(37) == 35)
         #expect(MissAngle.snap(38) == 40)
         #expect(MissAngle.snap(-2) == 0)
-        #expect(MissAngle.snap(171) == 150)
-        #expect(MissAngle.snap(-179) == -150)
+        #expect(MissAngle.snap(179) == 175)
+        #expect(MissAngle.snap(-179) == -175)
 
         // The bottom of the dial is short; the sides are left and right.
         #expect(MissAngle.angle(fromScreen: 90) == 0)
@@ -2024,9 +2088,21 @@ struct PuttorTests {
         #expect(MissAngle.result(for: 25) == .shortRight)
         #expect(MissAngle.result(for: -45) == .shortLeft)
         #expect(MissAngle.result(for: 90) == .right)
-        #expect(MissAngle.result(for: -110) == .left)
+        // Below the sides of the hole is short, above them long.
+        #expect(MissAngle.result(for: 85) == .shortRight)
+        #expect(MissAngle.result(for: -95) == .longLeft)
+        #expect(MissAngle.result(for: -110) == .longLeft)
+
+        // Read out from 0 at short to 90 beside the hole, then back down.
+        #expect(MissAngle.displayDegrees(-35) == 35)
+        #expect(MissAngle.displayDegrees(90) == 90)
+        #expect(MissAngle.displayDegrees(120) == 60)
+        #expect(MissAngle.displayDegrees(-175) == 5)
         #expect(MissAngle.result(for: 115) == .longRight)
         #expect(MissAngle.result(for: -150) == .longLeft)
+        // Right up against the split, a long miss still has a side.
+        #expect(MissAngle.result(for: 175) == .longRight)
+        #expect(MissAngle.result(for: -175) == .longLeft)
     }
 
     /// A layout saved before the angle style existed reads its old choice, and
