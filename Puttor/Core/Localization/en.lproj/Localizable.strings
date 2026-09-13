@@ -380,7 +380,7 @@
 "link.groupPhrase.leftToRightStrong" = "had a strong left-to-right break";
 "read.title" = "HOW YOU READ BREAKS";
 "read.sentence" = "%1$@ on %2$@: %3$ld of %4$ld (%5$ld%%) %6$@.";
-"read.band" = "Of those, %1$ld between %2$@ and %3$@.";
+"read.band" = "Of those, %1$ld from %2$@–%3$@.";
 "read.bandSingle" = "Of those, %1$ld from %2$@.";
 "read.reason.missRead" = "Misread";
 "read.reason.wrongAim" = "Wrong aim";

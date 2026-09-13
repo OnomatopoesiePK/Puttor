@@ -380,7 +380,7 @@
 "link.groupPhrase.leftToRightStrong" = "tenían caída fuerte de izquierda a derecha";
 "read.title" = "CÓMO LEES LAS CAÍDAS";
 "read.sentence" = "%1$@ en %2$@: %3$ld de %4$ld (%5$ld%%) %6$@.";
-"read.band" = "De ellos, %1$ld entre %2$@ y %3$@.";
+"read.band" = "De ellos, %1$ld a %2$@–%3$@.";
 "read.bandSingle" = "De ellos, %1$ld desde %2$@.";
 "read.reason.missRead" = "Mala lectura";
 "read.reason.wrongAim" = "Mala orientación";

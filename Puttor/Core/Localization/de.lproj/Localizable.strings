@@ -380,7 +380,7 @@
 "link.groupPhrase.leftToRightStrong" = "hatten starken Break von links nach rechts";
 "read.title" = "WIE DU BREAKS LIEST";
 "read.sentence" = "%1$@ bei %2$@: %3$ld von %4$ld (%5$ld%%) %6$@.";
-"read.band" = "Davon %1$ld zwischen %2$@ und %3$@.";
+"read.band" = "Davon %1$ld bei %2$@–%3$@.";
 "read.bandSingle" = "Davon %1$ld aus %2$@.";
 "read.reason.missRead" = "Verlesen";
 "read.reason.wrongAim" = "Falsch gezielt";
