@@ -33,7 +33,9 @@ enum DemoData {
                 isTournament: index % 4 == 0
             )
             round.isComplete = true
-            round.tracksScoreCategory = true
+            // Every fifth without a score reference, so the notes that only
+            // appear for mixed selections show up too.
+            round.tracksScoreCategory = index % 5 != 2
             context.insert(round)
             for hole in 1...18 {
                 addHole(hole, to: round, in: context, rng: &rng)

@@ -74,6 +74,45 @@ final class PuttorUITests: XCTestCase {
         XCTAssertLessThanOrEqual(after.maxX, window.maxX + 1, "after \(after), window \(window)")
     }
 
+    /// Nothing in the statistics may be wider than the screen: a vertical
+    /// scroll view whose content is wider can be dragged sideways.
+    @MainActor
+    func testStatisticsFitTheScreen() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+        XCTAssertTrue(app.staticTexts["STROKES GAINED PUTTING"].waitForExistence(timeout: 10))
+        sleep(2)
+
+        let hierarchy = XCTAttachment(string: app.debugDescription)
+        hierarchy.name = "statistics hierarchy"
+        hierarchy.lifetime = .keepAlways
+        add(hierarchy)
+
+        // Everything below the pinned filter header, which has its own
+        // sideways-scrolling rows.
+        let window = app.windows.firstMatch.frame
+        let header = app.buttons["Filter"].frame.maxY + 8
+        let overflowing = app.staticTexts.allElementsBoundByIndex
+            .filter { $0.frame.minY > header }
+            .filter { $0.frame.minX < window.minX - 1 || $0.frame.maxX > window.maxX + 1 }
+            .map { "\($0.label.prefix(40)) \($0.frame)" }
+        XCTAssertTrue(overflowing.isEmpty, "Outside the screen: \(overflowing)")
+
+        // And a sideways drag moves nothing.
+        let heading = app.staticTexts["STROKES GAINED PUTTING"]
+        let before = heading.frame
+        heading.swipeLeft()
+        sleep(1)
+        XCTAssertEqual(heading.frame.minX, before.minX, accuracy: 1, "before \(before), after \(heading.frame)")
+    }
+
     private func snapshot(_ name: String) {
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = name
