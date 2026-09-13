@@ -19,6 +19,8 @@ struct MissPattern: Identifiable {
     /// The reason most of the putts behind the habit share, where one stands
     /// out from the rest of the misses.
     var cause: MissCauseNote? = nil
+    /// How far the putts that went the leading way were struck from.
+    var distances: [Double] = []
 
     var id: String { key }
     var share: Double { total > 0 ? Double(count) / Double(total) : 0 }
@@ -145,6 +147,7 @@ enum MissPatternFinder {
             .map { lean in
                 var pattern = lean.pattern
                 pattern.cause = MissReasonLinker.cause(behind: lean.putts, among: tracked)
+                pattern.distances = lean.putts.map(\.distanceM)
                 return pattern
             }
             .sorted { ($0.percent, $0.count) > ($1.percent, $1.count) }

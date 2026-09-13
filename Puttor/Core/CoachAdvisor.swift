@@ -122,6 +122,8 @@ struct CoachReport {
     var links: [MissReasonLink] = []
     /// How misread and mis-aimed putts met the break.
     var breakReads: [BreakReadFinding] = []
+    /// What to do differently, drawn from all of the above.
+    var tips: [CoachTip] = []
     /// Differences that depend on the conditions rather than on the player:
     /// worth knowing before the next round rather than after it.
     var conditions: [SplitFinding] = []
@@ -205,6 +207,12 @@ enum CoachAdvisor {
         // to a drill.
         let habits = report.findings
         report.conditions = SplitInsight.findings(in: conditionRounds ?? rounds)
+        report.tips = CoachTipAdvisor.tips(
+            patterns: patterns,
+            reads: report.breakReads,
+            links: report.links,
+            conditions: report.conditions
+        )
         // Read from the same long window as the conditions: competition rounds
         // are rare, and ten rounds rarely hold enough of them.
         report.tournament = TournamentInsight.compare(rounds: conditionRounds ?? rounds)

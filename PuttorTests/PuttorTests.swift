@@ -1365,6 +1365,69 @@ struct PuttorTests {
         #expect(MissReasonLinker.links(in: putts).isEmpty)
     }
 
+    // MARK: - Coach tips
+
+    /// The three costliest topics become tips, each said once, where the
+    /// costliest finding behind it puts it; a condition that helps says
+    /// nothing.
+    @Test func tipsFollowTheCostliestTopics() async throws {
+        let lowSide = MissPattern(key: "pattern.missLowSide", count: 8, total: 10, distances: Array(repeating: 20, count: 8))
+        let strongRead = BreakReadFinding(
+            reason: .missRead, cellID: "strong", outcome: .under, count: 9, total: 10,
+            distances: Array(repeating: 1, count: 9)
+        )
+        let pull = MissReasonLink(
+            groupID: "left", cause: .pull, reading: .groupToCause, count: 7, total: 7, restPercent: 0,
+            distances: Array(repeating: 1.5, count: 7)
+        )
+        let short = MissPattern(key: "pattern.missShort", count: 8, total: 10, distances: Array(repeating: 12, count: 8))
+        let straightLeft = MissPattern(key: "pattern.straight.left", count: 5, total: 8, distances: Array(repeating: 25, count: 5))
+        let helps = SplitFinding(
+            key: "split.holedMore", conditionKey: "split.cond.dry", otherKey: "split.cond.rain",
+            high: 80, low: 60, display: .percent, sample: 20, weight: 100
+        )
+
+        let tips = CoachTipAdvisor.tips(
+            patterns: [lowSide, short, straightLeft],
+            reads: [strongRead],
+            links: [pull],
+            conditions: [helps]
+        )
+
+        #expect(tips.count == CoachTipAdvisor.maximumTips)
+        #expect(Set(tips.map(\.topic)) == [.pull, .moreBreak, .dieAtHole])
+        #expect(zip(tips, tips.dropFirst()).allSatisfy { $0.weight >= $1.weight })
+        // The costlier of the two break findings says where.
+        #expect(tips.first { $0.topic == .moreBreak }?.whereID == "strong")
+        #expect(tips.first { $0.topic == .pull }?.whereID == "all")
+    }
+
+    /// Every finding the coach can read leads to an instruction.
+    @Test func everyFindingHasATip() async throws {
+        let slices = ["rightToLeft", "leftToRight", "straight", "uphill", "downhill", "band15to3", "band3to6"]
+        let keys = ["missLeft", "missRight", "missShort", "missLong", "missLowSide", "missHighSide",
+                    "longPuttsShort", "longPuttsLong", "shortPuttsLeft", "shortPuttsRight"]
+            + slices.flatMap { slice in ["left", "right", "short", "long"].map { "\(slice).\($0)" } }
+        for key in keys {
+            #expect(CoachTipAdvisor.tip(for: MissPattern(key: "pattern.\(key)", count: 7, total: 10)) != nil, "\(key)")
+        }
+
+        for key in ["split.missLong", "split.missShort", "split.missHighSide", "split.missLowSide",
+                    "split.missRead", "split.holedLess", "split.threePutts"] {
+            let finding = SplitFinding(
+                key: key, conditionKey: "split.cond.rain", otherKey: "split.cond.dry",
+                high: 60, low: 40, display: .percent, sample: 20, weight: 2
+            )
+            #expect(CoachTipAdvisor.tip(for: finding) != nil, "\(key)")
+        }
+
+        // A straight putt misread is break seen that is not there.
+        let straightMisread = MissReasonLink(groupID: "straight", cause: .missRead, reading: .groupToCause, count: 6, total: 6, restPercent: 20)
+        #expect(CoachTipAdvisor.tip(for: straightMisread).topic == .phantomBreak)
+        let aim = BreakReadFinding(reason: .wrongAim, cellID: "breaking", outcome: .under, count: 6, total: 7)
+        #expect(CoachTipAdvisor.tip(for: aim).topic == .aim)
+    }
+
     // MARK: - Break reads
 
     @MainActor

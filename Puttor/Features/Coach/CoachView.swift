@@ -39,6 +39,7 @@ struct CoachView: View {
                     if report.hasEnoughData {
                         summaryCard
                         if !report.metrics.isEmpty { metricsCard }
+                        if !report.tips.isEmpty { tipsCard }
                         if report.practice.sessions > 0 { practiceCard }
                         if !report.findings.isEmpty || !report.links.isEmpty || !report.breakReads.isEmpty { findingsCard }
                         if !report.conditions.isEmpty { conditionsCard }
@@ -209,6 +210,38 @@ struct CoachView: View {
         .padding(.vertical, 6)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    /// The instructions: what to do differently on the course, each with the
+    /// finding it was drawn from underneath.
+    private var tipsCard: some View {
+        card {
+            cardHeader(L("coach.tips"), info: "coach.tips.info")
+
+            ForEach(Array(report.tips.enumerated()), id: \.element.id) { index, tip in
+                HStack(alignment: .top, spacing: 10) {
+                    Text("\(index + 1)")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 22, height: 22)
+                        .background(Circle().fill(Theme.accent))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(tip.title)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(Theme.text)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(tip.body)
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(tip.evidenceText)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Theme.textMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
     }
 
     private var findingsCard: some View {

@@ -70,6 +70,8 @@ struct MissReasonLink: Identifiable {
     let count: Int
     let total: Int
     let restPercent: Int
+    /// How far the putts in both the group and the cause were struck from.
+    var distances: [Double] = []
 
     var id: String { "\(groupID)-\(cause.rawValue)" }
     var percent: Int { MissReasonLinker.percent(count, of: total) }
@@ -189,9 +191,12 @@ enum MissReasonLinker {
             let inGroup = pool.map(group.includes)
             for cause in MissCause.allCases {
                 var both = 0, groupOnly = 0, causeOnly = 0, neither = 0
+                var bothDistances: [Double] = []
                 for (index, putt) in pool.enumerated() {
                     switch (inGroup[index], cause.applies(to: putt)) {
-                    case (true, true): both += 1
+                    case (true, true):
+                        both += 1
+                        bothDistances.append(putt.distanceM)
                     case (true, false): groupOnly += 1
                     case (false, true): causeOnly += 1
                     case (false, false): neither += 1
@@ -211,7 +216,8 @@ enum MissReasonLinker {
                         reading: best.0,
                         count: best.1.count,
                         total: best.1.total,
-                        restPercent: best.1.restPercent
+                        restPercent: best.1.restPercent,
+                        distances: bothDistances
                     ),
                     best.1.z
                 ))
