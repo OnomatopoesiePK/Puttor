@@ -67,6 +67,13 @@ private struct DispersionDot {
     }
 }
 
+/// The unit direction for an angle from the dial, in the plot's own frame:
+/// short points down, left points left.
+private func angleVector(_ angle: Double) -> (x: CGFloat, y: CGFloat) {
+    let radians = MissAngle.screenDegrees(angle) * .pi / 180
+    return (CGFloat(cos(radians)), CGFloat(sin(radians)))
+}
+
 private func missVector(_ result: PuttResult) -> (x: CGFloat, y: CGFloat) {
     switch result {
     case .left: return (-1, 0)
@@ -164,7 +171,9 @@ struct MissDispersionPlotView: View {
                 let next = i + 1 < sorted.count ? sorted[i + 1] : nil
                 let leave = next.map { max(0.3, $0.distanceM) } ?? max(0.3, p.distanceM * 0.35)
                 let radial = radius(forLeave: Double(leave))
-                let vec = missVector(p.result)
+                // An angle recorded on the dial places the dot where the ball
+                // actually went; the eight sectors are only the fallback.
+                let vec = p.missAngleDeg.map(angleVector) ?? missVector(p.result)
                 let x = (vec.x * radial * 10).rounded() / 10
                 let y = (vec.y * radial * 10).rounded() / 10
                 let key = "\(x)|\(y)"

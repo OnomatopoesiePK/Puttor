@@ -169,7 +169,13 @@ struct RoundInputCustomView: View {
 
     @ViewBuilder
     private func resultContent(_ session: RoundSession) -> some View {
-        if config.resultComplexity == .complex {
+        if config.resultStyle == .angle {
+            CircularMissSliderView(
+                result: Binding(get: { session.draftResult }, set: { session.draftResult = $0 }),
+                lipOut: Binding(get: { session.draftLipOut }, set: { session.draftLipOut = $0 }),
+                angle: Binding(get: { session.draftMissAngle }, set: { session.draftMissAngle = $0 })
+            )
+        } else if config.resultComplexity == .complex {
             DartboardMissView(
                 result: Binding(get: { session.draftResult }, set: { session.draftResult = $0 }),
                 lipOut: Binding(get: { session.draftLipOut }, set: { session.draftLipOut = $0 })

@@ -80,6 +80,21 @@ struct CustomField: Identifiable, Codable, Equatable {
     var complexity: FieldComplexity = .simple
 }
 
+/// How Custom mode asks for the result. `angle` records where around the hole
+/// the ball stopped, to the nearest five degrees, rather than which of eight
+/// sectors it fell in.
+enum ResultInputStyle: String, Codable, CaseIterable {
+    case simple, dartboard, angle
+
+    var labelKey: String {
+        switch self {
+        case .simple: return "custom.result.style.simple"
+        case .dartboard: return "custom.result.style.dartboard"
+        case .angle: return "custom.result.style.angle"
+        }
+    }
+}
+
 struct CustomModeConfig: Codable, Equatable {
     var resultComplexity: FieldComplexity = .simple
     var fields: [CustomField] = []
@@ -92,6 +107,21 @@ struct CustomModeConfig: Codable, Equatable {
     var distanceStyle: DistanceInputStyle {
         get { distanceStyleRaw ?? .slider }
         set { distanceStyleRaw = newValue }
+    }
+
+    /// Optional in storage for the same reason as the distance style. A config
+    /// saved before there were three styles reads its old simple/complex
+    /// choice as simple/board.
+    private var resultStyleRaw: ResultInputStyle?
+
+    var resultStyle: ResultInputStyle {
+        get { resultStyleRaw ?? (resultComplexity == .complex ? .dartboard : .simple) }
+        set {
+            resultStyleRaw = newValue
+            // Both detailed styles need the record button the simple one does
+            // without, so the older field keeps saying which is which.
+            resultComplexity = newValue == .simple ? .simple : .complex
+        }
     }
 
     static let defaultConfig = CustomModeConfig(

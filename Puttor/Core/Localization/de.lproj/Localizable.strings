@@ -467,7 +467,7 @@
 "custom.field.distance" = "Distanz";
 "custom.field.distance.desc" = "Wie weit der Putt war, immer als erstes Feld gezeigt";
 "custom.field.result" = "Resultat";
-"custom.result.desc" = "Einfach = nur getroffen/verfehlt.\n\nKomplex = Dartscheibe mit Richtung und Lip-Out, wie im Pro-Modus.";
+"custom.result.desc" = "Einfach = nur getroffen/verfehlt.\n\nScheibe = Dartscheibe mit Richtung und Lip-Out, wie im Pro-Modus.\n\nWinkel = ein Ring um das Loch, der in Fünf-Grad-Schritten dorthin gezogen wird, wo der Ball liegen blieb — Lang liegt in der Lücke oben.";
 "custom.field.puttFor" = "Putt-Kategorie";
 "custom.field.puttFor.desc" = "Eagle/Birdie/Par/Bogey/Doppelbogey-oder-schlechter, mit automatischer Stufe nach einem Fehlversuch";
 "custom.field.slope" = "Neigungs-Grid";
@@ -702,3 +702,11 @@
 "setup.format" = "SPIELFORM";
 "format.strokePlay" = "Zählspiel";
 "format.matchPlay" = "Lochspiel";
+
+// Miss angle input
+"custom.result.style.simple" = "Einfach";
+"custom.result.style.dartboard" = "Scheibe";
+"custom.result.style.angle" = "Winkel";
+"input.missAngle" = "MISS-WINKEL";
+"input.missAngle.none" = "Um das Loch ziehen";
+"input.missAngle.info" = "Den Ring um das Loch dorthin ziehen, wo der Ball liegen blieb, in Fünf-Grad-Schritten: gerade kurz unten, links und rechts an den Seiten, bis lang-links und lang-rechts an den beiden Enden. Die Lücke oben ist Lang.\n\nDie Mitte ist gelocht, der Ring darum ein Lip-Out, wie auf der Scheibe.\n\nFestgehalten wird nur die Richtung — wie weit der Ball gelaufen ist, steht schon in der Distanz des nächsten Putts.";

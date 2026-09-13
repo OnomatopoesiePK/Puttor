@@ -86,15 +86,15 @@ struct CustomModeSettingsView: View {
                     Text(L("custom.field.result")).foregroundStyle(Theme.text)
                     Spacer()
                     Picker("", selection: Binding(
-                        get: { draftConfig.resultComplexity },
-                        set: { draftConfig.resultComplexity = $0 }
+                        get: { draftConfig.resultStyle },
+                        set: { draftConfig.resultStyle = $0 }
                     )) {
-                        ForEach(FieldComplexity.allCases, id: \.self) { c in
-                            Text(L(c.labelKey)).tag(c)
+                        ForEach(ResultInputStyle.allCases, id: \.self) { style in
+                            Text(L(style.labelKey)).tag(style)
                         }
                     }
                     .pickerStyle(.segmented)
-                    .frame(width: 160)
+                    .frame(width: 230)
                     .disabled(!isEditing)
                 }
                 .listRowBackground(Theme.surface)

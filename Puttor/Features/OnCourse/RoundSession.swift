@@ -40,6 +40,8 @@ final class RoundSession {
     var draftPuttFor: ScoreCategory = .birdie
     var draftResult: PuttResult?
     var draftLipOut = false
+    /// Set only by the angle input; nil keeps the putt to its eight directions.
+    var draftMissAngle: Double?
     var draftMissRead = false
     var draftBadStroke = false
     var draftBadStrokeType: BadStrokeType?
@@ -135,6 +137,7 @@ final class RoundSession {
             || draftPuttFor != p.puttFor
             || draftResult != p.result
             || draftLipOut != p.lipOut
+            || draftMissAngle != p.missAngleDeg
             || draftMissRead != p.missRead
             || draftBadStroke != p.badStroke
             || draftBadStrokeType != p.badStrokeType
@@ -235,6 +238,7 @@ final class RoundSession {
         draftPuttFor = .birdie
         draftResult = nil
         draftLipOut = false
+        draftMissAngle = nil
         draftMissRead = false
         draftBadStroke = false
         draftBadStrokeType = nil
@@ -250,6 +254,7 @@ final class RoundSession {
         draftPuttFor = previousPuttFor.next
         draftResult = nil
         draftLipOut = false
+        draftMissAngle = nil
         draftMissRead = false
         draftBadStroke = false
         draftBadStrokeType = nil
@@ -268,6 +273,7 @@ final class RoundSession {
         draftPuttFor = p.puttFor
         draftResult = p.result
         draftLipOut = p.lipOut
+        draftMissAngle = p.missAngleDeg
         draftMissRead = p.missRead
         draftBadStroke = p.badStroke
         draftBadStrokeType = p.badStrokeType
@@ -294,6 +300,7 @@ final class RoundSession {
             putt.badStroke = draftBadStroke
             putt.badStrokeType = draftBadStroke ? draftBadStrokeType : nil
             putt.wrongAim = draftWrongAim
+            putt.missAngleDeg = effectiveResult.isHoled ? nil : draftMissAngle
             lastSavedPCG = putt.pcg
 
             if effectiveResult == .holed {
@@ -373,7 +380,8 @@ final class RoundSession {
             missRead: draftMissRead,
             badStroke: draftBadStroke,
             badStrokeType: draftBadStroke ? draftBadStrokeType : nil,
-            wrongAim: draftWrongAim
+            wrongAim: draftWrongAim,
+            missAngleDeg: effectiveResult.isHoled ? nil : draftMissAngle
         )
         putt.round = round
         round.putts.append(putt)
@@ -415,6 +423,7 @@ final class RoundSession {
         draftSideSlopePct = 0
         draftHillSlopePct = 0
         draftLipOut = false
+        draftMissAngle = nil
         draftMissRead = false
         draftBadStroke = false
         draftBadStrokeType = nil

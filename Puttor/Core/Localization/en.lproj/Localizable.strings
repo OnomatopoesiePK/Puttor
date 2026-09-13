@@ -467,7 +467,7 @@
 "custom.field.distance" = "Distance";
 "custom.field.distance.desc" = "How far the putt was, always shown first";
 "custom.field.result" = "Result";
-"custom.result.desc" = "Simple = made/missed only.\n\nComplex = dartboard with direction and lip-out, like Pro mode.";
+"custom.result.desc" = "Simple = made/missed only.\n\nBoard = dartboard with direction and lip-out, like Pro mode.\n\nAngle = a ring around the hole, dragged to where the ball stopped in five-degree steps, with Long in the gap at the top.";
 "custom.field.puttFor" = "Putt-For Category";
 "custom.field.puttFor.desc" = "Eagle/birdie/par/bogey/double-or-worse, with auto step-down after a miss";
 "custom.field.slope" = "Slope Grid";
@@ -702,3 +702,11 @@
 "setup.format" = "FORMAT";
 "format.strokePlay" = "Stroke play";
 "format.matchPlay" = "Match play";
+
+// Miss angle input
+"custom.result.style.simple" = "Simple";
+"custom.result.style.dartboard" = "Board";
+"custom.result.style.angle" = "Angle";
+"input.missAngle" = "MISS ANGLE";
+"input.missAngle.none" = "Drag around the hole";
+"input.missAngle.info" = "Drag around the ring to where the ball stopped, in steps of five degrees: straight short at the bottom, left and right at the sides, up to long-left and long-right at the two ends. The gap at the top is Long.\n\nThe centre is holed and the ring around it a lip-out, as on the board.\n\nOnly the direction is recorded — how far the ball ran is already known from the distance of the next putt.";

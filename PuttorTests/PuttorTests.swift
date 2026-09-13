@@ -1595,6 +1595,57 @@ struct PuttorTests {
         #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
     }
 
+    // MARK: - Miss angle
+
+    /// The dial's angles: straight short at 0, left negative, right positive,
+    /// five-degree steps, and a gap at the top that belongs to Long.
+    @Test func missAnglesSnapAndReadAsTheBoardsDirections() async throws {
+        // Onto the grid, and never past either end of the track.
+        #expect(MissAngle.snap(37) == 35)
+        #expect(MissAngle.snap(38) == 40)
+        #expect(MissAngle.snap(-2) == 0)
+        #expect(MissAngle.snap(171) == 150)
+        #expect(MissAngle.snap(-179) == -150)
+
+        // The bottom of the dial is short; the sides are left and right.
+        #expect(MissAngle.angle(fromScreen: 90) == 0)
+        #expect(MissAngle.angle(fromScreen: 180) == -90)
+        #expect(MissAngle.angle(fromScreen: 0) == 90)
+        #expect(MissAngle.screenDegrees(-90) == 180)
+
+        // The top is the gap; the track's ends are not.
+        #expect(MissAngle.isInGap(screen: -90))
+        #expect(!MissAngle.isInGap(screen: MissAngle.trackStartScreen))
+        #expect(!MissAngle.isInGap(screen: MissAngle.trackEndScreen))
+
+        // Every angle still means one of the eight directions, so everything
+        // that reads directions reads an angle the same way.
+        #expect(MissAngle.result(for: 0) == .short)
+        #expect(MissAngle.result(for: 20) == .short)
+        #expect(MissAngle.result(for: 25) == .shortRight)
+        #expect(MissAngle.result(for: -45) == .shortLeft)
+        #expect(MissAngle.result(for: 90) == .right)
+        #expect(MissAngle.result(for: -110) == .left)
+        #expect(MissAngle.result(for: 115) == .longRight)
+        #expect(MissAngle.result(for: -150) == .longLeft)
+    }
+
+    /// A layout saved before the angle style existed reads its old choice, and
+    /// the new style keeps the old field saying "detailed".
+    @Test func resultStyleReadsOldConfigsAndKeepsTheOldFieldInStep() async throws {
+        let old = #"{"resultComplexity":"complex","fields":[]}"#
+        var config = try JSONDecoder().decode(CustomModeConfig.self, from: Data(old.utf8))
+        #expect(config.resultStyle == .dartboard)
+
+        config.resultStyle = .angle
+        #expect(config.resultComplexity == .complex)
+        let restored = try JSONDecoder().decode(CustomModeConfig.self, from: JSONEncoder().encode(config))
+        #expect(restored.resultStyle == .angle)
+
+        config.resultStyle = .simple
+        #expect(config.resultComplexity == .simple)
+    }
+
     // MARK: - Picking the ball up
 
     /// A hole given up is out of every putting figure and on the card as a

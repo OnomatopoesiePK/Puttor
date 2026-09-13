@@ -467,7 +467,7 @@
 "custom.field.distance" = "Distancia";
 "custom.field.distance.desc" = "A qué distancia estaba el putt; siempre se muestra primero";
 "custom.field.result" = "Resultado";
-"custom.result.desc" = "Simple = solo dentro/fallado.\n\nComplejo = diana con dirección y lip-out, como en el modo Pro.";
+"custom.result.desc" = "Simple = solo dentro/fallado.\n\nDiana = diana con dirección y lip-out, como en el modo Pro.\n\nÁngulo = un anillo alrededor del hoyo que se arrastra hasta donde se paró la bola, en pasos de cinco grados, con Largo en el hueco de arriba.";
 "custom.field.puttFor" = "Categoría de putt para";
 "custom.field.puttFor.desc" = "Eagle/birdie/par/bogey/doble o peor, con descenso automático tras un fallo";
 "custom.field.slope" = "Rejilla de pendiente";
@@ -702,3 +702,11 @@
 "setup.format" = "MODALIDAD";
 "format.strokePlay" = "Stroke play";
 "format.matchPlay" = "Match play";
+
+// Miss angle input
+"custom.result.style.simple" = "Simple";
+"custom.result.style.dartboard" = "Diana";
+"custom.result.style.angle" = "Ángulo";
+"input.missAngle" = "ÁNGULO DEL FALLO";
+"input.missAngle.none" = "Arrastra alrededor del hoyo";
+"input.missAngle.info" = "Arrastra el anillo hasta donde se paró la bola, en pasos de cinco grados: corto recto abajo, izquierda y derecha a los lados, hasta largo-izquierda y largo-derecha en los dos extremos. El hueco de arriba es Largo.\n\nEl centro es dentro y el anillo alrededor un lip-out, como en la diana.\n\nSolo se registra la dirección: cuánto corrió la bola ya se sabe por la distancia del siguiente putt.";

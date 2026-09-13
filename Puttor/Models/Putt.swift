@@ -27,6 +27,11 @@ final class Putt {
     var badStroke: Bool = false
     var badStrokeTypeRaw: String?
     var wrongAim: Bool = false
+    /// Where the ball stopped around the hole, in degrees: 0 straight short,
+    /// negative to the left, positive to the right, out to ±150 at long-left
+    /// and long-right. Only the angle input records one; everything else
+    /// leaves it nil and keeps to the eight directions of `result`.
+    var missAngleDeg: Double?
 
     // Legacy columns from when each putt carried its own strokes-gained value.
     // Strokes gained is now a per-hole figure derived from the hole's putts, and
@@ -115,7 +120,8 @@ final class Putt {
         missRead: Bool = false,
         badStroke: Bool = false,
         badStrokeType: BadStrokeType? = nil,
-        wrongAim: Bool = false
+        wrongAim: Bool = false,
+        missAngleDeg: Double? = nil
     ) {
         self.id = UUID()
         self.holeNumber = holeNumber
@@ -131,6 +137,7 @@ final class Putt {
         self.badStroke = badStroke
         self.badStrokeTypeRaw = badStrokeType?.rawValue
         self.wrongAim = wrongAim
+        self.missAngleDeg = missAngleDeg
         self.createdAt = Date()
     }
 }
