@@ -1296,6 +1296,67 @@ struct PuttorTests {
         #expect(!findings.contains { $0.key == "pattern.straight.left" })
     }
 
+    // MARK: - Miss reasons
+
+    @MainActor
+    private static func reasonMiss(_ result: PuttResult, slope: Double = 0, missRead: Bool = false, pull: Bool = false) -> Putt {
+        Putt(
+            holeNumber: 1, puttNumber: 1, distanceM: 3, sideSlopePct: slope, puttFor: .par, result: result,
+            missRead: missRead, badStroke: pull, badStrokeType: pull ? .pull : nil
+        )
+    }
+
+    /// A habit carries the reason its putts share when the other misses
+    /// rarely have it.
+    @MainActor
+    @Test func aCauseBehindAPatternIsNamed() async throws {
+        let putts = Array(repeating: Self.reasonMiss(.left, missRead: true), count: 8)
+            + Array(repeating: Self.reasonMiss(.short), count: 6)
+        let findings = MissPatternFinder.findings(in: putts)
+
+        let left = try #require(findings.first { $0.key == "pattern.missLeft" })
+        let cause = try #require(left.cause)
+        #expect(cause.cause == .missRead)
+        #expect(cause.count == 8)
+        #expect(cause.total == 8)
+        #expect(cause.restPercent == 0)
+    }
+
+    /// Straight putts that are mostly misread, when breaking ones are not.
+    @MainActor
+    @Test func misreadStraightPuttsAreLinked() async throws {
+        let straight = Array(repeating: Self.reasonMiss(.left, missRead: true), count: 3)
+            + Array(repeating: Self.reasonMiss(.right, missRead: true), count: 3)
+        let breaking = Array(repeating: Self.reasonMiss(.left, slope: 2), count: 3)
+            + Array(repeating: Self.reasonMiss(.right, slope: 2), count: 3)
+            + [Self.reasonMiss(.right, slope: 2, missRead: true)]
+        let links = MissReasonLinker.links(in: straight + breaking)
+
+        let link = try #require(links.first { $0.groupID == "straight" && $0.cause == .missRead })
+        #expect(link.reading == .groupToCause)
+        #expect(link.count == 6)
+        #expect(link.total == 6)
+    }
+
+    /// A reason on every miss belongs to no group in particular.
+    @MainActor
+    @Test func aReasonEverywhereLinksToNothing() async throws {
+        let putts = Array(repeating: Self.reasonMiss(.left, missRead: true), count: 6)
+            + Array(repeating: Self.reasonMiss(.right, slope: 2, missRead: true), count: 6)
+        #expect(MissReasonLinker.links(in: putts).isEmpty)
+    }
+
+    /// "Pulled" says more than "bad stroke", so only the pull is named.
+    @MainActor
+    @Test func aPullIsNamedInsteadOfABadStroke() async throws {
+        let putts = Array(repeating: Self.reasonMiss(.left, pull: true), count: 7)
+            + Array(repeating: Self.reasonMiss(.right), count: 7)
+        let links = MissReasonLinker.links(in: putts)
+
+        #expect(links.contains { $0.groupID == "left" && $0.cause == .pull })
+        #expect(!links.contains { $0.groupID == "left" && $0.cause == .badStroke })
+    }
+
     /// Holed putts have no miss in them to read.
     @MainActor
     @Test func holedPuttsCarryNoPattern() async throws {

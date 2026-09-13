@@ -40,7 +40,7 @@ struct CoachView: View {
                         summaryCard
                         if !report.metrics.isEmpty { metricsCard }
                         if report.practice.sessions > 0 { practiceCard }
-                        if !report.findings.isEmpty { findingsCard }
+                        if !report.findings.isEmpty || !report.links.isEmpty { findingsCard }
                         if !report.conditions.isEmpty { conditionsCard }
                         if report.tournament.hasBoth { tournamentCard }
                     } else {
@@ -221,7 +221,29 @@ struct CoachView: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Theme.accent)
                         .padding(.top, 2)
-                    Text(text(for: finding))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(text(for: finding))
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let cause = finding.cause {
+                            Text(cause.text)
+                                .font(.system(size: 12))
+                                .foregroundStyle(Theme.textMuted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+            }
+
+            // Reasons that go with a direction or a kind of putt.
+            ForEach(report.links) { link in
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "link")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
+                    Text(link.text)
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)

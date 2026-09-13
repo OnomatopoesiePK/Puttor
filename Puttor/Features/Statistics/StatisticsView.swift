@@ -274,7 +274,42 @@ private struct StatisticsPane: View {
                             .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(Theme.accent)
                             .padding(.top, 2)
-                        Text(String(format: L(pattern.key), pattern.count, pattern.total, pattern.percent))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(format: L(pattern.key), pattern.count, pattern.total, pattern.percent))
+                                .font(.system(size: 12))
+                                .foregroundStyle(Theme.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if let cause = pattern.cause {
+                                Text(cause.text)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Theme.textMuted)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
+        }
+    }
+
+    /// Reasons tied to a direction or a kind of putt, under the reason counts.
+    @ViewBuilder
+    private func reasonLinks(_ links: [MissReasonLink]) -> some View {
+        if !links.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(L("link.title"))
+                    .font(.system(size: 9, weight: .bold)).tracking(1.0)
+                    .foregroundStyle(Theme.textMuted)
+
+                ForEach(links) { link in
+                    HStack(alignment: .top, spacing: 6) {
+                        Image(systemName: "link")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, 2)
+                        Text(link.text)
                             .font(.system(size: 12))
                             .foregroundStyle(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -282,7 +317,7 @@ private struct StatisticsPane: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 4)
+            .padding(.top, 8)
         }
     }
 
@@ -603,6 +638,7 @@ private struct StatisticsPane: View {
                                         if data.aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(data.aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
                                         if data.aggregated.missReasonCounts.multiple > 0 { reasonStat("\(data.aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
                                     }
+                                    reasonLinks(MissReasonLinker.links(in: data.allPutts))
                                 }
                             }
 

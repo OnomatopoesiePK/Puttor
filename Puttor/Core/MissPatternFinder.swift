@@ -16,6 +16,9 @@ struct MissPattern: Identifiable {
     let key: String
     let count: Int
     let total: Int
+    /// The reason most of the putts behind the habit share, where one stands
+    /// out from the rest of the misses.
+    var cause: MissCauseNote? = nil
 
     var id: String { key }
     var share: Double { total > 0 ? Double(count) / Double(total) : 0 }
@@ -75,6 +78,8 @@ enum MissPatternFinder {
         let axis: Axis?
         /// -1 left or short, +1 right or long.
         let direction: Int
+        /// The misses that went the leading way.
+        let putts: [Putt]
     }
 
     static func findings(in putts: [Putt]) -> [MissPattern] {
@@ -130,14 +135,19 @@ enum MissPatternFinder {
         ))
 
         let standingOut = slices.compactMap { $0 }.filter { standsOut($0, against: overall) }
+        let tracked = MissReasonLinker.trackedMisses(in: misses)
 
-        // Only habits, the most certain first.
+        // Only habits, the most certain first, each with the reason behind it
+        // where one stands out.
         return (overall + standingOut)
-            .map(\.pattern)
-            .filter(\.isStrong)
-            .sorted { ($0.confidenceFloor, $0.count) > ($1.confidenceFloor, $1.count) }
+            .filter { $0.pattern.isStrong }
+            .sorted { ($0.pattern.confidenceFloor, $0.pattern.count) > ($1.pattern.confidenceFloor, $1.pattern.count) }
             .prefix(maximumFindings)
-            .map { $0 }
+            .map { lean in
+                var pattern = lean.pattern
+                pattern.cause = MissReasonLinker.cause(behind: lean.putts, among: tracked)
+                return pattern
+            }
     }
 
     /// "Uphill, 80% go left" says nothing new when 80% of all misses go left.
@@ -180,19 +190,21 @@ enum MissPatternFinder {
         axis: Axis?
     ) -> Lean? {
         guard putts.count >= minimum else { return nil }
-        let firstCount = putts.filter(first).count
-        let secondCount = putts.count - firstCount
+        let firstPutts = putts.filter(first)
+        let secondCount = putts.count - firstPutts.count
         // An even split leans nowhere.
-        guard firstCount != secondCount else { return nil }
-        let towardsFirst = firstCount > secondCount
+        guard firstPutts.count != secondCount else { return nil }
+        let towardsFirst = firstPutts.count > secondCount
+        let leading = towardsFirst ? firstPutts : putts.filter { !first($0) }
         return Lean(
             pattern: MissPattern(
                 key: towardsFirst ? firstKey : secondKey,
-                count: max(firstCount, secondCount),
+                count: leading.count,
                 total: putts.count
             ),
             axis: axis,
-            direction: towardsFirst ? -1 : 1
+            direction: towardsFirst ? -1 : 1,
+            putts: leading
         )
     }
 }

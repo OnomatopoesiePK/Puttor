@@ -40,6 +40,8 @@ struct CoachMetric: Identifiable {
 struct CoachFinding: Identifiable {
     let key: String
     var numbers: [Int] = []
+    /// The reason behind a miss habit, where one stands out.
+    var cause: MissCauseNote?
 
     var id: String { key }
 
@@ -116,6 +118,8 @@ struct CoachReport {
     var puttCount: Int
     var metrics: [CoachMetric] = []
     var findings: [CoachFinding] = []
+    /// Reasons that go with a direction or a kind of putt.
+    var links: [MissReasonLink] = []
     /// Differences that depend on the conditions rather than on the player:
     /// worth knowing before the next round rather than after it.
     var conditions: [SplitFinding] = []
@@ -189,8 +193,11 @@ enum CoachAdvisor {
         report.practice = practice(in: sessions)
         let patterns = MissPatternFinder.findings(in: putts)
         report.findings = patterns.map {
-            CoachFinding(key: $0.key, count: $0.count, total: $0.total)
+            var finding = CoachFinding(key: $0.key, count: $0.count, total: $0.total)
+            finding.cause = $0.cause
+            return finding
         }
+        report.links = MissReasonLinker.links(in: putts)
         // Only habits come back from the finder, so each can send the coach
         // to a drill.
         let habits = report.findings
