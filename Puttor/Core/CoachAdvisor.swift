@@ -191,11 +191,9 @@ enum CoachAdvisor {
         report.findings = patterns.map {
             CoachFinding(key: $0.key, count: $0.count, total: $0.total)
         }
-        // Leans below the threshold are shown, but a drill is only prescribed
-        // for a habit.
-        let habits = patterns.filter(\.isStrong).map {
-            CoachFinding(key: $0.key, count: $0.count, total: $0.total)
-        }
+        // Only habits come back from the finder, so each can send the coach
+        // to a drill.
+        let habits = report.findings
         report.conditions = SplitInsight.findings(in: conditionRounds ?? rounds)
         // Read from the same long window as the conditions: competition rounds
         // are rare, and ten rounds rarely hold enough of them.
@@ -559,9 +557,20 @@ enum CoachAdvisor {
         switch key {
         case "pattern.missLowSide":
             return CoachRecommendation(gameType: .aroundTheHole, reasonKey: "coach.reason.lowSide")
+        case "pattern.rightToLeft.left", "pattern.rightToLeft.right",
+             "pattern.leftToRight.left", "pattern.leftToRight.right":
+            return CoachRecommendation(gameType: .aroundTheHole, reasonKey: "coach.reason.breakSide")
         case "pattern.shortPuttsLeft", "pattern.shortPuttsRight":
             return CoachRecommendation(gameType: .gate, reasonKey: "coach.reason.startLine")
-        case "pattern.longPuttsShort", "pattern.longPuttsLong", "pattern.missShort", "pattern.missLong":
+        case "pattern.straight.left", "pattern.straight.right":
+            return CoachRecommendation(gameType: .gate, reasonKey: "coach.reason.straightLine")
+        case "pattern.uphill.short", "pattern.uphill.long",
+             "pattern.downhill.short", "pattern.downhill.long":
+            return CoachRecommendation(gameType: .ladder, reasonKey: "coach.reason.slopePace")
+        case "pattern.longPuttsShort", "pattern.longPuttsLong", "pattern.missShort", "pattern.missLong",
+             "pattern.rightToLeft.short", "pattern.rightToLeft.long",
+             "pattern.leftToRight.short", "pattern.leftToRight.long",
+             "pattern.straight.short", "pattern.straight.long":
             return CoachRecommendation(gameType: .ninePutt, reasonKey: "coach.reason.pace")
         default:
             return nil

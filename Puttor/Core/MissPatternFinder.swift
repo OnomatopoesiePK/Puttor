@@ -11,7 +11,8 @@
 import Foundation
 
 struct MissPattern: Identifiable {
-    /// Localisation key taking the count and the total, in that order.
+    /// Localisation key taking the count, the total and the percent, in that
+    /// order.
     let key: String
     let count: Int
     let total: Int
@@ -19,9 +20,20 @@ struct MissPattern: Identifiable {
     var id: String { key }
     var share: Double { total > 0 ? Double(count) / Double(total) : 0 }
     var percent: Int { Int((share * 100).rounded()) }
-    /// At or above the threshold: a habit, not just the leading side. Only
-    /// these are strong enough to send the coach to a drill.
-    var isStrong: Bool { share >= MissPatternFinder.threshold }
+    /// Past the threshold, judged on the percent the sentence shows, so a lean
+    /// printed as "60%" is never called a habit.
+    var isStrong: Bool { percent > MissPatternFinder.thresholdPercent }
+
+    /// The lowest share the misses plausibly lean by (Wilson, 95%). Ranks a
+    /// clear lean over many putts above a perfect one over a handful.
+    var confidenceFloor: Double {
+        guard total > 0 else { return 0 }
+        let n = Double(total)
+        let z = 1.96
+        let z2 = z * z
+        let spread = z * ((share * (1 - share) + z2 / (4 * n)) / n).squareRoot()
+        return (share + z2 / (2 * n) - spread) / (1 + z2 / n)
+    }
 }
 
 enum MissPatternFinder {
@@ -29,13 +41,14 @@ enum MissPatternFinder {
     /// run of misses is just a run of misses.
     static let minimumSample = 8
     static let minimumSubsetSample = 6
-    /// Three in five going the same way is a habit.
-    static let threshold = 0.6
-    /// Always at least this many, where the misses hold that many leans — the
-    /// strongest ones, even when they fall short of the threshold.
-    static let minimumFindings = 3
-    /// And no more than this, however many habits there are.
+    /// More than this share going the same way is a habit; anything at or
+    /// below it is left unsaid.
+    static let thresholdPercent = 60
+    /// No more than this, however many habits there are.
     static let maximumFindings = 5
+    /// A slice of the misses only earns its own sentence when it leans this
+    /// many points further than all the misses together already do.
+    static let standOutPoints = 10
 
     /// Long putts, where distance control is the thing being tested, and short
     /// ones, where the line is.
@@ -44,98 +57,143 @@ enum MissPatternFinder {
     /// Below this the green is flat enough that "high side" means nothing.
     static let breakingSlopePct = 1.0
 
+    /// The same break directions and hills the dispersion menu offers, plus
+    /// straight putts, each read on its own.
+    private static let slices: [(name: String, includes: (Putt) -> Bool)] = [
+        ("rightToLeft", { $0.sideSlopePct < 0 }),
+        ("leftToRight", { $0.sideSlopePct > 0 }),
+        ("straight", { $0.sideSlopePct == 0 }),
+        ("uphill", { $0.hillSlopePct > 0 }),
+        ("downhill", { $0.hillSlopePct < 0 }),
+    ]
+
+    private enum Axis { case side, length }
+
+    private struct Lean {
+        let pattern: MissPattern
+        /// Nil for a lean that has no whole-green counterpart to repeat.
+        let axis: Axis?
+        /// -1 left or short, +1 right or long.
+        let direction: Int
+    }
+
     static func findings(in putts: [Putt]) -> [MissPattern] {
         let misses = putts.filter { $0.puttNumber > 0 && !$0.result.isHoled }
         guard !misses.isEmpty else { return [] }
 
-        var found: [MissPattern] = []
+        // Which side of the hole and which length, over everything.
+        let overall = [
+            sideLean(in: misses, leftKey: "pattern.missLeft", rightKey: "pattern.missRight", minimum: minimumSample),
+            lengthLean(in: misses, shortKey: "pattern.missShort", longKey: "pattern.missLong", minimum: minimumSample),
+        ].compactMap { $0 }
 
-        // Which side of the hole, over everything.
-        let lateral = misses.filter { $0.result.lateralBias != 0 }
-        found += lean(
-            in: lateral,
-            left: { $0.result.lateralBias < 0 },
-            leftKey: "pattern.missLeft",
-            rightKey: "pattern.missRight",
-            minimum: minimumSample
-        )
-
-        // Short or long, over everything.
-        let longitudinal = misses.filter { $0.result.lengthBias != 0 }
-        found += lean(
-            in: longitudinal,
-            left: { $0.result.lengthBias < 0 },
-            leftKey: "pattern.missShort",
-            rightKey: "pattern.missLong",
-            minimum: minimumSample
-        )
+        var slices: [Lean?] = []
 
         // On a breaking putt, below the hole is the miss that never had a
         // chance; above it at least died towards the cup.
         let breaking = misses.filter {
             abs($0.sideSlopePct) >= breakingSlopePct && $0.result.lateralBias != 0
         }
-        found += lean(
+        slices.append(lean(
             in: breaking,
-            left: { putt in
+            first: { putt in
                 // Low side: the ball missed the way the green was falling.
                 (putt.sideSlopePct < 0 && putt.result.lateralBias < 0)
                     || (putt.sideSlopePct > 0 && putt.result.lateralBias > 0)
             },
-            leftKey: "pattern.missLowSide",
-            rightKey: "pattern.missHighSide",
-            minimum: minimumSubsetSample
-        )
+            firstKey: "pattern.missLowSide",
+            secondKey: "pattern.missHighSide",
+            minimum: minimumSubsetSample,
+            axis: nil
+        ))
 
-        // Distance control from range.
-        let longPutts = misses.filter { $0.distanceM >= longPuttDistanceM && $0.result.lengthBias != 0 }
-        found += lean(
-            in: longPutts,
-            left: { $0.result.lengthBias < 0 },
-            leftKey: "pattern.longPuttsShort",
-            rightKey: "pattern.longPuttsLong",
-            minimum: minimumSubsetSample
-        )
+        // Each break direction and each hill: side and length.
+        for slice in Self.slices {
+            let subset = misses.filter(slice.includes)
+            let prefix = "pattern.\(slice.name)"
+            slices.append(sideLean(in: subset, leftKey: "\(prefix).left", rightKey: "\(prefix).right", minimum: minimumSubsetSample))
+            slices.append(lengthLean(in: subset, shortKey: "\(prefix).short", longKey: "\(prefix).long", minimum: minimumSubsetSample))
+        }
 
-        // Line from close in.
-        let shortPutts = misses.filter { $0.distanceM <= shortPuttDistanceM && $0.result.lateralBias != 0 }
-        found += lean(
-            in: shortPutts,
-            left: { $0.result.lateralBias < 0 },
+        // Distance control from range, and line from close in.
+        slices.append(lengthLean(
+            in: misses.filter { $0.distanceM >= longPuttDistanceM },
+            shortKey: "pattern.longPuttsShort",
+            longKey: "pattern.longPuttsLong",
+            minimum: minimumSubsetSample
+        ))
+        slices.append(sideLean(
+            in: misses.filter { $0.distanceM <= shortPuttDistanceM },
             leftKey: "pattern.shortPuttsLeft",
             rightKey: "pattern.shortPuttsRight",
             minimum: minimumSubsetSample
-        )
+        ))
 
-        // The strongest first, and the bigger sample where two lean the same
-        // amount. Every habit over the threshold is kept; below it the list is
-        // topped up to three with the next strongest leans.
-        let ranked = found.sorted { ($0.share, $0.count) > ($1.share, $1.count) }
-        let strong = ranked.filter(\.isStrong)
-        let shown = strong.count >= minimumFindings ? strong : Array(ranked.prefix(minimumFindings))
-        return Array(shown.prefix(maximumFindings))
+        let standingOut = slices.compactMap { $0 }.filter { standsOut($0, against: overall) }
+
+        // Only habits, the most certain first.
+        return (overall + standingOut)
+            .map(\.pattern)
+            .filter(\.isStrong)
+            .sorted { ($0.confidenceFloor, $0.count) > ($1.confidenceFloor, $1.count) }
+            .prefix(maximumFindings)
+            .map { $0 }
     }
 
-    /// One two-sided test: does this group lean far enough one way to mention?
+    /// "Uphill, 80% go left" says nothing new when 80% of all misses go left.
+    private static func standsOut(_ slice: Lean, against overall: [Lean]) -> Bool {
+        guard let axis = slice.axis,
+              let whole = overall.first(where: { $0.axis == axis && $0.direction == slice.direction && $0.pattern.isStrong })
+        else { return true }
+        return slice.pattern.percent >= whole.pattern.percent + standOutPoints
+    }
+
+    private static func sideLean(in putts: [Putt], leftKey: String, rightKey: String, minimum: Int) -> Lean? {
+        lean(
+            in: putts.filter { $0.result.lateralBias != 0 },
+            first: { $0.result.lateralBias < 0 },
+            firstKey: leftKey,
+            secondKey: rightKey,
+            minimum: minimum,
+            axis: .side
+        )
+    }
+
+    private static func lengthLean(in putts: [Putt], shortKey: String, longKey: String, minimum: Int) -> Lean? {
+        lean(
+            in: putts.filter { $0.result.lengthBias != 0 },
+            first: { $0.result.lengthBias < 0 },
+            firstKey: shortKey,
+            secondKey: longKey,
+            minimum: minimum,
+            axis: .length
+        )
+    }
+
+    /// One two-sided test: which way does this group lean, and by how much?
     private static func lean(
         in putts: [Putt],
-        left: (Putt) -> Bool,
-        leftKey: String,
-        rightKey: String,
-        minimum: Int
-    ) -> [MissPattern] {
-        guard putts.count >= minimum else { return [] }
-        let leftCount = putts.filter(left).count
-        let rightCount = putts.count - leftCount
-        let leading = max(leftCount, rightCount)
-        // An even split leans nowhere; anything past it is a candidate, and
-        // the ranking decides whether it is shown.
-        guard leading * 2 > putts.count else { return [] }
-        return [MissPattern(
-            key: leftCount >= rightCount ? leftKey : rightKey,
-            count: leading,
-            total: putts.count
-        )]
+        first: (Putt) -> Bool,
+        firstKey: String,
+        secondKey: String,
+        minimum: Int,
+        axis: Axis?
+    ) -> Lean? {
+        guard putts.count >= minimum else { return nil }
+        let firstCount = putts.filter(first).count
+        let secondCount = putts.count - firstCount
+        // An even split leans nowhere.
+        guard firstCount != secondCount else { return nil }
+        let towardsFirst = firstCount > secondCount
+        return Lean(
+            pattern: MissPattern(
+                key: towardsFirst ? firstKey : secondKey,
+                count: max(firstCount, secondCount),
+                total: putts.count
+            ),
+            axis: axis,
+            direction: towardsFirst ? -1 : 1
+        )
     }
 }
 

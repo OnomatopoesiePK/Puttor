@@ -1255,31 +1255,45 @@ struct PuttorTests {
         #expect(long.total == 6)
     }
 
-    /// At least the three strongest leans are shown when the misses hold
-    /// three, even below the threshold — and each carries its share.
+    /// Only more than 60% going one way is named; exactly 60% is left unsaid.
     @MainActor
-    @Test func theThreeStrongestLeansAreAlwaysShown() async throws {
-        // Side: 6 of 10 left (a habit). Length: 6 of 11 short (a lean, under
-        // the threshold). Long putts: 4 of 7 short (a lean, under it too).
-        let sides = Array(repeating: Self.miss(.shortLeft, distance: 3), count: 6)
-            + Array(repeating: Self.miss(.longRight, distance: 3), count: 4)
-        let length = [Self.miss(.short, distance: 3)]
-        let range = Array(repeating: Self.miss(.short, distance: 8), count: 4)
-            + Array(repeating: Self.miss(.long, distance: 8), count: 3)
-        let findings = MissPatternFinder.findings(in: sides + length + range)
+    @Test func onlyLeansOverSixtyPercentAreShown() async throws {
+        let even = Array(repeating: Self.miss(.left), count: 6) + Array(repeating: Self.miss(.right), count: 4)
+        #expect(MissPatternFinder.findings(in: even).isEmpty)
 
-        #expect(findings.count >= MissPatternFinder.minimumFindings)
-        #expect(findings.contains { $0.isStrong })
-        #expect(findings.contains { !$0.isStrong })
-        // Strongest first.
-        #expect(zip(findings, findings.dropFirst()).allSatisfy { $0.share >= $1.share })
+        let clear = Array(repeating: Self.miss(.left), count: 7) + Array(repeating: Self.miss(.right), count: 3)
+        let findings = MissPatternFinder.findings(in: clear)
+        #expect(findings.allSatisfy { $0.isStrong })
 
         let left = try #require(findings.first { $0.key == "pattern.missLeft" })
-        #expect(left.percent == Int((Double(left.count) / Double(left.total) * 100).rounded()))
+        #expect(left.percent == 70)
 
         // And the coach's sentence carries all three numbers.
         let sentence = CoachFinding(key: left.key, count: 8, total: 10)
         #expect(sentence.numbers == [8, 10, 80])
+    }
+
+    /// One break direction can lean hard while all misses together do not.
+    @MainActor
+    @Test func aBreakDirectionThatStandsOutIsReported() async throws {
+        let rightToLeft = Array(repeating: Self.miss(.left, slope: -2), count: 7) + [Self.miss(.right, slope: -2)]
+        let leftToRight = Array(repeating: Self.miss(.right, slope: 2), count: 8)
+        let findings = MissPatternFinder.findings(in: rightToLeft + leftToRight)
+
+        let slice = try #require(findings.first { $0.key == "pattern.rightToLeft.left" })
+        #expect(slice.count == 7)
+        #expect(slice.total == 8)
+        #expect(!findings.contains { $0.key == "pattern.missLeft" || $0.key == "pattern.missRight" })
+    }
+
+    /// A slice that only repeats what every miss already shows says nothing.
+    @MainActor
+    @Test func aSliceThatRepeatsTheWholeIsLeftOut() async throws {
+        let putts = Array(repeating: Self.miss(.left), count: 9) + [Self.miss(.right)]
+        let findings = MissPatternFinder.findings(in: putts)
+
+        #expect(findings.contains { $0.key == "pattern.missLeft" })
+        #expect(!findings.contains { $0.key == "pattern.straight.left" })
     }
 
     /// Holed putts have no miss in them to read.
