@@ -243,10 +243,18 @@ struct CoachView: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Theme.accent)
                         .padding(.top, 2)
-                    Text(read.text)
-                        .font(.system(size: 13))
-                        .foregroundStyle(Theme.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(read.text)
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let band = read.bandText(useFeet: useFeet) {
+                            Text(band)
+                                .font(.system(size: 12))
+                                .foregroundStyle(Theme.textMuted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
                 }
             }
 

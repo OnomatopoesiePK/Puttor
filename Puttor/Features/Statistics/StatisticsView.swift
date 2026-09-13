@@ -297,7 +297,7 @@ private struct StatisticsPane: View {
     /// Readings under the reason counts: how the break was read, and reasons
     /// tied to a direction or a kind of putt.
     @ViewBuilder
-    private func reasonInsights(titleKey: String, icon: String, lines: [(id: String, text: String)]) -> some View {
+    private func reasonInsights(titleKey: String, icon: String, lines: [(id: String, text: String, detail: String?)]) -> some View {
         if !lines.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
                 Text(L(titleKey))
@@ -310,10 +310,18 @@ private struct StatisticsPane: View {
                             .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(Theme.accent)
                             .padding(.top, 2)
-                        Text(line.text)
-                            .font(.system(size: 12))
-                            .foregroundStyle(Theme.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(line.text)
+                                .font(.system(size: 12))
+                                .foregroundStyle(Theme.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if let detail = line.detail {
+                                Text(detail)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Theme.textMuted)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
                     }
                 }
             }
@@ -642,12 +650,14 @@ private struct StatisticsPane: View {
                                     reasonInsights(
                                         titleKey: "read.title",
                                         icon: "eye",
-                                        lines: BreakReadAnalyzer.findings(in: data.allPutts).map { (id: $0.id, text: $0.text) }
+                                        lines: BreakReadAnalyzer.findings(in: data.allPutts).map {
+                                            (id: $0.id, text: $0.text, detail: $0.bandText(useFeet: useFeet))
+                                        }
                                     )
                                     reasonInsights(
                                         titleKey: "link.title",
                                         icon: "link",
-                                        lines: MissReasonLinker.links(in: data.allPutts).map { (id: $0.id, text: $0.text) }
+                                        lines: MissReasonLinker.links(in: data.allPutts).map { (id: $0.id, text: $0.text, detail: nil) }
                                     )
                                 }
                             }

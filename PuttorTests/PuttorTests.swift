@@ -1393,6 +1393,25 @@ struct PuttorTests {
         #expect(read.count == 6)
         #expect(read.total == 7)
         #expect(!findings.contains { ["gentle", "rightToLeft", "rightToLeftGentle"].contains($0.cellID) })
+
+        // The distances behind it travel along: 80% of six, all from 3 m.
+        let band = try #require(read.coreBand)
+        #expect(band.count == 5)
+        #expect(band.from == 3)
+        #expect(band.to == 3)
+    }
+
+    /// The band is the narrowest one holding 80% of the putts, so two stray
+    /// long ones do not stretch it.
+    @Test func theDistanceBandLeavesOutTheStrays() async throws {
+        let finding = BreakReadFinding(
+            reason: .missRead, cellID: "breaking", outcome: .under, count: 10, total: 12,
+            distances: [25, 2, 3, 2, 4, 5, 6, 8, 20, 3]
+        )
+        let band = try #require(finding.coreBand)
+        #expect(band.count == 8)
+        #expect(band.from == 2)
+        #expect(band.to == 8)
     }
 
     /// A misread straight putt missed right was played as a right-to-left

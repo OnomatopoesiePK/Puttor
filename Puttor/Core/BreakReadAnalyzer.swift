@@ -60,6 +60,11 @@ struct BreakReadFinding: Identifiable {
     let outcome: Outcome
     let count: Int
     let total: Int
+    /// How far the putts behind the finding were struck from.
+    var distances: [Double] = []
+
+    /// The share of those putts the distance band has to hold.
+    static let coreShare = 0.8
 
     var id: String { "\(reason.rawValue)-\(cellID)-\(outcome.rawValue)" }
     var percent: Int { MissReasonLinker.percent(count, of: total) }
@@ -72,6 +77,30 @@ struct BreakReadFinding: Identifiable {
             count, total, percent,
             L("read.outcome.\(reason.rawValue).\(outcome.rawValue)")
         )
+    }
+
+    /// The narrowest band of distances holding 80% of the putts behind the
+    /// finding, rounded to whole putts: where the habit actually lives.
+    var coreBand: (count: Int, from: Double, to: Double)? {
+        let sorted = distances.sorted()
+        guard !sorted.isEmpty else { return nil }
+        let size = max(1, Int((Double(sorted.count) * Self.coreShare).rounded()))
+        var best = (from: sorted[0], to: sorted[size - 1])
+        for start in 0...(sorted.count - size) {
+            let from = sorted[start]
+            let to = sorted[start + size - 1]
+            if to - from < best.to - best.from { best = (from, to) }
+        }
+        return (size, best.from, best.to)
+    }
+
+    func bandText(useFeet: Bool) -> String? {
+        guard let band = coreBand else { return nil }
+        let from = UnitConverter.formatDistance(band.from, useFeet: useFeet)
+        let to = UnitConverter.formatDistance(band.to, useFeet: useFeet)
+        return from == to
+            ? String(format: L("read.bandSingle"), band.count, from)
+            : String(format: L("read.band"), band.count, from, to)
     }
 }
 
@@ -187,14 +216,17 @@ enum BreakReadAnalyzer {
                 // An aim is a line; how long the miss ran says nothing about it.
                 if cell.axis == .length && reason == .wrongAim { continue }
 
-                let outcomes = reasoned.filter(cell.includes).compactMap(cell.outcome)
-                guard outcomes.count >= minimumSample else { continue }
-                let counts = Dictionary(grouping: outcomes, by: { $0 }).mapValues(\.count)
+                let read = reasoned.filter(cell.includes).compactMap { putt in
+                    cell.outcome(putt).map { (outcome: $0, distance: putt.distanceM) }
+                }
+                guard read.count >= minimumSample else { continue }
+                let counts = Dictionary(grouping: read, by: \.outcome).mapValues(\.count)
                 guard let leading = counts.max(by: { $0.value < $1.value }) else { continue }
 
                 let finding = BreakReadFinding(
                     reason: reason, cellID: cell.id, outcome: leading.key,
-                    count: leading.value, total: outcomes.count
+                    count: leading.value, total: read.count,
+                    distances: read.filter { $0.outcome == leading.key }.map(\.distance)
                 )
                 guard finding.percent > MissPatternFinder.thresholdPercent else { continue }
                 byCell[cell.id] = finding
