@@ -134,6 +134,12 @@ enum MissReasonLinker {
         Group(id: "downhill", includes: { $0.hillSlopePct < 0 }),
         Group(id: "longPutts", includes: { $0.distanceM >= MissPatternFinder.longPuttDistanceM }),
         Group(id: "shortPutts", includes: { $0.distanceM <= MissPatternFinder.shortPuttDistanceM }),
+        Group(id: "band15to3", includes: {
+            $0.distanceM > MissPatternFinder.shortPuttDistanceM && $0.distanceM < MissPatternFinder.midPuttDistanceM
+        }),
+        Group(id: "band3to6", includes: {
+            $0.distanceM >= MissPatternFinder.midPuttDistanceM && $0.distanceM < MissPatternFinder.longPuttDistanceM
+        }),
         Group(id: "doubleBreak", includes: { $0.doubleBreak != nil }),
     ]
 

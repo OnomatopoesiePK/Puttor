@@ -57,17 +57,21 @@ enum MissPatternFinder {
     /// ones, where the line is.
     static let longPuttDistanceM = 6.0
     static let shortPuttDistanceM = 1.5
+    /// Splits the range between them into 1.5–3 m and 3–6 m.
+    static let midPuttDistanceM = 3.0
     /// Below this the green is flat enough that "high side" means nothing.
     static let breakingSlopePct = 1.0
 
     /// The same break directions and hills the dispersion menu offers, plus
-    /// straight putts, each read on its own.
+    /// straight putts and the two middle distance bands, each read on its own.
     private static let slices: [(name: String, includes: (Putt) -> Bool)] = [
         ("rightToLeft", { $0.sideSlopePct < 0 }),
         ("leftToRight", { $0.sideSlopePct > 0 }),
         ("straight", { $0.sideSlopePct == 0 }),
         ("uphill", { $0.hillSlopePct > 0 }),
         ("downhill", { $0.hillSlopePct < 0 }),
+        ("band15to3", { $0.distanceM > MissPatternFinder.shortPuttDistanceM && $0.distanceM < MissPatternFinder.midPuttDistanceM }),
+        ("band3to6", { $0.distanceM >= MissPatternFinder.midPuttDistanceM && $0.distanceM < MissPatternFinder.longPuttDistanceM }),
     ]
 
     private enum Axis { case side, length }

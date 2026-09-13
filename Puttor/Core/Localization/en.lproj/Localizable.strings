@@ -34,6 +34,7 @@
 "coach.reason.straightLine" = "Even your straight putts keep missing on one side, which is a start-line problem.";
 "coach.reason.breakSide" = "On one break direction your misses keep going the same way — this drill has putts breaking both ways.";
 "coach.reason.slopePace" = "Up or down the hill, your pace keeps missing the same way — the Ladder Drill trains exactly that.";
+"coach.reason.midRangeLine" = "From 3 to 6 m your misses keep leaning one way — the Clock Drill trains exactly that range.";
 "coach.reason.pace" = "Your misses are a pace problem before they are a line problem.";
 "coach.reason.threePutts" = "Three-putts are costing you strokes; this one is about getting the first putt close.";
 "coach.reason.neverPlayed" = "You have not tried this one yet.";
@@ -273,7 +274,7 @@
 "stats.rounds.info" = "One tile per round in the current filter, showing that round's strokes gained putting.\n\nFor each hole: the putts the tour would expect from where the first putt stood, less the putts actually taken.";
 "stats.sgPutting.info" = "Strokes gained per hole, summed over a round and then averaged across the filtered rounds.\n\nPCG underneath is the same rounds' per-putt figure: how each result compares with the tour's odds of holing from that distance.";
 "stats.playingStats.info" = "Score is the average strokes over par per round.\n\nGIR counts holes played for eagle or birdie, birdie conversion how many of those greens were turned into a birdie or an eagle off one or two putts, scramble the par saves among holes played for par with the green missed.\n\nThe three putt figures count only holes that were actually putted.\n\nAll of it needs the score reference (\"putt for\"): every mode has it except Custom without that field.";
-"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. The rings mark 1, 2 and 3 metres of distance left.\n\nThe first menu picks which break directions to show, the second what the colours mean: the strength of the break, the length of the putt, or how much it ran up or down the hill — the last two need the slope field as well.\n\nThe two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time.\n\nA bigger dot means more misses in the same spot, and once a colour filter is on, each dot is shaded by the class it falls into.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nThe sentences underneath read every putt in the selection. A direction is only named when more than 60 percent of the misses go that way: over all misses, per break direction, on straight putts, uphill, downhill, from 6 m and inside 1.5 m. A slice that only repeats all misses is left out. Where one reason stands out behind a habit, it is named underneath.";
+"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. The rings mark 1, 2 and 3 metres of distance left.\n\nThe first menu picks which break directions to show, the second what the colours mean: the strength of the break, the length of the putt, or how much it ran up or down the hill — the last two need the slope field as well.\n\nThe two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time.\n\nA bigger dot means more misses in the same spot, and once a colour filter is on, each dot is shaded by the class it falls into.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nThe sentences underneath read every putt in the selection. A direction is only named when more than 60 percent of the misses go that way: over all misses, per break direction, on straight putts, uphill, downhill, inside 1.5 m, 1.5–3 m, 3–6 m and from 6 m. A slice that only repeats all misses is left out. Where one reason stands out behind a habit, it is named underneath.";
 "pattern.title" = "WHAT YOUR MISSES KEEP DOING";
 "pattern.missLeft" = "%1$ld of %2$ld (%3$ld%%) misses go left of the hole.";
 "pattern.missRight" = "%1$ld of %2$ld (%3$ld%%) misses go right of the hole.";
@@ -305,6 +306,14 @@
 "pattern.downhill.right" = "On downhill putts, %1$ld of %2$ld (%3$ld%%) misses go right.";
 "pattern.downhill.short" = "On downhill putts, %1$ld of %2$ld (%3$ld%%) misses finish short.";
 "pattern.downhill.long" = "On downhill putts, %1$ld of %2$ld (%3$ld%%) misses run past.";
+"pattern.band15to3.left" = "From 1.5 to 3 m, %1$ld of %2$ld (%3$ld%%) misses go left.";
+"pattern.band15to3.right" = "From 1.5 to 3 m, %1$ld of %2$ld (%3$ld%%) misses go right.";
+"pattern.band15to3.short" = "From 1.5 to 3 m, %1$ld of %2$ld (%3$ld%%) misses finish short.";
+"pattern.band15to3.long" = "From 1.5 to 3 m, %1$ld of %2$ld (%3$ld%%) misses run past.";
+"pattern.band3to6.left" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses go left.";
+"pattern.band3to6.right" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses go right.";
+"pattern.band3to6.short" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses finish short.";
+"pattern.band3to6.long" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses run past.";
 "link.title" = "WHAT GOES TOGETHER";
 "cause.note" = "Of those, %1$ld of %2$ld (%3$ld%%) were %4$@ — against %5$ld%% of the other misses.";
 "link.groupToCause" = "%1$@: %2$ld of %3$ld misses (%4$ld%%) were %5$@ — against %6$ld%% of the rest.";
@@ -347,12 +356,16 @@
 "link.groupPhrase.longPutts" = "were from 6 m or more";
 "link.group.shortPutts" = "Putts inside 1.5 m";
 "link.groupPhrase.shortPutts" = "were inside 1.5 m";
+"link.group.band15to3" = "Putts from 1.5–3 m";
+"link.groupPhrase.band15to3" = "were from 1.5–3 m";
+"link.group.band3to6" = "Putts from 3–6 m";
+"link.groupPhrase.band3to6" = "were from 3–6 m";
 "link.group.doubleBreak" = "Double breakers";
 "link.groupPhrase.doubleBreak" = "were double breakers";
 "chart.makeVsTour.info" = "One row per distance bracket: the putts you holed over the putts you took from there, against the tour's average make rate across the same bracket.\n\nThe right-hand column totals PCG for that bracket, divided by the number of rounds.\n\nThe tour column is a flat average across the whole bracket, while PCG measures every putt against the curve at its own distance. So when your putts sit at the near end of a bracket, PCG can come out negative even though your make % is above the tour column.";
 "stats.makeBySituation.info" = "The same distance brackets, split by the score each putt was for, so a birdie putt and a par putt from the same range can be compared.\n\nNeeds the score reference (\"putt for\"), which Custom mode can leave out.";
 "summary.missTendency.info" = "Every miss placed in the direction it was entered. A sector reddens with how often that direction came up, and the middle holds the total.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex — a plain \"missed\" has no direction to place.";
-"summary.missReasons.info" = "How often each reason was ticked on a missed putt. A putt with more than one reason is counted once, under \"several\".\n\nNeeds the miss reasons field: Pro mode, or Custom with that field added.\n\nUnderneath, every reason is checked against every direction and every kind of putt: break direction, straight, uphill, downhill, long, short, double break. A link is only named when more than 60 percent of a group's misses share the reason, at least 20 points more than the misses it is compared with, and a statistical test backs it. Only rounds where reasons were recorded count.";
+"summary.missReasons.info" = "How often each reason was ticked on a missed putt. A putt with more than one reason is counted once, under \"several\".\n\nNeeds the miss reasons field: Pro mode, or Custom with that field added.\n\nUnderneath, every reason is checked against every direction and every kind of putt: break direction, straight, uphill, downhill, the four distance bands, double break. A link is only named when more than 60 percent of a group's misses share the reason, at least 20 points more than the misses it is compared with, and a statistical test backs it. Only rounds where reasons were recorded count.";
 "summary.leaveByMiss.info" = "Average distance left after a miss, grouped by the direction it went — measured from the distance of the next putt on that hole. Bars are scaled to the longest of those averages.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.";
 
 /* Dispersion */

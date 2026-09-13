@@ -567,8 +567,11 @@ enum CoachAdvisor {
         case "pattern.rightToLeft.left", "pattern.rightToLeft.right",
              "pattern.leftToRight.left", "pattern.leftToRight.right":
             return CoachRecommendation(gameType: .aroundTheHole, reasonKey: "coach.reason.breakSide")
-        case "pattern.shortPuttsLeft", "pattern.shortPuttsRight":
+        case "pattern.shortPuttsLeft", "pattern.shortPuttsRight",
+             "pattern.band15to3.left", "pattern.band15to3.right":
             return CoachRecommendation(gameType: .gate, reasonKey: "coach.reason.startLine")
+        case "pattern.band3to6.left", "pattern.band3to6.right":
+            return CoachRecommendation(gameType: .clock, reasonKey: "coach.reason.midRangeLine")
         case "pattern.straight.left", "pattern.straight.right":
             return CoachRecommendation(gameType: .gate, reasonKey: "coach.reason.straightLine")
         case "pattern.uphill.short", "pattern.uphill.long",
@@ -577,7 +580,9 @@ enum CoachAdvisor {
         case "pattern.longPuttsShort", "pattern.longPuttsLong", "pattern.missShort", "pattern.missLong",
              "pattern.rightToLeft.short", "pattern.rightToLeft.long",
              "pattern.leftToRight.short", "pattern.leftToRight.long",
-             "pattern.straight.short", "pattern.straight.long":
+             "pattern.straight.short", "pattern.straight.long",
+             "pattern.band15to3.short", "pattern.band15to3.long",
+             "pattern.band3to6.short", "pattern.band3to6.long":
             return CoachRecommendation(gameType: .ninePutt, reasonKey: "coach.reason.pace")
         default:
             return nil

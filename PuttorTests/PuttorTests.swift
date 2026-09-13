@@ -1296,6 +1296,20 @@ struct PuttorTests {
         #expect(!findings.contains { $0.key == "pattern.straight.left" })
     }
 
+    /// The middle distances are read in two bands, 3 m belonging to the
+    /// longer one.
+    @MainActor
+    @Test func middleDistancesAreReadInTwoBands() async throws {
+        let putts = Array(repeating: Self.miss(.left, distance: 3), count: 6)
+            + Array(repeating: Self.miss(.right, distance: 1), count: 6)
+        let findings = MissPatternFinder.findings(in: putts)
+
+        let band = try #require(findings.first { $0.key == "pattern.band3to6.left" })
+        #expect(band.count == 6)
+        #expect(band.total == 6)
+        #expect(!findings.contains { $0.key.hasPrefix("pattern.band15to3") })
+    }
+
     // MARK: - Miss reasons
 
     @MainActor
