@@ -105,6 +105,7 @@ struct RoundSetupView: View {
                     }
 
                     // How the round is scored, then whether it counts.
+                    label(L("setup.mode"))
                     formatRow
                         .padding(.top, 16)
                     switchRow(titleKey: "setup.tournament", infoKey: "setup.tournament.info", isOn: $isTournament)

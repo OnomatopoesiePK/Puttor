@@ -36,8 +36,10 @@ enum DemoData {
             // Every fifth without a score reference, so the notes that only
             // appear for mixed selections show up too.
             round.tracksScoreCategory = index % 5 != 2
+            // One round over nine holes, so its asterisk shows up too.
+            round.holeCount = index == 3 ? 9 : 18
             context.insert(round)
-            for hole in 1...18 {
+            for hole in 1...round.holeCount {
                 addHole(hole, to: round, in: context, rng: &rng)
             }
         }

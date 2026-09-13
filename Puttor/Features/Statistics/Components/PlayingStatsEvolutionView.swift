@@ -11,9 +11,11 @@
 import SwiftUI
 
 enum PlayingStatsMetric: String, CaseIterable, Identifiable {
-    // Top to bottom as the charts stack: the putting figures first, then the
-    // round's, the total just above the putts it splits into.
-    case sg, pcg, score, gir, conversion, scramble, totalPutts, puttsGir, puttsNoGir, threePutts, lipOuts, proximity
+    // The order the charts stack in until they are arranged otherwise: the
+    // putting figures first, then the round's — the score with its holes by
+    // score under it — and the total just above the putts it splits into.
+    case sg, pcg, score, birdies, pars, bogeys, doubles
+    case gir, conversion, scramble, totalPutts, puttsGir, puttsNoGir, threePutts, lipOuts, proximity
 
     var id: String { rawValue }
     var titleKey: String { "evolution.\(rawValue)" }
@@ -27,10 +29,13 @@ struct PlayingStatsPoint: Identifiable, Equatable {
     let id: Int
     let date: Date
     let values: [PlayingStatsMetric: Double]
+    /// Played over nine holes, so its totals are half a round's; marked in the
+    /// charts with the asterisk it carries in the lists.
+    var isNineHoles = false
 
     /// Rounds in any order, laid out oldest first. `tracksScore` says whether
     /// the figures read off the score reference can be trusted for the round.
-    static func series(_ rounds: [(date: Date, stats: RoundStats, tracksScore: Bool)]) -> [PlayingStatsPoint] {
+    static func series(_ rounds: [(date: Date, stats: RoundStats, tracksScore: Bool, nineHoles: Bool)]) -> [PlayingStatsPoint] {
         rounds
             .filter { $0.stats.holes > 0 || $0.stats.scoredHoles > 0 }
             .sorted { $0.date < $1.date }
@@ -46,7 +51,13 @@ struct PlayingStatsPoint: Identifiable, Equatable {
                     .lipOuts: Double(stats.lipOutCount),
                 ]
                 if round.tracksScore {
-                    if stats.scoredHoles > 0 { values[.score] = Double(stats.scoreRelativeToPar) }
+                    if stats.scoredHoles > 0 {
+                        values[.score] = Double(stats.scoreRelativeToPar)
+                        values[.birdies] = Double(stats.birdiesOrBetter)
+                        values[.pars] = Double(stats.pars)
+                        values[.bogeys] = Double(stats.bogeys)
+                        values[.doubles] = Double(stats.doublesOrWorse)
+                    }
                     if stats.holes > 0 { values[.gir] = stats.girPercent }
                     if stats.girCount > 0 { values[.conversion] = stats.girConversionPercent }
                     if stats.scrambleAttempts > 0 { values[.scramble] = stats.scramblePercent }
@@ -54,8 +65,59 @@ struct PlayingStatsPoint: Identifiable, Equatable {
                     values[.puttsNoGir] = stats.avgPuttsOffGir
                     values[.proximity] = stats.avgGirProximityM
                 }
-                return PlayingStatsPoint(id: index, date: round.date, values: values)
+                return PlayingStatsPoint(id: index, date: round.date, values: values, isNineHoles: round.nineHoles)
             }
+    }
+}
+
+/// Which evolution charts show, in what order, and which were taken out, kept
+/// as one line of text: the figures in order, the taken-out ones marked. A
+/// figure the text has never heard of joins the end of the shown ones.
+struct EvolutionChartLayout: Equatable {
+    private(set) var shown: [PlayingStatsMetric]
+    private(set) var hidden: [PlayingStatsMetric]
+
+    init(text: String) {
+        var shown: [PlayingStatsMetric] = []
+        var hidden: [PlayingStatsMetric] = []
+        for entry in text.split(separator: ",") {
+            let isHidden = entry.hasPrefix("-")
+            guard let metric = PlayingStatsMetric(rawValue: String(isHidden ? entry.dropFirst() : entry)),
+                  !shown.contains(metric), !hidden.contains(metric)
+            else { continue }
+            if isHidden { hidden.append(metric) } else { shown.append(metric) }
+        }
+        shown += PlayingStatsMetric.allCases.filter { !shown.contains($0) && !hidden.contains($0) }
+        self.shown = shown
+        self.hidden = hidden
+    }
+
+    var text: String {
+        (shown.map(\.rawValue) + hidden.map { "-" + $0.rawValue }).joined(separator: ",")
+    }
+
+    func moving(from source: IndexSet, to destination: Int) -> EvolutionChartLayout {
+        var copy = self
+        copy.shown.move(fromOffsets: source, toOffset: destination)
+        return copy
+    }
+
+    /// Taken out, and first in line to come back.
+    func hiding(at offsets: IndexSet) -> EvolutionChartLayout {
+        var copy = self
+        let taken = offsets.map { shown[$0] }
+        copy.shown.remove(atOffsets: offsets)
+        copy.hidden = taken + copy.hidden
+        return copy
+    }
+
+    /// Back in, at the bottom of the stack.
+    func showing(_ metric: PlayingStatsMetric) -> EvolutionChartLayout {
+        guard let index = hidden.firstIndex(of: metric) else { return self }
+        var copy = self
+        copy.hidden.remove(at: index)
+        copy.shown.append(metric)
+        return copy
     }
 }
 
@@ -68,6 +130,15 @@ struct PlayingStatsEvolutionView: View {
     /// scroll view's own frame, which its content has no say in, so a turn of
     /// the screen changes it once and the charts simply follow.
     @State private var viewportHeight: CGFloat = 0
+
+    /// The charts' order and which are taken out, the same in both compare panes.
+    @AppStorage("evolution.chartLayout") private var layoutText = ""
+    @State private var arranging = false
+
+    private var layout: EvolutionChartLayout {
+        get { EvolutionChartLayout(text: layoutText) }
+        nonmutating set { layoutText = newValue.text }
+    }
 
     private static let chartsPerScreen: CGFloat = 3
     /// Landscape has a third of portrait's height; below this a chart is too
@@ -83,26 +154,53 @@ struct PlayingStatsEvolutionView: View {
     private static let roundAxisHeight: CGFloat = 16
 
     var body: some View {
+        VStack(spacing: 0) {
+            toolbar
+            if arranging {
+                chartArranger
+            } else {
+                charts
+            }
+        }
+        .overlay(alignment: .leading) {
+            if !arranging { backButton }
+        }
+        // A swipe to the right goes back, as the arrow does: as soon as the
+        // swipe is clearly sideways, not once the finger lifts. Not while the
+        // charts are arranged, where rows are dragged about.
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 10).onChanged { drag in
+                if drag.translation.width > 30, drag.translation.width > abs(drag.translation.height) * 1.5 {
+                    onBack()
+                }
+            },
+            including: arranging ? .subviews : .all
+        )
+        .background(Theme.background)
+    }
+
+    private var charts: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Self.spacing) {
                 if points.count < 2 {
-                    Text(L("evolution.needMore"))
-                        .font(.system(size: 13))
-                        .foregroundStyle(Theme.textMuted)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 40)
+                    note(L("evolution.needMore"))
+                } else if layout.shown.isEmpty {
+                    note(L("evolution.noneShown"))
                 } else {
-                    let metrics = PlayingStatsMetric.allCases
+                    let metrics = layout.shown
                     ForEach(Array(metrics.enumerated()), id: \.element) { index, metric in
                         let isLast = index == metrics.count - 1
                         chart(metric, colour: colour(for: metric), showsRounds: isLast)
                             .frame(height: chartHeight + (isLast ? Self.roundAxisHeight : 0))
                     }
+                    if points.contains(where: \.isNineHoles) {
+                        Text("* \(L("onCourse.nineHoleRound"))")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Theme.textMuted)
+                    }
                 }
             }
-            .padding(.top, Theme.Spacing.sm)
+            .padding(.top, Theme.Spacing.xs)
             .padding(.bottom, Self.spacing)
             .padding(.leading, Self.backStripWidth)
             .padding(.trailing, Theme.Spacing.edge)
@@ -111,24 +209,89 @@ struct PlayingStatsEvolutionView: View {
         .onGeometryChange(for: CGFloat.self) { $0.size.height.rounded(.down) } action: { height in
             viewportHeight = height
         }
-        .overlay(alignment: .leading) { backButton }
-        // A swipe to the right goes back, as the arrow does: as soon as the
-        // swipe is clearly sideways, not once the finger lifts.
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 20).onChanged { drag in
-                if drag.translation.width > 50, drag.translation.width > abs(drag.translation.height) * 1.5 {
-                    onBack()
+    }
+
+    private func note(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 13))
+            .foregroundStyle(Theme.textMuted)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 40)
+    }
+
+    /// Three lines in the corner into arranging the charts, a tick out of it.
+    private var toolbar: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { arranging.toggle() }
+            } label: {
+                Image(systemName: arranging ? "checkmark" : "line.3.horizontal")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Theme.primary)
+                    .frame(width: 44, height: 32)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L(arranging ? "evolution.doneArranging" : "evolution.arrange"))
+        }
+        .padding(.trailing, Theme.Spacing.edge)
+    }
+
+    /// The charts by name, to put in order, take out and bring back. Only the
+    /// names move, not the charts, so a long stack is arranged at a glance.
+    private var chartArranger: some View {
+        List {
+            Section(L("evolution.shown")) {
+                ForEach(layout.shown) { metric in
+                    arrangerName(metric)
+                        .listRowBackground(Theme.surface)
+                }
+                .onMove { source, destination in layout = layout.moving(from: source, to: destination) }
+                .onDelete { offsets in layout = layout.hiding(at: offsets) }
+            }
+            if !layout.hidden.isEmpty {
+                Section(L("evolution.hidden")) {
+                    ForEach(layout.hidden) { metric in
+                        HStack(spacing: 12) {
+                            Button {
+                                withAnimation { layout = layout.showing(metric) }
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 22))
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .green)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(String(format: L("evolution.add"), L(metric.titleKey)))
+                            arrangerName(metric)
+                        }
+                        .listRowBackground(Theme.surface)
+                    }
                 }
             }
-        )
-        .background(Theme.background)
+        }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .environment(\.editMode, .constant(.active))
+    }
+
+    private func arrangerName(_ metric: PlayingStatsMetric) -> some View {
+        Text(L(metric.titleKey))
+            .font(.system(size: 13, weight: .bold))
+            .tracking(1.0)
+            .foregroundStyle(colour(for: metric))
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
     }
 
     /// A third of the screen each, less the gaps between them, but never
     /// flatter than the minimum.
     private var chartHeight: CGFloat {
         guard viewportHeight > 0 else { return 160 }
-        let free = viewportHeight - Theme.Spacing.sm - Self.spacing * Self.chartsPerScreen
+        let free = viewportHeight - Theme.Spacing.xs - Self.spacing * Self.chartsPerScreen
         return max(Self.minimumChartHeight, (free / Self.chartsPerScreen).rounded(.down))
     }
 
@@ -164,6 +327,7 @@ struct PlayingStatsEvolutionView: View {
                 domain: domain,
                 ticks: yTicks(domain),
                 gridRounds: roundTicks,
+                nineHoleRounds: Set(points.filter(\.isNineHoles).map(\.id)),
                 colour: colour,
                 average: average,
                 axisText: { text($0, metric, onAxis: true) },
@@ -216,26 +380,32 @@ struct PlayingStatsEvolutionView: View {
         return Array(stride(from: 0, to: points.count, by: step))
     }
 
-    /// One colour per figure, bright on the dark theme and deeper on the
-    /// light — tied to the figure rather than its place, so a chart keeps its
-    /// colour when others join the stack.
+    /// One colour per figure, tied to the figure rather than its place so a
+    /// chart keeps its colour however the stack is arranged. The holes by
+    /// score wear the score colours the rest of the app uses; the others are
+    /// bright on the dark theme and deeper on the light.
     private func colour(for metric: PlayingStatsMetric) -> Color {
-        let pair: (dark: UInt32, light: UInt32)
-        switch metric {
-        case .sg: pair = (0xF5D547, 0x8C7400)         // yellow
-        case .pcg: pair = (0xD8E2EA, 0x46596A)        // silver
-        case .score: pair = (0x3DBA6F, 0x1F7A45)      // green
-        case .gir: pair = (0x6FA8FF, 0x1D5FCC)        // blue
-        case .conversion: pair = (0xFF5C6C, 0xD62839) // red
-        case .scramble: pair = (0xFFB84D, 0xB86A0A)   // amber
-        case .totalPutts: pair = (0x8C9EFF, 0x3A4DB8) // indigo
-        case .puttsGir: pair = (0x5BE7C4, 0x0E8F73)   // teal
-        case .puttsNoGir: pair = (0xB08CFF, 0x6A3FC4) // violet
-        case .threePutts: pair = (0xFF9E7D, 0xC24A26) // orange
-        case .lipOuts: pair = (0xF28AC8, 0xB0357A)    // pink
-        case .proximity: pair = (0xB6E36A, 0x5E8A12)  // lime
+        func tone(_ dark: UInt32, _ light: UInt32) -> Color {
+            Color(hex: ThemeManager.shared.isDark ? dark : light)
         }
-        return Color(hex: ThemeManager.shared.isDark ? pair.dark : pair.light)
+        switch metric {
+        case .sg: return tone(0xF5D547, 0x8C7400)         // yellow
+        case .pcg: return tone(0xD8E2EA, 0x46596A)        // silver
+        case .score: return tone(0x4DD4FF, 0x0A7FA3)      // cyan: green is par's
+        case .birdies: return ScoreCategory.birdie.color
+        case .pars: return ScoreCategory.par.color
+        case .bogeys: return ScoreCategory.bogey.color
+        case .doubles: return ScoreCategory.double.color
+        case .gir: return tone(0x6FA8FF, 0x1D5FCC)        // blue
+        case .conversion: return tone(0xFF5C6C, 0xD62839) // red
+        case .scramble: return tone(0xFFB84D, 0xB86A0A)   // amber
+        case .totalPutts: return tone(0x8C9EFF, 0x3A4DB8) // indigo
+        case .puttsGir: return tone(0x5BE7C4, 0x0E8F73)   // teal
+        case .puttsNoGir: return tone(0xB08CFF, 0x6A3FC4) // violet
+        case .threePutts: return tone(0xFF9E7D, 0xC24A26) // orange
+        case .lipOuts: return tone(0xF28AC8, 0xB0357A)    // pink
+        case .proximity: return tone(0xB6E36A, 0x5E8A12)  // lime
+        }
     }
 
     /// Each chart on its own scale, around its own values, with a little room
@@ -249,6 +419,7 @@ struct PlayingStatsEvolutionView: View {
         case .score: minimumSpan = 4
         case .sg, .pcg: minimumSpan = 2
         case .totalPutts: minimumSpan = 4
+        case .birdies, .pars, .bogeys, .doubles: minimumSpan = 2
         case .gir, .conversion, .scramble: minimumSpan = 20
         case .puttsGir, .puttsNoGir: minimumSpan = 0.5
         case .threePutts, .lipOuts: minimumSpan = 2
@@ -303,7 +474,7 @@ struct PlayingStatsEvolutionView: View {
             return "\(Int(value.rounded()))%"
         case .puttsGir, .puttsNoGir:
             return String(format: onAxis ? "%.1f" : "%.2f", value)
-        case .totalPutts, .threePutts, .lipOuts:
+        case .totalPutts, .birdies, .pars, .bogeys, .doubles, .threePutts, .lipOuts:
             return whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
         case .proximity:
             let number = onAxis && whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
@@ -323,6 +494,8 @@ private struct EvolutionChart: View {
     let domain: ClosedRange<Double>
     let ticks: [Double]
     let gridRounds: [Int]
+    /// The rounds played over nine holes, drawn as an asterisk.
+    let nineHoleRounds: Set<Int>
     let colour: Color
     /// Drawn across the chart as a dashed line in the chart's colour.
     let average: Double?
@@ -405,7 +578,22 @@ private struct EvolutionChart: View {
             }
             for item in series {
                 let point = CGPoint(x: xPosition(item.index), y: yPosition(item.value))
-                context.fill(Path(ellipseIn: CGRect(x: point.x - 3.5, y: point.y - 3.5, width: 7, height: 7)), with: .color(colour))
+                if nineHoleRounds.contains(item.index) {
+                    // The asterisk a nine-hole round carries in the lists: three
+                    // crossed strokes, on a rim of the background so the line
+                    // running into it doesn't blur it.
+                    var star = Path()
+                    for degrees in [90.0, 30.0, -30.0] {
+                        let radians = degrees * .pi / 180
+                        let reach = CGSize(width: cos(radians) * 5.5, height: sin(radians) * 5.5)
+                        star.move(to: CGPoint(x: point.x - reach.width, y: point.y - reach.height))
+                        star.addLine(to: CGPoint(x: point.x + reach.width, y: point.y + reach.height))
+                    }
+                    context.stroke(star, with: .color(Theme.background), style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                    context.stroke(star, with: .color(colour), style: StrokeStyle(lineWidth: 2.2, lineCap: .round))
+                } else {
+                    context.fill(Path(ellipseIn: CGRect(x: point.x - 3.5, y: point.y - 3.5, width: 7, height: 7)), with: .color(colour))
+                }
             }
 
             // Numbers at the points, kept clear of the chart's sides. Each one

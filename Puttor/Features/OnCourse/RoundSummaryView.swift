@@ -21,6 +21,9 @@ struct RoundSummaryView: View {
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
     @State private var expandedHole: Int?
     @State private var editingHole: Int?
+    /// The holes as a scorecard rather than by putts; kept between rounds.
+    @AppStorage("summary.holesShowScore") private var holesShowScore = false
+    @State private var showHoleColours = false
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -144,16 +147,12 @@ struct RoundSummaryView: View {
                 mistakesCard
 
                 card {
-                    Text(L("summary.holes").uppercased()).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                    holesHeader
                     holeGrid
                     if let expandedHole {
                         holeDetail(expandedHole)
                     }
-                    HStack(spacing: 14) {
-                        legendDot(Theme.primary, L("summary.onePutt"))
-                        legendDot(Theme.text, L("summary.twoPutts"))
-                        legendDot(Theme.error, L("summary.threePlusPutts"))
-                    }
+                    holeLegend
                 }
 
                 card {
@@ -435,12 +434,150 @@ struct RoundSummaryView: View {
         return String(format: L("summary.pickedUpScored"), L(score.labelKey))
     }
 
+    // MARK: - Holes: by putts or as a scorecard
+
+    /// A scorecard only for a round entered with the score reference; without
+    /// it every hole would read as par.
+    private var showsScorecard: Bool { holesShowScore && round.tracksScoreCategory }
+
+    /// The title says which colours are showing; the arrows switch them.
+    private var holesHeader: some View {
+        HStack(spacing: 10) {
+            Text("\(L("summary.holes")) · \(L(showsScorecard ? "summary.holes.byScore" : "summary.holes.byPutts"))".uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .tracking(1.2)
+                .foregroundStyle(Theme.textMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 0)
+            holeColoursInfo
+            if round.tracksScoreCategory {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { holesShowScore.toggle() }
+                } label: {
+                    Image(systemName: "arrow.left.arrow.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.primary)
+                        .frame(width: 32, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(L(showsScorecard ? "summary.holes.showPutts" : "summary.holes.showScore"))
+            }
+        }
+    }
+
+    /// What the colours on the holes mean, for the view that is showing.
+    private var holeColoursInfo: some View {
+        Button {
+            showHoleColours = true
+        } label: {
+            Image(systemName: "info.circle")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Theme.textMuted)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L("summary.holes.coloursTitle"))
+        .popover(isPresented: $showHoleColours) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L(showsScorecard ? "summary.holes.coloursScore" : "summary.holes.coloursPutts"))
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Theme.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(holeColourKey, id: \.label) { entry in
+                    HStack(spacing: 10) {
+                        Text(entry.sample)
+                            .font(.system(size: 11, weight: .black))
+                            .foregroundStyle(entry.colour)
+                            .frame(width: 36, height: 20)
+                            .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(entry.colour.opacity(0.2)))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.border, lineWidth: 1))
+                        Text(entry.label)
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+                if round.tracksScoreCategory {
+                    Text(L("summary.holes.switchHint"))
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.textMuted)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(Theme.Spacing.md)
+            .frame(width: 260, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .background(Theme.surface)
+            .presentationCompactAdaptation(.popover)
+        }
+    }
+
+    /// Each colour with what it stands for: putts on the hole, or the score
+    /// against par in the score colours the rest of the app uses.
+    private var holeColourKey: [(sample: String, colour: Color, label: String)] {
+        guard showsScorecard else {
+            return [
+                ("1", Theme.primary, L("summary.onePutt")),
+                ("2", Theme.text, L("summary.twoPutts")),
+                ("3", Theme.error, L("summary.threePlusPutts")),
+            ]
+        }
+        let scores: [(Int, ScoreCategory)] = [(-2, .eagle), (-1, .birdie), (0, .par), (1, .bogey), (2, .double), (3, .plus3)]
+        return scores.map { score, category in
+            (scoreCardText(score), category.color, L(score >= 3 ? "summary.holes.tripleOrWorse" : category.labelKey))
+        }
+    }
+
+    private var holeLegend: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 10, alignment: .leading)], alignment: .leading, spacing: 6) {
+            ForEach(holeColourKey, id: \.label) { entry in
+                legendDot(entry.colour, entry.label)
+            }
+        }
+    }
+
+    /// The hole against par, as the scorecard counts it: a picked-up hole at
+    /// what was entered for it, or at the pick-up score it is written down as.
+    private func holeScore(_ hole: Int) -> Int? {
+        if stats.pickedUpHoleNumbers.contains(hole) {
+            let entered = putts.first { $0.holeNumber == hole && $0.isPickUp }?.pickUpScore
+            return (entered ?? Putt.lowestPickUpScore).strokesRelativeToPar
+        }
+        return RoundStats.holeScoreRelativeToPar(putts.filter { $0.holeNumber == hole })
+    }
+
+    /// -2, -1, 0, +1, +2: the scorecard's shorthand.
+    private func scoreCardText(_ score: Int) -> String {
+        score > 0 ? "+\(score)" : "\(score)"
+    }
+
+    private func scoreCardColour(_ score: Int) -> Color {
+        switch score {
+        case ..<(-1): return ScoreCategory.eagle.color
+        case -1: return ScoreCategory.birdie.color
+        case 0: return ScoreCategory.par.color
+        case 1: return ScoreCategory.bogey.color
+        case 2: return ScoreCategory.double.color
+        default: return ScoreCategory.plus3.color
+        }
+    }
+
     private func holeCell(_ hole: Int) -> some View {
         let pickedUp = stats.pickedUpHoleNumbers.contains(hole)
         let played = stats.puttsByHole[hole] != nil
         let count = stats.puttsByHole[hole] ?? 0
-        let bg: Color = pickedUp ? Theme.accent.opacity(0.15) : !played ? Theme.borderLight : (count == 0 ? Theme.accent.opacity(0.25) : (count == 1 ? Theme.primary.opacity(0.2) : (count >= 3 ? Theme.error.opacity(0.2) : Theme.surface)))
-        let fg: Color = !played ? Theme.textMuted : (count == 0 ? Theme.accent : (count == 1 ? Theme.primary : (count >= 3 ? Theme.error : Theme.text)))
+        let score = showsScorecard ? holeScore(hole) : nil
+        let bg: Color
+        let fg: Color
+        if showsScorecard {
+            let colour = score.map(scoreCardColour) ?? Theme.textMuted
+            bg = score == nil ? Theme.borderLight : colour.opacity(0.2)
+            fg = colour
+        } else {
+            bg = pickedUp ? Theme.accent.opacity(0.15) : !played ? Theme.borderLight : (count == 0 ? Theme.accent.opacity(0.25) : (count == 1 ? Theme.primary.opacity(0.2) : (count >= 3 ? Theme.error.opacity(0.2) : Theme.surface)))
+            fg = !played ? Theme.textMuted : (count == 0 ? Theme.accent : (count == 1 ? Theme.primary : (count >= 3 ? Theme.error : Theme.text)))
+        }
         let isOpen = expandedHole == hole
 
         return Button {
@@ -450,7 +587,9 @@ struct RoundSummaryView: View {
         } label: {
             VStack(spacing: 2) {
                 Text("\(hole)").font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textMuted)
-                if pickedUp {
+                if showsScorecard {
+                    Text(score.map(scoreCardText) ?? "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
+                } else if pickedUp {
                     PickUpBallIcon()
                         .foregroundStyle(Theme.accent)
                         .frame(width: 18, height: 18)

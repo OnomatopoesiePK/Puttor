@@ -368,6 +368,87 @@ final class PuttorUITests: XCTestCase {
         snapshot("4 list again")
     }
 
+    /// The charts are arranged by name — one taken out and brought back — and
+    /// a round's holes switch to a scorecard.
+    @MainActor
+    func testChartsArrangeByNameAndHolesSwitchToScore() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+        let open = app.buttons["Show how these figures moved"]
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        tapOnScreen(open, in: app)
+        XCTAssertTrue(app.staticTexts["SCORE (TO PAR)"].waitForExistence(timeout: 5))
+
+        app.buttons["Arrange the charts"].tap()
+        let done = app.buttons["Done arranging"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3))
+        sleep(1)
+        snapshot("1 arranging")
+        hierarchy(app, "arranging hierarchy")
+
+        // The red minus sits at the row's leading edge and is no button of its
+        // own; it opens the row's delete button, named in whatever language
+        // the phone speaks.
+        let firstRow = app.cells.containing(NSPredicate(format: "label ENDSWITH 'SG PUTTING'")).firstMatch
+        XCTAssertTrue(firstRow.waitForExistence(timeout: 3))
+        firstRow.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.5)).withOffset(CGVector(dx: 22, dy: 0)).tap()
+        let confirm = app.buttons.matching(NSPredicate(format: "label IN {'Delete', 'Löschen', 'Entfernen', 'Eliminar'}")).firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3), "the minus opens a delete button")
+        confirm.tap()
+        // Taken out, it waits under the shown ones, past the bottom of the
+        // screen, where the list only lays out its rows once scrolled to.
+        let bringBack = app.buttons["Add SG PUTTING"]
+        for _ in 0..<6 where !(bringBack.exists && bringBack.isHittable) {
+            drag(app, from: 0.75, to: 0.35)
+        }
+        XCTAssertTrue(bringBack.waitForExistence(timeout: 3), "the taken-out chart offers itself back")
+        sleep(1)
+        snapshot("2 one taken out")
+        bringBack.tap()
+        XCTAssertTrue(bringBack.waitForNonExistence(timeout: 3))
+
+        done.tap()
+        XCTAssertTrue(app.staticTexts["SCORE (TO PAR)"].waitForExistence(timeout: 3))
+        snapshot("3 charts again")
+
+        // A round's holes, as a scorecard.
+        app.tabBars.buttons["Course"].tap()
+        XCTAssertTrue(app.buttons["Start New Round"].waitForExistence(timeout: 5))
+        app.staticTexts["Demo 1"].firstMatch.tap()
+        let showScore = app.buttons["Show the score on each hole"]
+        XCTAssertTrue(showScore.waitForExistence(timeout: 5))
+        for _ in 0..<6 where !showScore.isHittable {
+            drag(app, from: 0.7, to: 0.4)
+        }
+        showScore.tap()
+        XCTAssertTrue(app.staticTexts["HOLES · SCORE"].waitForExistence(timeout: 3))
+        sleep(1)
+        snapshot("4 scorecard")
+        app.buttons["What the colours mean"].tap()
+        sleep(1)
+        snapshot("5 colours")
+
+        // The round settings name the mode above stroke/match play.
+        app.tap() // closes the colours
+        swipeFromLeftEdge(app)
+        let start = app.buttons["Start New Round"]
+        XCTAssertTrue(waitUntilHittable(start))
+        start.tap()
+        let mode = app.staticTexts["MODE"]
+        for _ in 0..<6 where !(mode.exists && mode.isHittable) {
+            drag(app, from: 0.7, to: 0.45)
+        }
+        XCTAssertTrue(mode.exists)
+        snapshot("6 round settings")
+    }
+
     private func swipeFromLeftEdge(_ app: XCUIApplication) {
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.55))
             .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.55)))

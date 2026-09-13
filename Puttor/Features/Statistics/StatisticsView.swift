@@ -254,7 +254,7 @@ private struct StatisticsPane: View {
 
             evolution = PlayingStatsPoint.series(rounds.compactMap { r in
                 byRound[r.persistentModelID].map {
-                    (date: r.date, stats: $0, tracksScore: r.tracksScoreCategory && $0.pickedUpWithoutScore == 0)
+                    (date: r.date, stats: $0, tracksScore: r.tracksScoreCategory && $0.pickedUpWithoutScore == 0, nineHoles: r.holeCount == 9)
                 }
             })
         }
@@ -545,7 +545,7 @@ private struct StatisticsPane: View {
                                         // round of nothing but hole-outs still has them —
                                         // only the per-category putt comparison needs putts.
                                         if data.scoreAggregated.holes > 0 {
-                                            CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats", infoKey: "stats.playingStats.info") {
+                                            CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats", infoKey: "stats.playingStats.info", opensTrailingEdge: true) {
                                                 HStack(spacing: 6) {
                                                     VStack(spacing: 10) {
                                                         // A grid rather than rows, so a seventh box
@@ -606,14 +606,16 @@ private struct StatisticsPane: View {
                                                 // The arrow out into the box's margin, against its edge.
                                                 .padding(.trailing, -Theme.Spacing.sm)
                                             }
-                                            // Out to the screen's right edge, where the arrow to the evolution sits.
-                                            .padding(.trailing, -Theme.Spacing.edge)
+                                            // Out past the screen's right edge, square there and its
+                                            // border just out of sight, so the box reads as going on
+                                            // to the evolution beside it.
+                                            .padding(.trailing, -(Theme.Spacing.edge + 2))
                                             // Or pushed across with a swipe to the left, as soon as
                                             // the swipe is clearly sideways rather than once the
                                             // finger lifts.
                                             .simultaneousGesture(
-                                                DragGesture(minimumDistance: 20).onChanged { drag in
-                                                    if drag.translation.width < -50, abs(drag.translation.width) > abs(drag.translation.height) * 1.5 {
+                                                DragGesture(minimumDistance: 10).onChanged { drag in
+                                                    if drag.translation.width < -30, abs(drag.translation.width) > abs(drag.translation.height) * 1.5 {
                                                         openEvolution()
                                                     }
                                                 }
@@ -934,7 +936,7 @@ private struct StatisticsPane: View {
     }
 
     /// Quick off the mark, so the page is already moving with the finger.
-    private static let slide = Animation.easeOut(duration: 0.25)
+    private static let slide = Animation.easeOut(duration: 0.18)
 
     /// A tall, flat arrow down the right edge of the playing stats that slides
     /// their evolution in.

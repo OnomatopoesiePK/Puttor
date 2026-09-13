@@ -12,6 +12,9 @@ struct CollapsibleStatSection<Content: View>: View {
     let title: String
     /// Localisation key for an explanation, shown behind an (ⓘ) in the corner.
     var infoKey: String?
+    /// Square on the right, for a section that runs on past the screen's edge
+    /// into something more.
+    var opensTrailingEdge: Bool
     private let content: () -> Content
 
     @AppStorage private var isExpanded: Bool
@@ -21,10 +24,12 @@ struct CollapsibleStatSection<Content: View>: View {
         storageKey: String,
         defaultExpanded: Bool = true,
         infoKey: String? = nil,
+        opensTrailingEdge: Bool = false,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.title = title
         self.infoKey = infoKey
+        self.opensTrailingEdge = opensTrailingEdge
         self.content = content
         _isExpanded = AppStorage(wrappedValue: defaultExpanded, AppStorageKeys.statsSection(storageKey))
     }
@@ -68,7 +73,18 @@ struct CollapsibleStatSection<Content: View>: View {
         }
         .frame(maxWidth: .infinity)
         .padding(Theme.Spacing.md)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
+        .background(outline.fill(Theme.surface))
+        .overlay(outline.stroke(Theme.border, lineWidth: 1))
+    }
+
+    private var outline: UnevenRoundedRectangle {
+        let radius = Theme.Radius.lg
+        let trailing = opensTrailingEdge ? 0 : radius
+        return UnevenRoundedRectangle(
+            topLeadingRadius: radius,
+            bottomLeadingRadius: radius,
+            bottomTrailingRadius: trailing,
+            topTrailingRadius: trailing
+        )
     }
 }

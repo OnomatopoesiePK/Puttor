@@ -1471,6 +1471,10 @@ struct PuttorTests {
         scored.totalPutts = 31
         scored.sgTotal = -1.5
         scored.pcgTotal = 0.5
+        scored.birdiesOrBetter = 2
+        scored.pars = 10
+        scored.bogeys = 5
+        scored.doublesOrWorse = 1
         var unscored = RoundStats()
         unscored.holes = 18
         unscored.threePuttHoles = 4
@@ -1480,11 +1484,12 @@ struct PuttorTests {
 
         let now = Date()
         let series = PlayingStatsPoint.series([
-            (date: now, stats: unscored, tracksScore: false),
-            (date: now.addingTimeInterval(-86_400), stats: scored, tracksScore: true),
+            (date: now, stats: unscored, tracksScore: false, nineHoles: true),
+            (date: now.addingTimeInterval(-86_400), stats: scored, tracksScore: true, nineHoles: false),
         ])
 
         #expect(series.map(\.id) == [0, 1])
+        #expect(series.map(\.isNineHoles) == [false, true])
         #expect(series[0].values[.score] == 12)
         #expect(series[0].values[.gir] == Double(6) / 18 * 100)
         #expect(series[0].values[.threePutts] == 2)
@@ -1498,6 +1503,65 @@ struct PuttorTests {
         #expect(series[0].values[.totalPutts] == 31)
         #expect(series[1].values[.sg] == 2)
         #expect(series[1].values[.totalPutts] == 34)
+        // Holes by score come off the score reference, like the score itself.
+        #expect(series[0].values[.birdies] == 2)
+        #expect(series[0].values[.pars] == 10)
+        #expect(series[0].values[.bogeys] == 5)
+        #expect(series[0].values[.doubles] == 1)
+        #expect(series[1].values[.birdies] == nil)
+    }
+
+    /// Every scored hole is counted once, by how it finished, and the counts
+    /// add up across rounds.
+    @MainActor
+    @Test func holesAreCountedByScore() async throws {
+        let putts = [
+            Putt(holeNumber: 1, puttNumber: 1, distanceM: 3, puttFor: .birdie, result: .holed),
+            Putt(holeNumber: 2, puttNumber: 1, distanceM: 6, puttFor: .birdie, result: .short),
+            Putt(holeNumber: 2, puttNumber: 2, distanceM: 1, puttFor: .par, result: .holed),
+            Putt(holeNumber: 3, puttNumber: 1, distanceM: 4, puttFor: .par, result: .long),
+            Putt(holeNumber: 3, puttNumber: 2, distanceM: 1, puttFor: .bogey, result: .holed),
+            Putt(holeNumber: 4, puttNumber: 1, distanceM: 9, puttFor: .par, result: .short),
+            Putt(holeNumber: 4, puttNumber: 2, distanceM: 2, puttFor: .bogey, result: .left),
+            Putt(holeNumber: 4, puttNumber: 3, distanceM: 1, puttFor: .double, result: .holed),
+        ]
+        let stats = RoundStats.compute(putts: putts, useFeet: false)
+        #expect(stats.birdiesOrBetter == 1)
+        #expect(stats.pars == 1)
+        #expect(stats.bogeys == 1)
+        #expect(stats.doublesOrWorse == 1)
+
+        let merged = RoundStats.merge([stats, stats])
+        #expect(merged.birdiesOrBetter == 2)
+        #expect(merged.pars == 2)
+        #expect(merged.bogeys == 2)
+        #expect(merged.doublesOrWorse == 2)
+    }
+
+    /// The charts keep the order they were put in and stay out once taken
+    /// out, through the stored text; one the text never knew shows at the end.
+    @Test func evolutionChartLayoutKeepsItsOrderAndWhatWasTakenOut() async throws {
+        let fresh = EvolutionChartLayout(text: "")
+        #expect(fresh.shown == PlayingStatsMetric.allCases)
+        #expect(fresh.hidden.isEmpty)
+
+        var layout = fresh.moving(from: IndexSet(integer: 2), to: 0)
+        #expect(layout.shown.first == .score)
+        layout = layout.hiding(at: IndexSet(integer: 0))
+        #expect(!layout.shown.contains(.score))
+        #expect(layout.hidden == [.score])
+
+        let stored = EvolutionChartLayout(text: layout.text)
+        #expect(stored == layout)
+
+        layout = stored.showing(.score)
+        #expect(layout.shown.last == .score)
+        #expect(layout.hidden.isEmpty)
+
+        let older = EvolutionChartLayout(text: "pcg,-sg,nonsense")
+        #expect(older.shown.first == .pcg)
+        #expect(older.hidden == [.sg])
+        #expect(older.shown.count == PlayingStatsMetric.allCases.count - 1)
     }
 
     // MARK: - Coach tips

@@ -114,6 +114,22 @@ struct RoundStats {
     /// Holes the score could be derived for — the divisor behind any average.
     var scoredHoles: Int = 0
 
+    /// The scored holes by how they finished: under par, level, one over, and
+    /// two or more over.
+    var birdiesOrBetter: Int = 0
+    var pars: Int = 0
+    var bogeys: Int = 0
+    var doublesOrWorse: Int = 0
+
+    mutating func countHole(scored score: Int) {
+        switch score {
+        case ..<0: birdiesOrBetter += 1
+        case 0: pars += 1
+        case 1: bogeys += 1
+        default: doublesOrWorse += 1
+        }
+    }
+
     var girPercent: Double { holes > 0 ? Double(girCount) / Double(holes) * 100 : 0 }
     var scramblePercent: Double { scrambleAttempts > 0 ? Double(scrambleSuccesses) / Double(scrambleAttempts) * 100 : 0 }
 
@@ -258,9 +274,10 @@ struct RoundStats {
         for hole in pickedUp {
             let sentinel = putts.first { $0.holeNumber == hole && $0.isPickUp }
             let score = sentinel?.pickUpScore
-            stats.scoreRelativeToPar += score?.strokesRelativeToPar
-                ?? Putt.lowestPickUpScore.strokesRelativeToPar
+            let relative = score?.strokesRelativeToPar ?? Putt.lowestPickUpScore.strokesRelativeToPar
+            stats.scoreRelativeToPar += relative
             stats.scoredHoles += 1
+            stats.countHole(scored: relative)
             if score == nil { stats.pickedUpWithoutScore += 1 }
         }
 
@@ -276,6 +293,7 @@ struct RoundStats {
             if let score = holeScoreRelativeToPar(holePutts) {
                 stats.scoreRelativeToPar += score
                 stats.scoredHoles += 1
+                stats.countHole(scored: score)
             }
 
             if category.isGreenInRegulation {
@@ -410,6 +428,10 @@ struct RoundStats {
         }
 
         merged.lipOutCount = list.reduce(0) { $0 + $1.lipOutCount }
+        merged.birdiesOrBetter = list.reduce(0) { $0 + $1.birdiesOrBetter }
+        merged.pars = list.reduce(0) { $0 + $1.pars }
+        merged.bogeys = list.reduce(0) { $0 + $1.bogeys }
+        merged.doublesOrWorse = list.reduce(0) { $0 + $1.doublesOrWorse }
         merged.girCount = list.reduce(0) { $0 + $1.girCount }
         merged.girConversions = list.reduce(0) { $0 + $1.girConversions }
         merged.girPutts = list.reduce(0) { $0 + $1.girPutts }
