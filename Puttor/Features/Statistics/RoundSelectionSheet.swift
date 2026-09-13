@@ -94,7 +94,7 @@ struct RoundSelectionSheet: View {
                 .foregroundStyle(Theme.textMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.horizontal, Theme.Spacing.edge)
         .padding(.vertical, Theme.Spacing.sm)
     }
 
@@ -128,7 +128,7 @@ struct RoundSelectionSheet: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, Theme.Spacing.lg)
+            .padding(.horizontal, Theme.Spacing.edge)
             .padding(.bottom, Theme.Spacing.lg)
         }
     }

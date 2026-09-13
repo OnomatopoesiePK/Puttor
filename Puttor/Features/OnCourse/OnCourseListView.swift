@@ -32,7 +32,7 @@ struct OnCourseListView: View {
                                 roundCard(round)
                                     .listRowBackground(Theme.background)
                                     .listRowSeparator(.hidden)
-                                    .listRowInsets(EdgeInsets(top: 4, leading: Theme.Spacing.lg, bottom: 4, trailing: Theme.Spacing.lg))
+                                    .listRowInsets(EdgeInsets(top: 4, leading: Theme.Spacing.edge, bottom: 4, trailing: Theme.Spacing.edge))
                             }
                         } header: {
                             Text(L("onCourse.recentRounds"))
@@ -42,7 +42,7 @@ struct OnCourseListView: View {
                                 // Headers carry their own default insets, which
                                 // don't match the ones set on the rows — without
                                 // this the heading sits left of the cards.
-                                .listRowInsets(EdgeInsets(top: 10, leading: Theme.Spacing.lg, bottom: 6, trailing: Theme.Spacing.lg))
+                                .listRowInsets(EdgeInsets(top: 10, leading: Theme.Spacing.edge, bottom: 6, trailing: Theme.Spacing.edge))
                                 .textCase(nil)
                         }
                     }

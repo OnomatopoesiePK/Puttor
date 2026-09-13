@@ -190,7 +190,8 @@ struct RoundInputView: View {
                 slopeField(session)
                 resultField(session)
             }
-            .padding(Theme.Spacing.md)
+            .padding(.horizontal, Theme.Spacing.edge)
+            .padding(.vertical, Theme.Spacing.md)
         }
     }
 
@@ -200,7 +201,7 @@ struct RoundInputView: View {
         GeometryReader { geo in
             // The controls end up the width of the column above them, so the
             // grid, the board and the buttons share one bottom line.
-            let columnWidth = max(120, (geo.size.width - Theme.Spacing.md * 3) / 2)
+            let columnWidth = max(120, (geo.size.width - Theme.Spacing.edge * 2 - Theme.Spacing.md) / 2)
             scrollingFields(session, columnWidth: columnWidth)
                 .overlay(alignment: .topLeading) { landscapeTopBar(session) }
                 .overlay(alignment: .bottomTrailing) {
@@ -230,7 +231,7 @@ struct RoundInputView: View {
                     resultField(session, boardSize: 220)
                 }
             }
-            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.horizontal, Theme.Spacing.edge)
             // Room at the top for the floating corners; none at the bottom, so
             // scrolling stops at the foot of the slope grid rather than on
             // empty space below it.
@@ -287,7 +288,7 @@ struct RoundInputView: View {
             totalCount(session)
             endButton()
         }
-        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.horizontal, Theme.Spacing.edge)
         .padding(.vertical, Theme.Spacing.sm)
         .overlay(Rectangle().fill(Theme.border).frame(height: 1), alignment: .bottom)
     }
@@ -312,7 +313,7 @@ struct RoundInputView: View {
                 endButton()
             }
         }
-        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.horizontal, Theme.Spacing.edge)
         .padding(.top, 6)
     }
 
@@ -435,7 +436,7 @@ struct RoundInputView: View {
         // The width goes on the island itself; padding outside it would eat
         // into the column width the board above is drawn at.
         .frame(width: width)
-        .padding(.trailing, Theme.Spacing.md)
+        .padding(.trailing, Theme.Spacing.edge)
         .padding(.bottom, 6)
     }
 

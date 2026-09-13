@@ -50,7 +50,8 @@ struct CoachView: View {
 
                     recommendationsCard
                 }
-                .padding(Theme.Spacing.lg)
+                .padding(.horizontal, Theme.Spacing.edge)
+                .padding(.vertical, Theme.Spacing.lg)
             }
             .background(Theme.background.ignoresSafeArea())
             .safeAreaInset(edge: .top) {

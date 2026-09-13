@@ -91,7 +91,8 @@ struct RoundInputQuickView: View {
                 }
 
                 }
-                .padding(Theme.Spacing.lg)
+                .padding(.horizontal, Theme.Spacing.edge)
+                .padding(.vertical, Theme.Spacing.lg)
             }
             .overlay(alignment: .top) {
                 InputStatusBanner(

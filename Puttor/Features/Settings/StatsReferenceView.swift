@@ -47,7 +47,8 @@ struct StatsReferenceView: View {
 
                 source
             }
-            .padding(Theme.Spacing.lg)
+            .padding(.horizontal, Theme.Spacing.edge)
+            .padding(.vertical, Theme.Spacing.lg)
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle(L("reference.title"))

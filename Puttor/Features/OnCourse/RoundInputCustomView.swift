@@ -99,7 +99,8 @@ struct RoundInputCustomView: View {
                         resultContent(session)
                     }
                 }
-                .padding(Theme.Spacing.md)
+                .padding(.horizontal, Theme.Spacing.edge)
+                .padding(.vertical, Theme.Spacing.md)
             }
             .overlay(alignment: .top) {
                 InputStatusBanner(

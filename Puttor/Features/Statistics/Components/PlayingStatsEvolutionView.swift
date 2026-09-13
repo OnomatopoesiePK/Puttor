@@ -3,9 +3,9 @@
 //  Puttor
 //
 //  How the playing stats moved from round to round: one chart per figure,
-//  stacked, each on its own scale and in its own colour, with the rounds along
-//  a single axis at the bottom. Two charts fill the height between the filters
-//  and the tab bar, in portrait and in landscape alike.
+//  stacked straight on the background, each on its own scale and in its own
+//  colour, with the rounds along a single axis at the bottom. About three
+//  charts fill a screen, in portrait and in landscape alike.
 //
 
 import SwiftUI
@@ -59,18 +59,21 @@ struct PlayingStatsEvolutionView: View {
     let useFeet: Bool
     let onBack: () -> Void
 
-    /// Room for the values beside every chart — the same for all of them, so
-    /// the rounds line up from the top chart to the bottom one.
-    private static let yLabelWidth: CGFloat = 38
+    /// The height of the scroll view, which the charts share out. Read off the
+    /// scroll view's own frame, which its content has no say in, so a turn of
+    /// the screen changes it once and the charts simply follow.
+    @State private var viewportHeight: CGFloat = 0
+
+    private static let chartsPerScreen: CGFloat = 3
+    private static let spacing: CGFloat = Theme.Spacing.md
     /// The strip down the left edge that holds the way back.
-    private static let backStripWidth: CGFloat = 30
-    private static let roundAxisHeight: CGFloat = 22
+    private static let backStripWidth: CGFloat = 20
+    /// Under the last chart, for the dates.
+    private static let roundAxisHeight: CGFloat = 16
 
     var body: some View {
-        let spacing = Theme.Spacing.md
-
         ScrollView {
-            VStack(spacing: spacing) {
+            VStack(alignment: .leading, spacing: Self.spacing) {
                 if points.count < 2 {
                     Text(L("evolution.needMore"))
                         .font(.system(size: 13))
@@ -83,23 +86,19 @@ struct PlayingStatsEvolutionView: View {
                     let metrics = PlayingStatsMetric.allCases
                     ForEach(Array(metrics.enumerated()), id: \.element) { index, metric in
                         let isLast = index == metrics.count - 1
-                        chartCard(metric, colour: palette[index % palette.count], showsRounds: isLast)
-                            // Two charts to a screen: the scroll view's own
-                            // height, less the gaps above and between them,
-                            // halved. Read off the scroll view as a container
-                            // rather than a GeometryReader around it, which
-                            // kept resizing the scroll view once the screen
-                            // turned and never let it settle.
-                            .containerRelativeFrame(.vertical) { length, _ in
-                                max(110, (length - spacing * 2) / 2) + (isLast ? Self.roundAxisHeight : 0)
-                            }
+                        chart(metric, colour: palette[index % palette.count], showsRounds: isLast)
+                            .frame(height: chartHeight + (isLast ? Self.roundAxisHeight : 0))
                     }
                 }
             }
-            .padding(.vertical, spacing)
+            .padding(.top, Theme.Spacing.sm)
+            .padding(.bottom, Self.spacing)
             .padding(.leading, Self.backStripWidth)
-            .padding(.trailing, Theme.Spacing.lg)
-            .frame(maxWidth: .infinity)
+            .padding(.trailing, Theme.Spacing.edge)
+            .frame(minWidth: 0, maxWidth: .infinity)
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height.rounded(.down) } action: { height in
+            viewportHeight = height
         }
         .overlay(alignment: .leading) { backButton }
         // A swipe to the right goes back, as the arrow does.
@@ -113,14 +112,21 @@ struct PlayingStatsEvolutionView: View {
         .background(Theme.background)
     }
 
+    /// A third of the screen each, less the gaps between them.
+    private var chartHeight: CGFloat {
+        guard viewportHeight > 0 else { return 160 }
+        let free = viewportHeight - Theme.Spacing.sm - Self.spacing * Self.chartsPerScreen
+        return max(80, (free / Self.chartsPerScreen).rounded(.down))
+    }
+
     // MARK: - Pieces
 
-    private func chartCard(_ metric: PlayingStatsMetric, colour: Color, showsRounds: Bool) -> some View {
+    private func chart(_ metric: PlayingStatsMetric, colour: Color, showsRounds: Bool) -> some View {
         let series = points.compactMap { point in
             point.values[metric].map { (index: point.id, value: shown($0, metric)) }
         }
 
-        return VStack(alignment: .leading, spacing: 6) {
+        return VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
                 Text(L(metric.titleKey))
                     .font(.system(size: 10, weight: .bold))
@@ -145,7 +151,8 @@ struct PlayingStatsEvolutionView: View {
                 ticks: yTicks(domain),
                 gridRounds: roundTicks,
                 colour: colour,
-                valueText: { text($0, metric, onAxis: true) },
+                axisText: { text($0, metric, onAxis: true) },
+                pointText: { text($0, metric) },
                 // The rounds are named once, under the last chart, spread the
                 // same way as in every chart above.
                 roundLabels: showsRounds
@@ -163,15 +170,12 @@ struct PlayingStatsEvolutionView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(L(metric.titleKey))
         }
-        .padding(10)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
     private var backButton: some View {
         Button(action: onBack) {
             Image(systemName: "chevron.compact.left")
-                .font(.system(size: 40, weight: .regular))
+                .font(.system(size: 34, weight: .regular))
                 .foregroundStyle(Theme.primary)
                 .frame(width: Self.backStripWidth, height: 160)
                 .contentShape(Rectangle())
@@ -255,29 +259,33 @@ struct PlayingStatsEvolutionView: View {
         metric == .proximity && useFeet ? UnitConverter.metresToFeet(value) : value
     }
 
+    /// A figure as the chart writes it: whole numbers without decimals, the
+    /// putts to two places beside a point and one on the axis.
     private func text(_ value: Double, _ metric: PlayingStatsMetric, onAxis: Bool = false) -> String {
         let whole = abs(value - value.rounded()) < 0.001
         switch metric {
         case .score:
             if abs(value) < 0.05 { return "E" }
-            let number = onAxis && whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
+            let number = whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
             return value > 0 ? "+\(number)" : number
         case .gir, .conversion, .scramble:
             return "\(Int(value.rounded()))%"
         case .puttsGir, .puttsNoGir:
             return String(format: onAxis ? "%.1f" : "%.2f", value)
         case .threePutts, .lipOuts:
-            return onAxis && whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
+            return whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
         case .proximity:
-            return String(format: "%.1f", value) + (useFeet ? " ft" : " m")
+            let number = onAxis && whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
+            return number + (useFeet ? " ft" : " m")
         }
     }
 }
 
-/// A line through the rounds, drawn on a plain canvas. Swift Charts rebuilt
-/// itself on every frame once the screen started turning and never stopped,
-/// so this draws its own few marks: a fixed band for the values, the rounds
-/// spread evenly, the same in every chart so they line up down the stack.
+/// A line through the rounds, drawn on a plain canvas: the values down the
+/// left edge, the rounds spread evenly — the same in every chart, so they line
+/// up down the stack — and the highest and lowest value written at their
+/// points. A canvas has no size of its own to negotiate; it draws into
+/// whatever it is given.
 private struct EvolutionChart: View {
     let series: [(index: Int, value: Double)]
     let rounds: Int
@@ -285,22 +293,26 @@ private struct EvolutionChart: View {
     let ticks: [Double]
     let gridRounds: [Int]
     let colour: Color
-    let valueText: (Double) -> String
+    let axisText: (Double) -> String
+    let pointText: (Double) -> String
     let roundLabels: [(index: Int, text: String)]
 
-    /// The band left of the plot the values sit in.
-    private static let valueBand: CGFloat = 42
+    /// The band at the left edge the values sit in.
+    private static let valueBand: CGFloat = 30
+    /// Above and below the line: room for the numbers at its highest and
+    /// lowest points.
+    private static let markRoom: CGFloat = 14
     /// The band under the plot the dates sit in, on the last chart.
-    private static let roundBand: CGFloat = 16
+    private static let roundBand: CGFloat = 14
 
     var body: some View {
         Canvas { context, size in
             let bottom = roundLabels.isEmpty ? 0 : Self.roundBand
             let plot = CGRect(
                 x: Self.valueBand,
-                y: 5,
+                y: Self.markRoom,
                 width: max(1, size.width - Self.valueBand - 4),
-                height: max(1, size.height - 10 - bottom)
+                height: max(1, size.height - Self.markRoom * 2 - bottom)
             )
             let span = max(domain.upperBound - domain.lowerBound, 0.0001)
             let slots = Double(max(1, rounds))
@@ -327,9 +339,9 @@ private struct EvolutionChart: View {
                 line.addLine(to: CGPoint(x: plot.maxX, y: y))
                 context.stroke(line, with: .color(grid), lineWidth: 0.5)
                 context.draw(
-                    Text(valueText(tick)).font(.system(size: 9)).foregroundStyle(Theme.textMuted),
-                    at: CGPoint(x: plot.minX - 6, y: y),
-                    anchor: .trailing
+                    Text(axisText(tick)).font(.system(size: 9)).foregroundStyle(Theme.textMuted),
+                    at: CGPoint(x: 0, y: y),
+                    anchor: .leading
                 )
             }
 
@@ -350,10 +362,29 @@ private struct EvolutionChart: View {
                 context.fill(Path(ellipseIn: CGRect(x: point.x - 3.5, y: point.y - 3.5, width: 7, height: 7)), with: .color(colour))
             }
 
+            // The highest value over its point, the lowest under its own, both
+            // kept clear of the chart's sides.
+            var marks: [(item: (index: Int, value: Double), above: Bool)] = []
+            if let highest = series.max(by: { $0.value < $1.value }) {
+                marks.append((highest, true))
+                if let lowest = series.min(by: { $0.value < $1.value }), lowest.value < highest.value {
+                    marks.append((lowest, false))
+                }
+            }
+            for mark in marks {
+                let x = min(max(xPosition(mark.item.index), plot.minX + 14), size.width - 16)
+                let y = yPosition(mark.item.value)
+                context.draw(
+                    Text(pointText(mark.item.value)).font(.system(size: 10, weight: .bold)).foregroundStyle(colour),
+                    at: CGPoint(x: x, y: mark.above ? y - 5 : y + 5),
+                    anchor: mark.above ? .bottom : .top
+                )
+            }
+
             for label in roundLabels {
                 context.draw(
                     Text(label.text).font(.system(size: 9)).foregroundStyle(Theme.textMuted),
-                    at: CGPoint(x: xPosition(label.index), y: plot.maxY + 4),
+                    at: CGPoint(x: xPosition(label.index), y: plot.maxY + Self.markRoom),
                     anchor: .top
                 )
             }

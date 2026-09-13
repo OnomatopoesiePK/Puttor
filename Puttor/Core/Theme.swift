@@ -94,6 +94,9 @@ enum Theme {
         static let lg: CGFloat = 24
         static let xl: CGFloat = 32
         static let xxl: CGFloat = 48
+        /// Between the screen's edge and the boxes along it: the same gap
+        /// the boxes keep from one another.
+        static let edge: CGFloat = sm
     }
 
     enum Radius {

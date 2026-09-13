@@ -77,7 +77,8 @@ struct GameResultView<Breakdown: View>: View {
                 .buttonStyle(.plain)
                 .padding(.top, Theme.Spacing.md)
             }
-            .padding(Theme.Spacing.lg)
+            .padding(.horizontal, Theme.Spacing.edge)
+            .padding(.vertical, Theme.Spacing.lg)
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)

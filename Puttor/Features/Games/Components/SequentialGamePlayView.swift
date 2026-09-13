@@ -45,7 +45,7 @@ struct SequentialGamePlayView: View {
                 onSuccess: { mark(true) },
                 onFail: { mark(false) }
             )
-            .padding(.horizontal, Theme.Spacing.lg)
+            .padding(.horizontal, Theme.Spacing.edge)
             .padding(.bottom, Theme.Spacing.lg)
         }
         .background(Theme.background.ignoresSafeArea())
@@ -96,7 +96,7 @@ struct SequentialGamePlayView: View {
         .padding(Theme.Spacing.xl)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(Theme.border, lineWidth: 1))
-        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.horizontal, Theme.Spacing.edge)
     }
 
     private func mark(_ success: Bool) {

@@ -178,6 +178,138 @@ final class PuttorUITests: XCTestCase {
         XCTAssertTrue(arrow.isHittable)
     }
 
+    /// Compare in landscape splits the statistics into two panes; turning
+    /// back to portrait must leave the single pane whole again.
+    @MainActor
+    func testCompareInLandscapeAndBack() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+        XCTAssertTrue(app.staticTexts["STROKES GAINED PUTTING"].waitForExistence(timeout: 10))
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(3)
+        snapshot("1 landscape")
+
+        let compare = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'compare'")).firstMatch
+        XCTAssertTrue(compare.waitForExistence(timeout: 5))
+        compare.tap()
+        sleep(3)
+        snapshot("2 compare")
+        hierarchy(app, "compare hierarchy")
+
+        // Two panes, each inside the screen, and the title row still there.
+        let headings = app.staticTexts.matching(NSPredicate(format: "label == 'STROKES GAINED PUTTING'"))
+        XCTAssertEqual(headings.count, 2)
+        let screen = app.windows.firstMatch.frame
+        for pane in headings.allElementsBoundByIndex {
+            XCTAssertGreaterThanOrEqual(pane.frame.minX, screen.minX - 1, "heading \(pane.frame), screen \(screen)")
+            XCTAssertLessThanOrEqual(pane.frame.maxX, screen.maxX + 1, "heading \(pane.frame), screen \(screen)")
+        }
+        XCTAssertTrue(compare.isHittable, "compare at \(compare.frame)")
+
+        XCUIDevice.shared.orientation = .portrait
+        sleep(3)
+        snapshot("3 portrait again")
+        hierarchy(app, "portrait hierarchy")
+
+        let heading = app.staticTexts["STROKES GAINED PUTTING"]
+        let window = app.windows.firstMatch.frame
+        XCTAssertTrue(heading.exists)
+        XCTAssertLessThanOrEqual(heading.frame.maxX, window.maxX + 1, "heading \(heading.frame), window \(window)")
+
+        // Turned again, compare starts closed.
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(3)
+        snapshot("4 landscape again")
+        XCTAssertEqual(headings.count, 1)
+        XCUIDevice.shared.orientation = .portrait
+        sleep(2)
+    }
+
+    /// Turning the screen while the evolution is open and going back in the
+    /// new orientation must leave the app answering, both ways round.
+    @MainActor
+    func testEvolutionTurnThenGoBack() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+
+        let open = app.buttons["Show how these figures moved"]
+        let back = app.buttons["Back to the statistics"]
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        bringIntoReach(open, in: app)
+        open.tap()
+        XCTAssertTrue(back.waitForExistence(timeout: 5))
+        snapshot("1 evolution portrait")
+
+        // Portrait to landscape, then back while turned.
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(3)
+        snapshot("2 evolution landscape")
+        var started = Date()
+        back.tap()
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        XCTAssertLessThan(Date().timeIntervalSince(started), 8, "going back in landscape took too long")
+        sleep(2)
+        snapshot("3 statistics landscape")
+        hierarchy(app, "statistics landscape")
+
+        // Landscape to portrait, then back with a swipe.
+        bringIntoReach(open, in: app)
+        open.tap()
+        XCTAssertTrue(back.waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("4 evolution opened in landscape")
+        XCUIDevice.shared.orientation = .portrait
+        sleep(3)
+        snapshot("5 evolution portrait again")
+        started = Date()
+        app.swipeRight()
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        XCTAssertLessThan(Date().timeIntervalSince(started), 8, "going back in portrait took too long")
+        sleep(2)
+        snapshot("6 statistics portrait")
+
+        // Still answering: the tabs switch.
+        app.tabBars.buttons["Coach"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Stats"].waitForExistence(timeout: 5))
+        snapshot("7 coach")
+    }
+
+    /// Short drags until the element sits clear of the tab bar — or, in
+    /// landscape, where the tabs float up top, of the bottom of the screen.
+    private func bringIntoReach(_ element: XCUIElement, in app: XCUIApplication) {
+        let tabBar = app.tabBars.firstMatch
+        let floor = tabBar.exists && tabBar.frame.minY > 200 ? tabBar.frame.minY : app.windows.firstMatch.frame.maxY
+        var drags = 0
+        while (element.frame.midY > floor - 60 || !element.isHittable) && drags < 14 {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)))
+            drags += 1
+        }
+        sleep(1)
+    }
+
+    private func hierarchy(_ app: XCUIApplication, _ name: String) {
+        let attachment = XCTAttachment(string: app.debugDescription)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     private func snapshot(_ name: String) {
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = name

@@ -141,7 +141,7 @@ struct RoundSetupView: View {
                     }
 
                 }
-                .padding(.horizontal, Theme.Spacing.lg)
+                .padding(.horizontal, Theme.Spacing.edge)
                 .padding(.top, 8)
                 .padding(.bottom, Theme.Spacing.lg)
             }
@@ -392,7 +392,7 @@ struct RoundSetupView: View {
     /// out behind it so it never reads as one of them.
     private var floatingStartButton: some View {
         startButton
-            .padding(.horizontal, Theme.Spacing.lg)
+            .padding(.horizontal, Theme.Spacing.edge)
             .padding(.top, Theme.Spacing.lg)
             .padding(.bottom, Theme.Spacing.sm)
             .background(

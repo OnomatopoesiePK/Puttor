@@ -144,7 +144,7 @@ private struct GateTallyEntryView: View {
             }
             .buttonStyle(.plain)
             .disabled(madeCount == nil)
-            .padding(.horizontal, Theme.Spacing.lg)
+            .padding(.horizontal, Theme.Spacing.edge)
             .padding(.bottom, Theme.Spacing.lg)
         }
         .background(Theme.background.ignoresSafeArea())

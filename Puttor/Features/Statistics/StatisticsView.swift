@@ -597,11 +597,25 @@ private struct StatisticsPane: View {
                                                         }
                                                         scoreCoverageNote(data)
                                                     }
+                                                    // A lazy grid asks for no width of its own: without
+                                                    // this the tiles shrank to a strip whenever no note
+                                                    // stood under them.
+                                                    .frame(maxWidth: .infinity)
                                                     evolutionArrow
                                                 }
+                                                // The arrow out into the box's margin, against its edge.
+                                                .padding(.trailing, -Theme.Spacing.sm)
                                             }
                                             // Out to the screen's right edge, where the arrow to the evolution sits.
-                                            .padding(.trailing, -(dense ? Theme.Spacing.sm : Theme.Spacing.lg))
+                                            .padding(.trailing, -Theme.Spacing.edge)
+                                            // Or pushed across with a swipe to the left.
+                                            .simultaneousGesture(
+                                                DragGesture(minimumDistance: 30).onEnded { drag in
+                                                    if drag.translation.width < -80, abs(drag.translation.width) > abs(drag.translation.height) * 1.5 {
+                                                        openEvolution()
+                                                    }
+                                                }
+                                            )
                                         }
 
                                         CollapsibleStatSection(title: sectionTitle(L("stats.scoreVsPutting"), marked: data.hasRoundsWithoutScore), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
@@ -738,13 +752,16 @@ private struct StatisticsPane: View {
                                         }
 
                                     }
-                                    .padding(dense ? Theme.Spacing.sm : Theme.Spacing.lg)
+                                    .padding(.horizontal, Theme.Spacing.edge)
+                                    .padding(.vertical, dense ? Theme.Spacing.sm : Theme.Spacing.lg)
                                 }
                             }
-                            // Exactly as wide as the scroll view, whatever sits inside:
-                            // content wider than the screen let the whole tab be
-                            // dragged sideways.
-                            .containerRelativeFrame(.horizontal)
+                            // As wide as the scroll view is offered and never wider, so
+                            // the tab can't be dragged sideways. Not containerRelativeFrame:
+                            // that answered with the width the scroll view last had, the
+                            // scroll view took its own width from that answer, and once the
+                            // screen turned the two kept resizing each other and froze the app.
+                            .frame(minWidth: 0, maxWidth: .infinity)
                         }
                         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
                         .scrollPosition($statsScroll)
@@ -831,7 +848,7 @@ private struct StatisticsPane: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.horizontal, Theme.Spacing.edge)
         .padding(.bottom, 6)
     }
 
@@ -860,7 +877,7 @@ private struct StatisticsPane: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.horizontal, Theme.Spacing.edge)
         .padding(.bottom, 6)
     }
 
@@ -873,7 +890,7 @@ private struct StatisticsPane: View {
                     filterChip(L(mode.labelKey), selected: filterMode == mode) { filterMode = mode }
                 }
             }
-            .padding(.horizontal, dense ? Theme.Spacing.sm : Theme.Spacing.lg)
+            .padding(.horizontal, Theme.Spacing.edge)
             // Breathing room inside the scroll view, so the capsule outlines
             // aren't clipped by its bounds.
             .padding(.vertical, 6)
@@ -985,7 +1002,7 @@ private struct StatisticsPane: View {
         .padding(.vertical, Theme.Spacing.sm)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-        .padding(.horizontal, dense ? Theme.Spacing.sm : Theme.Spacing.lg)
+        .padding(.horizontal, Theme.Spacing.edge)
         .padding(.bottom, 6)
     }
 
@@ -1171,7 +1188,7 @@ private struct StatisticsPane: View {
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.textMuted)
         }
-        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.horizontal, Theme.Spacing.edge)
         .padding(.bottom, 6)
     }
 
@@ -1295,7 +1312,9 @@ private struct StatisticsPane: View {
 /// putter against another, or the rounds played in the wind against the calm
 /// ones.
 struct StatisticsView: View {
-    @AppStorage("statsCompareEnabled") private var comparing = false
+    /// Closed each time the screen turns: the second pane keeps its filters,
+    /// but landscape opens on the one pane until compare is asked for.
+    @State private var comparing = false
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     private var canCompare: Bool { verticalSizeClass == .compact }
@@ -1306,17 +1325,24 @@ struct StatisticsView: View {
                 header
 
                 if canCompare && comparing {
+                    // Half the width each, whatever their content would like:
+                    // left to ask, each pane took the width of a whole
+                    // landscape screen and pushed the title off the top.
                     HStack(spacing: 0) {
                         StatisticsPane(storageSuffix: "", dense: true)
+                            .frame(minWidth: 0, maxWidth: .infinity)
                         Rectangle().fill(Theme.border).frame(width: 1)
                         StatisticsPane(storageSuffix: "B", dense: true)
+                            .frame(minWidth: 0, maxWidth: .infinity)
                     }
                 } else {
                     StatisticsPane(storageSuffix: "")
+                        .frame(minWidth: 0, maxWidth: .infinity)
                 }
             }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
+            .onChange(of: verticalSizeClass) { comparing = false }
         }
     }
 

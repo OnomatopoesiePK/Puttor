@@ -203,7 +203,7 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 4)
                 }
-                .padding(.horizontal, Theme.Spacing.lg)
+                .padding(.horizontal, Theme.Spacing.edge)
                 .padding(.bottom, 40)
             }
             .background(Theme.background.ignoresSafeArea())
