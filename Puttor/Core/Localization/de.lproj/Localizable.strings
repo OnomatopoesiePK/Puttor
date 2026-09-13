@@ -940,7 +940,7 @@
 "summary.pickedUp" = "Ball aufgehoben — aus den Putt-Werten heraus.";
 "summary.puttedHoles" = "%ld mit Putts";
 "stats.svp.impactEvens" = "PUTTEN GLEICHT DEINE RUNDEN AUS";
-"stats.svp.note.separates" = "Mit Tour-Schnitt beim Putten lägen deine Runden enger beisammen — was eine gute Runde gut macht, ist also vor allem der Putter.";
+"stats.svp.note.separates" = "Mit Tour-Schnitt beim Putten lägen deine Runden enger beisammen — was eine gute Runde gut und eine schlechte Runde schlecht macht, ist also vor allem der Putter.";
 "stats.svp.note.evensGain" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe: an den Tagen, an denen das lange Spiel schlechter lief, hat der Putter am meisten gewonnen und die Karte zurückgeholt.";
 "stats.svp.note.evensLoss" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe: an den Tagen mit dem besten langen Spiel hat der Putter am meisten zurückgegeben.";
 "stats.svp.note.evensFlat" = "Deine Runden liegen enger beisammen, als das übrige Spiel allein sie ließe — der Putter gleicht die Ausschläge des langen Spiels aus.";

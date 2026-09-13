@@ -940,7 +940,7 @@
 "summary.pickedUp" = "Ball picked up — out of the putting figures.";
 "summary.puttedHoles" = "%ld with putts";
 "stats.svp.impactEvens" = "PUTTING EVENS YOUR ROUNDS OUT";
-"stats.svp.note.separates" = "With tour-average putting your rounds would sit closer together, so what makes a good round good is largely the putter.";
+"stats.svp.note.separates" = "With tour-average putting your rounds would sit closer together, so what makes a good round good and a bad round bad is largely the putter.";
 "stats.svp.note.evensGain" = "Your rounds sit closer together than the rest of your game alone would leave them: on the days the long game was off, the putter gained the most and pulled the card back.";
 "stats.svp.note.evensLoss" = "Your rounds sit closer together than the rest of your game alone would leave them: on the days the long game was best, the putter gave the most back.";
 "stats.svp.note.evensFlat" = "Your rounds sit closer together than the rest of your game alone would leave them — the putter is evening out how much the long game swings.";

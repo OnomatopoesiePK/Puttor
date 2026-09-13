@@ -940,7 +940,7 @@
 "summary.pickedUp" = "Bola recogida: fuera de los datos de putt.";
 "summary.puttedHoles" = "%ld con putts";
 "stats.svp.impactEvens" = "EL PUTT IGUALA TUS RONDAS";
-"stats.svp.note.separates" = "Con un putt de media del tour tus rondas quedarían más juntas, así que lo que hace buena a una buena ronda es sobre todo el putter.";
+"stats.svp.note.separates" = "Con un putt de media del tour tus rondas quedarían más juntas, así que lo que hace buena a una buena ronda y mala a una mala ronda es sobre todo el putter.";
 "stats.svp.note.evensGain" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: los días en que el juego largo falló, el putter fue el que más ganó y recuperó la tarjeta.";
 "stats.svp.note.evensLoss" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: los días de mejor juego largo, el putter fue el que más devolvió.";
 "stats.svp.note.evensFlat" = "Tus rondas quedan más juntas de lo que las dejaría el resto de tu juego: el putter compensa las oscilaciones del juego largo.";
