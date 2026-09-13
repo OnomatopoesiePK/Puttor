@@ -12,6 +12,10 @@ import SwiftData
 struct RoundSummaryView: View {
     let round: Round
     var onDone: () -> Void = {}
+    /// Straight over the list of rounds a swipe back does what the button does.
+    /// Straight after entering a round it would land back in the input
+    /// instead, so there it stays off.
+    var allowsSwipeBack = false
 
     @Environment(\.modelContext) private var modelContext
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
@@ -199,6 +203,7 @@ struct RoundSummaryView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationBarHidden(true)
+        .swipeBack(allowed: allowsSwipeBack)
         .navigationDestination(item: $editingHole) { hole in
             switch round.inputMode {
             case .quick:

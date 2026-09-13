@@ -111,6 +111,9 @@ struct CustomModeSettingsView: View {
         .navigationTitle(L("custom.title"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        // Swiped back like any other screen, unless there are changes to ask
+        // about: then the swipe asks, as the button does.
+        .swipeBack(allowed: !(isEditing && hasPendingChanges)) { showUnsavedConfirm = true }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {

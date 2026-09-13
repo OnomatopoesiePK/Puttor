@@ -11,7 +11,9 @@
 import SwiftUI
 
 enum PlayingStatsMetric: String, CaseIterable, Identifiable {
-    case score, gir, conversion, scramble, puttsGir, puttsNoGir, threePutts, lipOuts, proximity
+    // Top to bottom as the charts stack: the putting figures first, then the
+    // round's, the total just above the putts it splits into.
+    case sg, pcg, score, gir, conversion, scramble, totalPutts, puttsGir, puttsNoGir, threePutts, lipOuts, proximity
 
     var id: String { rawValue }
     var titleKey: String { "evolution.\(rawValue)" }
@@ -37,6 +39,9 @@ struct PlayingStatsPoint: Identifiable, Equatable {
                 let stats = round.stats
                 // Counted from the putts alone, so every round has them.
                 var values: [PlayingStatsMetric: Double] = [
+                    .sg: stats.sgTotal,
+                    .pcg: stats.pcgTotal,
+                    .totalPutts: Double(stats.totalPutts),
                     .threePutts: Double(stats.threePuttHoles),
                     .lipOuts: Double(stats.lipOutCount),
                 ]
@@ -92,7 +97,7 @@ struct PlayingStatsEvolutionView: View {
                     let metrics = PlayingStatsMetric.allCases
                     ForEach(Array(metrics.enumerated()), id: \.element) { index, metric in
                         let isLast = index == metrics.count - 1
-                        chart(metric, colour: palette[index % palette.count], showsRounds: isLast)
+                        chart(metric, colour: colour(for: metric), showsRounds: isLast)
                             .frame(height: chartHeight + (isLast ? Self.roundAxisHeight : 0))
                     }
                 }
@@ -107,10 +112,11 @@ struct PlayingStatsEvolutionView: View {
             viewportHeight = height
         }
         .overlay(alignment: .leading) { backButton }
-        // A swipe to the right goes back, as the arrow does.
+        // A swipe to the right goes back, as the arrow does: as soon as the
+        // swipe is clearly sideways, not once the finger lifts.
         .simultaneousGesture(
-            DragGesture(minimumDistance: 30).onEnded { drag in
-                if drag.translation.width > 80, drag.translation.width > abs(drag.translation.height) * 1.5 {
+            DragGesture(minimumDistance: 20).onChanged { drag in
+                if drag.translation.width > 50, drag.translation.width > abs(drag.translation.height) * 1.5 {
                     onBack()
                 }
             }
@@ -210,21 +216,26 @@ struct PlayingStatsEvolutionView: View {
         return Array(stride(from: 0, to: points.count, by: step))
     }
 
-    /// One colour per chart, bright on the dark theme and deeper on the light.
-    private var palette: [Color] {
-        let dark = ThemeManager.shared.isDark
-        let pairs: [(UInt32, UInt32)] = [
-            (0x3DBA6F, 0x1F7A45), // green
-            (0x6FA8FF, 0x1D5FCC), // blue
-            (0xFF5C6C, 0xD62839), // red
-            (0xFFB84D, 0xB86A0A), // amber
-            (0x5BE7C4, 0x0E8F73), // teal
-            (0xB08CFF, 0x6A3FC4), // violet
-            (0xFF9E7D, 0xC24A26), // orange
-            (0xF28AC8, 0xB0357A), // pink
-            (0xB6E36A, 0x5E8A12), // lime
-        ]
-        return pairs.map { Color(hex: dark ? $0.0 : $0.1) }
+    /// One colour per figure, bright on the dark theme and deeper on the
+    /// light — tied to the figure rather than its place, so a chart keeps its
+    /// colour when others join the stack.
+    private func colour(for metric: PlayingStatsMetric) -> Color {
+        let pair: (dark: UInt32, light: UInt32)
+        switch metric {
+        case .sg: pair = (0xF5D547, 0x8C7400)         // yellow
+        case .pcg: pair = (0xD8E2EA, 0x46596A)        // silver
+        case .score: pair = (0x3DBA6F, 0x1F7A45)      // green
+        case .gir: pair = (0x6FA8FF, 0x1D5FCC)        // blue
+        case .conversion: pair = (0xFF5C6C, 0xD62839) // red
+        case .scramble: pair = (0xFFB84D, 0xB86A0A)   // amber
+        case .totalPutts: pair = (0x8C9EFF, 0x3A4DB8) // indigo
+        case .puttsGir: pair = (0x5BE7C4, 0x0E8F73)   // teal
+        case .puttsNoGir: pair = (0xB08CFF, 0x6A3FC4) // violet
+        case .threePutts: pair = (0xFF9E7D, 0xC24A26) // orange
+        case .lipOuts: pair = (0xF28AC8, 0xB0357A)    // pink
+        case .proximity: pair = (0xB6E36A, 0x5E8A12)  // lime
+        }
+        return Color(hex: ThemeManager.shared.isDark ? pair.dark : pair.light)
     }
 
     /// Each chart on its own scale, around its own values, with a little room
@@ -236,6 +247,8 @@ struct PlayingStatsEvolutionView: View {
         let minimumSpan: Double
         switch metric {
         case .score: minimumSpan = 4
+        case .sg, .pcg: minimumSpan = 2
+        case .totalPutts: minimumSpan = 4
         case .gir, .conversion, .scramble: minimumSpan = 20
         case .puttsGir, .puttsNoGir: minimumSpan = 0.5
         case .threePutts, .lipOuts: minimumSpan = 2
@@ -245,7 +258,9 @@ struct PlayingStatsEvolutionView: View {
         let middle = (low + high) / 2
         var lower = middle - span * 0.6
         var upper = middle + span * 0.6
-        if metric != .score, lower < 0 {
+        // Strokes gained and the score run either side of nothing; the
+        // rest never go below it.
+        if ![.score, .sg, .pcg].contains(metric), lower < 0 {
             upper -= lower
             lower = 0
         }
@@ -276,6 +291,10 @@ struct PlayingStatsEvolutionView: View {
     private func text(_ value: Double, _ metric: PlayingStatsMetric, onAxis: Bool = false, withUnit: Bool = true) -> String {
         let whole = abs(value - value.rounded()) < 0.001
         switch metric {
+        case .sg, .pcg:
+            if abs(value) < 0.05 { return onAxis ? "0" : "0.0" }
+            let number = onAxis && whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
+            return value > 0 ? "+\(number)" : number
         case .score:
             if abs(value) < 0.05 { return "E" }
             let number = whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
@@ -284,7 +303,7 @@ struct PlayingStatsEvolutionView: View {
             return "\(Int(value.rounded()))%"
         case .puttsGir, .puttsNoGir:
             return String(format: onAxis ? "%.1f" : "%.2f", value)
-        case .threePutts, .lipOuts:
+        case .totalPutts, .threePutts, .lipOuts:
             return whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
         case .proximity:
             let number = onAxis && whole ? String(Int(value.rounded())) : String(format: "%.1f", value)

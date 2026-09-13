@@ -60,7 +60,7 @@ struct OnCourseListView: View {
             }
             .navigationDestination(item: $roundToOpen) { round in
                 if round.isComplete {
-                    RoundSummaryView(round: round, onDone: { roundToOpen = nil })
+                    RoundSummaryView(round: round, onDone: { roundToOpen = nil }, allowsSwipeBack: true)
                 } else if round.inputMode == .quick {
                     RoundInputQuickView(round: round, onDone: { roundToOpen = nil })
                 } else if round.inputMode == .custom {

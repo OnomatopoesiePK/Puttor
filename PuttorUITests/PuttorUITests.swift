@@ -176,6 +176,15 @@ final class PuttorUITests: XCTestCase {
         let arrow = app.buttons["Show how these figures moved"]
         XCTAssertEqual(arrow.frame.midY, arrowBefore.midY, accuracy: 40, "before \(arrowBefore), after \(arrow.frame)")
         XCTAssertTrue(arrow.isHittable)
+
+        // A swipe to the left across the playing stats opens it too.
+        let origin = app.coordinate(withNormalizedOffset: .zero)
+        origin.withOffset(CGVector(dx: arrow.frame.midX - 60, dy: arrow.frame.midY))
+            .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: arrow.frame.midX - 300, dy: arrow.frame.midY)))
+        XCTAssertTrue(app.staticTexts["SCORE (TO PAR)"].waitForExistence(timeout: 3))
+        snapshot("6 opened with a swipe")
+        app.swipeRight()
+        XCTAssertTrue(app.staticTexts["SCORE (TO PAR)"].waitForNonExistence(timeout: 3))
     }
 
     /// Compare in landscape splits the statistics into two panes; turning
@@ -250,8 +259,7 @@ final class PuttorUITests: XCTestCase {
         let open = app.buttons["Show how these figures moved"]
         let back = app.buttons["Back to the statistics"]
         XCTAssertTrue(open.waitForExistence(timeout: 10))
-        bringIntoReach(open, in: app)
-        open.tap()
+        tapOnScreen(open, in: app)
         XCTAssertTrue(back.waitForExistence(timeout: 5))
         snapshot("1 evolution portrait")
 
@@ -268,8 +276,7 @@ final class PuttorUITests: XCTestCase {
         hierarchy(app, "statistics landscape")
 
         // Landscape to portrait, then back with a swipe.
-        bringIntoReach(open, in: app)
-        open.tap()
+        tapOnScreen(open, in: app)
         XCTAssertTrue(back.waitForExistence(timeout: 5))
         sleep(1)
         snapshot("4 evolution opened in landscape")
@@ -289,18 +296,91 @@ final class PuttorUITests: XCTestCase {
         snapshot("7 coach")
     }
 
-    /// Short drags until the element sits clear of the tab bar — or, in
-    /// landscape, where the tabs float up top, of the bottom of the screen.
-    private func bringIntoReach(_ element: XCUIElement, in app: XCUIApplication) {
+    /// Short drags until a good piece of the element is on screen — below the
+    /// pinned header, clear of the tab bar (in landscape, where the tabs float
+    /// up top, of the bottom of the screen) — then a tap in the middle of that
+    /// piece. The arrow beside the playing stats is nearly as tall as a
+    /// landscape screen, and XCTest will not tap an element whose own middle
+    /// is off screen.
+    private func tapOnScreen(_ element: XCUIElement, in app: XCUIApplication) {
+        let screen = app.windows.firstMatch.frame
         let tabBar = app.tabBars.firstMatch
-        let floor = tabBar.exists && tabBar.frame.minY > 200 ? tabBar.frame.minY : app.windows.firstMatch.frame.maxY
-        var drags = 0
-        while (element.frame.midY > floor - 60 || !element.isHittable) && drags < 14 {
-            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
-                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)))
-            drags += 1
+        let floor = (tabBar.exists && tabBar.frame.minY > 200 ? tabBar.frame.minY : screen.maxY) - 10
+        let ceiling = screen.minY + (screen.height > screen.width ? 240 : 80)
+        for _ in 0..<14 {
+            let frame = element.frame
+            if min(frame.maxY, floor) - max(frame.minY, ceiling) >= 60 { break }
+            if frame.midY > (ceiling + floor) / 2 {
+                drag(app, from: 0.7, to: 0.45)
+            } else {
+                drag(app, from: 0.45, to: 0.7)
+            }
         }
         sleep(1)
+        let frame = element.frame
+        let middle = (max(frame.minY, ceiling) + min(frame.maxY, floor)) / 2
+        app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: frame.midX, dy: middle)).tap()
+    }
+
+    private func drag(_ app: XCUIApplication, from start: CGFloat, to end: CGFloat) {
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: start))
+            .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: end)))
+    }
+
+    /// Screens that draw their own back button still go back with a swipe
+    /// from the edge: the custom mode fields, and a round opened from the list.
+    @MainActor
+    func testSwipeBackWhereScreensHaveTheirOwnBackButton() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let settingsTab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(settingsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+
+        // The custom mode fields, from the settings.
+        settingsTab.tap()
+        let customRow = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Custom Mode Fields'")).firstMatch
+        XCTAssertTrue(customRow.waitForExistence(timeout: 5))
+        customRow.tap()
+        let customTitle = app.navigationBars.staticTexts["Custom Mode"]
+        XCTAssertTrue(customTitle.waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("1 custom mode")
+        swipeFromLeftEdge(app)
+        XCTAssertTrue(customTitle.waitForNonExistence(timeout: 5), "still on the custom mode fields")
+        XCTAssertTrue(waitUntilHittable(customRow))
+        snapshot("2 settings again")
+
+        // A round opened from the list on the course tab.
+        app.tabBars.buttons["Course"].tap()
+        let start = app.buttons["Start New Round"]
+        XCTAssertTrue(start.waitForExistence(timeout: 5))
+        app.staticTexts["Demo 1"].firstMatch.tap()
+        let summaryPutts = app.staticTexts["Putts"].firstMatch
+        XCTAssertTrue(summaryPutts.waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("3 round summary")
+        swipeFromLeftEdge(app)
+        XCTAssertTrue(waitUntilHittable(start), "still on the round")
+        snapshot("4 list again")
+    }
+
+    private func swipeFromLeftEdge(_ app: XCUIApplication) {
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.55))
+            .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.55)))
+        sleep(1)
+    }
+
+    private func waitUntilHittable(_ element: XCUIElement, timeout: TimeInterval = 5) -> Bool {
+        let end = Date().addingTimeInterval(timeout)
+        while Date() < end {
+            if element.exists && element.isHittable { return true }
+            usleep(200_000)
+        }
+        return false
     }
 
     private func hierarchy(_ app: XCUIApplication, _ name: String) {

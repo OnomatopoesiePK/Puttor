@@ -295,6 +295,9 @@
 "stats.firstPutt" = "primer putt";
 "stats.threePuttsAvg" = "Ø 3 PUTTS";
 "stats.lipOutsAvg" = "Ø LIP-OUTS";
+"evolution.sg" = "SG EN PUTT";
+"evolution.pcg" = "PCG";
+"evolution.totalPutts" = "PUTTS TOTALES";
 "evolution.score" = "SCORE (RESPECTO AL PAR)";
 "evolution.gir" = "GIR %";
 "evolution.conversion" = "CONVERSIÓN DE BIRDIE %";

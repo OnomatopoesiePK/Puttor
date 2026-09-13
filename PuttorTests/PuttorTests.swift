@@ -1467,10 +1467,15 @@ struct PuttorTests {
         scored.scoreRelativeToPar = 12
         scored.girCount = 6
         scored.threePuttHoles = 2
+        scored.totalPutts = 31
+        scored.sgTotal = -1.5
+        scored.pcgTotal = 0.5
         var unscored = RoundStats()
         unscored.holes = 18
         unscored.threePuttHoles = 4
         unscored.lipOutCount = 1
+        unscored.totalPutts = 34
+        unscored.sgTotal = 2
 
         let now = Date()
         let series = PlayingStatsPoint.series([
@@ -1486,6 +1491,12 @@ struct PuttorTests {
         #expect(series[1].values[.gir] == nil)
         #expect(series[1].values[.threePutts] == 4)
         #expect(series[1].values[.lipOuts] == 1)
+        // Read off the putts, so every round has them, scored or not.
+        #expect(series[0].values[.sg] == -1.5)
+        #expect(series[0].values[.pcg] == 0.5)
+        #expect(series[0].values[.totalPutts] == 31)
+        #expect(series[1].values[.sg] == 2)
+        #expect(series[1].values[.totalPutts] == 34)
     }
 
     // MARK: - Coach tips

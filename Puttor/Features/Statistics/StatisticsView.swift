@@ -608,10 +608,12 @@ private struct StatisticsPane: View {
                                             }
                                             // Out to the screen's right edge, where the arrow to the evolution sits.
                                             .padding(.trailing, -Theme.Spacing.edge)
-                                            // Or pushed across with a swipe to the left.
+                                            // Or pushed across with a swipe to the left, as soon as
+                                            // the swipe is clearly sideways rather than once the
+                                            // finger lifts.
                                             .simultaneousGesture(
-                                                DragGesture(minimumDistance: 30).onEnded { drag in
-                                                    if drag.translation.width < -80, abs(drag.translation.width) > abs(drag.translation.height) * 1.5 {
+                                                DragGesture(minimumDistance: 20).onChanged { drag in
+                                                    if drag.translation.width < -50, abs(drag.translation.width) > abs(drag.translation.height) * 1.5 {
                                                         openEvolution()
                                                     }
                                                 }
@@ -920,13 +922,19 @@ private struct StatisticsPane: View {
     // MARK: - Evolution
 
     private func openEvolution() {
+        // A drag keeps reporting after it has crossed the line; once is enough.
+        guard !showingEvolution else { return }
         scrollMemory.restore = scrollMemory.y
-        withAnimation(.easeInOut(duration: 0.35)) { showingEvolution = true }
+        withAnimation(Self.slide) { showingEvolution = true }
     }
 
     private func closeEvolution() {
-        withAnimation(.easeInOut(duration: 0.35)) { showingEvolution = false }
+        guard showingEvolution else { return }
+        withAnimation(Self.slide) { showingEvolution = false }
     }
+
+    /// Quick off the mark, so the page is already moving with the finger.
+    private static let slide = Animation.easeOut(duration: 0.25)
 
     /// A tall, flat arrow down the right edge of the playing stats that slides
     /// their evolution in.
