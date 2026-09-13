@@ -154,7 +154,7 @@ enum MissReasonLinker {
         return misses.filter { recording.contains(roundID($0)) }
     }
 
-    /// Every group against every cause, strongest evidence first.
+    /// Every group against every cause, highest share first.
     static func links(in putts: [Putt]) -> [MissReasonLink] {
         let tracked = trackedMisses(in: putts)
         guard !tracked.isEmpty else { return [] }
@@ -199,10 +199,12 @@ enum MissReasonLinker {
         let specific = found.filter { candidate in
             !found.contains { $0.link.groupID == candidate.link.groupID && $0.link.cause.parent == candidate.link.cause }
         }
+        // The best-evidenced are kept, then shown from the highest share down.
         return specific
             .sorted { ($0.z, $0.link.count) > ($1.z, $1.link.count) }
             .prefix(maximumLinks)
             .map(\.link)
+            .sorted { ($0.percent, $0.count) > ($1.percent, $1.count) }
     }
 
     /// The cause behind a group of misses — the putts a habit rests on —

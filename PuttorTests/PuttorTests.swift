@@ -1284,6 +1284,10 @@ struct PuttorTests {
         #expect(slice.count == 7)
         #expect(slice.total == 8)
         #expect(!findings.contains { $0.key == "pattern.missLeft" || $0.key == "pattern.missRight" })
+
+        // Shown from the highest share down.
+        #expect(findings.count > 1)
+        #expect(zip(findings, findings.dropFirst()).allSatisfy { $0.percent >= $1.percent })
     }
 
     /// A slice that only repeats what every miss already shows says nothing.
@@ -1350,6 +1354,7 @@ struct PuttorTests {
         #expect(link.reading == .groupToCause)
         #expect(link.count == 6)
         #expect(link.total == 6)
+        #expect(zip(links, links.dropFirst()).allSatisfy { $0.percent >= $1.percent })
     }
 
     /// A reason on every miss belongs to no group in particular.

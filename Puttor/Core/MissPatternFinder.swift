@@ -141,7 +141,9 @@ enum MissPatternFinder {
         let standingOut = slices.compactMap { $0 }.filter { standsOut($0, against: overall) }
         let tracked = MissReasonLinker.trackedMisses(in: misses)
 
-        // Only habits, the most certain first, each with the reason behind it
+        // Only habits. The most certain ones are kept, so a perfect lean over a
+        // handful of putts cannot push out a clear one over many; they are then
+        // shown from the highest share down, each with the reason behind it
         // where one stands out.
         return (overall + standingOut)
             .filter { $0.pattern.isStrong }
@@ -152,6 +154,7 @@ enum MissPatternFinder {
                 pattern.cause = MissReasonLinker.cause(behind: lean.putts, among: tracked)
                 return pattern
             }
+            .sorted { ($0.percent, $0.count) > ($1.percent, $1.count) }
     }
 
     /// "Uphill, 80% go left" says nothing new when 80% of all misses go left.
