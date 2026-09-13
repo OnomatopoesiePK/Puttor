@@ -16,10 +16,15 @@ import Foundation
 enum MissCause: String, CaseIterable {
     case missRead, wrongAim, badStroke, pull, push, misshit
 
+    /// A read and an aim set the line, not the pace: they can only explain a
+    /// putt that missed off line. Left short or run long on its line, it was
+    /// not misread or misaimed, whatever was ticked.
+    var isLineCause: Bool { self == .missRead || self == .wrongAim }
+
     func applies(to putt: Putt) -> Bool {
         switch self {
-        case .missRead: return putt.missRead
-        case .wrongAim: return putt.wrongAim
+        case .missRead: return putt.missRead && putt.result.lateralBias != 0
+        case .wrongAim: return putt.wrongAim && putt.result.lateralBias != 0
         case .badStroke: return putt.badStroke
         case .pull: return putt.badStroke && putt.badStrokeType == .pull
         case .push: return putt.badStroke && putt.badStrokeType == .push
@@ -113,6 +118,8 @@ enum MissReasonLinker {
         /// The broader groups this one sits inside: a strong right-to-left
         /// break inside right-to-left and inside strong.
         var parents: [String] = []
+        /// Split by how long the misses ran, which no read or aim explains.
+        var measuresLength = false
         let includes: (Putt) -> Bool
     }
 
@@ -130,8 +137,8 @@ enum MissReasonLinker {
         Group(id: "left", pool: { $0.result.lateralBias != 0 }, includes: { $0.result.lateralBias < 0 }),
         Group(id: "right", pool: { $0.result.lateralBias != 0 }, includes: { $0.result.lateralBias > 0 }),
         // Past the hole only counts once the ball ran more than a metre on.
-        Group(id: "short", pool: { leave.lengthBias($0) != 0 }, includes: { leave.lengthBias($0) < 0 }),
-        Group(id: "long", pool: { leave.lengthBias($0) != 0 }, includes: { leave.lengthBias($0) > 0 }),
+        Group(id: "short", pool: { leave.lengthBias($0) != 0 }, measuresLength: true, includes: { leave.lengthBias($0) < 0 }),
+        Group(id: "long", pool: { leave.lengthBias($0) != 0 }, measuresLength: true, includes: { leave.lengthBias($0) > 0 }),
         Group(id: "lowSide", pool: isBreaking, includes: isLowSide),
         Group(id: "highSide", pool: isBreaking, includes: { !isLowSide($0) }),
         Group(id: "rightToLeft", includes: { $0.sideSlopePct < 0 }),
@@ -194,6 +201,7 @@ enum MissReasonLinker {
             let pool = tracked.filter(group.pool)
             let inGroup = pool.map(group.includes)
             for cause in MissCause.allCases {
+                if group.measuresLength && cause.isLineCause { continue }
                 var both = 0, groupOnly = 0, causeOnly = 0, neither = 0
                 var bothDistances: [Double] = []
                 for (index, putt) in pool.enumerated() {
@@ -254,13 +262,15 @@ enum MissReasonLinker {
     }
 
     /// The cause behind a group of misses — the putts a habit rests on —
-    /// measured against every other tracked miss.
-    static func cause(behind group: [Putt], among tracked: [Putt]) -> MissCauseNote? {
+    /// measured against every other tracked miss. A habit of length or of
+    /// distance left takes no read or aim behind it.
+    static func cause(behind group: [Putt], among tracked: [Putt], allowingLineCauses: Bool = true) -> MissCauseNote? {
         let members = Set(group.map { ObjectIdentifier($0) })
         let inGroup = tracked.filter { members.contains(ObjectIdentifier($0)) }
         let rest = tracked.filter { !members.contains(ObjectIdentifier($0)) }
 
-        let found: [(note: MissCauseNote, z: Double)] = MissCause.allCases.compactMap { cause in
+        let causes = MissCause.allCases.filter { allowingLineCauses || !$0.isLineCause }
+        let found: [(note: MissCauseNote, z: Double)] = causes.compactMap { cause in
             let share = Share(
                 count: inGroup.filter(cause.applies).count,
                 total: inGroup.count,

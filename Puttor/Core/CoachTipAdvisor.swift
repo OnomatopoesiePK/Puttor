@@ -16,7 +16,7 @@ import Foundation
 struct CoachTip: Identifiable {
     enum Topic: String, CaseIterable {
         case moreBreak, lessBreak, phantomBreak
-        case uphillPace, downhillPace, slopeOverRead, greenSpeed
+        case uphillPace, downhillPace, slopeOverRead
         case dieAtHole, softerPace
         case startLineLeft, startLineRight
         case pull, push, contact, badStroke
@@ -169,10 +169,6 @@ enum CoachTipAdvisor {
             case .under: topic = .moreBreak
             case .over: topic = .lessBreak
             case .sawRightToLeft, .sawLeftToRight: topic = .phantomBreak
-            case .uphillUnder: topic = .uphillPace
-            case .downhillUnder: topic = .downhillPace
-            case .uphillOver, .downhillOver: topic = .slopeOverRead
-            case .slower, .faster: topic = .greenSpeed
             }
         }
         let share = read.total > 0 ? Double(read.count) / Double(read.total) : 0

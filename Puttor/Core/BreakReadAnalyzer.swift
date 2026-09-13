@@ -5,11 +5,11 @@
 //  Reads the misses put down to the read or the aim against the break they
 //  were struck on. The side a misread breaking putt missed on says whether
 //  too little or too much break was played; the side a misread straight putt
-//  missed on says which break was seen that was not there; the length of a
-//  misread putt up or down a hill says whether the slope was under- or
-//  overestimated. Each is read by break direction, by strength and by hill,
-//  and a narrower reading only earns a sentence when it says more than the
-//  broader one it sits inside.
+//  missed on says which break was seen that was not there. A read and an aim
+//  set the line, not the pace, so only misses off line are read: a putt left
+//  short on its line was not misread. Each is read by break direction, by
+//  strength and by hill, and a narrower reading only earns a sentence when it
+//  says more than the broader one it sits inside.
 //
 
 import Foundation
@@ -50,9 +50,6 @@ struct BreakReadFinding: Identifiable {
         case sawRightToLeft
         /// Straight putt missed left: played as breaking left to right.
         case sawLeftToRight
-        case uphillUnder, uphillOver, downhillUnder, downhillOver
-        /// Flat putt short or long: the pace was misjudged.
-        case slower, faster
     }
 
     let reason: Reason
@@ -108,12 +105,9 @@ enum BreakReadAnalyzer {
     static let minimumSample = MissPatternFinder.minimumSubsetSample
     static let maximumFindings = 5
 
-    private enum Axis { case side, length }
-
     /// One kind of putt, and how a miss on it reads.
     private struct Cell {
         let id: String
-        let axis: Axis
         /// The broader cells this one sits inside.
         var parents: [String] = []
         let includes: (Putt) -> Bool
@@ -141,13 +135,13 @@ enum BreakReadAnalyzer {
     }
 
     /// Broader cells come before the ones inside them.
-    private static func cells(leave: MissLeave) -> [Cell] {
+    private static func cells() -> [Cell] {
         var cells = [
-            Cell(id: "breaking", axis: .side, includes: { !isStraight($0) }, outcome: sideOfBreak),
+            Cell(id: "breaking", includes: { !isStraight($0) }, outcome: sideOfBreak),
         ]
         for strength in BreakStrength.allCases {
             cells.append(Cell(
-                id: strength.rawValue, axis: .side, parents: ["breaking"],
+                id: strength.rawValue, parents: ["breaking"],
                 includes: { BreakStrength(sideSlopePct: $0.sideSlopePct) == strength },
                 outcome: sideOfBreak
             ))
@@ -158,11 +152,10 @@ enum BreakReadAnalyzer {
             ("leftToRight", { $0.sideSlopePct >= MissPatternFinder.breakingSlopePct }),
         ]
         for direction in directions {
-            cells.append(Cell(id: direction.id, axis: .side, parents: ["breaking"], includes: direction.includes, outcome: sideOfBreak))
+            cells.append(Cell(id: direction.id, parents: ["breaking"], includes: direction.includes, outcome: sideOfBreak))
             for strength in BreakStrength.allCases {
                 cells.append(Cell(
-                    id: direction.id + strength.rawValue.capitalized, axis: .side,
-                    parents: [direction.id, strength.rawValue],
+                    id: direction.id + strength.rawValue.capitalized, parents: [direction.id, strength.rawValue],
                     includes: { direction.includes($0) && BreakStrength(sideSlopePct: $0.sideSlopePct) == strength },
                     outcome: sideOfBreak
                 ))
@@ -170,31 +163,10 @@ enum BreakReadAnalyzer {
         }
 
         cells += [
-            Cell(id: "straight", axis: .side, includes: isStraight, outcome: breakSeen),
-            Cell(id: "straightUphill", axis: .side, parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct > 0 }, outcome: breakSeen),
-            Cell(id: "straightDownhill", axis: .side, parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct < 0 }, outcome: breakSeen),
-            Cell(id: "straightFlat", axis: .side, parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct == 0 }, outcome: breakSeen),
-            Cell(id: "uphill", axis: .length, includes: { $0.hillSlopePct > 0 }, outcome: {
-                switch leave.lengthBias($0) {
-                case ..<0: return .uphillUnder
-                case 1...: return .uphillOver
-                default: return nil
-                }
-            }),
-            Cell(id: "downhill", axis: .length, includes: { $0.hillSlopePct < 0 }, outcome: {
-                switch leave.lengthBias($0) {
-                case 1...: return .downhillUnder
-                case ..<0: return .downhillOver
-                default: return nil
-                }
-            }),
-            Cell(id: "flat", axis: .length, includes: { $0.hillSlopePct == 0 }, outcome: {
-                switch leave.lengthBias($0) {
-                case ..<0: return .slower
-                case 1...: return .faster
-                default: return nil
-                }
-            }),
+            Cell(id: "straight", includes: isStraight, outcome: breakSeen),
+            Cell(id: "straightUphill", parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct > 0 }, outcome: breakSeen),
+            Cell(id: "straightDownhill", parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct < 0 }, outcome: breakSeen),
+            Cell(id: "straightFlat", parents: ["straight"], includes: { isStraight($0) && $0.hillSlopePct == 0 }, outcome: breakSeen),
         ]
         return cells
     }
@@ -203,22 +175,19 @@ enum BreakReadAnalyzer {
 
     static func findings(in putts: [Putt]) -> [BreakReadFinding] {
         let misses = putts.filter { $0.puttNumber > 0 && !$0.result.isHoled }
-        // A misread ball that stopped within a metre past had the pace,
-        // however the slope was read.
-        let cells = Self.cells(leave: MissLeave(putts))
+        let cells = Self.cells()
         var found: [BreakReadFinding] = []
 
         for reason in BreakReadFinding.Reason.allCases {
-            let reasoned = misses.filter { reason == .missRead ? $0.missRead : $0.wrongAim }
+            // Only the misses the reason can explain: the ones off line.
+            let cause: MissCause = reason == .missRead ? .missRead : .wrongAim
+            let reasoned = misses.filter(cause.applies)
             guard reasoned.count >= minimumSample else { continue }
 
             // Every lean found, shown or not, so a narrower cell is always
             // measured against the broader one around it.
             var byCell: [String: BreakReadFinding] = [:]
             for cell in cells {
-                // An aim is a line; how long the miss ran says nothing about it.
-                if cell.axis == .length && reason == .wrongAim { continue }
-
                 let read = reasoned.filter(cell.includes).compactMap { putt in
                     cell.outcome(putt).map { (outcome: $0, distance: putt.distanceM) }
                 }

@@ -1394,16 +1394,25 @@ struct PuttorTests {
         #expect(tip.weight > 0)
     }
 
-    /// The same for a misread up the hill: just past is not a slope overread.
+    /// A read sets the line, not the pace: a misread ticked on a putt that only
+    /// came up short or ran long explains nothing — no break read, no link to
+    /// length, no count, no reason behind a length habit.
     @MainActor
-    @Test func aMisreadThatSlidesJustPastIsNoOverRead() async throws {
-        let putts = (1...7).flatMap { number -> [Putt] in
-            [
-                Putt(holeNumber: number, puttNumber: 1, distanceM: 4, hillSlopePct: 2, puttFor: .par, result: .long, missRead: true),
-                Putt(holeNumber: number, puttNumber: 2, distanceM: 0.5, puttFor: .bogey, result: .holed),
-            ]
-        }
-        #expect(!BreakReadAnalyzer.findings(in: putts).contains { $0.cellID == "uphill" })
+    @Test func aMisreadOnlyExplainsAPuttThatMissedOffLine() async throws {
+        #expect(MissCause.missRead.applies(to: Self.readMiss(.shortLeft, missRead: true)))
+        #expect(!MissCause.missRead.applies(to: Self.readMiss(.short, missRead: true)))
+        #expect(!MissCause.wrongAim.applies(to: Self.readMiss(.long, wrongAim: true)))
+
+        let onLine = Array(repeating: Self.readMiss(.short, hill: 2, missRead: true), count: 8)
+            + Array(repeating: Self.readMiss(.long, missRead: true), count: 4)
+        #expect(BreakReadAnalyzer.findings(in: onLine).isEmpty)
+        #expect(RoundStats.computeMissReasonCounts(onLine).missRead == 0)
+
+        let mixed = Array(repeating: Self.reasonMiss(.short, missRead: true), count: 8)
+            + Array(repeating: Self.reasonMiss(.left), count: 4)
+        #expect(!MissReasonLinker.links(in: mixed).contains { $0.cause == .missRead })
+        let short = MissPatternFinder.findings(in: mixed).first { $0.key == "pattern.missShort" }
+        #expect(short?.cause == nil)
     }
 
     // MARK: - Miss reasons
@@ -1702,16 +1711,6 @@ struct PuttorTests {
         #expect(findings.contains { $0.cellID == "strong" && $0.outcome == .under })
         #expect(findings.contains { $0.cellID == "gentle" && $0.outcome == .over })
         #expect(!findings.contains { $0.cellID == "rightToLeftStrong" })
-    }
-
-    /// Misread uphill putts that come up short underestimated the slope.
-    @MainActor
-    @Test func misreadUphillPuttsShortUnderestimatedTheSlope() async throws {
-        let putts = Array(repeating: Self.readMiss(.short, hill: 2, missRead: true), count: 6)
-            + [Self.readMiss(.long, hill: 2, missRead: true)]
-        let read = try #require(BreakReadAnalyzer.findings(in: putts).first { $0.cellID == "uphill" })
-        #expect(read.outcome == .uphillUnder)
-        #expect(read.count == 6)
     }
 
     /// Wrong aim is read on the line alone.
@@ -2863,7 +2862,7 @@ struct PuttorTests {
 
     @Test func roundStatsComputesMakeCountsAndTotals() async throws {
         let holedPutt = Putt(holeNumber: 1, puttNumber: 1, distanceM: 2.0, puttFor: .par, result: .holed)
-        let missedPutt = Putt(holeNumber: 2, puttNumber: 1, distanceM: 4.0, puttFor: .par, result: .short, missRead: true)
+        let missedPutt = Putt(holeNumber: 2, puttNumber: 1, distanceM: 4.0, puttFor: .par, result: .shortLeft, missRead: true)
         let tapIn = Putt(holeNumber: 2, puttNumber: 2, distanceM: 0.3, puttFor: .bogey, result: .holed)
 
         let stats = RoundStats.compute(putts: [holedPutt, missedPutt, tapIn])
@@ -2871,7 +2870,7 @@ struct PuttorTests {
         #expect(stats.totalPutts == 3)
         #expect(stats.holes == 2)
         #expect(stats.missCounts[.holed] == 2)
-        #expect(stats.missCounts[.short] == 1)
+        #expect(stats.missCounts[.shortLeft] == 1)
         #expect(stats.missReasonCounts.missRead == 1)
     }
 

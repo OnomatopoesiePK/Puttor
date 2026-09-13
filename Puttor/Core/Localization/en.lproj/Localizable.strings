@@ -67,8 +67,6 @@
 "tip.downhillPace.body" = "%@ the ball runs too far. Picture a hole half a metre short of the real one and let the ball roll into it.";
 "tip.slopeOverRead.title" = "Don't overplay the slope";
 "tip.slopeOverRead.body" = "%@ you play more slope than there is. Start from the pace of a flat putt of the same length and adjust only a little.";
-"tip.greenSpeed.title" = "Read the green speed before the round";
-"tip.greenSpeed.body" = "%@ you misjudge the pace of the green. Roll a few long putts on the practice green before the round and take that feel with you.";
 "tip.dieAtHole.title" = "Get the ball to the hole";
 "tip.dieAtHole.body" = "%@ your misses come up short. Play for the ball to finish 30 to 40 cm past the hole — short never goes in.";
 "tip.softerPace.title" = "Take some pace off";
@@ -515,19 +513,10 @@
 "read.cell.straightUphill" = "straight uphill putts";
 "read.cell.straightDownhill" = "straight downhill putts";
 "read.cell.straightFlat" = "straight flat putts";
-"read.cell.uphill" = "uphill putts";
-"read.cell.downhill" = "downhill putts";
-"read.cell.flat" = "flat putts";
 "read.outcome.missRead.under" = "played too little break, missed below";
 "read.outcome.missRead.over" = "played too much break, missed above";
 "read.outcome.missRead.sawRightToLeft" = "read as right-to-left, missed right";
 "read.outcome.missRead.sawLeftToRight" = "read as left-to-right, missed left";
-"read.outcome.missRead.uphillUnder" = "underestimated the slope, short";
-"read.outcome.missRead.uphillOver" = "overestimated the slope, long";
-"read.outcome.missRead.downhillUnder" = "underestimated the slope, long";
-"read.outcome.missRead.downhillOver" = "overestimated the slope, short";
-"read.outcome.missRead.slower" = "green slower than read, short";
-"read.outcome.missRead.faster" = "green faster than read, long";
 "read.outcome.wrongAim.under" = "aimed too little break, missed below";
 "read.outcome.wrongAim.over" = "aimed too much break, missed above";
 "read.outcome.wrongAim.sawRightToLeft" = "aimed right, missed right";
@@ -537,7 +526,7 @@
 "chart.makeVsTour.info" = "One row per distance bracket: the putts you holed over the putts you took from there, against the tour's average make rate across the same bracket.\n\nThe right-hand column totals PCG for that bracket, divided by the number of rounds.\n\nThe tour column is a flat average across the whole bracket, while PCG measures every putt against the curve at its own distance. So when your putts sit at the near end of a bracket, PCG can come out negative even though your make % is above the tour column.";
 "stats.makeBySituation.info" = "The same distance brackets, split by the score each putt was for, so a birdie putt and a par putt from the same range can be compared.\n\nNeeds the score reference (\"putt for\"), which Custom mode can leave out.";
 "summary.missTendency.info" = "Every miss placed in the direction it was entered. A sector reddens with how often that direction came up, and the middle holds the total.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex — a plain \"missed\" has no direction to place.";
-"summary.missReasons.info" = "How often each reason was ticked on a missed putt. A putt with more than one reason is counted once, under \"multiple\".\n\nNeeds the miss reasons field: Pro mode, or Custom with that field added.\n\nUnderneath, every reason is checked against every direction and every kind of putt: break direction and strength, straight, uphill, downhill, the four distance bands, double break. A link is only named when more than 60 percent of a group's misses share the reason, at least 20 points more than the misses it is compared with, and a statistical test backs it. Only rounds where reasons were recorded count.\n\nFor misreads and wrong aims the break is read as well: its direction, its strength (gentle 1 percent, medium 2, strong 3 and more) and the hill. The side of the miss shows whether too little or too much break was played, or on a straight putt which break was seen. For misreads the length shows whether the slope or the pace was misjudged. This is named from 6 such misses, when more than 60 percent went the same way. Underneath each one is the narrowest distance range holding 80 percent of those misses.";
+"summary.missReasons.info" = "How often each reason was ticked on a missed putt. A putt with more than one reason is counted once, under \"multiple\".\n\nNeeds the miss reasons field: Pro mode, or Custom with that field added.\n\nUnderneath, every reason is checked against every direction and every kind of putt: break direction and strength, straight, uphill, downhill, the four distance bands, double break. A link is only named when more than 60 percent of a group's misses share the reason, at least 20 points more than the misses it is compared with, and a statistical test backs it. Only rounds where reasons were recorded count.\n\nFor misreads and wrong aims the break is read as well: its direction, its strength (gentle 1 percent, medium 2, strong 3 and more) and the hill. The side of the miss shows whether too little or too much break was played, or on a straight putt which break was seen. A misread or a wrong aim only counts on a putt that missed off line: one that only came up short or ran long was not misread, so it is left out here and in the counts above. This is named from 6 such misses, when more than 60 percent went the same way. Underneath each one is the narrowest distance range holding 80 percent of those misses.";
 "summary.leaveByMiss.info" = "Average distance left after a miss, grouped by the direction it went — measured from the distance of the next putt on that hole. Bars are scaled to the longest of those averages.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.";
 
 /* Dispersion */

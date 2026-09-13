@@ -157,13 +157,14 @@ enum SplitInsight {
                     || (putt.sideSlopePct > 0 && putt.result.lateralBias > 0))
             }
         ),
-        // How often a miss was put down to the line rather than the stroke.
+        // How often a miss off line was put down to the read rather than the
+        // stroke. A putt left short on its line cannot have been misread.
         Measure(
             id: "missRead",
             key: "split.missRead",
             mirrorKey: nil,
             importance: 1,
-            pool: { !$0.result.isHoled },
+            pool: { !$0.result.isHoled && $0.result.lateralBias != 0 },
             hit: { $0.missRead }
         ),
         // And whether they simply go in less often.

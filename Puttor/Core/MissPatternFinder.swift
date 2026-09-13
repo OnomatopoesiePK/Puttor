@@ -231,7 +231,7 @@ enum MissPatternFinder {
         let candidates = (alerts + (overall + standingOut).filter { $0.pattern.isStrong })
             .map { lean in
                 var pattern = lean.pattern
-                pattern.cause = MissReasonLinker.cause(behind: lean.putts, among: tracked)
+                pattern.cause = MissReasonLinker.cause(behind: lean.putts, among: tracked, allowingLineCauses: pattern.category == .line)
                 pattern.distances = lean.putts.map(\.distanceM)
                 return pattern
             }

@@ -354,13 +354,17 @@ struct RoundStats {
     static func computeMissReasonCounts(_ putts: [Putt]) -> MissReasonCounts {
         var result = MissReasonCounts()
         for p in putts {
-            let flags = [p.missRead, p.badStroke, p.wrongAim]
+            // A read or an aim only misses the line: ticked on a putt that
+            // missed for length alone, it is not counted.
+            let misread = MissCause.missRead.applies(to: p)
+            let wrongAim = MissCause.wrongAim.applies(to: p)
+            let flags = [misread, p.badStroke, wrongAim]
             let count = flags.filter { $0 }.count
             if count == 0 { continue }
             if count >= 2 { result.multiple += 1; continue }
-            if p.missRead { result.missRead += 1 }
+            if misread { result.missRead += 1 }
             else if p.badStroke { result.badStroke += 1 }
-            else if p.wrongAim { result.wrongAim += 1 }
+            else if wrongAim { result.wrongAim += 1 }
         }
         return result
     }

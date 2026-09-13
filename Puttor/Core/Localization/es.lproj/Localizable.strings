@@ -67,8 +67,6 @@
 "tip.downhillPace.body" = "%@, la bola se pasa. Imagina un hoyo medio metro antes del real y deja que la bola ruede hasta él.";
 "tip.slopeOverRead.title" = "No sobrestimes la pendiente";
 "tip.slopeOverRead.body" = "%@, juegas más pendiente de la que hay. Parte de la velocidad de un putt llano de la misma longitud y ajústala solo un poco.";
-"tip.greenSpeed.title" = "Lee la velocidad del green antes de la ronda";
-"tip.greenSpeed.body" = "%@, no aciertas la velocidad del green. Haz unos putts largos en el green de prácticas antes de la ronda y llévate esa sensación.";
 "tip.dieAtHole.title" = "Haz llegar la bola al hoyo";
 "tip.dieAtHole.body" = "%@, tus fallos se quedan cortos. Juega para que la bola quede de 30 a 40 cm detrás del hoyo: corto nunca entra.";
 "tip.softerPace.title" = "Quita velocidad";
@@ -515,19 +513,10 @@
 "read.cell.straightUphill" = "putts rectos cuesta arriba";
 "read.cell.straightDownhill" = "putts rectos cuesta abajo";
 "read.cell.straightFlat" = "putts rectos llanos";
-"read.cell.uphill" = "putts cuesta arriba";
-"read.cell.downhill" = "putts cuesta abajo";
-"read.cell.flat" = "putts llanos";
 "read.outcome.missRead.under" = "jugaste poca caída, fallo por debajo";
 "read.outcome.missRead.over" = "jugaste demasiada caída, fallo por encima";
 "read.outcome.missRead.sawRightToLeft" = "leído como caída de derecha a izquierda, fallo por la derecha";
 "read.outcome.missRead.sawLeftToRight" = "leído como caída de izquierda a derecha, fallo por la izquierda";
-"read.outcome.missRead.uphillUnder" = "subida subestimada, corto";
-"read.outcome.missRead.uphillOver" = "subida sobrestimada, largo";
-"read.outcome.missRead.downhillUnder" = "bajada subestimada, largo";
-"read.outcome.missRead.downhillOver" = "bajada sobrestimada, corto";
-"read.outcome.missRead.slower" = "green más lento de lo leído, corto";
-"read.outcome.missRead.faster" = "green más rápido de lo leído, largo";
 "read.outcome.wrongAim.under" = "apuntaste poca caída, fallo por debajo";
 "read.outcome.wrongAim.over" = "apuntaste demasiada caída, fallo por encima";
 "read.outcome.wrongAim.sawRightToLeft" = "apuntaste a la derecha, fallo por la derecha";
@@ -537,7 +526,7 @@
 "chart.makeVsTour.info" = "Una fila por tramo de distancia: los putts embocados sobre los intentados desde ahí, frente a la tasa media de acierto del tour en ese mismo tramo.\n\nLa columna de la derecha suma el PCG de ese tramo, dividido entre el número de rondas.\n\nLa columna del tour es una media plana de todo el tramo, mientras que el PCG mide cada putt contra la curva en su propia distancia. Por eso, si tus putts se concentran en el extremo corto de un tramo, el PCG puede salir negativo aunque tu % de acierto esté por encima de la columna del tour.";
 "stats.makeBySituation.info" = "Los mismos tramos de distancia, separados según el score para el que iba cada putt, para poder comparar un putt de birdie con uno de par desde la misma distancia.\n\nNecesita la referencia de score («putt para»), que el modo Personalizado puede omitir.";
 "summary.missTendency.info" = "Cada fallo colocado en la dirección con la que se registró. Un sector se vuelve más rojo cuanto más se repite esa dirección, y el centro muestra el total.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo; un simple «fallado» no tiene dirección que colocar.";
-"summary.missReasons.info" = "Con qué frecuencia se marcó cada motivo en un putt fallado. Un putt con varios motivos cuenta una vez, bajo «varios».\n\nNecesita el campo de motivos del fallo: modo Pro, o Personalizado con ese campo añadido.\n\nDebajo, cada motivo se cruza con cada dirección y cada tipo de putt: dirección y fuerza de la caída, recto, cuesta arriba, cuesta abajo, los cuatro tramos de distancia, doble caída. Una relación solo se nombra cuando más del 60 por ciento de los fallos de un grupo comparten el motivo, al menos 20 puntos más que los fallos con los que se compara, y una prueba estadística la respalda. Solo cuentan las rondas en las que se registraron motivos.\n\nCon mala lectura y mala orientación también se tiene en cuenta la caída: su dirección, su fuerza (suave 1 por ciento, media 2, fuerte desde 3) y la pendiente. El lado del fallo indica si se jugó poca o demasiada caída o, en un putt recto, qué caída se vio. En la mala lectura, la longitud indica si se juzgó mal la pendiente o la velocidad. Se nombra a partir de 6 fallos así, cuando más del 60 por ciento fue hacia el mismo lado. Debajo de cada una aparece el tramo de distancia más estrecho que reúne el 80 por ciento de esos fallos.";
+"summary.missReasons.info" = "Con qué frecuencia se marcó cada motivo en un putt fallado. Un putt con varios motivos cuenta una vez, bajo «varios».\n\nNecesita el campo de motivos del fallo: modo Pro, o Personalizado con ese campo añadido.\n\nDebajo, cada motivo se cruza con cada dirección y cada tipo de putt: dirección y fuerza de la caída, recto, cuesta arriba, cuesta abajo, los cuatro tramos de distancia, doble caída. Una relación solo se nombra cuando más del 60 por ciento de los fallos de un grupo comparten el motivo, al menos 20 puntos más que los fallos con los que se compara, y una prueba estadística la respalda. Solo cuentan las rondas en las que se registraron motivos.\n\nCon mala lectura y mala orientación también se tiene en cuenta la caída: su dirección, su fuerza (suave 1 por ciento, media 2, fuerte desde 3) y la pendiente. El lado del fallo indica si se jugó poca o demasiada caída o, en un putt recto, qué caída se vio. La mala lectura y la mala orientación solo cuentan en un putt que falló de lado: uno que solo se quedó corto o se pasó no se leyó mal, así que no aparece aquí ni en los números de arriba. Se nombra a partir de 6 fallos así, cuando más del 60 por ciento fue hacia el mismo lado. Debajo de cada una aparece el tramo de distancia más estrecho que reúne el 80 por ciento de esos fallos.";
 "summary.leaveByMiss.info" = "Distancia media que queda tras un fallo, agrupada por la dirección en la que se fue, medida a partir de la distancia del siguiente putt de ese hoyo. Las barras se escalan a la mayor de esas medias.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.";
 
 /* Dispersion */
