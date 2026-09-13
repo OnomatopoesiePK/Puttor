@@ -52,6 +52,7 @@ enum DemoData {
         for number in 1...4 {
             let odds = StrokesGained.baseline(at: distance).makeProbability
             let holed = number == 4 || Double.random(in: 0...1, using: &rng) < odds
+            let result: PuttResult = holed ? .holed : misses.randomElement(using: &rng)!
             let badStroke = !holed && Double.random(in: 0...1, using: &rng) < 0.25
             let putt = Putt(
                 holeNumber: hole,
@@ -60,7 +61,7 @@ enum DemoData {
                 sideSlopePct: number == 1 ? side : 0,
                 hillSlopePct: number == 1 ? hill : 0,
                 puttFor: category,
-                result: holed ? .holed : misses.randomElement(using: &rng)!,
+                result: result,
                 lipOut: !holed && Double.random(in: 0...1, using: &rng) < 0.12,
                 missRead: !holed && Double.random(in: 0...1, using: &rng) < 0.35,
                 badStroke: badStroke,
@@ -73,7 +74,9 @@ enum DemoData {
 
             if holed { return }
             category = steppedDown(category)
-            distance = Double.random(in: 0.3...2.5, using: &rng)
+            // Like real misses: well long or short, seldom far to the side.
+            let furthest = result.lengthBias == 0 ? 1.2 : (result.lateralBias == 0 ? 2.5 : 2.0)
+            distance = Double.random(in: 0.3...furthest, using: &rng)
         }
     }
 

@@ -128,6 +128,8 @@ struct MissDispersionPlotView: View {
     private static let edgeLabelBand: CGFloat = 16
     /// How far past the outer ring a dot may stray, as a share of that ring.
     private static let overshoot: CGFloat = 1.1
+    /// The nearest a dot sits to the hole, as a share of the outer ring.
+    private static let innermostShare: CGFloat = 0.12
 
     /// Everything the plot draws, worked out in one pass.
     ///
@@ -141,6 +143,9 @@ struct MissDispersionPlotView: View {
         /// Zero means the putts carry nothing to shade by — slope left
         /// unrecorded, for instance.
         var shadingScale: Double = 0
+        /// Drawn stretched sideways: the sides reach only the lateral limit.
+        /// False as soon as one miss lies further out to the side than that.
+        var stretched = false
     }
 
     /// Ring distances, marked on the scale line. The outer one — 3 m, or 10 ft
@@ -160,10 +165,15 @@ struct MissDispersionPlotView: View {
 
     private var outerDistance: Double { ringDistances.last ?? 3 }
 
+    /// How far to the side the stretched plot reaches. A putt seldom misses
+    /// far off line but often runs metres long or short, so the sides get half
+    /// the reach of the top and bottom — 1.5 m against 3 m, 5 ft against 10.
+    private var lateralLimitM: Double { useFeet ? UnitConverter.feetToMetres(5) : 1.5 }
+
     /// Where a leave of this length sits, as a share of the outer ring. Never
     /// on top of the hole, and never further out than the plot has room for.
     private func fraction(forLeave leave: Double) -> CGFloat {
-        min(Self.overshoot, max(0.12, CGFloat(leave / outerDistance)))
+        min(Self.overshoot, max(Self.innermostShare, CGFloat(leave / outerDistance)))
     }
 
     private func computeData() -> DispersionData {
@@ -173,9 +183,8 @@ struct MissDispersionPlotView: View {
             byHole[key, default: []].append(p)
         }
 
-        var result: [DispersionDot] = []
-        var index: [String: Int] = [:]
-
+        // Every miss first, so the scale is settled before anything is placed.
+        var misses: [(vec: (x: CGFloat, y: CGFloat), leave: Double, shading: Double?)] = []
         for holePutts in byHole.values {
             let sorted = holePutts.sorted { $0.puttNumber < $1.puttNumber }
             for (i, p) in sorted.enumerated() {
@@ -183,29 +192,45 @@ struct MissDispersionPlotView: View {
                 if let distanceRange, !distanceRange.contains(p.distanceM) { continue }
                 let next = i + 1 < sorted.count ? sorted[i + 1] : nil
                 let leave = next.map { max(0.3, $0.distanceM) } ?? max(0.3, p.distanceM * 0.35)
-                let radial = fraction(forLeave: Double(leave))
                 // An angle recorded on the dial places the dot where the ball
                 // actually went; the eight sectors are only the fallback.
                 let vec = p.missAngleDeg.map(angleVector) ?? missVector(p.result)
-                let x = (vec.x * radial * 1000).rounded() / 1000
-                let y = (vec.y * radial * 1000).rounded() / 1000
-                let key = "\(x)|\(y)"
-                let shadingValue = shading.value(for: p)
-                if let idx = index[key] {
-                    result[idx].count += 1
-                    if let shadingValue { result[idx].values.append(shadingValue) }
-                } else {
-                    index[key] = result.count
-                    result.append(DispersionDot(
-                        x: x, y: y, count: 1,
-                        values: shadingValue.map { [$0] } ?? []
-                    ))
-                }
+                misses.append((vec, leave, shading.value(for: p)))
+            }
+        }
+
+        // Stretched sideways while every miss stays inside the lateral limit;
+        // a single one beyond it puts the whole plot back on circles, so no
+        // dot is ever pinned somewhere it did not go.
+        let stretched = misses.allSatisfy { $0.leave * Double(abs($0.vec.x)) <= lateralLimitM + 0.0001 }
+
+        var result: [DispersionDot] = []
+        var index: [String: Int] = [:]
+        for miss in misses {
+            let radial = fraction(forLeave: miss.leave)
+            // Sideways, stretched, a dot is measured against the lateral limit
+            // instead of the outer ring — and never pinned, since it fits.
+            let across = stretched
+                ? CGFloat(max(Double(Self.innermostShare) * outerDistance, miss.leave) / lateralLimitM)
+                : radial
+            let x = (miss.vec.x * across * 1000).rounded() / 1000
+            let y = (miss.vec.y * radial * 1000).rounded() / 1000
+            let key = "\(x)|\(y)"
+            if let idx = index[key] {
+                result[idx].count += 1
+                if let value = miss.shading { result[idx].values.append(value) }
+            } else {
+                index[key] = result.count
+                result.append(DispersionDot(
+                    x: x, y: y, count: 1,
+                    values: miss.shading.map { [$0] } ?? []
+                ))
             }
         }
         return DispersionData(
             dots: result,
-            shadingScale: result.flatMap(\.values).map { abs($0) }.max() ?? 0
+            shadingScale: result.flatMap(\.values).map { abs($0) }.max() ?? 0,
+            stretched: stretched
         )
     }
 
@@ -274,6 +299,19 @@ struct MissDispersionPlotView: View {
                 if filter == .up || filter == .down {
                     slopeArrowVertical
                 }
+            }
+
+            if data.stretched, !data.dots.isEmpty {
+                Text(String(
+                    format: L("dispersion.stretched"),
+                    UnitConverter.formatDistance(lateralLimitM, useFeet: useFeet),
+                    UnitConverter.formatDistance(outerDistance, useFeet: useFeet)
+                ))
+                .font(.system(size: 10))
+                .foregroundStyle(Theme.textMuted)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: side)
             }
 
             if shading != .none, !data.dots.isEmpty {
@@ -470,39 +508,46 @@ struct MissDispersionPlotView: View {
             // The scale reads outwards from the hole along one line to the
             // right, and each ring opens where its label sits rather than
             // running through it.
-            for distance in ringDistances {
-                let r = maxR * fraction(forLeave: distance)
-                let labelled = labelledRingDistances.contains(distance)
-                let gapHalfWidth: CGFloat = 15
-                let gap: Angle = labelled ? .radians(Double(atan(gapHalfWidth / r))) : .degrees(0)
+            // Stretched, the sides reach only the lateral limit, so every ring
+            // is that many times wider than it is tall.
+            let stretch = data.stretched ? CGFloat(outerDistance / lateralLimitM) : 1
+            if data.stretched {
+                context.drawLayer { rings in
+                    // The wider rings run off the sides; they stop before the
+                    // edge labels instead of running through them.
+                    rings.clip(to: Path(CGRect(x: c.x - plotLimit, y: 0, width: plotLimit * 2, height: canvasSize.height)))
+                    for distance in ringDistances {
+                        let ry = maxR * fraction(forLeave: distance)
+                        let rx = ry * stretch
+                        rings.stroke(
+                            Path(ellipseIn: CGRect(x: c.x - rx, y: c.y - ry, width: rx * 2, height: ry * 2)),
+                            with: .color(Theme.borderLight),
+                            lineWidth: 1
+                        )
+                    }
+                }
+            } else {
+                for distance in ringDistances {
+                    let r = maxR * fraction(forLeave: distance)
+                    let labelled = labelledRingDistances.contains(distance)
+                    let gapHalfWidth: CGFloat = 15
+                    let gap: Angle = labelled ? .radians(Double(atan(gapHalfWidth / r))) : .degrees(0)
 
-                var ring = Path()
-                ring.addArc(
-                    center: c, radius: r,
-                    startAngle: .degrees(0) + gap,
-                    endAngle: .degrees(360) - gap,
-                    clockwise: false
-                )
-                context.stroke(ring, with: .color(Theme.borderLight), lineWidth: 1)
+                    var ring = Path()
+                    ring.addArc(
+                        center: c, radius: r,
+                        startAngle: .degrees(0) + gap,
+                        endAngle: .degrees(360) - gap,
+                        clockwise: false
+                    )
+                    context.stroke(ring, with: .color(Theme.borderLight), lineWidth: 1)
+                }
             }
             var crosshair = Path()
             crosshair.move(to: CGPoint(x: c.x - maxR, y: c.y)); crosshair.addLine(to: CGPoint(x: c.x + maxR, y: c.y))
             crosshair.move(to: CGPoint(x: c.x, y: c.y - maxR)); crosshair.addLine(to: CGPoint(x: c.x, y: c.y + maxR))
             context.stroke(crosshair, with: .color(.white.opacity(0.18)), lineWidth: 1)
 
-            // Clear the crosshair behind each number, then set the scale on it.
-            for distance in labelledRingDistances {
-                let r = maxR * fraction(forLeave: distance)
-                let plate = CGRect(x: c.x + r - 15, y: c.y - 7, width: 30, height: 14)
-                context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
-                context.draw(
-                    Text(UnitConverter.formatDistance(distance, useFeet: useFeet))
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(Theme.textMuted),
-                    at: CGPoint(x: c.x + r, y: c.y),
-                    anchor: .center
-                )
-            }
 
             context.fill(Path(ellipseIn: CGRect(x: c.x - 7, y: c.y - 7, width: 14, height: 14)), with: .color(Theme.primary))
             context.stroke(Path(ellipseIn: CGRect(x: c.x - 7, y: c.y - 7, width: 14, height: 14)), with: .color(.white), lineWidth: 2)
@@ -548,6 +593,39 @@ struct MissDispersionPlotView: View {
                     context.fill(Path(ellipseIn: rect), with: .color(Theme.error.opacity(alpha)))
                     context.stroke(Path(ellipseIn: rect), with: .color(Color(hex: 0x7A1111).opacity(0.6)), lineWidth: 1)
                 }
+            }
+
+            // The scale goes on last, each number on a plate of the card's
+            // colour, so a cluster of dots cannot bury what measures it.
+            // Stretched, the outer rings run off the sides, so they are
+            // numbered a little right of the middle, where short and long
+            // misses stack up less — and the innermost a little below where it
+            // crosses sideways, which shows how far the stretch goes. Each
+            // number still sits on its own ring.
+            let offset: CGFloat = 20
+            var labels: [(distance: Double, point: CGPoint)] = labelledRingDistances.map { distance in
+                let ry = maxR * fraction(forLeave: distance)
+                guard data.stretched else { return (distance, CGPoint(x: c.x + ry, y: c.y)) }
+                let rx = ry * stretch
+                let rise = ry * max(0, 1 - pow(offset / rx, 2)).squareRoot()
+                return (distance, CGPoint(x: c.x + offset, y: c.y - rise))
+            }
+            if data.stretched, let inner = ringDistances.first {
+                let ry = maxR * fraction(forLeave: inner)
+                let rx = ry * stretch
+                let reach = rx * max(0, 1 - pow(offset / ry, 2)).squareRoot()
+                labels.append((inner, CGPoint(x: c.x + reach, y: c.y + offset)))
+            }
+            for label in labels {
+                let plate = CGRect(x: label.point.x - 15, y: label.point.y - 7, width: 30, height: 14)
+                context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
+                context.draw(
+                    Text(UnitConverter.formatDistance(label.distance, useFeet: useFeet))
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(Theme.textMuted),
+                    at: label.point,
+                    anchor: .center
+                )
             }
         }
     }
