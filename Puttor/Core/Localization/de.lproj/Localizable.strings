@@ -295,7 +295,7 @@
 "stats.firstPutt" = "erster Putt";
 "stats.threePuttsAvg" = "Ø 3-PUTTS";
 "stats.lipOutsAvg" = "Ø LIP-OUTS";
-"evolution.score" = "SCORE (ÜBER PAR)";
+"evolution.score" = "SCORE (ZUM PAR)";
 "evolution.gir" = "GIR %";
 "evolution.conversion" = "BIRDIE-KONVERSION %";
 "evolution.scramble" = "SCRAMBLE %";

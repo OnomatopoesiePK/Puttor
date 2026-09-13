@@ -149,7 +149,7 @@ final class PuttorUITests: XCTestCase {
         snapshot("1 statistics with arrow")
         open.tap()
 
-        XCTAssertTrue(app.staticTexts["SCORE (OVER PAR)"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["SCORE (TO PAR)"].waitForExistence(timeout: 5))
         sleep(1)
         snapshot("2 evolution")
         app.swipeUp()
@@ -169,7 +169,7 @@ final class PuttorUITests: XCTestCase {
         // Marked with an asterisk when some rounds carry no score.
         let playingStats = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'PLAYING STATS'")).firstMatch
         XCTAssertTrue(playingStats.waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["SCORE (OVER PAR)"].exists)
+        XCTAssertFalse(app.staticTexts["SCORE (TO PAR)"].exists)
         sleep(1)
         snapshot("5 back")
         // Back where the statistics were left, not at the top.

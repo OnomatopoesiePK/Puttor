@@ -132,6 +132,7 @@ struct PlayingStatsEvolutionView: View {
         let series = points.compactMap { point in
             point.values[metric].map { (index: point.id, value: shown($0, metric)) }
         }
+        let average = series.isEmpty ? nil : series.reduce(0) { $0 + $1.value } / Double(series.count)
 
         return VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
@@ -142,8 +143,7 @@ struct PlayingStatsEvolutionView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 Spacer(minLength: 8)
-                if !series.isEmpty {
-                    let average = series.reduce(0) { $0 + $1.value } / Double(series.count)
+                if let average {
                     Text("Ø \(text(average, metric))")
                         .font(.system(size: 12, weight: .heavy))
                         .foregroundStyle(colour)
@@ -159,6 +159,7 @@ struct PlayingStatsEvolutionView: View {
                 ticks: yTicks(domain),
                 gridRounds: roundTicks,
                 colour: colour,
+                average: average,
                 axisText: { text($0, metric, onAxis: true) },
                 // A number at every point leaves no room for a unit after
                 // each; the axis already gives it.
@@ -304,6 +305,8 @@ private struct EvolutionChart: View {
     let ticks: [Double]
     let gridRounds: [Int]
     let colour: Color
+    /// Drawn across the chart as a dashed line in the chart's colour.
+    let average: Double?
     let axisText: (Double) -> String
     let pointText: (Double) -> String
     /// Every point's number, or only the highest's and the lowest's.
@@ -357,6 +360,16 @@ private struct EvolutionChart: View {
                     at: CGPoint(x: 0, y: y),
                     anchor: .leading
                 )
+            }
+
+            // The average under the line, dashed and a little fainter, so the
+            // rounds above and below it read at a glance.
+            if let average {
+                let y = yPosition(average)
+                var line = Path()
+                line.move(to: CGPoint(x: plot.minX, y: y))
+                line.addLine(to: CGPoint(x: plot.maxX, y: y))
+                context.stroke(line, with: .color(colour.opacity(0.7)), style: StrokeStyle(lineWidth: 1, dash: [5, 4]))
             }
 
             if series.count > 1 {
