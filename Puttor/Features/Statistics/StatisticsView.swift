@@ -39,6 +39,21 @@ private enum FilterMode: String, CaseIterable, Identifiable {
     }
 }
 
+/// A scroll offset kept outside SwiftUI's state, so remembering it redraws
+/// nothing.
+private final class ScrollMemory {
+    var y: CGFloat = 0
+    /// Where to go back to, set as the statistics slide away. Kept apart from
+    /// `y`, which the scroll view resets to the top as soon as it reappears.
+    var restore: CGFloat?
+}
+
+/// What the statistics' scroll view reports: where it is, and how far it can go.
+private struct ScrollSnapshot: Equatable {
+    var y: CGFloat
+    var height: CGFloat
+}
+
 /// One statistics column: its own filter, its own numbers. Two of them side by
 /// side is what the compare mode is.
 private struct StatisticsPane: View {
@@ -91,6 +106,13 @@ private struct StatisticsPane: View {
     /// The last computed bundle, rebuilt only when the rounds behind it change
     /// — not on every keystroke in a filter field or every section that folds.
     @State private var bundle = StatsBundle()
+    /// Whether the evolution charts have taken the statistics' place.
+    @State private var showingEvolution = false
+    /// Where the statistics were scrolled to, so they come back there. The
+    /// offset lives in a plain object: it changes every frame while scrolling,
+    /// and must not redraw the whole tab each time.
+    @State private var statsScroll = ScrollPosition(edge: .top)
+    @State private var scrollMemory = ScrollMemory()
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     /// Bars double in landscape rather than leaving the extra width empty.
@@ -175,6 +197,8 @@ private struct StatisticsPane: View {
         var scorePutting: ScorePuttingAnalysis?
         var allPutts: [Putt] = []
         var leaveByMiss: [PuttResult: LeaveInfo] = [:]
+        /// Every round's playing stats, oldest first, for the evolution charts.
+        var evolution: [PlayingStatsPoint] = []
 
         var hasScoreSituationData: Bool {
             RoundStats.situationCategories.contains {
@@ -227,6 +251,12 @@ private struct StatisticsPane: View {
 
             allPutts = rounds.flatMap { $0.putts }
             leaveByMiss = RoundStats.computeLeaveByMissDirection(allPutts)
+
+            evolution = PlayingStatsPoint.series(rounds.compactMap { r in
+                byRound[r.persistentModelID].map {
+                    (date: r.date, stats: $0, tracksScore: r.tracksScoreCategory && $0.pickedUpWithoutScore == 0)
+                }
+            })
         }
     }
 
@@ -464,243 +494,285 @@ private struct StatisticsPane: View {
                 // eats a third of it — so there it scrolls away with the rest.
                 if !isLandscape { filterHeader }
 
-                ScrollView {
-                    VStack {
-                        if isLandscape { filterHeader }
+                // The statistics, or in their place the evolution of the playing
+                // stats. Only one is ever laid out: kept side by side, the one past
+                // the screen's edge sat in landscape's side safe areas, and the two
+                // kept resizing each other without end.
+                ZStack {
+                    if showingEvolution {
+                        PlayingStatsEvolutionView(points: data.evolution, useFeet: useFeet, onBack: closeEvolution)
+                            .transition(.move(edge: .trailing))
+                    } else {
+                        ScrollView {
+                            VStack {
+                                if isLandscape { filterHeader }
 
-                        if completeRounds.isEmpty {
-                            emptyState(L("stats.noRounds"), "📊")
-                        } else if filteredRounds.isEmpty {
-                            emptyState(L(filterMode == .choose ? "stats.noneSelected" : "stats.noMatch"), "🔍")
-                        } else {
-                            VStack(spacing: Theme.Spacing.md) {
-                                CollapsibleStatSection(title: "\(L("stats.rounds")) (\(filteredRounds.count))", storageKey: "rounds", infoKey: "stats.rounds.info") {
-                                    roundsGrid(data.byRound)
-                                }
+                                if completeRounds.isEmpty {
+                                    emptyState(L("stats.noRounds"), "📊")
+                                } else if filteredRounds.isEmpty {
+                                    emptyState(L(filterMode == .choose ? "stats.noneSelected" : "stats.noMatch"), "🔍")
+                                } else {
+                                    VStack(spacing: Theme.Spacing.md) {
+                                        CollapsibleStatSection(title: "\(L("stats.rounds")) (\(filteredRounds.count))", storageKey: "rounds", infoKey: "stats.rounds.info") {
+                                            roundsGrid(data.byRound)
+                                        }
 
-                                HStack(spacing: Theme.Spacing.sm) {
-                                    statBox(L("summary.putts"), "\(data.aggregated.totalPutts)")
-                                    statBox(L("summary.holes"), "\(data.aggregated.holes)")
-                                    statBox(L("summary.avgPerHole"), String(format: "%.1f", data.aggregated.avgPuttsPerHole))
-                                }
+                                        HStack(spacing: Theme.Spacing.sm) {
+                                            statBox(L("summary.putts"), "\(data.aggregated.totalPutts)")
+                                            statBox(L("summary.holes"), "\(data.aggregated.holes)")
+                                            statBox(L("summary.avgPerHole"), String(format: "%.1f", data.aggregated.avgPuttsPerHole))
+                                        }
 
-                                CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained", infoKey: "stats.sgPutting.info") {
-                                    VStack(spacing: 4) {
-                                        MetricValue(
-                                            value: data.sgAverage,
-                                            metric: .sg,
-                                            size: dense ? 30 : 40,
-                                            colour: data.sgAverage > 0.5 ? Theme.primary : (data.sgAverage < -0.5 ? Theme.error : Theme.warning)
-                                        )
-                                        Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
+                                        CollapsibleStatSection(title: L("stats.sgPutting"), storageKey: "strokesGained", infoKey: "stats.sgPutting.info") {
+                                            VStack(spacing: 4) {
+                                                MetricValue(
+                                                    value: data.sgAverage,
+                                                    metric: .sg,
+                                                    size: dense ? 30 : 40,
+                                                    colour: data.sgAverage > 0.5 ? Theme.primary : (data.sgAverage < -0.5 ? Theme.error : Theme.warning)
+                                                )
+                                                Text(L("stats.sgSubtitle")).font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
 
-                                        Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
+                                                Rectangle().fill(Theme.borderLight).frame(height: 1).padding(.vertical, 8)
 
-                                        MetricValue(value: data.pcgAverage, metric: .pcg, size: 20)
-                                        Text(L("stats.pcgSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                }
-
-                                // Score, GIR and scramble come from the holes, so a
-                                // round of nothing but hole-outs still has them —
-                                // only the per-category putt comparison needs putts.
-                                if data.scoreAggregated.holes > 0 {
-                                    CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats", infoKey: "stats.playingStats.info") {
-                                        // A grid rather than rows, so a seventh box
-                                        // keeps the width of the six above it.
-                                        LazyVGrid(columns: playingStatColumns, spacing: Theme.Spacing.sm) {
-                                            // An average per round compares across
-                                            // filters; a running total only grows.
-                                            playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: L("stats.svp.perRound"))
-                                            playingStat(L("stats.gir"), "\(Int(data.scoreAggregated.girPercent.rounded()))%", subtitle: "\(data.scoreAggregated.girCount)/\(data.scoreAggregated.holes)")
-                                            playingStat(
-                                                L("stats.conversion"),
-                                                data.scoreAggregated.girCount > 0 ? "\(Int(data.scoreAggregated.girConversionPercent.rounded()))%" : "—",
-                                                subtitle: "\(data.scoreAggregated.girConversions)/\(data.scoreAggregated.girCount)",
-                                                highlighted: RoundHighlights.strongConversion(data.scoreAggregated.girConversionPercent)
-                                            )
-                                            playingStat(L("stats.scramble"), "\(Int(data.scoreAggregated.scramblePercent.rounded()))%", subtitle: "\(data.scoreAggregated.scrambleSuccesses)/\(data.scoreAggregated.scrambleAttempts)")
-                                            // What the putter faces after hitting
-                                            // the green, and after missing it.
-                                            playingStat(
-                                                L("stats.puttsGir"),
-                                                decimalText(data.scoreAggregated.avgPuttsOnGir),
-                                                subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.girPuttedHoles)
-                                            )
-                                            playingStat(
-                                                L("stats.puttsNoGir"),
-                                                decimalText(data.scoreAggregated.avgPuttsOffGir),
-                                                subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.nonGirPuttedHoles)
-                                            )
-                                            // Counted from the putts alone, so every
-                                            // round in the filter counts, scored or not.
-                                            playingStat(
-                                                L("stats.threePuttsAvg"),
-                                                String(format: "%.1f", Double(data.aggregated.threePuttHoles) / Double(max(1, filteredRounds.count))),
-                                                subtitle: String(format: L("stats.totalInRounds"), data.aggregated.threePuttHoles, filteredRounds.count)
-                                            )
-                                            playingStat(
-                                                L("stats.lipOutsAvg"),
-                                                String(format: "%.1f", Double(data.aggregated.lipOutCount) / Double(max(1, filteredRounds.count))),
-                                                subtitle: String(format: L("stats.totalInRounds"), data.aggregated.lipOutCount, filteredRounds.count)
-                                            )
-                                            // A ninth tile completes the three-wide
-                                            // grid; two wide, it would stand alone.
-                                            if !dense {
-                                                playingStat(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
+                                                MetricValue(value: data.pcgAverage, metric: .pcg, size: 20)
+                                                Text(L("stats.pcgSubtitle")).font(.system(size: 11)).foregroundStyle(Theme.textMuted)
                                             }
+                                            .frame(maxWidth: .infinity)
                                         }
-                                        if dense {
-                                            playingStatWide(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
-                                        }
-                                        scoreCoverageNote(data)
-                                    }
-                                }
 
-                                CollapsibleStatSection(title: sectionTitle(L("stats.scoreVsPutting"), marked: data.hasRoundsWithoutScore), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
-                                    if let analysis = data.scorePutting {
-                                        ScoreVsPuttingView(analysis: analysis, dense: dense)
-                                    } else {
-                                        Text(String(format: L("stats.svp.needMore"), ScorePuttingAnalysis.minimumRounds))
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(Theme.textMuted)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
-                                }
-
-                                CollapsibleStatSection(title: L("stats.dispersion"), storageKey: "dispersion", infoKey: "stats.dispersion.info") {
-                                    // Which putts to plot, and what their colour
-                                    // should say about them.
-                                    HStack(spacing: Theme.Spacing.sm) {
-                                        Picker(L(dispersionFilter.labelKey), selection: $dispersionFilter) {
-                                            ForEach(DispersionFilter.allCases) { f in
-                                                Text(L(f.labelKey)).tag(f)
-                                            }
-                                        }
-                                        Picker(L(dispersionShading.labelKey), selection: $dispersionShading) {
-                                            ForEach(DispersionShading.allCases) { s in
-                                                Text(L(s.labelKey)).tag(s)
-                                            }
-                                        }
-                                    }
-                                    .pickerStyle(.menu)
-                                    .tint(Theme.text)
-                                    // Clear of the header's tap area, so reaching
-                                    // for a menu can't fold the section away.
-                                    .padding(.top, 10)
-
-                                    dispersionRangeRow(longest: longestPuttDistance(data.allPutts))
-
-                                    MissDispersionPlotView(
-                                        putts: data.allPutts,
-                                        filter: dispersionFilter,
-                                        shading: dispersionShading,
-                                        useFeet: useFeet,
-                                        distanceRange: DistanceRangeFilter.range(
-                                            fromText: dispersionFromText,
-                                            toText: dispersionToText,
-                                            useFeet: useFeet,
-                                            fullRangeMaxM: longestPuttDistance(data.allPutts)
-                                        )
-                                    )
-
-                                    // Read from every putt in the selection, not
-                                    // from whatever the menus above are showing:
-                                    // a habit is a habit whichever slice is shown.
-                                    missPatterns(MissPatternFinder.findings(in: data.allPutts))
-                                }
-
-                                if !data.aggregated.makeByDistance.isEmpty {
-                                    CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance", infoKey: "chart.makeVsTour.info") {
-                                        DistanceMakeChartView(data: data.aggregated.makeByDistance, pcgDivisor: max(1, filteredRounds.count), showsTitle: false, dense: dense)
-                                    }
-                                }
-
-                                if data.hasScoreSituationData {
-                                    CollapsibleStatSection(title: sectionTitle(L("stats.makeBySituation"), marked: data.hasRoundsWithoutScore), storageKey: "situation", infoKey: "stats.makeBySituation.info") {
-                                        SituationComparisonView(makeByCategory: data.scoreAggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
-                                        scoreCoverageNote(data)
-                                    }
-                                }
-
-                                if !data.aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
-                                    CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency", infoKey: "summary.missTendency.info") {
-                                        MissDonutView(missCounts: data.aggregated.missCounts, size: dense ? 210 : 260)
-                                    }
-                                }
-
-                                let leave = data.leaveByMiss
-                                if !leave.isEmpty {
-                                    CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss", infoKey: "summary.leaveByMiss.info") {
-                                        // Bars are scaled to the longest leave in
-                                        // view, rounded up, so the widest one fills
-                                        // the track and the labels keep their room.
-                                        let leaveScale = leaveScaleMax(leave)
-                                        ForEach(leave.sorted { $0.value.count > $1.value.count }, id: \.key) { dir, info in
-                                            HStack(spacing: 8) {
-                                                Text(L(dir.labelKey))
-                                                    .font(.system(size: 11, weight: .semibold))
-                                                    .foregroundStyle(Theme.textSecondary)
-                                                    .lineLimit(1).minimumScaleFactor(0.75)
-                                                    .frame(width: 72, alignment: .leading)
-                                                ZStack(alignment: .leading) {
-                                                    Capsule().fill(Theme.borderLight)
-                                                    Capsule().fill(Theme.accent)
-                                                        .frame(width: leaveBarWidth * min(1, info.avgLeaveM / leaveScale))
+                                        // Score, GIR and scramble come from the holes, so a
+                                        // round of nothing but hole-outs still has them —
+                                        // only the per-category putt comparison needs putts.
+                                        if data.scoreAggregated.holes > 0 {
+                                            CollapsibleStatSection(title: sectionTitle(L("stats.playingStats"), marked: data.hasRoundsWithoutScore), storageKey: "playingStats", infoKey: "stats.playingStats.info") {
+                                                HStack(spacing: 6) {
+                                                    VStack(spacing: 10) {
+                                                        // A grid rather than rows, so a seventh box
+                                                        // keeps the width of the six above it.
+                                                        LazyVGrid(columns: playingStatColumns, spacing: Theme.Spacing.sm) {
+                                                            // An average per round compares across
+                                                            // filters; a running total only grows.
+                                                            playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: L("stats.svp.perRound"))
+                                                            playingStat(L("stats.gir"), "\(Int(data.scoreAggregated.girPercent.rounded()))%", subtitle: "\(data.scoreAggregated.girCount)/\(data.scoreAggregated.holes)")
+                                                            playingStat(
+                                                                L("stats.conversion"),
+                                                                data.scoreAggregated.girCount > 0 ? "\(Int(data.scoreAggregated.girConversionPercent.rounded()))%" : "—",
+                                                                subtitle: "\(data.scoreAggregated.girConversions)/\(data.scoreAggregated.girCount)",
+                                                                highlighted: RoundHighlights.strongConversion(data.scoreAggregated.girConversionPercent)
+                                                            )
+                                                            playingStat(L("stats.scramble"), "\(Int(data.scoreAggregated.scramblePercent.rounded()))%", subtitle: "\(data.scoreAggregated.scrambleSuccesses)/\(data.scoreAggregated.scrambleAttempts)")
+                                                            // What the putter faces after hitting
+                                                            // the green, and after missing it.
+                                                            playingStat(
+                                                                L("stats.puttsGir"),
+                                                                decimalText(data.scoreAggregated.avgPuttsOnGir),
+                                                                subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.girPuttedHoles)
+                                                            )
+                                                            playingStat(
+                                                                L("stats.puttsNoGir"),
+                                                                decimalText(data.scoreAggregated.avgPuttsOffGir),
+                                                                subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.nonGirPuttedHoles)
+                                                            )
+                                                            // Counted from the putts alone, so every
+                                                            // round in the filter counts, scored or not.
+                                                            playingStat(
+                                                                L("stats.threePuttsAvg"),
+                                                                String(format: "%.1f", Double(data.aggregated.threePuttHoles) / Double(max(1, filteredRounds.count))),
+                                                                subtitle: String(format: L("stats.totalInRounds"), data.aggregated.threePuttHoles, filteredRounds.count)
+                                                            )
+                                                            playingStat(
+                                                                L("stats.lipOutsAvg"),
+                                                                String(format: "%.1f", Double(data.aggregated.lipOutCount) / Double(max(1, filteredRounds.count))),
+                                                                subtitle: String(format: L("stats.totalInRounds"), data.aggregated.lipOutCount, filteredRounds.count)
+                                                            )
+                                                            // A ninth tile completes the three-wide
+                                                            // grid; two wide, it would stand alone.
+                                                            if !dense {
+                                                                playingStat(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
+                                                            }
+                                                        }
+                                                        if dense {
+                                                            playingStatWide(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
+                                                        }
+                                                        scoreCoverageNote(data)
+                                                    }
+                                                    evolutionArrow
                                                 }
-                                                .frame(width: leaveBarWidth, height: 8)
-                                                Text(UnitConverter.formatDistance(info.avgLeaveM, useFeet: useFeet))
-                                                    .font(.system(size: 12, weight: .heavy))
-                                                    .foregroundStyle(Theme.accent)
-                                                    .lineLimit(1).minimumScaleFactor(0.8)
-                                                    .frame(width: 46, alignment: .trailing)
-                                                Spacer(minLength: 0)
-                                                Text("\(info.count) \(L("summary.puttsAbbr"))")
-                                                    .font(.system(size: 10))
-                                                    .foregroundStyle(Theme.textMuted)
-                                                    .lineLimit(1).minimumScaleFactor(0.8)
                                             }
+                                            // Out to the screen's right edge, where the arrow to the evolution sits.
+                                            .padding(.trailing, -(dense ? Theme.Spacing.sm : Theme.Spacing.lg))
                                         }
-                                        Text(String(format: L("summary.leaveScale"), UnitConverter.formatDistance(leaveScale, useFeet: useFeet)))
-                                            .font(.system(size: 9))
-                                            .foregroundStyle(Theme.textMuted)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
-                                }
-                                if data.aggregated.missReasonCounts.total > 0 {
-                                    CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons", infoKey: "summary.missReasons.info") {
-                                        HStack(spacing: Theme.Spacing.md) {
-                                            if data.aggregated.missReasonCounts.missRead > 0 { reasonStat("\(data.aggregated.missReasonCounts.missRead)", L("input.missRead")) }
-                                            if data.aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(data.aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
-                                            if data.aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(data.aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
-                                            if data.aggregated.missReasonCounts.multiple > 0 { reasonStat("\(data.aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
-                                        }
-                                        reasonInsights(
-                                            titleKey: "read.title",
-                                            icon: "eye",
-                                            lines: BreakReadAnalyzer.findings(in: data.allPutts).map {
-                                                (id: $0.id, text: $0.text, detail: $0.bandText(useFeet: useFeet))
-                                            }
-                                        )
-                                        reasonInsights(
-                                            titleKey: "link.title",
-                                            icon: "link",
-                                            lines: MissReasonLinker.links(in: data.allPutts).map { (id: $0.id, text: $0.text, detail: nil) }
-                                        )
-                                    }
-                                }
 
+                                        CollapsibleStatSection(title: sectionTitle(L("stats.scoreVsPutting"), marked: data.hasRoundsWithoutScore), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
+                                            if let analysis = data.scorePutting {
+                                                ScoreVsPuttingView(analysis: analysis, dense: dense)
+                                            } else {
+                                                Text(String(format: L("stats.svp.needMore"), ScorePuttingAnalysis.minimumRounds))
+                                                    .font(.system(size: 12))
+                                                    .foregroundStyle(Theme.textMuted)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                            }
+                                        }
+
+                                        CollapsibleStatSection(title: L("stats.dispersion"), storageKey: "dispersion", infoKey: "stats.dispersion.info") {
+                                            // Which putts to plot, and what their colour
+                                            // should say about them.
+                                            HStack(spacing: Theme.Spacing.sm) {
+                                                Picker(L(dispersionFilter.labelKey), selection: $dispersionFilter) {
+                                                    ForEach(DispersionFilter.allCases) { f in
+                                                        Text(L(f.labelKey)).tag(f)
+                                                    }
+                                                }
+                                                Picker(L(dispersionShading.labelKey), selection: $dispersionShading) {
+                                                    ForEach(DispersionShading.allCases) { s in
+                                                        Text(L(s.labelKey)).tag(s)
+                                                    }
+                                                }
+                                            }
+                                            .pickerStyle(.menu)
+                                            .tint(Theme.text)
+                                            // Clear of the header's tap area, so reaching
+                                            // for a menu can't fold the section away.
+                                            .padding(.top, 10)
+
+                                            dispersionRangeRow(longest: longestPuttDistance(data.allPutts))
+
+                                            MissDispersionPlotView(
+                                                putts: data.allPutts,
+                                                filter: dispersionFilter,
+                                                shading: dispersionShading,
+                                                useFeet: useFeet,
+                                                distanceRange: DistanceRangeFilter.range(
+                                                    fromText: dispersionFromText,
+                                                    toText: dispersionToText,
+                                                    useFeet: useFeet,
+                                                    fullRangeMaxM: longestPuttDistance(data.allPutts)
+                                                )
+                                            )
+
+                                            // Read from every putt in the selection, not
+                                            // from whatever the menus above are showing:
+                                            // a habit is a habit whichever slice is shown.
+                                            missPatterns(MissPatternFinder.findings(in: data.allPutts))
+                                        }
+
+                                        if !data.aggregated.makeByDistance.isEmpty {
+                                            CollapsibleStatSection(title: L("chart.makeVsTour"), storageKey: "makeByDistance", infoKey: "chart.makeVsTour.info") {
+                                                DistanceMakeChartView(data: data.aggregated.makeByDistance, pcgDivisor: max(1, filteredRounds.count), showsTitle: false, dense: dense)
+                                            }
+                                        }
+
+                                        if data.hasScoreSituationData {
+                                            CollapsibleStatSection(title: sectionTitle(L("stats.makeBySituation"), marked: data.hasRoundsWithoutScore), storageKey: "situation", infoKey: "stats.makeBySituation.info") {
+                                                SituationComparisonView(makeByCategory: data.scoreAggregated.makeByCategory, useFeet: useFeet, showsTitle: false)
+                                                scoreCoverageNote(data)
+                                            }
+                                        }
+
+                                        if !data.aggregated.missCounts.filter({ $0.key != .holed }).isEmpty {
+                                            CollapsibleStatSection(title: L("summary.missTendency"), storageKey: "missTendency", infoKey: "summary.missTendency.info") {
+                                                MissDonutView(missCounts: data.aggregated.missCounts, size: dense ? 210 : 260)
+                                            }
+                                        }
+
+                                        let leave = data.leaveByMiss
+                                        if !leave.isEmpty {
+                                            CollapsibleStatSection(title: L("summary.leaveByMiss"), storageKey: "leaveByMiss", infoKey: "summary.leaveByMiss.info") {
+                                                // Bars are scaled to the longest leave in
+                                                // view, rounded up, so the widest one fills
+                                                // the track and the labels keep their room.
+                                                let leaveScale = leaveScaleMax(leave)
+                                                ForEach(leave.sorted { $0.value.count > $1.value.count }, id: \.key) { dir, info in
+                                                    HStack(spacing: 8) {
+                                                        Text(L(dir.labelKey))
+                                                            .font(.system(size: 11, weight: .semibold))
+                                                            .foregroundStyle(Theme.textSecondary)
+                                                            .lineLimit(1).minimumScaleFactor(0.75)
+                                                            .frame(width: 72, alignment: .leading)
+                                                        ZStack(alignment: .leading) {
+                                                            Capsule().fill(Theme.borderLight)
+                                                            Capsule().fill(Theme.accent)
+                                                                .frame(width: leaveBarWidth * min(1, info.avgLeaveM / leaveScale))
+                                                        }
+                                                        .frame(width: leaveBarWidth, height: 8)
+                                                        Text(UnitConverter.formatDistance(info.avgLeaveM, useFeet: useFeet))
+                                                            .font(.system(size: 12, weight: .heavy))
+                                                            .foregroundStyle(Theme.accent)
+                                                            .lineLimit(1).minimumScaleFactor(0.8)
+                                                            .frame(width: 46, alignment: .trailing)
+                                                        Spacer(minLength: 0)
+                                                        Text("\(info.count) \(L("summary.puttsAbbr"))")
+                                                            .font(.system(size: 10))
+                                                            .foregroundStyle(Theme.textMuted)
+                                                            .lineLimit(1).minimumScaleFactor(0.8)
+                                                    }
+                                                }
+                                                Text(String(format: L("summary.leaveScale"), UnitConverter.formatDistance(leaveScale, useFeet: useFeet)))
+                                                    .font(.system(size: 9))
+                                                    .foregroundStyle(Theme.textMuted)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                            }
+                                        }
+                                        if data.aggregated.missReasonCounts.total > 0 {
+                                            CollapsibleStatSection(title: L("summary.missReasons"), storageKey: "missReasons", infoKey: "summary.missReasons.info") {
+                                                HStack(spacing: Theme.Spacing.md) {
+                                                    if data.aggregated.missReasonCounts.missRead > 0 { reasonStat("\(data.aggregated.missReasonCounts.missRead)", L("input.missRead")) }
+                                                    if data.aggregated.missReasonCounts.badStroke > 0 { reasonStat("\(data.aggregated.missReasonCounts.badStroke)", L("input.badStroke")) }
+                                                    if data.aggregated.missReasonCounts.wrongAim > 0 { reasonStat("\(data.aggregated.missReasonCounts.wrongAim)", L("input.wrongAim")) }
+                                                    if data.aggregated.missReasonCounts.multiple > 0 { reasonStat("\(data.aggregated.missReasonCounts.multiple)", L("summary.multipleReasons"), color: Theme.warning) }
+                                                }
+                                                reasonInsights(
+                                                    titleKey: "read.title",
+                                                    icon: "eye",
+                                                    lines: BreakReadAnalyzer.findings(in: data.allPutts).map {
+                                                        (id: $0.id, text: $0.text, detail: $0.bandText(useFeet: useFeet))
+                                                    }
+                                                )
+                                                reasonInsights(
+                                                    titleKey: "link.title",
+                                                    icon: "link",
+                                                    lines: MissReasonLinker.links(in: data.allPutts).map { (id: $0.id, text: $0.text, detail: nil) }
+                                                )
+                                            }
+                                        }
+
+                                    }
+                                    .padding(dense ? Theme.Spacing.sm : Theme.Spacing.lg)
+                                }
                             }
-                            .padding(dense ? Theme.Spacing.sm : Theme.Spacing.lg)
+                            // Exactly as wide as the scroll view, whatever sits inside:
+                            // content wider than the screen let the whole tab be
+                            // dragged sideways.
+                            .containerRelativeFrame(.horizontal)
                         }
+                        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+                        .scrollPosition($statsScroll)
+                        .onScrollGeometryChange(for: ScrollSnapshot.self) { geometry in
+                            ScrollSnapshot(y: geometry.contentOffset.y, height: geometry.contentSize.height)
+                        } action: { _, now in
+                            // Coming back: return to where they were left as
+                            // soon as the content is tall enough to get there,
+                            // and remember nothing until then.
+                            if let target = scrollMemory.restore {
+                                guard target > 0 else {
+                                    scrollMemory.restore = nil
+                                    return
+                                }
+                                if now.height > target {
+                                    scrollMemory.restore = nil
+                                    statsScroll.scrollTo(y: target)
+                                }
+                                return
+                            }
+                            // Only while they are what is on screen: sliding
+                            // away, the scroll view reports its offset reset.
+                            if !showingEvolution { scrollMemory.y = now.y }
+                        }
+                        .transition(.move(edge: .leading))
                     }
-                    // Exactly as wide as the scroll view, whatever sits inside:
-                    // content wider than the screen let the whole tab be
-                    // dragged sideways.
-                    .containerRelativeFrame(.horizontal)
                 }
-                .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+                .clipped()
         }
         .background(Theme.background.ignoresSafeArea())
         .task(id: statsKey) {
@@ -827,6 +899,32 @@ private struct StatisticsPane: View {
     }
 
     private var isLandscape: Bool { verticalSizeClass == .compact }
+
+    // MARK: - Evolution
+
+    private func openEvolution() {
+        scrollMemory.restore = scrollMemory.y
+        withAnimation(.easeInOut(duration: 0.35)) { showingEvolution = true }
+    }
+
+    private func closeEvolution() {
+        withAnimation(.easeInOut(duration: 0.35)) { showingEvolution = false }
+    }
+
+    /// A tall, flat arrow down the right edge of the playing stats that slides
+    /// their evolution in.
+    private var evolutionArrow: some View {
+        Button(action: openEvolution) {
+            Image(systemName: "chevron.compact.right")
+                .font(.system(size: 40, weight: .regular))
+                .foregroundStyle(Theme.primary)
+                .frame(width: 24)
+                .frame(maxHeight: .infinity)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L("evolution.open"))
+    }
 
     // MARK: - Conditions
 

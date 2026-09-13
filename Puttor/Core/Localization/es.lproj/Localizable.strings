@@ -295,6 +295,18 @@
 "stats.firstPutt" = "primer putt";
 "stats.threePuttsAvg" = "Ø 3 PUTTS";
 "stats.lipOutsAvg" = "Ø LIP-OUTS";
+"evolution.score" = "SCORE (SOBRE PAR)";
+"evolution.gir" = "GIR %";
+"evolution.conversion" = "CONVERSIÓN DE BIRDIE %";
+"evolution.scramble" = "SCRAMBLE %";
+"evolution.puttsGir" = "PUTTS · GIR";
+"evolution.puttsNoGir" = "PUTTS · SIN GIR";
+"evolution.threePutts" = "3 PUTTS";
+"evolution.lipOuts" = "LIP-OUTS";
+"evolution.proximity" = "PROXIMIDAD · GIR, PRIMER PUTT";
+"evolution.open" = "Mostrar cómo han evolucionado estas cifras";
+"evolution.back" = "Volver a las estadísticas";
+"evolution.needMore" = "Hacen falta al menos dos rondas en la selección para ver cómo evolucionan las cifras.";
 "stats.totalInRounds" = "%1$ld en %2$ld rondas";
 "stats.girFull" = "Greens en regulación";
 "stats.scramble" = "Scramble";
@@ -348,7 +360,7 @@
 "stats.dispersion" = "DISPERSIÓN DE FALLOS";
 "stats.rounds.info" = "Una casilla por ronda del filtro actual, con los golpes ganados en putt de esa ronda.\n\nPor cada hoyo: los putts que el tour esperaría desde donde estaba el primer putt, menos los putts realmente usados.";
 "stats.sgPutting.info" = "Golpes ganados por hoyo, sumados a lo largo de la ronda y promediados entre las rondas filtradas.\n\nEl PCG de debajo es la cifra por putt de esas mismas rondas: cómo se compara cada resultado con la probabilidad del tour de embocar desde esa distancia.";
-"stats.playingStats.info" = "El score es la media de golpes sobre par por ronda.\n\nGIR cuenta los hoyos jugados para eagle o birdie; la conversión de birdie, cuántos de esos greens acabaron en birdie o eagle con uno o dos putts; el scramble, los pares salvados entre los hoyos jugados para par con el green fallado.\n\nLas cifras de putts cuentan solo los hoyos en los que realmente se puteó. Los 3 putts y los lip-outs son medias por ronda sobre todas las rondas del filtro; la proximidad es la longitud del primer putt en los greens en regulación.\n\nTodo ello necesita la referencia de score («putt para»): la tienen todos los modos salvo Personalizado sin ese campo.";
+"stats.playingStats.info" = "El score es la media de golpes sobre par por ronda.\n\nGIR cuenta los hoyos jugados para eagle o birdie; la conversión de birdie, cuántos de esos greens acabaron en birdie o eagle con uno o dos putts; el scramble, los pares salvados entre los hoyos jugados para par con el green fallado.\n\nLas cifras de putts cuentan solo los hoyos en los que realmente se puteó. Los 3 putts y los lip-outs son medias por ronda sobre todas las rondas del filtro; la proximidad es la longitud del primer putt en los greens en regulación.\n\nTodo ello necesita la referencia de score («putt para»): la tienen todos los modos salvo Personalizado sin ese campo.\n\nLa flecha de la derecha muestra cómo ha evolucionado cada cifra de ronda en ronda, con las mismas rondas que el filtro de arriba. Desliza hacia la derecha o toca la flecha de la izquierda para volver.";
 "stats.dispersion.info" = "Cada putt fallado se coloca en la dirección en la que falló, tan lejos del hoyo como quedó de él. Los anillos marcan 1, 2 y 3 metros de distancia restante. Se dibujan como elipses estiradas a lo ancho, porque un putt rara vez falla muy de lado: los lados llegan a 1,5 m y arriba y abajo a 3 m. En cuanto un fallo queda a más de 1,5 m de lado, el gráfico vuelve a círculos.\n\nEl primer menú elige qué direcciones de caída se muestran; el segundo, qué significan los colores: la fuerza de la caída, la longitud del putt o cuánto subía o bajaba la pendiente; los dos últimos necesitan también el campo de pendiente.\n\nLos dos campos de debajo limitan el gráfico a putts golpeados dentro de un rango de distancias, ambos extremos incluidos, para poder leer un filtro de pendiente distancia por distancia.\n\nUn punto más grande significa más fallos en el mismo sitio y, con un filtro de color activo, cada punto se tiñe según la clase a la que pertenece.\n\nNecesita el campo de resultado complejo: modo Pro, o Personalizado con el resultado en complejo.\n\nLas frases de debajo leen todos los putts de la selección. Una dirección solo se nombra cuando más del 60 por ciento de los fallos va hacia ese lado: en todos los fallos, por dirección de caída, en putts rectos, cuesta arriba, cuesta abajo, dentro de 1,5 m, de 1,5 a 3 m, de 3 a 6 m y desde 6 m. Un subconjunto que solo repite lo que muestran todos los fallos se omite. Si detrás de un patrón destaca un motivo, aparece debajo. Un fallo solo cuenta como largo cuando el siguiente putt mide más de 1 m: una bola que se queda justo pasado el hoyo llevaba la velocidad correcta. Dos excepciones se nombran ya desde el 30 por ciento: fallos por debajo de 3 m que se quedan cortos y putts desde 8 m que quedan a más de 1 m del hoyo. Los hallazgos se agrupan en longitud, línea y caída, y distancia restante. Cada grupo muestra como mucho tres, uno por dirección, y tanto los grupos como sus hallazgos se ordenan según cuántos putts cuestan aproximadamente.";
 "pattern.title" = "LO QUE HACEN SIEMPRE TUS FALLOS";
 "pattern.category.length" = "LONGITUD";

@@ -99,7 +99,12 @@ final class PuttorUITests: XCTestCase {
         // sideways-scrolling rows.
         let window = app.windows.firstMatch.frame
         let header = app.buttons["Filter"].frame.maxY + 8
-        let overflowing = app.staticTexts.allElementsBoundByIndex
+        // One snapshot of the whole tree: resolving the texts one by one
+        // fails as soon as any of them changes in the meantime.
+        func texts(in element: XCUIElementSnapshot) -> [XCUIElementSnapshot] {
+            (element.elementType == .staticText ? [element] : []) + element.children.flatMap(texts)
+        }
+        let overflowing = try texts(in: app.snapshot())
             .filter { $0.frame.minY > header }
             .filter { $0.frame.minX < window.minX - 1 || $0.frame.maxX > window.maxX + 1 }
             .map { "\($0.label.prefix(40)) \($0.frame)" }
@@ -111,6 +116,66 @@ final class PuttorUITests: XCTestCase {
         heading.swipeLeft()
         sleep(1)
         XCTAssertEqual(heading.frame.minX, before.minX, accuracy: 1, "before \(before), after \(heading.frame)")
+    }
+
+    /// The arrow beside the playing stats slides their evolution in, and a
+    /// swipe to the right slides the statistics back.
+    @MainActor
+    func testPlayingStatsEvolutionSlidesInAndBack() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+
+        let open = app.buttons["Show how these figures moved"]
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        // Short drags, until the arrow sits clear of the tab bar: the
+        // statistics must be scrolled for coming back to mean anything.
+        let tabBarTop = app.tabBars.firstMatch.frame.minY
+        var drags = 0
+        while open.frame.midY > tabBarTop - 60 && drags < 12 {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+            drags += 1
+        }
+        sleep(1)
+        let arrowBefore = open.frame
+        XCTAssertGreaterThan(drags, 0)
+        snapshot("1 statistics with arrow")
+        open.tap()
+
+        XCTAssertTrue(app.staticTexts["SCORE (OVER PAR)"].waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("2 evolution")
+        app.swipeUp()
+        sleep(1)
+        snapshot("3 evolution scrolled")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(4)
+        snapshot("4 evolution landscape")
+        XCUIDevice.shared.orientation = .portrait
+        sleep(4)
+        snapshot("4b evolution portrait again")
+
+        XCTAssertTrue(app.buttons["Back to the statistics"].exists)
+        app.swipeRight()
+        sleep(1)
+        // Marked with an asterisk when some rounds carry no score.
+        let playingStats = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'PLAYING STATS'")).firstMatch
+        XCTAssertTrue(playingStats.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["SCORE (OVER PAR)"].exists)
+        sleep(1)
+        snapshot("5 back")
+        // Back where the statistics were left, not at the top.
+        let arrow = app.buttons["Show how these figures moved"]
+        XCTAssertEqual(arrow.frame.midY, arrowBefore.midY, accuracy: 40, "before \(arrowBefore), after \(arrow.frame)")
+        XCTAssertTrue(arrow.isHittable)
     }
 
     private func snapshot(_ name: String) {

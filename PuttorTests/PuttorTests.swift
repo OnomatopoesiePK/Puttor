@@ -1456,6 +1456,38 @@ struct PuttorTests {
         #expect(MissReasonLinker.links(in: putts).isEmpty)
     }
 
+    // MARK: - Playing stats evolution
+
+    /// The evolution reads rounds oldest first, and leaves out what a round
+    /// without a score reference cannot say while keeping what its putts can.
+    @Test func playingStatsEvolutionRunsOldestFirstAndSkipsUnscoredFigures() async throws {
+        var scored = RoundStats()
+        scored.holes = 18
+        scored.scoredHoles = 18
+        scored.scoreRelativeToPar = 12
+        scored.girCount = 6
+        scored.threePuttHoles = 2
+        var unscored = RoundStats()
+        unscored.holes = 18
+        unscored.threePuttHoles = 4
+        unscored.lipOutCount = 1
+
+        let now = Date()
+        let series = PlayingStatsPoint.series([
+            (date: now, stats: unscored, tracksScore: false),
+            (date: now.addingTimeInterval(-86_400), stats: scored, tracksScore: true),
+        ])
+
+        #expect(series.map(\.id) == [0, 1])
+        #expect(series[0].values[.score] == 12)
+        #expect(series[0].values[.gir] == Double(6) / 18 * 100)
+        #expect(series[0].values[.threePutts] == 2)
+        #expect(series[1].values[.score] == nil)
+        #expect(series[1].values[.gir] == nil)
+        #expect(series[1].values[.threePutts] == 4)
+        #expect(series[1].values[.lipOuts] == 1)
+    }
+
     // MARK: - Coach tips
 
     /// The three costliest topics become tips, each said once, where the
