@@ -154,6 +154,7 @@
 "setup.weather" = "WETTER";
 "setup.grainyGreens" = "Grüns mit Grain";
 "setup.grainyGreens.desc" = "Grüns haben sichtbares Grain";
+"setup.grainyGreens.info" = "Grain ist die Richtung, in die die Grashalme wachsen und liegen. Mit dem Grain rollt der Ball schneller und weiter, gegen den Grain langsamer, quer dazu driftet er in die Richtung, in die die Halme liegen. Am stärksten ist das auf Gräsern aus warmen Regionen wie Bermuda. Zu erkennen ist es an der Farbe des Grüns, glänzend mit dem Grain und matt und dunkler dagegen, und am Lochrand, der auf der Seite ausgefranst aussieht, zu der das Grain läuft.\n\nSchalte es ein, wenn die Grüns deutliches Grain haben, damit der Coach diese Runden mit den anderen vergleichen kann.";
 "setup.startingHole" = "START-LOCH";
 "setup.inputMode" = "EINGABEMODUS";
 "setup.startRound" = "Runde starten";

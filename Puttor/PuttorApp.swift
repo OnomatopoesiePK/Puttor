@@ -49,6 +49,9 @@ struct PuttorApp: App {
                 #if DEBUG
                 .onAppear { LaunchClock.mark("first screen on") }
                 #endif
+                // Once the window is up: a tap outside a text field closes the
+                // keyboard, number pads included.
+                .onAppear { DispatchQueue.main.async { KeyboardDismissal.install() } }
                 .overlay {
                     if showingTitle {
                         SplashView().transition(.opacity)

@@ -154,6 +154,7 @@
 "setup.weather" = "TIEMPO";
 "setup.grainyGreens" = "Greens con grano";
 "setup.grainyGreens.desc" = "Los greens tienen grano visible";
+"setup.grainyGreens.info" = "El grano es la dirección en la que crecen y se tumban las hojas de hierba. A favor del grano la bola rueda más rápido y más lejos; en contra, más despacio; de través, se desvía hacia donde se inclinan las hojas. Es más fuerte en hierbas de clima cálido como la bermuda. Se reconoce por el color del green, brillante a favor del grano y mate y más oscuro en contra, y por el borde del hoyo, que se ve deshilachado en el lado hacia el que va el grano.\n\nActívalo cuando los greens tengan un grano marcado, para que el coach pueda comparar estas rondas con las demás.";
 "setup.startingHole" = "HOYO DE SALIDA";
 "setup.inputMode" = "MODO DE ENTRADA";
 "setup.startRound" = "Empezar ronda";

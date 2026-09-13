@@ -157,12 +157,6 @@ struct MissDispersionPlotView: View {
             : [1, 2, 3]
     }
 
-    /// The innermost ring is drawn but not numbered — that close to the hole
-    /// the label would sit among the dots it is meant to measure.
-    private var labelledRingDistances: [Double] {
-        Array(ringDistances.dropFirst())
-    }
-
     private var outerDistance: Double { ringDistances.last ?? 3 }
 
     /// How far to the side the stretched plot reaches. A putt seldom misses
@@ -509,38 +503,20 @@ struct MissDispersionPlotView: View {
             // right, and each ring opens where its label sits rather than
             // running through it.
             // Stretched, the sides reach only the lateral limit, so every ring
-            // is that many times wider than it is tall.
+            // is that many times wider than it is tall; otherwise a circle.
             let stretch = data.stretched ? CGFloat(outerDistance / lateralLimitM) : 1
-            if data.stretched {
-                context.drawLayer { rings in
-                    // The wider rings run off the sides; they stop before the
-                    // edge labels instead of running through them.
-                    rings.clip(to: Path(CGRect(x: c.x - plotLimit, y: 0, width: plotLimit * 2, height: canvasSize.height)))
-                    for distance in ringDistances {
-                        let ry = maxR * fraction(forLeave: distance)
-                        let rx = ry * stretch
-                        rings.stroke(
-                            Path(ellipseIn: CGRect(x: c.x - rx, y: c.y - ry, width: rx * 2, height: ry * 2)),
-                            with: .color(Theme.borderLight),
-                            lineWidth: 1
-                        )
-                    }
-                }
-            } else {
+            context.drawLayer { rings in
+                // The wider rings run off the sides; they stop before the edge
+                // labels instead of running through them.
+                rings.clip(to: Path(CGRect(x: c.x - plotLimit, y: 0, width: plotLimit * 2, height: canvasSize.height)))
                 for distance in ringDistances {
-                    let r = maxR * fraction(forLeave: distance)
-                    let labelled = labelledRingDistances.contains(distance)
-                    let gapHalfWidth: CGFloat = 15
-                    let gap: Angle = labelled ? .radians(Double(atan(gapHalfWidth / r))) : .degrees(0)
-
-                    var ring = Path()
-                    ring.addArc(
-                        center: c, radius: r,
-                        startAngle: .degrees(0) + gap,
-                        endAngle: .degrees(360) - gap,
-                        clockwise: false
+                    let ry = maxR * fraction(forLeave: distance)
+                    let rx = ry * stretch
+                    rings.stroke(
+                        Path(ellipseIn: CGRect(x: c.x - rx, y: c.y - ry, width: rx * 2, height: ry * 2)),
+                        with: .color(Theme.borderLight),
+                        lineWidth: 1
                     )
-                    context.stroke(ring, with: .color(Theme.borderLight), lineWidth: 1)
                 }
             }
             var crosshair = Path()
@@ -595,35 +571,18 @@ struct MissDispersionPlotView: View {
                 }
             }
 
-            // The scale goes on last, each number on a plate of the card's
-            // colour, so a cluster of dots cannot bury what measures it.
-            // Stretched, the outer rings run off the sides, so they are
-            // numbered a little right of the middle, where short and long
-            // misses stack up less — and the innermost a little below where it
-            // crosses sideways, which shows how far the stretch goes. Each
-            // number still sits on its own ring.
-            let offset: CGFloat = 20
-            var labels: [(distance: Double, point: CGPoint)] = labelledRingDistances.map { distance in
-                let ry = maxR * fraction(forLeave: distance)
-                guard data.stretched else { return (distance, CGPoint(x: c.x + ry, y: c.y)) }
-                let rx = ry * stretch
-                let rise = ry * max(0, 1 - pow(offset / rx, 2)).squareRoot()
-                return (distance, CGPoint(x: c.x + offset, y: c.y - rise))
-            }
-            if data.stretched, let inner = ringDistances.first {
-                let ry = maxR * fraction(forLeave: inner)
-                let rx = ry * stretch
-                let reach = rx * max(0, 1 - pow(offset / ry, 2)).squareRoot()
-                labels.append((inner, CGPoint(x: c.x + reach, y: c.y + offset)))
-            }
-            for label in labels {
-                let plate = CGRect(x: label.point.x - 15, y: label.point.y - 7, width: 30, height: 14)
+            // The scale goes on last, straight up from the hole — few misses
+            // finish right above it — each number on a plate of the card's
+            // colour, so no dot can bury what measures it.
+            for distance in ringDistances {
+                let point = CGPoint(x: c.x, y: c.y - maxR * fraction(forLeave: distance))
+                let plate = CGRect(x: point.x - 15, y: point.y - 7, width: 30, height: 14)
                 context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
                 context.draw(
-                    Text(UnitConverter.formatDistance(label.distance, useFeet: useFeet))
+                    Text(UnitConverter.formatDistance(distance, useFeet: useFeet))
                         .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(Theme.textMuted),
-                    at: label.point,
+                    at: point,
                     anchor: .center
                 )
             }

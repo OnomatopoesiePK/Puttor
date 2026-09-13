@@ -154,6 +154,7 @@
 "setup.weather" = "WEATHER";
 "setup.grainyGreens" = "Grainy greens";
 "setup.grainyGreens.desc" = "Greens have visible grain";
+"setup.grainyGreens.info" = "Grain is the direction the blades of grass grow and lie in. Putting with the grain, the ball rolls faster and further; against it, slower; across it, the ball drifts the way the blades lean. It is strongest on warm-climate grasses such as Bermuda. You can see it in the colour of the green, shiny with the grain and dull and darker against it, and at the edge of the hole, which looks ragged on the side the grain runs towards.\n\nTurn it on when the greens have noticeable grain, so the coach can compare these rounds with the others.";
 "setup.startingHole" = "STARTING HOLE";
 "setup.inputMode" = "INPUT MODE";
 "setup.startRound" = "Start Round";

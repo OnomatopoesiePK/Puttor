@@ -69,7 +69,9 @@ struct RoundSetupView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
-                    label(L("setup.course"))
+                    // The first heading sits right under the bar; the rest keep
+                    // their gap to whatever is above them.
+                    label(L("setup.course"), top: 0)
                     TextField(L("setup.courseNamePlaceholder"), text: $courseName)
                         .textFieldStyle(.plain)
                         .padding(Theme.Spacing.md)
@@ -88,6 +90,10 @@ struct RoundSetupView: View {
 
                     label(L("setup.stimp"))
                     stimpCard
+                    // Grain is part of how the greens roll, so it sits with
+                    // their pace rather than with the weather.
+                    grainRow
+                        .padding(.top, 8)
 
                     // Wind, temperature and precipitation are one question
                     // asked three ways, so they sit under one heading.
@@ -98,22 +104,9 @@ struct RoundSetupView: View {
                         twoToggle(selection: $precipitation, options: Precipitation.allCases)
                     }
 
-                    switchRow(
-                        isOn: $isTournament,
-                        title: L("setup.tournament"),
-                        subtitle: L("setup.tournament.desc")
-                    )
-                    .padding(.top, 16)
-
-                    label(L("setup.format"))
-                    twoToggle(selection: $playFormat, options: PlayFormat.allCases)
-
-                    switchRow(
-                        isOn: $grainyGreens,
-                        title: L("setup.grainyGreens"),
-                        subtitle: L("setup.grainyGreens.desc")
-                    )
-                    .padding(.top, 8)
+                    // Whether the round counts and how it is scored: one card.
+                    competitionCard
+                        .padding(.top, 16)
 
                     label(L("setup.startingHole"))
                     HStack(spacing: 10) {
@@ -145,14 +138,18 @@ struct RoundSetupView: View {
                         }
                     }
 
-                    startButton
-                        .padding(.top, Theme.Spacing.md)
                 }
                 .padding(.horizontal, Theme.Spacing.lg)
                 .padding(.top, 8)
-                .padding(.bottom, 40)
+                .padding(.bottom, Theme.Spacing.lg)
             }
             .background(Theme.background.ignoresSafeArea())
+            // Always in reach, so a round starts without scrolling past every
+            // question. An inset rather than an overlay: the scroll view makes
+            // room for it, and the last field is never left underneath.
+            .safeAreaInset(edge: .bottom, spacing: 0) { floatingStartButton }
+            // Inline, or the bar keeps an empty large-title row under the title.
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text(existingRound != nil ? L("setup.editRound") : L("setup.newRound")).font(.system(size: 18, weight: .heavy)).foregroundStyle(Theme.text)
@@ -168,27 +165,65 @@ struct RoundSetupView: View {
         .preferredColorScheme(ThemeManager.shared.colorScheme)
     }
 
-    /// A labelled switch in its own card — used for the two questions that
-    /// are answered yes or no, and need no heading above them to say so.
-    private func switchRow(isOn: Binding<Bool>, title: String, subtitle: String) -> some View {
-        Toggle(isOn: isOn) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).foregroundStyle(Theme.text)
-                Text(subtitle).font(.caption).foregroundStyle(Theme.textSecondary)
+    /// Grain as one flat row: the switch and an (ⓘ) for what grain is.
+    private var grainRow: some View {
+        HStack(spacing: 6) {
+            Text(L("setup.grainyGreens"))
+                .font(.system(size: 15))
+                .foregroundStyle(Theme.text)
+            FieldInfoButton(titleKey: "setup.grainyGreens", textKey: "setup.grainyGreens.info")
+            Spacer(minLength: 0)
+            Toggle("", isOn: $grainyGreens)
+                .labelsHidden()
+                .tint(Theme.primary)
+        }
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.vertical, 6)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    /// Tournament or not, and stroke or match play underneath it: the two
+    /// things that say what kind of round this is.
+    private var competitionCard: some View {
+        VStack(spacing: 10) {
+            Toggle(isOn: $isTournament) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("setup.tournament")).foregroundStyle(Theme.text)
+                    Text(L("setup.tournament.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
+                }
+            }
+            .tint(Theme.primary)
+
+            HStack(spacing: 8) {
+                ForEach(PlayFormat.allCases, id: \.self) { format in
+                    let selected = playFormat == format
+                    Button {
+                        playFormat = format
+                    } label: {
+                        Text(L(format.labelKey))
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(selected ? Theme.primary.opacity(0.13) : Theme.surfaceElevated))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(selected ? Theme.primary : Theme.border, lineWidth: 1.5))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
-        .tint(Theme.primary)
         .padding(Theme.Spacing.md)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
-    private func label(_ text: String) -> some View {
+    private func label(_ text: String, top: CGFloat = 16) -> some View {
         Text(text)
             .font(.system(size: 10, weight: .bold))
             .tracking(1.4)
             .foregroundStyle(Theme.textMuted)
-            .padding(.top, 16)
+            .padding(.top, top)
             .padding(.bottom, 6)
     }
 
@@ -323,7 +358,6 @@ struct RoundSetupView: View {
         case let v as WindLevel: return v.emoji
         case let v as WeatherTemp: return v.emoji
         case let v as Precipitation: return v.emoji
-        case let v as PlayFormat: return v.emoji
         default: return ""
         }
     }
@@ -333,7 +367,6 @@ struct RoundSetupView: View {
         case let v as WindLevel: return v.labelKey
         case let v as WeatherTemp: return v.labelKey
         case let v as Precipitation: return v.labelKey
-        case let v as PlayFormat: return v.labelKey
         default: return ""
         }
     }
@@ -359,10 +392,30 @@ struct RoundSetupView: View {
                 .font(.system(size: 18, weight: .heavy))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, Theme.Spacing.lg)
+                .padding(.vertical, Theme.Spacing.md)
                 .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary))
         }
         .buttonStyle(.plain)
+    }
+
+    /// The start button over the bottom of the form, with the fields fading
+    /// out behind it so it never reads as one of them.
+    private var floatingStartButton: some View {
+        startButton
+            .padding(.horizontal, Theme.Spacing.lg)
+            .padding(.top, Theme.Spacing.lg)
+            .padding(.bottom, Theme.Spacing.sm)
+            .background(
+                LinearGradient(
+                    stops: [
+                        .init(color: Theme.background.opacity(0), location: 0),
+                        .init(color: Theme.background, location: 0.35),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea(edges: .bottom)
+            )
     }
 
     private func startRound() {
