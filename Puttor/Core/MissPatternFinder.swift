@@ -18,6 +18,10 @@ struct MissPattern: Identifiable {
 
     var id: String { key }
     var share: Double { total > 0 ? Double(count) / Double(total) : 0 }
+    var percent: Int { Int((share * 100).rounded()) }
+    /// At or above the threshold: a habit, not just the leading side. Only
+    /// these are strong enough to send the coach to a drill.
+    var isStrong: Bool { share >= MissPatternFinder.threshold }
 }
 
 enum MissPatternFinder {
@@ -25,10 +29,13 @@ enum MissPatternFinder {
     /// run of misses is just a run of misses.
     static let minimumSample = 8
     static let minimumSubsetSample = 6
-    /// Three in five going the same way is a lean; less than that is noise.
+    /// Three in five going the same way is a habit.
     static let threshold = 0.6
-    /// How many findings are worth reading at once.
-    static let maximumFindings = 3
+    /// Always at least this many, where the misses hold that many leans — the
+    /// strongest ones, even when they fall short of the threshold.
+    static let minimumFindings = 3
+    /// And no more than this, however many habits there are.
+    static let maximumFindings = 5
 
     /// Long putts, where distance control is the thing being tested, and short
     /// ones, where the line is.
@@ -100,13 +107,13 @@ enum MissPatternFinder {
             minimum: minimumSubsetSample
         )
 
-        // The strongest habits first, and the bigger sample where two lean the
-        // same amount.
-        return Array(
-            found
-                .sorted { ($0.share, $0.count) > ($1.share, $1.count) }
-                .prefix(maximumFindings)
-        )
+        // The strongest first, and the bigger sample where two lean the same
+        // amount. Every habit over the threshold is kept; below it the list is
+        // topped up to three with the next strongest leans.
+        let ranked = found.sorted { ($0.share, $0.count) > ($1.share, $1.count) }
+        let strong = ranked.filter(\.isStrong)
+        let shown = strong.count >= minimumFindings ? strong : Array(ranked.prefix(minimumFindings))
+        return Array(shown.prefix(maximumFindings))
     }
 
     /// One two-sided test: does this group lean far enough one way to mention?
@@ -121,7 +128,9 @@ enum MissPatternFinder {
         let leftCount = putts.filter(left).count
         let rightCount = putts.count - leftCount
         let leading = max(leftCount, rightCount)
-        guard Double(leading) / Double(putts.count) >= threshold else { return [] }
+        // An even split leans nowhere; anything past it is a candidate, and
+        // the ranking decides whether it is shown.
+        guard leading * 2 > putts.count else { return [] }
         return [MissPattern(
             key: leftCount >= rightCount ? leftKey : rightKey,
             count: leading,

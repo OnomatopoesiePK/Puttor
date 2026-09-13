@@ -109,12 +109,25 @@ struct MissDispersionPlotView: View {
     /// that follow-up is outside the band.
     var distanceRange: ClosedRange<Double>?
 
-    /// Smaller when two panes share a screen.
-    var size: CGFloat = 268
-    /// The outer ring, and how far a dot may stray beyond it before the plot
-    /// runs out of room.
-    private let maxR: CGFloat = 100
-    private let plotLimit: CGFloat = 110
+    /// As wide as the section allows, up to this — a phone's full width, but
+    /// not a square taller than a landscape screen.
+    var maxSide: CGFloat = 460
+
+    /// The width the plot has to work with, measured rather than guessed.
+    @State private var measuredWidth: CGFloat = 0
+
+    private var hasVerticalArrow: Bool { filter == .up || filter == .down }
+
+    /// The plot's edge: everything left once the slope arrow has its strip.
+    private var side: CGFloat {
+        let width = measuredWidth > 0 ? measuredWidth : 268
+        return max(160, min(maxSide, width - (hasVerticalArrow ? 32 : 0)))
+    }
+
+    /// The band along each edge the LONG / SHORT / LEFT / RIGHT labels sit in.
+    private static let edgeLabelBand: CGFloat = 16
+    /// How far past the outer ring a dot may stray, as a share of that ring.
+    private static let overshoot: CGFloat = 1.1
 
     /// Everything the plot draws, worked out in one pass.
     ///
@@ -147,10 +160,10 @@ struct MissDispersionPlotView: View {
 
     private var outerDistance: Double { ringDistances.last ?? 3 }
 
-    /// Where a leave of this length sits, in points from the centre.
-    private func radius(forLeave leave: Double) -> CGFloat {
-        let scaled = maxR * CGFloat(leave / outerDistance)
-        return min(plotLimit, max(12, scaled))
+    /// Where a leave of this length sits, as a share of the outer ring. Never
+    /// on top of the hole, and never further out than the plot has room for.
+    private func fraction(forLeave leave: Double) -> CGFloat {
+        min(Self.overshoot, max(0.12, CGFloat(leave / outerDistance)))
     }
 
     private func computeData() -> DispersionData {
@@ -170,12 +183,12 @@ struct MissDispersionPlotView: View {
                 if let distanceRange, !distanceRange.contains(p.distanceM) { continue }
                 let next = i + 1 < sorted.count ? sorted[i + 1] : nil
                 let leave = next.map { max(0.3, $0.distanceM) } ?? max(0.3, p.distanceM * 0.35)
-                let radial = radius(forLeave: Double(leave))
+                let radial = fraction(forLeave: Double(leave))
                 // An angle recorded on the dial places the dot where the ball
                 // actually went; the eight sectors are only the fallback.
                 let vec = p.missAngleDeg.map(angleVector) ?? missVector(p.result)
-                let x = (vec.x * radial * 10).rounded() / 10
-                let y = (vec.y * radial * 10).rounded() / 10
+                let x = (vec.x * radial * 1000).rounded() / 1000
+                let y = (vec.y * radial * 1000).rounded() / 1000
                 let key = "\(x)|\(y)"
                 let shadingValue = shading.value(for: p)
                 if let idx = index[key] {
@@ -211,21 +224,25 @@ struct MissDispersionPlotView: View {
                             .font(.system(size: 12))
                             .foregroundStyle(Theme.textMuted)
                     }
-                    .frame(width: size, height: size)
+                    .frame(width: side, height: side)
                     .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
                 } else {
                     ZStack {
                         plot(data)
-                        Text(L("dispersion.left")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                            .position(x: 2, y: size / 2)
-                        Text(L("dispersion.right")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                            .position(x: size - 2, y: size / 2)
-                        Text(L("dispersion.long")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                            .position(x: size / 2, y: 10)
-                        Text(L("dispersion.short")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                            .position(x: size / 2, y: size - 10)
+                        // Turned to run along their edges, so they take a
+                        // label's height from the plot instead of its width.
+                        edgeLabel("dispersion.left")
+                            .rotationEffect(.degrees(-90))
+                            .position(x: Self.edgeLabelBand / 2, y: side / 2)
+                        edgeLabel("dispersion.right")
+                            .rotationEffect(.degrees(90))
+                            .position(x: side - Self.edgeLabelBand / 2, y: side / 2)
+                        edgeLabel("dispersion.long")
+                            .position(x: side / 2, y: Self.edgeLabelBand / 2)
+                        edgeLabel("dispersion.short")
+                            .position(x: side / 2, y: side - Self.edgeLabelBand / 2)
                     }
-                    .frame(width: size, height: size)
+                    .frame(width: side, height: side)
                 }
 
                 if filter == .up || filter == .down {
@@ -245,6 +262,15 @@ struct MissDispersionPlotView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { measuredWidth = $0 }
+    }
+
+    private func edgeLabel(_ key: String) -> some View {
+        Text(L(key))
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(Theme.textMuted)
+            .fixedSize()
     }
 
     // MARK: - Shading
@@ -357,7 +383,7 @@ struct MissDispersionPlotView: View {
                 .foregroundStyle(Theme.textMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(width: size)
+        .frame(width: side)
     }
 
     private func rampLegend(scale: Double) -> some View {
@@ -384,7 +410,7 @@ struct MissDispersionPlotView: View {
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(Theme.textMuted)
         }
-        .frame(width: size)
+        .frame(width: side)
     }
 
     private func legendLabel(_ value: Double) -> String {
@@ -415,11 +441,13 @@ struct MissDispersionPlotView: View {
     private func plot(_ data: DispersionData) -> some View {
         Canvas { context, canvasSize in
             let c = CGPoint(x: canvasSize.width / 2, y: canvasSize.height / 2)
+            let plotLimit = canvasSize.width / 2 - Self.edgeLabelBand
+            let maxR = plotLimit / Self.overshoot
             // The scale reads outwards from the hole along one line to the
             // right, and each ring opens where its label sits rather than
             // running through it.
             for distance in ringDistances {
-                let r = radius(forLeave: distance)
+                let r = maxR * fraction(forLeave: distance)
                 let labelled = labelledRingDistances.contains(distance)
                 let gapHalfWidth: CGFloat = 15
                 let gap: Angle = labelled ? .radians(Double(atan(gapHalfWidth / r))) : .degrees(0)
@@ -440,7 +468,7 @@ struct MissDispersionPlotView: View {
 
             // Clear the crosshair behind each number, then set the scale on it.
             for distance in labelledRingDistances {
-                let r = radius(forLeave: distance)
+                let r = maxR * fraction(forLeave: distance)
                 let plate = CGRect(x: c.x + r - 15, y: c.y - 7, width: 30, height: 14)
                 context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
                 context.draw(
@@ -466,7 +494,7 @@ struct MissDispersionPlotView: View {
 
             for dot in ordered {
                 let r = min(22, 6 + CGFloat(dot.count - 1) * 2.4)
-                let centre = CGPoint(x: c.x + dot.x, y: c.y + dot.y)
+                let centre = CGPoint(x: c.x + dot.x * maxR, y: c.y + dot.y * maxR)
                 let rect = CGRect(x: centre.x - r, y: centre.y - r, width: r * 2, height: r * 2)
 
                 if dot.values.count > 1 {
@@ -518,7 +546,7 @@ struct MissDispersionPlotView: View {
             }
             context.stroke(head, with: .color(Theme.accent), lineWidth: 3)
         }
-        .frame(width: size, height: 24)
+        .frame(width: side, height: 24)
     }
 
     private var slopeArrowVertical: some View {
@@ -539,6 +567,6 @@ struct MissDispersionPlotView: View {
             }
             context.stroke(head, with: .color(Theme.accent), lineWidth: 3)
         }
-        .frame(width: 24, height: size)
+        .frame(width: 24, height: side)
     }
 }

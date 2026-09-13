@@ -48,8 +48,10 @@ struct CoachFinding: Identifiable {
         self.numbers = numbers
     }
 
+    /// Count, total and the share they make, rounded to a whole percent.
     init(key: String, count: Int, total: Int) {
-        self.init(key: key, numbers: [count, total])
+        let percent = total > 0 ? Int((Double(count) / Double(total) * 100).rounded()) : 0
+        self.init(key: key, numbers: [count, total, percent])
     }
 }
 
@@ -185,7 +187,13 @@ enum CoachAdvisor {
         }
 
         report.practice = practice(in: sessions)
-        report.findings = MissPatternFinder.findings(in: putts).map {
+        let patterns = MissPatternFinder.findings(in: putts)
+        report.findings = patterns.map {
+            CoachFinding(key: $0.key, count: $0.count, total: $0.total)
+        }
+        // Leans below the threshold are shown, but a drill is only prescribed
+        // for a habit.
+        let habits = patterns.filter(\.isStrong).map {
             CoachFinding(key: $0.key, count: $0.count, total: $0.total)
         }
         report.conditions = SplitInsight.findings(in: conditionRounds ?? rounds)
@@ -215,7 +223,7 @@ enum CoachAdvisor {
         report.recommendations = plan(
             stats: stats,
             costliest: costliest,
-            patterns: report.findings,
+            patterns: habits,
             sessions: sessions,
             trend: reading.trend,
             practice: report.practice

@@ -274,7 +274,7 @@ private struct StatisticsPane: View {
                             .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(Theme.accent)
                             .padding(.top, 2)
-                        Text(String(format: L(pattern.key), pattern.count, pattern.total))
+                        Text(String(format: L(pattern.key), pattern.count, pattern.total, pattern.percent))
                             .font(.system(size: 12))
                             .foregroundStyle(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -529,8 +529,7 @@ private struct StatisticsPane: View {
                                         toText: dispersionToText,
                                         useFeet: useFeet,
                                         fullRangeMaxM: longestPuttDistance(data.allPutts)
-                                    ),
-                                    size: dense ? 224 : 268
+                                    )
                                 )
 
                                 // Read from every putt in the selection, not

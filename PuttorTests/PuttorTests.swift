@@ -1255,6 +1255,33 @@ struct PuttorTests {
         #expect(long.total == 6)
     }
 
+    /// At least the three strongest leans are shown when the misses hold
+    /// three, even below the threshold — and each carries its share.
+    @MainActor
+    @Test func theThreeStrongestLeansAreAlwaysShown() async throws {
+        // Side: 6 of 10 left (a habit). Length: 6 of 11 short (a lean, under
+        // the threshold). Long putts: 4 of 7 short (a lean, under it too).
+        let sides = Array(repeating: Self.miss(.shortLeft, distance: 3), count: 6)
+            + Array(repeating: Self.miss(.longRight, distance: 3), count: 4)
+        let length = [Self.miss(.short, distance: 3)]
+        let range = Array(repeating: Self.miss(.short, distance: 8), count: 4)
+            + Array(repeating: Self.miss(.long, distance: 8), count: 3)
+        let findings = MissPatternFinder.findings(in: sides + length + range)
+
+        #expect(findings.count >= MissPatternFinder.minimumFindings)
+        #expect(findings.contains { $0.isStrong })
+        #expect(findings.contains { !$0.isStrong })
+        // Strongest first.
+        #expect(zip(findings, findings.dropFirst()).allSatisfy { $0.share >= $1.share })
+
+        let left = try #require(findings.first { $0.key == "pattern.missLeft" })
+        #expect(left.percent == Int((Double(left.count) / Double(left.total) * 100).rounded()))
+
+        // And the coach's sentence carries all three numbers.
+        let sentence = CoachFinding(key: left.key, count: 8, total: 10)
+        #expect(sentence.numbers == [8, 10, 80])
+    }
+
     /// Holed putts have no miss in them to read.
     @MainActor
     @Test func holedPuttsCarryNoPattern() async throws {
