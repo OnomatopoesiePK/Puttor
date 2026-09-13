@@ -1285,9 +1285,10 @@ struct PuttorTests {
         #expect(slice.total == 8)
         #expect(!findings.contains { $0.key == "pattern.missLeft" || $0.key == "pattern.missRight" })
 
-        // Shown from the highest share down.
+        // All about the line, so ordered by what each finding costs.
         #expect(findings.count > 1)
-        #expect(zip(findings, findings.dropFirst()).allSatisfy { $0.percent >= $1.percent })
+        #expect(findings.allSatisfy { $0.category == .line })
+        #expect(zip(findings, findings.dropFirst()).allSatisfy { $0.strokesLost >= $1.strokesLost })
     }
 
     /// A slice that only repeats what every miss already shows says nothing.
@@ -1330,6 +1331,33 @@ struct PuttorTests {
 
         let ranAway = (1...9).flatMap { hole($0, leave: 1.8) }
         #expect(MissPatternFinder.findings(in: ranAway).contains { $0.key == "pattern.missLong" })
+    }
+
+    /// Findings come by kind of miss, the kind with the most to win first,
+    /// and several ways of saying "short" come down to one.
+    @MainActor
+    @Test func findingsAreGroupedByKindWithOneFindingEachWay() async throws {
+        let closeShort = Array(repeating: Self.miss(.short, distance: 2), count: 10)
+        let lags = (1...6).flatMap { number -> [Putt] in
+            [
+                Putt(holeNumber: 100 + number, puttNumber: 1, distanceM: 10, puttFor: .par, result: .left),
+                Putt(holeNumber: 100 + number, puttNumber: 2, distanceM: 2, puttFor: .bogey, result: .holed),
+            ]
+        }
+        let findings = MissPatternFinder.findings(in: closeShort + lags)
+
+        #expect(findings.filter { $0.direction == "short" }.count == 1)
+        #expect(findings.contains { $0.category == .leave })
+
+        let groups = MissCategory.grouped(findings, by: \.category)
+        #expect(Set(groups.map(\.category)).count == groups.count)
+        #expect(zip(groups, groups.dropFirst()).allSatisfy {
+            ($0.items.first?.strokesLost ?? 0) >= ($1.items.first?.strokesLost ?? 0)
+        })
+        for group in groups {
+            #expect(group.items.count <= MissPatternFinder.maximumPerCategory)
+            #expect(zip(group.items, group.items.dropFirst()).allSatisfy { $0.strokesLost >= $1.strokesLost })
+        }
     }
 
     /// Short from inside 3 m is named from 30%, far under a habit's bar.

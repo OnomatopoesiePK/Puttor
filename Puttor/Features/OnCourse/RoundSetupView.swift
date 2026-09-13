@@ -92,7 +92,7 @@ struct RoundSetupView: View {
                     stimpCard
                     // Grain is part of how the greens roll, so it sits with
                     // their pace rather than with the weather.
-                    grainRow
+                    switchRow(titleKey: "setup.grainyGreens", infoKey: "setup.grainyGreens.info", isOn: $grainyGreens)
                         .padding(.top, 8)
 
                     // Wind, temperature and precipitation are one question
@@ -104,9 +104,11 @@ struct RoundSetupView: View {
                         twoToggle(selection: $precipitation, options: Precipitation.allCases)
                     }
 
-                    // Whether the round counts and how it is scored: one card.
-                    competitionCard
+                    // How the round is scored, then whether it counts.
+                    formatRow
                         .padding(.top, 16)
+                    switchRow(titleKey: "setup.tournament", infoKey: "setup.tournament.info", isOn: $isTournament)
+                        .padding(.top, 8)
 
                     label(L("setup.startingHole"))
                     HStack(spacing: 10) {
@@ -165,15 +167,16 @@ struct RoundSetupView: View {
         .preferredColorScheme(ThemeManager.shared.colorScheme)
     }
 
-    /// Grain as one flat row: the switch and an (ⓘ) for what grain is.
-    private var grainRow: some View {
+    /// A yes-or-no question as one flat row: its name, an (ⓘ) with what it
+    /// means, and the switch.
+    private func switchRow(titleKey: String, infoKey: String, isOn: Binding<Bool>) -> some View {
         HStack(spacing: 6) {
-            Text(L("setup.grainyGreens"))
+            Text(L(titleKey))
                 .font(.system(size: 15))
                 .foregroundStyle(Theme.text)
-            FieldInfoButton(titleKey: "setup.grainyGreens", textKey: "setup.grainyGreens.info")
+            FieldInfoButton(titleKey: titleKey, textKey: infoKey)
             Spacer(minLength: 0)
-            Toggle("", isOn: $grainyGreens)
+            Toggle("", isOn: isOn)
                 .labelsHidden()
                 .tint(Theme.primary)
         }
@@ -183,39 +186,26 @@ struct RoundSetupView: View {
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
-    /// Tournament or not, and stroke or match play underneath it: the two
-    /// things that say what kind of round this is.
-    private var competitionCard: some View {
-        VStack(spacing: 10) {
-            Toggle(isOn: $isTournament) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(L("setup.tournament")).foregroundStyle(Theme.text)
-                    Text(L("setup.tournament.desc")).font(.caption).foregroundStyle(Theme.textSecondary)
+    /// Stroke play or match play, as two flat buttons the height of a switch
+    /// row.
+    private var formatRow: some View {
+        HStack(spacing: 8) {
+            ForEach(PlayFormat.allCases, id: \.self) { format in
+                let selected = playFormat == format
+                Button {
+                    playFormat = format
+                } label: {
+                    Text(L(format.labelKey))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(selected ? Theme.primary.opacity(0.13) : Theme.surface))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(selected ? Theme.primary : Theme.border, lineWidth: 1.5))
                 }
-            }
-            .tint(Theme.primary)
-
-            HStack(spacing: 8) {
-                ForEach(PlayFormat.allCases, id: \.self) { format in
-                    let selected = playFormat == format
-                    Button {
-                        playFormat = format
-                    } label: {
-                        Text(L(format.labelKey))
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(selected ? Theme.primary.opacity(0.13) : Theme.surfaceElevated))
-                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(selected ? Theme.primary : Theme.border, lineWidth: 1.5))
-                    }
-                    .buttonStyle(.plain)
-                }
+                .buttonStyle(.plain)
             }
         }
-        .padding(Theme.Spacing.md)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
 
     private func label(_ text: String, top: CGFloat = 16) -> some View {
@@ -388,7 +378,7 @@ struct RoundSetupView: View {
         Button {
             startRound()
         } label: {
-            Text(existingRound != nil ? L("setup.saveChanges") : "⛳  \(L("setup.startRound"))")
+            Text(existingRound != nil ? L("setup.saveChanges") : L("setup.startRound"))
                 .font(.system(size: 18, weight: .heavy))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

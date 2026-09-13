@@ -42,6 +42,8 @@ struct CoachFinding: Identifiable {
     var numbers: [Int] = []
     /// The reason behind a miss habit, where one stands out.
     var cause: MissCauseNote?
+    /// The kind of miss a habit is about, for grouping on the card.
+    var category: MissCategory { MissPattern.classify(key).category }
 
     var id: String { key }
 

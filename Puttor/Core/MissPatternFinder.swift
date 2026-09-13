@@ -38,9 +38,76 @@ struct MissPattern: Identifiable {
         return percent > MissPatternFinder.thresholdPercent
     }
 
+    /// The kind of miss this is about, and which way it goes within that kind.
+    var category: MissCategory { Self.classify(key).category }
+    var direction: String { Self.classify(key).direction }
+
+    static func classify(_ key: String) -> (category: MissCategory, direction: String) {
+        switch key {
+        case "pattern.lagOutsideMetre": return (.leave, "outside")
+        case "pattern.shortInside3m": return (.length, "short")
+        case "pattern.missLowSide": return (.line, "lowSide")
+        case "pattern.missHighSide": return (.line, "highSide")
+        default:
+            let name = key.lowercased()
+            if name.hasSuffix("short") { return (.length, "short") }
+            if name.hasSuffix("long") { return (.length, "long") }
+            if name.hasSuffix("left") { return (.line, "left") }
+            return (.line, "right")
+        }
+    }
+
+    /// Roughly the putts the habit costs over the rounds read — what there is
+    /// to win by fixing it.
+    var strokesLost: Double {
+        switch key {
+        // A lag outside a metre costs the putts expected from where it
+        // stopped, beyond the one that is always left.
+        case "pattern.lagOutsideMetre":
+            return leaves.reduce(0) { $0 + max(0, StrokesGained.baseline(at: $1).expectedPutts - 1) }
+        // Every short miss from close in lost its whole chance.
+        case "pattern.shortInside3m":
+            return Self.odds(of: distances)
+        // Elsewhere, the tour's odds of holing the misses behind it, scaled by
+        // how much of the lean is habit rather than an even split.
+        default:
+            return Self.odds(of: distances) * max(0, 2 * share - 1)
+        }
+    }
+
+    private static func odds(of distances: [Double]) -> Double {
+        distances.reduce(0) { $0 + StrokesGained.baseline(at: $1).makeProbability }
+    }
+
     /// The lowest share the misses plausibly lean by (Wilson, 95%). Ranks a
     /// clear lean over many putts above a perfect one over a handful.
     var confidenceFloor: Double { MissReasonLinker.confidenceFloor(count, of: total) }
+}
+
+/// The three things a miss can be about.
+enum MissCategory: String, CaseIterable {
+    /// Short or long.
+    case length
+    /// Left or right, below or above the break.
+    case line
+    /// What the putt left for the next one.
+    case leave
+
+    var titleKey: String { "pattern.category.\(rawValue)" }
+
+    /// Consecutive runs of one kind, in the order they come.
+    static func grouped<T>(_ items: [T], by category: (T) -> MissCategory) -> [(category: MissCategory, items: [T])] {
+        var result: [(category: MissCategory, items: [T])] = []
+        for item in items {
+            let kind = category(item)
+            if let last = result.indices.last, result[last].category == kind {
+                result[last].items.append(item)
+            } else {
+                result.append((kind, [item]))
+            }
+        }
+        return result
+    }
 }
 
 enum MissPatternFinder {
@@ -51,16 +118,16 @@ enum MissPatternFinder {
     /// More than this share going the same way is a habit; anything at or
     /// below it is left unsaid.
     static let thresholdPercent = 60
-    /// No more than this, however many habits there are.
-    static let maximumFindings = 5
+    /// No more findings than this for one kind of miss.
+    static let maximumPerCategory = 3
     /// A slice of the misses only earns its own sentence when it leans this
     /// many points further than all the misses together already do.
     static let standOutPoints = 10
 
     /// Two exceptions are named from a far lower share than a habit: a miss
     /// short from close in never had a chance to drop, and a lag left outside
-    /// a metre is a three-putt waiting to happen. Both are kept on the list
-    /// whatever else is on it.
+    /// a metre is a three-putt waiting to happen. They are ranked on what
+    /// they cost like any other finding.
     static let alertPercent = 30
     static let shortAlertDistanceM = 3.0
     static let lagDistanceM = 8.0
@@ -158,28 +225,37 @@ enum MissPatternFinder {
         let tracked = MissReasonLinker.trackedMisses(in: misses)
 
         let alerts = [shortFromClose(misses), lagOutsideAMetre(putts, leave: leave)].compactMap { $0 }
-        let shortAlert = alerts.contains { $0.pattern.key == "pattern.shortInside3m" }
 
-        // Only habits. The most certain ones are kept, so a perfect lean over a
-        // handful of putts cannot push out a clear one over many; the alerts
-        // keep their places ahead of them. Everything is then shown from the
-        // highest share down, each with the reason behind it where one stands
-        // out.
-        let habits = (overall + standingOut)
-            .filter { $0.pattern.isStrong }
-            // Short from 1.5 to 3 m says less than the alert over the same putts.
-            .filter { !(shortAlert && $0.pattern.key == "pattern.band15to3.short") }
-            .sorted { ($0.pattern.confidenceFloor, $0.pattern.count) > ($1.pattern.confidenceFloor, $1.pattern.count) }
-            .prefix(max(0, maximumFindings - alerts.count))
-
-        return (alerts + habits)
+        // Every habit and alert, each with the reason behind it where one
+        // stands out, then ranked by what it costs.
+        let candidates = (alerts + (overall + standingOut).filter { $0.pattern.isStrong })
             .map { lean in
                 var pattern = lean.pattern
                 pattern.cause = MissReasonLinker.cause(behind: lean.putts, among: tracked)
                 pattern.distances = lean.putts.map(\.distanceM)
                 return pattern
             }
-            .sorted { ($0.percent, $0.count) > ($1.percent, $1.count) }
+        return ranked(candidates)
+    }
+
+    /// Findings by kind of miss — length, line and break, distance left.
+    /// Within a kind only the costliest finding for each direction is kept, so
+    /// five ways of saying "short" come down to one, and no more than
+    /// `maximumPerCategory` of them. The kinds follow each other in the order
+    /// of what their costliest finding costs: that is where most is to be won.
+    static func ranked(_ patterns: [MissPattern]) -> [MissPattern] {
+        var groups: [MissCategory: [MissPattern]] = [:]
+        for pattern in patterns.sorted(by: { ($0.strokesLost, $0.count) > ($1.strokesLost, $1.count) }) {
+            let group = groups[pattern.category, default: []]
+            guard group.count < maximumPerCategory,
+                  !group.contains(where: { $0.direction == pattern.direction })
+            else { continue }
+            groups[pattern.category] = group + [pattern]
+        }
+        return MissCategory.allCases
+            .compactMap { groups[$0] }
+            .sorted { ($0.first?.strokesLost ?? 0) > ($1.first?.strokesLost ?? 0) }
+            .flatMap { $0 }
     }
 
     /// Misses from inside 3 m that finished short, over every miss from there.

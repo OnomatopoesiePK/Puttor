@@ -268,22 +268,31 @@ private struct StatisticsPane: View {
                     .font(.system(size: 9, weight: .bold)).tracking(1.0)
                     .foregroundStyle(Theme.textMuted)
 
-                ForEach(patterns) { pattern in
-                    HStack(alignment: .top, spacing: 6) {
-                        Image(systemName: "arrow.turn.down.right")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(Theme.accent)
-                            .padding(.top, 2)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(String(format: L(pattern.key), pattern.count, pattern.total, pattern.percent))
-                                .font(.system(size: 12))
-                                .foregroundStyle(Theme.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                            if let cause = pattern.cause {
-                                Text(cause.text)
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(Theme.textMuted)
+                // By kind of miss, the kind with the most to win first.
+                ForEach(MissCategory.grouped(patterns, by: \.category), id: \.category) { group in
+                    Text(L(group.category.titleKey))
+                        .font(.system(size: 9, weight: .semibold))
+                        .tracking(0.8)
+                        .foregroundStyle(Theme.accent)
+                        .padding(.top, 4)
+
+                    ForEach(group.items) { pattern in
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: "arrow.turn.down.right")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(Theme.accent)
+                                .padding(.top, 2)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(String(format: L(pattern.key), pattern.count, pattern.total, pattern.percent))
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Theme.textSecondary)
                                     .fixedSize(horizontal: false, vertical: true)
+                                if let cause = pattern.cause {
+                                    Text(cause.text)
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(Theme.textMuted)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
                             }
                         }
                     }

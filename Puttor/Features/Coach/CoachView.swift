@@ -248,22 +248,31 @@ struct CoachView: View {
         card {
             cardHeader(L("coach.whatIsHappening"), info: "coach.whatIsHappening.info")
 
-            ForEach(report.findings) { finding in
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "arrow.turn.down.right")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Theme.accent)
-                        .padding(.top, 2)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(text(for: finding))
-                            .font(.system(size: 13))
-                            .foregroundStyle(Theme.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        if let cause = finding.cause {
-                            Text(cause.text)
-                                .font(.system(size: 12))
-                                .foregroundStyle(Theme.textMuted)
+            // By kind of miss, the kind with the most to win first.
+            ForEach(MissCategory.grouped(report.findings, by: \.category), id: \.category) { group in
+                Text(L(group.category.titleKey))
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.accent)
+                    .padding(.top, 2)
+
+                ForEach(group.items) { finding in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "arrow.turn.down.right")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, 2)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(text(for: finding))
+                                .font(.system(size: 13))
+                                .foregroundStyle(Theme.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
+                            if let cause = finding.cause {
+                                Text(cause.text)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Theme.textMuted)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                     }
                 }

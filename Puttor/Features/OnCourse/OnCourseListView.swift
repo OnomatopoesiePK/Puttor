@@ -91,7 +91,6 @@ struct OnCourseListView: View {
             showingSetup = true
         } label: {
             HStack(spacing: 8) {
-                Text("⛳").font(.system(size: 17))
                 Text(L("onCourse.startNewRound"))
                     .font(.system(size: 15, weight: .heavy))
                     .foregroundStyle(.white)

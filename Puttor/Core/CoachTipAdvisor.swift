@@ -150,25 +150,12 @@ enum CoachTipAdvisor {
             }
         }
 
-        let weight: Double
-        switch key {
-        // A lag outside a metre costs the putts expected from where it
-        // stopped, beyond the one that is always left.
-        case "lagOutsideMetre":
-            weight = pattern.leaves.reduce(0) { $0 + max(0, StrokesGained.baseline(at: $1).expectedPutts - 1) }
-        // Every short miss from close in lost its whole chance, not just the
-        // part past an even split.
-        case "shortInside3m":
-            weight = cost(of: pattern.distances, excess: 1)
-        default:
-            weight = cost(of: pattern.distances, excess: 2 * pattern.share - 1)
-        }
-
+        // The same cost the statistics rank their findings by.
         return CoachTip(
             topic: topic,
             whereID: whereID,
             evidence: .pattern(pattern),
-            weight: weight
+            weight: pattern.strokesLost
         )
     }
 
