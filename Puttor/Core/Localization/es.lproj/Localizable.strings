@@ -710,3 +710,16 @@
 "input.missAngle" = "ÁNGULO DEL FALLO";
 "input.missAngle.none" = "Arrastra alrededor del hoyo";
 "input.missAngle.info" = "Arrastra el anillo hasta donde se paró la bola, en pasos de cinco grados: corto recto abajo, izquierda y derecha a los lados, hasta largo-izquierda y largo-derecha en los dos extremos. El hueco de arriba es Largo.\n\nEl centro es dentro y el anillo alrededor un lip-out, como en la diana.\n\nSolo se registra la dirección: cuánto corrió la bola ya se sabe por la distancia del siguiente putt.";
+
+// Export and import
+"settings.data" = "DATOS";
+"data.export" = "Exportar datos";
+"data.export.desc" = "Todas las rondas y ejercicios en un archivo: como copia de seguridad o para otro dispositivo.";
+"data.import" = "Importar datos";
+"data.import.desc" = "Añade las rondas y ejercicios de una exportación. Nada de lo que ya hay se cambia ni se duplica.";
+"data.exported.title" = "Exportado";
+"data.exported.body" = "%1$ld rondas y %2$ld sesiones de ejercicios guardadas.";
+"data.imported.title" = "Importado";
+"data.imported.body" = "%1$ld rondas y %2$ld sesiones de ejercicios añadidas; %3$ld ya estaban y se omitieron.";
+"data.failed.title" = "No ha funcionado";
+"data.failed.body" = "El archivo no se pudo leer como exportación de Puttor.";

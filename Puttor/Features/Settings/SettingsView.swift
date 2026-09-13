@@ -170,6 +170,10 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
 
+                    sectionHeader(L("settings.data"))
+                    DataTransferSection()
+                        .padding(.bottom, 8)
+
                     sectionHeader(L("settings.legal"))
                     VStack(spacing: 8) {
                         ForEach(LegalDocument.allCases) { document in

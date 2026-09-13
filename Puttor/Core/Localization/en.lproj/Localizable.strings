@@ -710,3 +710,16 @@
 "input.missAngle" = "MISS ANGLE";
 "input.missAngle.none" = "Drag around the hole";
 "input.missAngle.info" = "Drag around the ring to where the ball stopped, in steps of five degrees: straight short at the bottom, left and right at the sides, up to long-left and long-right at the two ends. The gap at the top is Long.\n\nThe centre is holed and the ring around it a lip-out, as on the board.\n\nOnly the direction is recorded — how far the ball ran is already known from the distance of the next putt.";
+
+// Export and import
+"settings.data" = "DATA";
+"data.export" = "Export data";
+"data.export.desc" = "Every round and drill as one file — as a backup, or to move to another device.";
+"data.import" = "Import data";
+"data.import.desc" = "Adds the rounds and drills from an export. Nothing already here is changed or doubled.";
+"data.exported.title" = "Exported";
+"data.exported.body" = "%1$ld rounds and %2$ld drill sessions saved.";
+"data.imported.title" = "Imported";
+"data.imported.body" = "%1$ld rounds and %2$ld drill sessions added; %3$ld were already here and were skipped.";
+"data.failed.title" = "That didn't work";
+"data.failed.body" = "The file could not be read as a Puttor export.";

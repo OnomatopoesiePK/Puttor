@@ -710,3 +710,16 @@
 "input.missAngle" = "MISS-WINKEL";
 "input.missAngle.none" = "Um das Loch ziehen";
 "input.missAngle.info" = "Den Ring um das Loch dorthin ziehen, wo der Ball liegen blieb, in Fünf-Grad-Schritten: gerade kurz unten, links und rechts an den Seiten, bis lang-links und lang-rechts an den beiden Enden. Die Lücke oben ist Lang.\n\nDie Mitte ist gelocht, der Ring darum ein Lip-Out, wie auf der Scheibe.\n\nFestgehalten wird nur die Richtung — wie weit der Ball gelaufen ist, steht schon in der Distanz des nächsten Putts.";
+
+// Export and import
+"settings.data" = "DATEN";
+"data.export" = "Daten exportieren";
+"data.export.desc" = "Alle Runden und Drills als eine Datei — als Sicherung oder für ein anderes Gerät.";
+"data.import" = "Daten importieren";
+"data.import.desc" = "Fügt die Runden und Drills aus einem Export hinzu. Vorhandenes wird weder geändert noch doppelt angelegt.";
+"data.exported.title" = "Exportiert";
+"data.exported.body" = "%1$ld Runden und %2$ld Drill-Einheiten gesichert.";
+"data.imported.title" = "Importiert";
+"data.imported.body" = "%1$ld Runden und %2$ld Drill-Einheiten hinzugefügt; %3$ld waren schon da und wurden übersprungen.";
+"data.failed.title" = "Das hat nicht geklappt";
+"data.failed.body" = "Die Datei ließ sich nicht als Puttor-Export lesen.";

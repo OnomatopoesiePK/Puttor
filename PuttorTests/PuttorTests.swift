@@ -1622,6 +1622,110 @@ struct PuttorTests {
         #expect(CoachAdvisor.costliestBracket(in: strong) == nil)
     }
 
+    // MARK: - Export and import
+
+    /// Everything recorded in one store arrives in another through the file:
+    /// rounds with their putts and putter, drills with their attempts — and a
+    /// second import of the same file doubles nothing.
+    @MainActor
+    @Test func anExportRestoresEveryRoundAndDrillIntoAnotherStore() async throws {
+        let source = try Self.makeInMemoryContext()
+
+        let putter = Putter(name: "Newport 2")
+        source.insert(putter)
+        let round = Round(courseName: "Linz", isTournament: true, playFormat: .matchPlay)
+        round.putter = putter
+        round.isComplete = true
+        round.tracksScoreCategory = true
+        source.insert(round)
+        let putts = [
+            Putt(holeNumber: 1, puttNumber: 1, distanceM: 4.5, sideSlopePct: -2, puttFor: .birdie, result: .shortLeft, missRead: true, missAngleDeg: -35),
+            Putt(holeNumber: 1, puttNumber: 2, distanceM: 0.8, puttFor: .par, result: .holed),
+            Putt(holeNumber: 2, puttNumber: Putt.pickedUpPuttNumber, distanceM: 0, puttFor: .plus3, result: .missedGeneric),
+        ]
+        for putt in putts {
+            putt.round = round
+            round.putts.append(putt)
+            source.insert(putt)
+        }
+        let session = GameSession(gameType: .clock)
+        session.isComplete = true
+        session.score = 75
+        source.insert(session)
+        let attempt = GameAttempt(groupIndex: 0, index: 0, label: "12", distanceM: 2, success: true)
+        attempt.session = session
+        session.attempts.append(attempt)
+        source.insert(attempt)
+        try source.save()
+
+        // Through the file, exactly as the app writes and reads it.
+        let data = try PuttorArchive.make(from: source).encoded()
+        let archive = try PuttorArchive.decode(data)
+
+        let target = try Self.makeInMemoryContext()
+        let summary = try archive.restore(into: target)
+        #expect(summary == PuttorArchive.Summary(roundsAdded: 1, sessionsAdded: 1, puttersAdded: 1, skipped: 0))
+
+        let restored = try #require(try target.fetch(FetchDescriptor<Round>()).first)
+        #expect(restored.id == round.id)
+        #expect(restored.courseName == "Linz")
+        #expect(restored.isTournament)
+        #expect(restored.playFormat == .matchPlay)
+        #expect(restored.isComplete)
+        #expect(restored.tracksScoreCategory)
+        #expect(restored.putter?.name == "Newport 2")
+        #expect(restored.putts.count == 3)
+        let first = try #require(restored.putts.first { $0.holeNumber == 1 && $0.puttNumber == 1 })
+        #expect(first.result == .shortLeft)
+        #expect(first.missAngleDeg == -35)
+        #expect(first.missRead)
+        #expect(first.puttFor == .birdie)
+        #expect(restored.putts.first { $0.isPickUp }?.pickUpScore == .plus3)
+        // Statistics read the same round the same way.
+        #expect(RoundStats.compute(putts: restored.putts).scoreRelativeToPar
+                == RoundStats.compute(putts: round.putts).scoreRelativeToPar)
+
+        let drill = try #require(try target.fetch(FetchDescriptor<GameSession>()).first)
+        #expect(drill.gameType == .clock)
+        #expect(drill.score == 75)
+        #expect(drill.attempts.count == 1)
+        #expect(drill.attempts.first?.success == true)
+
+        // The same file again adds nothing.
+        let again = try archive.restore(into: target)
+        #expect(again.roundsAdded == 0 && again.sessionsAdded == 0 && again.puttersAdded == 0)
+        #expect(again.skipped == 2)
+        #expect(try target.fetch(FetchDescriptor<Round>()).count == 1)
+        #expect(try target.fetch(FetchDescriptor<Putter>()).count == 1)
+    }
+
+    /// A putter added again by hand in the new install is the same putter:
+    /// the imported round joins it instead of creating a twin.
+    @MainActor
+    @Test func anImportJoinsAPutterOfTheSameName() async throws {
+        let source = try Self.makeInMemoryContext()
+        let original = Putter(name: "Spider")
+        source.insert(original)
+        let round = Round(courseName: "T")
+        round.putter = original
+        source.insert(round)
+        try source.save()
+        let archive = try PuttorArchive.decode(PuttorArchive.make(from: source).encoded())
+
+        let target = try Self.makeInMemoryContext()
+        let readded = Putter(name: " spider ")
+        target.insert(readded)
+        try target.save()
+
+        let summary = try archive.restore(into: target)
+        #expect(summary.puttersAdded == 0)
+        #expect(try target.fetch(FetchDescriptor<Putter>()).count == 1)
+        #expect(try target.fetch(FetchDescriptor<Round>()).first?.putter?.id == readded.id)
+
+        // Anything that is not a Puttor export is refused.
+        #expect(throws: (any Error).self) { try PuttorArchive.decode(Data(#"{"app":"Other","version":1}"#.utf8)) }
+    }
+
     // MARK: - Miss angle
 
     /// The dial's angles: straight short at 0, left negative, right positive,
@@ -2434,7 +2538,8 @@ struct PuttorTests {
     }
 
     private static func makeInMemoryContext() throws -> ModelContext {
-        let schema = Schema([Putter.self, Round.self, Putt.self])
+        // The same five models the app's own container registers.
+        let schema = Schema([Putter.self, Round.self, Putt.self, GameSession.self, GameAttempt.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: schema, configurations: [config])
         return ModelContext(container)
