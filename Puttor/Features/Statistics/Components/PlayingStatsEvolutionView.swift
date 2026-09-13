@@ -19,6 +19,14 @@ enum PlayingStatsMetric: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var titleKey: String { "evolution.\(rawValue)" }
+
+    /// Counted in whole numbers per round, so its scale steps in them too.
+    var isWholeNumber: Bool {
+        switch self {
+        case .score, .birdies, .pars, .bogeys, .doubles, .totalPutts, .threePutts, .lipOuts: return true
+        default: return false
+        }
+    }
 }
 
 /// One round's playing stats, in the order the rounds were played. A figure is
@@ -130,6 +138,7 @@ struct PlayingStatsEvolutionView: View {
     /// scroll view's own frame, which its content has no say in, so a turn of
     /// the screen changes it once and the charts simply follow.
     @State private var viewportHeight: CGFloat = 0
+    @State private var viewportWidth: CGFloat = 0
 
     /// The charts' order and which are taken out, the same in both compare panes.
     @AppStorage("evolution.chartLayout") private var layoutText = ""
@@ -144,9 +153,6 @@ struct PlayingStatsEvolutionView: View {
     /// Landscape has a third of portrait's height; below this a chart is too
     /// flat to read, so there a little less than three fit.
     private static let minimumChartHeight: CGFloat = 135
-    /// Up to this many rounds every point carries its number; beyond it only
-    /// the highest and the lowest do.
-    private static let everyPointLimit = 10
     private static let spacing: CGFloat = Theme.Spacing.md
     /// The strip down the left edge that holds the way back.
     private static let backStripWidth: CGFloat = 20
@@ -188,10 +194,18 @@ struct PlayingStatsEvolutionView: View {
                     note(L("evolution.noneShown"))
                 } else {
                     let metrics = layout.shown
-                    ForEach(Array(metrics.enumerated()), id: \.element) { index, metric in
-                        let isLast = index == metrics.count - 1
-                        chart(metric, colour: colour(for: metric), showsRounds: isLast)
-                            .frame(height: chartHeight + (isLast ? Self.roundAxisHeight : 0))
+                    VStack(alignment: .leading, spacing: Self.spacing) {
+                        ForEach(Array(metrics.enumerated()), id: \.element) { index, metric in
+                            let isLast = index == metrics.count - 1
+                            chart(metric, colour: colour(for: metric), showsRounds: isLast)
+                                .frame(height: chartHeight + (isLast ? Self.roundAxisHeight : 0))
+                        }
+                    }
+                    // The rounds' lines drawn once down the whole stack, so a
+                    // round's values sit on one unbroken line from the top chart
+                    // to the dates at the bottom.
+                    .background {
+                        RoundGridLines(rounds: points.count, lineRounds: roundTicks, bottomInset: EvolutionChart.roundBand + 2)
                     }
                     if points.contains(where: \.isNineHoles) {
                         Text("* \(L("onCourse.nineHoleRound"))")
@@ -206,8 +220,11 @@ struct PlayingStatsEvolutionView: View {
             .padding(.trailing, Theme.Spacing.edge)
             .frame(minWidth: 0, maxWidth: .infinity)
         }
-        .onGeometryChange(for: CGFloat.self) { $0.size.height.rounded(.down) } action: { height in
-            viewportHeight = height
+        .onGeometryChange(for: CGSize.self) { geometry in
+            CGSize(width: geometry.size.width.rounded(.down), height: geometry.size.height.rounded(.down))
+        } action: { size in
+            viewportHeight = size.height
+            viewportWidth = size.width
         }
     }
 
@@ -287,6 +304,12 @@ struct PlayingStatsEvolutionView: View {
             .minimumScaleFactor(0.8)
     }
 
+    /// Every point carries its number while the rounds sit far enough apart
+    /// for it: up to 15 across a phone held upright or half a landscape
+    /// screen, 30 across a whole one. Beyond that only the highest and the
+    /// lowest do.
+    private var everyPointLimit: Int { viewportWidth >= 600 ? 30 : 15 }
+
     /// A third of the screen each, less the gaps between them, but never
     /// flatter than the minimum.
     private var chartHeight: CGFloat {
@@ -320,13 +343,12 @@ struct PlayingStatsEvolutionView: View {
             }
 
             let domain = yDomain(series.map(\.value), metric)
-            let everyPoint = points.count <= Self.everyPointLimit
+            let everyPoint = points.count <= everyPointLimit
             EvolutionChart(
                 series: series,
                 rounds: points.count,
                 domain: domain,
-                ticks: yTicks(domain),
-                gridRounds: roundTicks,
+                ticks: yTicks(domain, whole: metric.isWholeNumber),
                 nineHoleRounds: Set(points.filter(\.isNineHoles).map(\.id)),
                 colour: colour,
                 average: average,
@@ -444,11 +466,15 @@ struct PlayingStatsEvolutionView: View {
 
     /// Two or three round numbers inside a scale, worked out from the scale
     /// alone so the chart has nothing to reconsider when its size changes.
-    private func yTicks(_ domain: ClosedRange<Double>) -> [Double] {
+    /// A figure that only comes in whole numbers gets whole-number ticks: half
+    /// a birdie marks nothing.
+    private func yTicks(_ domain: ClosedRange<Double>, whole: Bool) -> [Double] {
         let raw = (domain.upperBound - domain.lowerBound) / 2.5
         guard raw > 0 else { return [domain.lowerBound] }
         let magnitude = pow(10, floor(log10(raw)))
-        let step = [1, 2, 2.5, 5, 10].map { $0 * magnitude }.first { $0 >= raw } ?? 10 * magnitude
+        let multiples: [Double] = whole ? [1, 2, 5, 10] : [1, 2, 2.5, 5, 10]
+        var step = multiples.map { $0 * magnitude }.first { $0 >= raw } ?? 10 * magnitude
+        if whole { step = max(1, step.rounded(.up)) }
         let first = (domain.lowerBound / step).rounded(.up) * step
         return Array(stride(from: first, through: domain.upperBound, by: step))
     }
@@ -493,7 +519,6 @@ private struct EvolutionChart: View {
     let rounds: Int
     let domain: ClosedRange<Double>
     let ticks: [Double]
-    let gridRounds: [Int]
     /// The rounds played over nine holes, drawn as an asterisk.
     let nineHoleRounds: Set<Int>
     let colour: Color
@@ -512,7 +537,14 @@ private struct EvolutionChart: View {
     /// edge. Less than that, and a nought at the foot of a chart was cut off.
     private static let markRoom: CGFloat = 20
     /// The band under the plot the dates sit in, on the last chart.
-    private static let roundBand: CGFloat = 14
+    static let roundBand: CGFloat = 14
+
+    /// Where a round sits across a chart this wide: the same in every chart,
+    /// and for the lines running down behind them all.
+    static func x(ofRound index: Int, rounds: Int, width: CGFloat) -> CGFloat {
+        let plotWidth = max(1, width - valueBand - 4)
+        return valueBand + plotWidth * CGFloat((Double(index) + 0.5) / Double(max(1, rounds)))
+    }
 
     var body: some View {
         Canvas { context, size in
@@ -524,22 +556,15 @@ private struct EvolutionChart: View {
                 height: max(1, size.height - Self.markRoom * 2 - bottom)
             )
             let span = max(domain.upperBound - domain.lowerBound, 0.0001)
-            let slots = Double(max(1, rounds))
 
             func xPosition(_ index: Int) -> CGFloat {
-                plot.minX + plot.width * CGFloat((Double(index) + 0.5) / slots)
+                Self.x(ofRound: index, rounds: rounds, width: size.width)
             }
             func yPosition(_ value: Double) -> CGFloat {
                 plot.maxY - plot.height * CGFloat((value - domain.lowerBound) / span)
             }
 
             let grid = Theme.borderLight
-            for index in gridRounds {
-                var line = Path()
-                line.move(to: CGPoint(x: xPosition(index), y: plot.minY))
-                line.addLine(to: CGPoint(x: xPosition(index), y: plot.maxY))
-                context.stroke(line, with: .color(grid), style: StrokeStyle(lineWidth: 0.5, dash: [2, 3]))
-            }
 
             for tick in ticks {
                 let y = yPosition(tick)
@@ -618,7 +643,7 @@ private struct EvolutionChart: View {
                 let x = min(max(xPosition(mark.item.index), plot.minX + 12), size.width - 14)
                 let y = yPosition(mark.item.value)
                 context.draw(
-                    Text(pointText(mark.item.value)).font(.system(size: labelsEveryPoint ? 9.5 : 10, weight: .bold)).foregroundStyle(colour),
+                    Text(pointText(mark.item.value)).font(.system(size: !labelsEveryPoint ? 10 : (plot.width / CGFloat(max(1, rounds)) >= 32 ? 9.5 : 8.5), weight: .bold)).foregroundStyle(colour),
                     at: CGPoint(x: x, y: mark.above ? y - 6 : y + 6),
                     anchor: mark.above ? .bottom : .top
                 )
@@ -632,5 +657,27 @@ private struct EvolutionChart: View {
                 )
             }
         }
+    }
+}
+
+/// The rounds' dashed lines, drawn once down the whole stack of charts rather
+/// than chart by chart, where they broke off between one chart and the next.
+private struct RoundGridLines: View {
+    let rounds: Int
+    let lineRounds: [Int]
+    /// Left clear at the bottom, for the dates under the last chart.
+    let bottomInset: CGFloat
+
+    var body: some View {
+        Canvas { context, size in
+            for index in lineRounds {
+                let x = EvolutionChart.x(ofRound: index, rounds: rounds, width: size.width)
+                var line = Path()
+                line.move(to: CGPoint(x: x, y: 0))
+                line.addLine(to: CGPoint(x: x, y: max(0, size.height - bottomInset)))
+                context.stroke(line, with: .color(Theme.borderLight), style: StrokeStyle(lineWidth: 0.5, dash: [2, 3]))
+            }
+        }
+        .allowsHitTesting(false)
     }
 }

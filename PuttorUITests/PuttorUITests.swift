@@ -449,6 +449,53 @@ final class PuttorUITests: XCTestCase {
         snapshot("6 round settings")
     }
 
+    /// Every point carries its number up to fifteen rounds: all twelve demo
+    /// rounds, numbered.
+    @MainActor
+    func testEvolutionNumbersEveryPointOfTwelveRounds() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+
+        let allRounds = app.buttons["All Rounds"]
+        XCTAssertTrue(allRounds.waitForExistence(timeout: 10))
+        // The chip sits past the right edge of its row: drag the row along by
+        // position, since XCTest won't say whether an off-screen chip is
+        // hittable.
+        let screen = app.windows.firstMatch.frame
+        let origin = app.coordinate(withNormalizedOffset: .zero)
+        for _ in 0..<4 where allRounds.frame.maxX > screen.maxX - 8 {
+            let row = allRounds.frame.midY
+            origin.withOffset(CGVector(dx: screen.width * 0.8, dy: row))
+                .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: screen.width * 0.15, dy: row)))
+        }
+        sleep(1)
+        allRounds.tap()
+        XCTAssertTrue(app.buttons["ROUNDS (12)"].waitForExistence(timeout: 5))
+
+        let open = app.buttons["Show how these figures moved"]
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        tapOnScreen(open, in: app)
+        XCTAssertTrue(app.staticTexts["SCORE (TO PAR)"].waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("1 twelve rounds numbered")
+        drag(app, from: 0.8, to: 0.35)
+        sleep(1)
+        snapshot("2 further down")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(3)
+        snapshot("3 landscape")
+        XCUIDevice.shared.orientation = .portrait
+        sleep(2)
+    }
+
     private func swipeFromLeftEdge(_ app: XCUIApplication) {
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.55))
             .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.55)))
