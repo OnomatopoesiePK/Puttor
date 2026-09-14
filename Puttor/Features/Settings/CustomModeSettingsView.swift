@@ -213,7 +213,7 @@ struct CustomModeSettingsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 160)
+                .frame(width: 230)
                 .disabled(!isEditing)
             }
         }

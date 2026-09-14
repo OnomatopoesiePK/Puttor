@@ -14,15 +14,39 @@ import SwiftData
 
 enum DemoData {
     static let launchArgument = "-PuttorDemoData"
+    /// Every round gone, for a look at the empty list.
+    static let emptyArgument = "-PuttorNoRounds"
+    /// Custom mode set to type the slope in numbers.
+    static let slopeNumbersArgument = "-PuttorSlopeNumbers"
     static let roundCount = 12
 
     static func seedIfRequested(_ container: ModelContainer) {
-        guard ProcessInfo.processInfo.arguments.contains(launchArgument) else { return }
-        let context = ModelContext(container)
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains(slopeNumbersArgument) {
+            var config = CustomModeConfig.defaultConfig
+            config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .numbers)]
+            config.save()
+        }
+        if arguments.contains(emptyArgument) {
+            let context = ModelContext(container)
+            try? context.delete(model: Putt.self)
+            try? context.delete(model: Round.self)
+            try? context.save()
+            return
+        }
+        guard arguments.contains(launchArgument) else { return }
         // The arrangements back to where they start, so every launch shows the
         // default stack.
         UserDefaults.standard.removeObject(forKey: "stats.sectionLayout")
         UserDefaults.standard.removeObject(forKey: "evolution.chartLayout")
+        seed(into: ModelContext(container))
+    }
+
+    /// The demo season, into any context. `nineHoleRound` is the round played
+    /// over nine holes; nil plays every one over eighteen. The tenth, so the
+    /// rounds before it draw the same numbers as they did before there was a
+    /// nine-hole round, and the last ten read as they always have.
+    static func seed(into context: ModelContext, nineHoleRound: Int? = 9) {
         try? context.delete(model: Putt.self)
         try? context.delete(model: Round.self)
 
@@ -41,7 +65,7 @@ enum DemoData {
             // appear for mixed selections show up too.
             round.tracksScoreCategory = index % 5 != 2
             // One round over nine holes, so its asterisk shows up too.
-            round.holeCount = index == 3 ? 9 : 18
+            round.holeCount = index == nineHoleRound ? 9 : 18
             context.insert(round)
             for hole in 1...round.holeCount {
                 addHole(hole, to: round, in: context, rng: &rng)

@@ -13,11 +13,14 @@ import Foundation
 
 enum FieldComplexity: String, Codable, CaseIterable {
     case simple, complex
+    /// The slope typed in percent on a keypad instead of picked on a grid.
+    case numbers
 
     var labelKey: String {
         switch self {
         case .simple: return "custom.complexity.simple"
         case .complex: return "custom.complexity.complex"
+        case .numbers: return "custom.complexity.numbers"
         }
     }
 }

@@ -123,17 +123,10 @@ struct PlayingStatsEvolutionView: View {
         .overlay(alignment: .leading) {
             if !arranging { backButton }
         }
-        // A swipe to the right goes back, as the arrow does: as soon as the
-        // swipe is clearly sideways, not once the finger lifts. Not while the
-        // charts are arranged, where rows are dragged about.
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 10).onChanged { drag in
-                if drag.translation.width > 30, drag.translation.width > abs(drag.translation.height) * 1.5 {
-                    onBack()
-                }
-            },
-            including: arranging ? .subviews : .all
-        )
+        // A swipe to the right goes back, as the arrow does, while a drag up or
+        // down still scrolls the charts. Not while the charts are arranged,
+        // where rows are dragged about.
+        .gesture(HorizontalSwipe(direction: .right, isEnabled: !arranging) { onBack() })
         .background(Theme.background)
     }
 

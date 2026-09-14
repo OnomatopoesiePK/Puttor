@@ -89,7 +89,7 @@ private func missVector(_ result: PuttResult) -> (x: CGFloat, y: CGFloat) {
     }
 }
 
-private func includeByFilter(_ p: Putt, _ filter: DispersionFilter) -> Bool {
+func includeByFilter(_ p: Putt, _ filter: DispersionFilter) -> Bool {
     switch filter {
     case .all: return true
     case .rl: return p.sideSlopePct < 0

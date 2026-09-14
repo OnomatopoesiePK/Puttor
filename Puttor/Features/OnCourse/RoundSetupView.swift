@@ -31,6 +31,8 @@ struct RoundSetupView: View {
     @State private var playFormat: PlayFormat
     @State private var startingHole: Int
     @State private var inputMode: InputMode
+    /// Optional: nil until a way of reading is picked.
+    @State private var readingMode: ReadingMode?
 
     @State private var addingPutter = false
     @State private var newPutterName = ""
@@ -58,6 +60,7 @@ struct RoundSetupView: View {
         _grainyGreens = State(initialValue: existingRound?.grainyGreens ?? false)
         _isTournament = State(initialValue: existingRound?.isTournament ?? false)
         _playFormat = State(initialValue: existingRound?.playFormat ?? .strokePlay)
+        _readingMode = State(initialValue: existingRound?.readingMode)
         _startingHole = State(initialValue: existingRound?.startingHole ?? 1)
         // New rounds start on whichever mode was used last, so a player who
         // always uses the same one never has to re-pick it.
@@ -110,6 +113,17 @@ struct RoundSetupView: View {
                         .padding(.top, 16)
                     switchRow(titleKey: "setup.tournament", infoKey: "setup.tournament.info", isOn: $isTournament)
                         .padding(.top, 8)
+
+                    // How the putts get read. Optional: tapping the chosen one
+                    // again leaves it open.
+                    label(L("setup.readingMode"))
+                    HStack(spacing: 10) {
+                        ForEach(ReadingMode.allCases) { mode in
+                            pillButton(title: L(mode.labelKey), selected: readingMode == mode) {
+                                readingMode = readingMode == mode ? nil : mode
+                            }
+                        }
+                    }
 
                     label(L("setup.startingHole"))
                     HStack(spacing: 10) {
@@ -424,6 +438,7 @@ struct RoundSetupView: View {
             existingRound.grainyGreens = grainyGreens
             existingRound.isTournament = isTournament
             existingRound.playFormat = playFormat
+            existingRound.readingMode = readingMode
             existingRound.startingHole = startingHole
             existingRound.inputMode = inputMode
             try? modelContext.save()
@@ -445,6 +460,7 @@ struct RoundSetupView: View {
             startingHole: startingHole,
             inputMode: inputMode
         )
+        round.readingMode = readingMode
         modelContext.insert(round)
         try? modelContext.save()
         onCreated(round)

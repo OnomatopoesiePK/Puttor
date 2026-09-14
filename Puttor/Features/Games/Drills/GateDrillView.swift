@@ -119,9 +119,12 @@ private struct GateTallyEntryView: View {
         return reps - made - left
     }
 
+    /// More made, or missed left, than there were putts in the set — alone or
+    /// together.
     private var tooMany: Bool {
-        guard let made = count(madeText), let left = count(leftText) else { return false }
-        return made + left > reps
+        let made = Int(madeText) ?? 0
+        let left = Int(leftText) ?? 0
+        return made > reps || left > reps || made + left > reps
     }
 
     var body: some View {
@@ -139,12 +142,12 @@ private struct GateTallyEntryView: View {
             .padding(.horizontal, Theme.Spacing.edge)
 
             Group {
-                if let missedRight {
+                if tooMany {
+                    Label(String(format: L("game.gate.tooMany"), reps), systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(Theme.error)
+                } else if let missedRight {
                     Text(String(format: L("game.gate.restRight"), missedRight))
                         .foregroundStyle(Theme.textSecondary)
-                } else if tooMany {
-                    Text(String(format: L("game.gate.tooMany"), reps))
-                        .foregroundStyle(Theme.error)
                 }
             }
             .font(.system(size: 15, weight: .semibold))
@@ -202,7 +205,10 @@ private struct GateTallyEntryView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 84)
                 .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(focused == field ? colour : Theme.border, lineWidth: 2))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(
+                    (Int(text.wrappedValue) ?? 0) > reps ? Theme.error : (focused == field ? colour : Theme.border),
+                    lineWidth: 2
+                ))
                 .onTapGesture { focused = field }
         }
         .frame(maxWidth: .infinity)

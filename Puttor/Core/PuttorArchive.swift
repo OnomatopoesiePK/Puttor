@@ -53,6 +53,8 @@ struct PuttorArchive: Codable {
         var isComplete: Bool
         var notes: String
         var tracksScoreCategory: Bool
+        /// Optional, so archives from before it was asked still read.
+        var readingModeRaw: String?
         var putts: [PuttRecord]
     }
 
@@ -180,6 +182,7 @@ struct PuttorArchive: Codable {
                 isComplete: round.isComplete,
                 notes: round.notes,
                 tracksScoreCategory: round.tracksScoreCategory,
+                readingModeRaw: round.readingModeRaw,
                 putts: round.putts
                     .sorted { ($0.holeNumber, $0.puttNumber) < ($1.holeNumber, $1.puttNumber) }
                     .map { putt in
@@ -284,6 +287,7 @@ struct PuttorArchive: Codable {
             round.weatherRaw = record.weatherRaw
             round.precipitationRaw = record.precipitationRaw
             round.grainyGreens = record.grainyGreens
+            round.readingModeRaw = record.readingModeRaw
             round.isTournament = record.isTournament
             round.playFormatRaw = record.playFormatRaw
             round.startingHole = record.startingHole

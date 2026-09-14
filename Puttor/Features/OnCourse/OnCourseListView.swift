@@ -24,7 +24,6 @@ struct OnCourseListView: View {
 
                 if rounds.isEmpty {
                     emptyState
-                    Spacer()
                 } else {
                     List {
                         Section {
@@ -92,31 +91,55 @@ struct OnCourseListView: View {
             Image(systemName: "plus")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.white)
-                .frame(width: 60, height: 60)
+                .frame(width: Self.plusSize, height: Self.plusSize)
                 .background(Circle().fill(Theme.primary))
                 .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(L("onCourse.startNewRound"))
-        .padding(.trailing, Theme.Spacing.lg)
-        .padding(.bottom, Theme.Spacing.md)
+        .padding(.trailing, Self.plusTrailing)
+        .padding(.bottom, Self.plusBottom)
     }
 
+    /// No rounds yet: a word where the list will be, and an arrow down to the
+    /// plus that starts the first one.
     private var emptyState: some View {
-        VStack(spacing: 10) {
-            Text("🏌️").font(.system(size: 48))
-            Text(L("onCourse.noRounds"))
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(Theme.text)
-            Text(L("onCourse.noRoundsHint"))
-                .font(.system(size: 14))
-                .foregroundStyle(Theme.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+        VStack(spacing: 0) {
+            VStack(spacing: 10) {
+                Text("🏌️").font(.system(size: 48))
+                Text(L("onCourse.noRounds"))
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(Theme.text)
+                Text(L("onCourse.noRoundsHint"))
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(Theme.Spacing.lg)
+            .frame(maxWidth: .infinity)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+            .padding(.horizontal, Theme.Spacing.edge)
+            .padding(.top, Theme.Spacing.md)
+
+            Spacer(minLength: Theme.Spacing.md)
+
+            // Above and to the left of the plus, pointing at it.
+            Image(systemName: "arrow.down.right")
+                .font(.system(size: 46, weight: .bold))
+                .foregroundStyle(Theme.primary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, Self.plusTrailing + Self.plusSize - 8)
+                .padding(.bottom, Self.plusBottom + Self.plusSize - 8)
+                .accessibilityHidden(true)
         }
-        .padding(.top, 60)
     }
+
+    private static let plusSize: CGFloat = 60
+    private static let plusTrailing: CGFloat = Theme.Spacing.lg
+    private static let plusBottom: CGFloat = Theme.Spacing.md
 
     /// Same total RoundStats reports, summed directly here rather than building
     /// the full stats (brackets, dispersion, leaves) for every row of the list.

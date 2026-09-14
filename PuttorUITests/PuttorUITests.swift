@@ -567,7 +567,11 @@ final class PuttorUITests: XCTestCase {
         let left = app.textFields.element(boundBy: 1)
         XCTAssertTrue(left.waitForExistence(timeout: 5))
         made.tap()
-        made.typeText("12")
+        made.typeText("25")
+        let tooMany = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'more than the 20 reps'")).firstMatch
+        XCTAssertTrue(tooMany.waitForExistence(timeout: 3), "25 made of 20 is not flagged")
+        snapshot("1b too many")
+        made.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 2) + "12")
         left.tap()
         left.typeText("5")
         let rest = app.staticTexts["Missed right: 3"]
@@ -598,6 +602,134 @@ final class PuttorUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["MISSES BY SIDE"].waitForExistence(timeout: 5))
         sleep(1)
         snapshot("5 clock result")
+    }
+
+    /// A drag up that starts on the playing stats scrolls the tab rather than
+    /// being swallowed by the swipe to the evolution, and the dispersion plot
+    /// swipes over to the grid of where the misses finished, and back.
+    @MainActor
+    func testStatisticsScrollOverPlayingStatsAndSwipeToTheMissGrid() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+
+        let playing = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'PLAYING STATS'")).firstMatch
+        let gir = app.staticTexts["GIR"].firstMatch
+        XCTAssertTrue(gir.waitForExistence(timeout: 10))
+        scrollIntoView(gir, in: app, bottomMargin: 320)
+        let before = playing.frame.minY
+        let tile = gir.frame
+        let origin = app.coordinate(withNormalizedOffset: .zero)
+        origin.withOffset(CGVector(dx: tile.midX, dy: tile.midY))
+            .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: tile.midX, dy: tile.midY - 240)))
+        sleep(1)
+        XCTAssertLessThan(playing.frame.minY, before - 100, "dragging up over the playing stats did not scroll")
+        XCTAssertFalse(app.staticTexts["SCORE (TO PAR)"].exists, "a drag up opened the evolution")
+
+        let dispersion = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'MISS DISPERSION'")).firstMatch
+        XCTAssertTrue(dispersion.waitForExistence(timeout: 5))
+        for _ in 0..<14 where dispersion.frame.minY > 260 {
+            drag(app, from: 0.75, to: 0.45)
+        }
+        sleep(1)
+        let row = dispersion.frame.maxY + 230
+        origin.withOffset(CGVector(dx: 330, dy: row))
+            .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: 50, dy: row)))
+        let justPast = app.staticTexts["Just past"]
+        XCTAssertTrue(justPast.waitForExistence(timeout: 3), "no grid after swiping the plot")
+        sleep(1)
+        snapshot("1 miss grid")
+        // Back on the grid's own row: the grid is shorter than the plot, so
+        // what stood at the first swipe's height has moved.
+        let gridRow = justPast.frame.midY
+        origin.withOffset(CGVector(dx: 130, dy: gridRow))
+            .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: 390, dy: gridRow)))
+        XCTAssertTrue(justPast.waitForNonExistence(timeout: 3), "no plot after swiping back")
+    }
+
+    /// With no rounds, the list says so and points down at the plus.
+    @MainActor
+    func testEmptyRoundListPointsToThePlus() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorNoRounds"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["No rounds yet."].waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        snapshot("1 empty list")
+        XCTAssertTrue(app.buttons["Start New Round"].isHittable)
+    }
+
+    /// The round settings take an optional way of reading, and a custom round
+    /// set to numbers takes the slope typed on its keypad: side break first,
+    /// Enter, then up or down.
+    @MainActor
+    func testRoundSettingsReadingAndSlopeTypedInNumbers() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData", "-PuttorSlopeNumbers"]
+        app.launch()
+
+        let start = app.buttons["Start New Round"]
+        XCTAssertTrue(start.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        start.tap()
+
+        let aimPoint = app.buttons["AimPoint"]
+        XCTAssertTrue(aimPoint.waitForExistence(timeout: 5))
+        scrollIntoView(aimPoint, in: app, bottomMargin: 180)
+        aimPoint.tap()
+        snapshot("1 reading picked")
+
+        let custom = app.staticTexts["Custom"].firstMatch
+        scrollIntoView(custom, in: app, bottomMargin: 180)
+        custom.tap()
+        app.buttons["Start Round"].tap()
+
+        let side = app.buttons["SIDE BREAK"]
+        let hill = app.buttons["UP / DOWN"]
+        XCTAssertTrue(side.waitForExistence(timeout: 10))
+        let zero = lowestButton(labelled: "0", in: app)
+        scrollIntoView(zero, in: app, bottomMargin: 60)
+
+        lowestButton(labelled: "2", in: app).tap()
+        enterKey(in: app).tap()
+        lowestButton(labelled: "1", in: app).tap()
+        lowestButton(labelled: "±", in: app).tap()
+        enterKey(in: app).tap()
+        sleep(1)
+        snapshot("2 slope typed")
+
+        XCTAssertTrue((side.value as? String ?? "").contains("L→R"), "side break reads \(side.value ?? "nothing")")
+        XCTAssertTrue((hill.value as? String ?? "").contains("downhill"), "up or down reads \(hill.value ?? "nothing")")
+    }
+
+    /// Short drags until the element's bottom sits above the margin.
+    private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication, bottomMargin: CGFloat) {
+        let screen = app.windows.firstMatch.frame
+        for _ in 0..<14 where element.frame.maxY > screen.maxY - bottomMargin {
+            drag(app, from: 0.75, to: 0.45)
+        }
+        sleep(1)
+    }
+
+    /// Of the buttons with this label, the one lowest on the screen: the key
+    /// on the keypad rather than a chip higher up.
+    private func lowestButton(labelled label: String, in app: XCUIApplication) -> XCUIElement {
+        let matches = app.buttons.matching(NSPredicate(format: "label == %@", label)).allElementsBoundByIndex
+        return matches.max { $0.frame.minY < $1.frame.minY } ?? app.buttons[label]
+    }
+
+    private func enterKey(in app: XCUIApplication) -> XCUIElement {
+        let matches = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'enter'")).allElementsBoundByIndex
+        return matches.max { $0.frame.minY < $1.frame.minY } ?? app.buttons["Enter"]
     }
 
     private func swipeFromLeftEdge(_ app: XCUIApplication) {

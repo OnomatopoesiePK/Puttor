@@ -1547,6 +1547,51 @@ struct PuttorTests {
         #expect(merged.doublesOrWorse == 2)
     }
 
+    /// Misses land in the grid by side and by how far they finished: up to a
+    /// foot short is just short, up to two feet past just past, level with the
+    /// hole counts as past, and straight past splits between left and right.
+    @MainActor
+    @Test func missesLandInTheGridBySideAndLeave() async throws {
+        func hole(_ number: Int, _ result: PuttResult, leave: Double) -> [Putt] {
+            [
+                Putt(holeNumber: number, puttNumber: 1, distanceM: 5, puttFor: .par, result: result),
+                Putt(holeNumber: number, puttNumber: 2, distanceM: leave, puttFor: .bogey, result: .holed),
+            ]
+        }
+        let putts = hole(1, .long, leave: 1.5)
+            + hole(2, .shortLeft, leave: 0.2)
+            + hole(3, .right, leave: 0.5)
+            + hole(4, .short, leave: 1.0)
+            + hole(5, .short, leave: MissGrid.justShortM)
+        let grid = MissGrid(putts: putts)
+
+        #expect(grid.total == 5)
+        #expect(grid.percent(.leftLong) == 10)
+        #expect(grid.percent(.rightLong) == 10)
+        #expect(grid.percent(.leftJustShort) == 20)
+        #expect(grid.percent(.rightJustPast) == 20)
+        #expect(grid.percent(.centreShort) == 20)
+        // A tap-in of exactly a foot is just short.
+        #expect(grid.percent(.centreJustShort) == 20)
+        #expect(abs(MissGridCell.allCases.map(grid.percent).reduce(0, +) - 100) < 0.001)
+    }
+
+    /// Rounds are filtered by how their putts were read, and the filter keeps
+    /// that through its stored text.
+    @MainActor
+    @Test func roundsFilterByHowTheyWereRead() async throws {
+        let aimed = Round(courseName: "A", date: Date(), stimp: 10, isTournament: false)
+        aimed.readingMode = .aimPoint
+        let unsaid = Round(courseName: "B", date: Date(), stimp: 10, isTournament: false)
+        var filter = RoundFilter()
+        filter.readingMode = .aimPoint
+
+        #expect(filter.isActive)
+        #expect(filter.matches(aimed))
+        #expect(!filter.matches(unsaid))
+        #expect(RoundFilter.decode(filter.encoded) == filter)
+    }
+
     /// A drill's misses name a side once there are enough of them and one side
     /// clearly has most.
     @Test func drillMissesNameASideOnceEnoughLeanOneWay() async throws {

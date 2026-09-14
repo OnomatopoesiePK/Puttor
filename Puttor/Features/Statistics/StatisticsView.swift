@@ -109,6 +109,8 @@ private struct StatisticsPane: View {
     /// The sections' order and which were taken out, arranged from the tab's
     /// header and the same in both compare panes.
     @AppStorage("stats.sectionLayout") private var sectionLayoutText = ""
+    /// The dispersion plot, or the grid of where the misses finished.
+    @State private var dispersionPage = 0
     /// Whether the evolution charts have taken the statistics' place.
     @State private var showingEvolution = false
     /// Where the statistics were scrolled to, so they come back there. The
@@ -685,6 +687,30 @@ private struct StatisticsPane: View {
         }
     }
 
+    // MARK: - Dispersion pages
+
+    private func showDispersionPage(_ page: Int) {
+        guard page != dispersionPage else { return }
+        withAnimation(Self.slide) { dispersionPage = page }
+    }
+
+    /// A dot for each page, the one showing larger, as on the home screen.
+    private func pageDots(count: Int, current: Int, select: @escaping (Int) -> Void) -> some View {
+        HStack(spacing: 6) {
+            ForEach(0..<count, id: \.self) { page in
+                Circle()
+                    .fill(page == current ? Theme.primary : Theme.textMuted.opacity(0.5))
+                    .frame(width: page == current ? 9 : 6, height: page == current ? 9 : 6)
+                    .frame(width: 18, height: 18)
+                    .contentShape(Rectangle())
+                    .onTapGesture { select(page) }
+            }
+        }
+        .animation(.easeOut(duration: 0.18), value: current)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(format: L("dispersion.page"), current + 1, count))
+    }
+
     // MARK: - Sections
 
     /// One section of the tab, wherever the arrangement puts it. A section
@@ -790,16 +816,9 @@ private struct StatisticsPane: View {
                 // border just out of sight, so the box reads as going on
                 // to the evolution beside it.
                 .padding(.trailing, -(Theme.Spacing.edge + 2))
-                // Or pushed across with a swipe to the left, as soon as
-                // the swipe is clearly sideways rather than once the
-                // finger lifts.
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 10).onChanged { drag in
-                        if drag.translation.width < -30, abs(drag.translation.width) > abs(drag.translation.height) * 1.5 {
-                            openEvolution()
-                        }
-                    }
-                )
+                // Or pushed across with a swipe to the left. Sideways only: a
+                // drag up or down still scrolls the tab.
+                .gesture(HorizontalSwipe(direction: .left) { openEvolution() })
             }
         case .scoreVsPutting:
             CollapsibleStatSection(title: sectionTitle(L("stats.scoreVsPutting"), marked: data.hasRoundsWithoutScore), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
@@ -836,18 +855,35 @@ private struct StatisticsPane: View {
 
                 dispersionRangeRow(longest: longestPuttDistance(data.allPutts))
 
-                MissDispersionPlotView(
-                    putts: data.allPutts,
-                    filter: dispersionFilter,
-                    shading: dispersionShading,
+                // The misses as dots, or as shares of a grid of where they finished:
+                // swiped between, with a dot for each page under them.
+                let range = DistanceRangeFilter.range(
+                    fromText: dispersionFromText,
+                    toText: dispersionToText,
                     useFeet: useFeet,
-                    distanceRange: DistanceRangeFilter.range(
-                        fromText: dispersionFromText,
-                        toText: dispersionToText,
-                        useFeet: useFeet,
-                        fullRangeMaxM: longestPuttDistance(data.allPutts)
-                    )
+                    fullRangeMaxM: longestPuttDistance(data.allPutts)
                 )
+                ZStack {
+                    if dispersionPage == 0 {
+                        MissDispersionPlotView(
+                            putts: data.allPutts,
+                            filter: dispersionFilter,
+                            shading: dispersionShading,
+                            useFeet: useFeet,
+                            distanceRange: range
+                        )
+                        .transition(.move(edge: .leading))
+                    } else {
+                        MissGridView(putts: data.allPutts, filter: dispersionFilter, distanceRange: range, useFeet: useFeet)
+                            .transition(.move(edge: .trailing))
+                    }
+                }
+                .clipped()
+                .gesture(HorizontalSwipe(
+                    onLeft: dispersionPage == 0 ? { showDispersionPage(1) } : nil,
+                    onRight: dispersionPage == 1 ? { showDispersionPage(0) } : nil
+                ))
+                pageDots(count: 2, current: dispersionPage) { showDispersionPage($0) }
 
                 // Read from every putt in the selection, not
                 // from whatever the menus above are showing:
@@ -1063,6 +1099,13 @@ private struct StatisticsPane: View {
                 }
             }
 
+            Menu(L("stats.filter.reading")) {
+                Button(L("stats.filter.any")) { filter.readingMode = nil }
+                ForEach(ReadingMode.allCases) { mode in
+                    Button(L(mode.labelKey)) { filter.readingMode = mode }
+                }
+            }
+
             Menu(L("stats.filter.weather")) {
                 Button(L("stats.filter.any")) { filter.weather = nil }
                 ForEach(WeatherFilter.allCases) { option in
@@ -1166,6 +1209,9 @@ private struct StatisticsPane: View {
         }
         if let format = filter.format {
             chips.append(("\(format.emoji) \(L(format.labelKey))", { filter.format = nil }))
+        }
+        if let readingMode = filter.readingMode {
+            chips.append(("\(L("stats.filter.reading")): \(L(readingMode.labelKey))", { filter.readingMode = nil }))
         }
         if filter.stimpEnabled {
             chips.append((stimpChipLabel, {

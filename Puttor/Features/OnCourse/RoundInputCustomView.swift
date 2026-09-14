@@ -150,16 +150,15 @@ struct RoundInputCustomView: View {
         case .puttForCategory:
             scoreCategoryRow(session)
         case .slope:
-            if field.complexity == .complex {
-                SlopeGridPickerView(
-                    sideValue: Binding(get: { session.draftSideSlopePct }, set: { session.draftSideSlopePct = $0 }),
-                    hillValue: Binding(get: { session.draftHillSlopePct }, set: { session.draftHillSlopePct = $0 })
-                )
-            } else {
-                SimpleSlopeGridView(
-                    sideValue: Binding(get: { session.draftSideSlopePct }, set: { session.draftSideSlopePct = $0 }),
-                    hillValue: Binding(get: { session.draftHillSlopePct }, set: { session.draftHillSlopePct = $0 })
-                )
+            let side = Binding(get: { session.draftSideSlopePct }, set: { session.draftSideSlopePct = $0 })
+            let hill = Binding(get: { session.draftHillSlopePct }, set: { session.draftHillSlopePct = $0 })
+            switch field.complexity {
+            case .complex:
+                SlopeGridPickerView(sideValue: side, hillValue: hill)
+            case .numbers:
+                SlopeNumpadView(sideValue: side, hillValue: hill)
+            case .simple:
+                SimpleSlopeGridView(sideValue: side, hillValue: hill)
             }
         case .doubleBreak:
             DoubleBreakButtonsView(value: Binding(get: { session.draftDoubleBreak }, set: { session.draftDoubleBreak = $0 }))
