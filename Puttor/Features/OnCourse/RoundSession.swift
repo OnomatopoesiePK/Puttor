@@ -37,6 +37,7 @@ final class RoundSession {
     var draftSideSlopePct: Double = 0
     var draftHillSlopePct: Double = 0
     var draftDoubleBreak: DoubleBreakType?
+    var draftIntention = PuttIntention()
     var draftPuttFor: ScoreCategory = .birdie
     var draftResult: PuttResult?
     var draftLipOut = false
@@ -134,6 +135,7 @@ final class RoundSession {
             || draftSideSlopePct != p.sideSlopePct
             || draftHillSlopePct != p.hillSlopePct
             || draftDoubleBreak != p.doubleBreak
+            || draftIntention != p.intention
             || draftPuttFor != p.puttFor
             || draftResult != p.result
             || draftLipOut != p.lipOut
@@ -235,6 +237,7 @@ final class RoundSession {
         draftSideSlopePct = 0
         draftHillSlopePct = 0
         draftDoubleBreak = nil
+        draftIntention = PuttIntention()
         draftPuttFor = .birdie
         draftResult = nil
         draftLipOut = false
@@ -251,6 +254,7 @@ final class RoundSession {
         draftSideSlopePct = 0
         draftHillSlopePct = 0
         draftDoubleBreak = nil
+        draftIntention = PuttIntention()
         draftPuttFor = previousPuttFor.next
         draftResult = nil
         draftLipOut = false
@@ -270,6 +274,7 @@ final class RoundSession {
         draftSideSlopePct = p.sideSlopePct
         draftHillSlopePct = p.hillSlopePct
         draftDoubleBreak = p.doubleBreak
+        draftIntention = p.intention
         draftPuttFor = p.puttFor
         draftResult = p.result
         draftLipOut = p.lipOut
@@ -293,6 +298,7 @@ final class RoundSession {
             putt.sideSlopePct = draftSideSlopePct
             putt.hillSlopePct = draftHillSlopePct
             putt.doubleBreak = draftDoubleBreak
+            putt.intention = draftIntention
             putt.puttFor = draftPuttFor
             putt.result = effectiveResult
             putt.lipOut = draftLipOut
@@ -383,6 +389,7 @@ final class RoundSession {
             wrongAim: draftWrongAim,
             missAngleDeg: effectiveResult.isHoled ? nil : draftMissAngle
         )
+        putt.intention = draftIntention
         putt.round = round
         round.putts.append(putt)
         modelContext.insert(putt)

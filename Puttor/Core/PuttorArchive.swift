@@ -75,6 +75,11 @@ struct PuttorArchive: Codable {
         var wrongAim: Bool
         var missAngleDeg: Double?
         var createdAt: Date
+        var intentionGoalRaw: String?
+        var intentionSpeedRaw: String?
+        var intentionLineRaw: String?
+        var intentionSituationRaw: String?
+        var intentionExecuted: Bool?
     }
 
     struct SessionRecord: Codable {
@@ -202,7 +207,12 @@ struct PuttorArchive: Codable {
                             badStrokeTypeRaw: putt.badStrokeTypeRaw,
                             wrongAim: putt.wrongAim,
                             missAngleDeg: putt.missAngleDeg,
-                            createdAt: putt.createdAt
+                            createdAt: putt.createdAt,
+                            intentionGoalRaw: putt.intentionGoalRaw,
+                            intentionSpeedRaw: putt.intentionSpeedRaw,
+                            intentionLineRaw: putt.intentionLineRaw,
+                            intentionSituationRaw: putt.intentionSituationRaw,
+                            intentionExecuted: putt.intentionExecuted
                         )
                     }
             )
@@ -319,6 +329,11 @@ struct PuttorArchive: Codable {
                 putt.wrongAim = puttRecord.wrongAim
                 putt.missAngleDeg = puttRecord.missAngleDeg
                 putt.createdAt = puttRecord.createdAt
+                putt.intentionGoalRaw = puttRecord.intentionGoalRaw
+                putt.intentionSpeedRaw = puttRecord.intentionSpeedRaw
+                putt.intentionLineRaw = puttRecord.intentionLineRaw
+                putt.intentionSituationRaw = puttRecord.intentionSituationRaw
+                putt.intentionExecuted = puttRecord.intentionExecuted
                 putt.round = round
                 round.putts.append(putt)
                 context.insert(putt)

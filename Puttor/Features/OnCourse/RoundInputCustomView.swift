@@ -162,6 +162,13 @@ struct RoundInputCustomView: View {
             }
         case .doubleBreak:
             DoubleBreakButtonsView(value: Binding(get: { session.draftDoubleBreak }, set: { session.draftDoubleBreak = $0 }))
+        case .intention:
+            IntentionFieldView(
+                parts: field.intentionParts,
+                isMatchPlay: round.playFormat == .matchPlay,
+                useFeet: useFeet,
+                intention: Binding(get: { session.draftIntention }, set: { session.draftIntention = $0 })
+            )
         case .missReasons:
             missReasonRow(session)
         }

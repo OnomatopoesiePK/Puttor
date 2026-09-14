@@ -11,6 +11,7 @@ import Foundation
 enum StatisticsSection: String, CaseIterable, Identifiable, Arrangeable {
     case rounds, totals, strokesGained, playingStats, scoreVsPutting, dispersion
     case makeByDistance, situation, missTendency, leaveByMiss, missReasons
+    case intentionOutcome
 
     var id: String { rawValue }
 
@@ -28,6 +29,7 @@ enum StatisticsSection: String, CaseIterable, Identifiable, Arrangeable {
         case .missTendency: return "summary.missTendency"
         case .leaveByMiss: return "summary.leaveByMiss"
         case .missReasons: return "summary.missReasons"
+        case .intentionOutcome: return "stats.intention"
         }
     }
 }

@@ -18,6 +18,8 @@ enum DemoData {
     static let emptyArgument = "-PuttorNoRounds"
     /// Custom mode set to type the slope in numbers.
     static let slopeNumbersArgument = "-PuttorSlopeNumbers"
+    /// Custom mode asking for the intention.
+    static let intentionArgument = "-PuttorIntention"
     static let roundCount = 12
 
     static func seedIfRequested(_ container: ModelContainer) {
@@ -25,6 +27,11 @@ enum DemoData {
         if arguments.contains(slopeNumbersArgument) {
             var config = CustomModeConfig.defaultConfig
             config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .numbers)]
+            config.save()
+        }
+        if arguments.contains(intentionArgument) {
+            var config = CustomModeConfig.defaultConfig
+            config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .intention)]
             config.save()
         }
         if arguments.contains(emptyArgument) {
@@ -53,6 +60,7 @@ enum DemoData {
         // The same season every launch, so a screenshot can be compared with
         // the last one.
         var rng = SeededGenerator(seed: 7)
+        var intentions = SeededGenerator(seed: 11)
         for index in 0..<roundCount {
             let round = Round(
                 courseName: "Demo \(index + 1)",
@@ -68,13 +76,13 @@ enum DemoData {
             round.holeCount = index == nineHoleRound ? 9 : 18
             context.insert(round)
             for hole in 1...round.holeCount {
-                addHole(hole, to: round, in: context, rng: &rng)
+                addHole(hole, to: round, in: context, rng: &rng, intentions: &intentions)
             }
         }
         try? context.save()
     }
 
-    private static func addHole(_ hole: Int, to round: Round, in context: ModelContext, rng: inout SeededGenerator) {
+    private static func addHole(_ hole: Int, to round: Round, in context: ModelContext, rng: inout SeededGenerator, intentions: inout SeededGenerator) {
         var category: ScoreCategory = [.birdie, .par, .par, .par, .bogey].randomElement(using: &rng)!
         var distance = Double.random(in: 0.8...14, using: &rng)
         let side = [-3.0, -2, -1, 0, 0, 1, 2, 3].randomElement(using: &rng)!
@@ -100,6 +108,9 @@ enum DemoData {
                 badStrokeType: badStroke ? BadStrokeType.allCases.randomElement(using: &rng) : nil,
                 wrongAim: !holed && Double.random(in: 0...1, using: &rng) < 0.15
             )
+            if number == 1 && distance >= 1.5 {
+                putt.intention = intention(at: distance, holed: holed, rng: &intentions)
+            }
             putt.round = round
             round.putts.append(putt)
             context.insert(putt)
@@ -110,6 +121,18 @@ enum DemoData {
             let furthest = result.lengthBias == 0 ? 1.2 : (result.lateralBias == 0 ? 2.5 : 2.0)
             distance = Double.random(in: 0.3...furthest, using: &rng)
         }
+    }
+
+    /// Short ones to hole, long ones to lag; played as meant more often when
+    /// they drop.
+    private static func intention(at distance: Double, holed: Bool, rng: inout SeededGenerator) -> PuttIntention {
+        let goal: PuttGoal = distance < 4 ? .make
+            : distance > 9 ? .lag
+            : [.make, .lag, .position].randomElement(using: &rng)!
+        let speed: PuttSpeed = goal == .lag ? .dieIn : [.dieIn, .pelz, .pelz, .firm].randomElement(using: &rng)!
+        let line = PuttLine.allCases.randomElement(using: &rng)!
+        let executed = Double.random(in: 0...1, using: &rng) < (holed ? 0.85 : 0.55)
+        return PuttIntention(goal: goal, speed: speed, line: line, executed: executed)
     }
 
     private static func steppedDown(_ category: ScoreCategory) -> ScoreCategory {

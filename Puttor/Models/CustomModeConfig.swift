@@ -43,6 +43,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
     case slope
     case doubleBreak
     case missReasons
+    case intention
 
     var id: String { rawValue }
 
@@ -52,6 +53,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .slope: return "custom.field.slope"
         case .doubleBreak: return "custom.field.doubleBreak"
         case .missReasons: return "custom.field.missReasons"
+        case .intention: return "custom.field.intention"
         }
     }
 
@@ -61,6 +63,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .slope: return "custom.field.slope.desc"
         case .doubleBreak: return "custom.field.doubleBreak.desc"
         case .missReasons: return "custom.field.missReasons.desc"
+        case .intention: return "custom.field.intention.desc"
         }
     }
 
@@ -70,6 +73,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .slope: return "square.grid.3x3.fill"
         case .doubleBreak: return "arrow.triangle.branch"
         case .missReasons: return "exclamationmark.triangle.fill"
+        case .intention: return "scope"
         }
     }
 
@@ -81,6 +85,14 @@ struct CustomField: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
     var kind: CustomFieldKind
     var complexity: FieldComplexity = .simple
+    /// The parts the intention field asks for. Optional in storage so fields
+    /// saved before there were parts still decode; nil asks for all of them.
+    var intentionPartsRaw: [IntentionPart]? = nil
+
+    var intentionParts: [IntentionPart] {
+        get { intentionPartsRaw ?? IntentionPart.allCases }
+        set { intentionPartsRaw = IntentionPart.allCases.filter(newValue.contains) }
+    }
 }
 
 /// How Custom mode asks for the result. `angle` records where around the hole

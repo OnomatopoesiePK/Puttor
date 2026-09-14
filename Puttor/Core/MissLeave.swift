@@ -21,7 +21,7 @@ struct MissLeave {
         let hole: Int
     }
 
-    private let leaves: [ObjectIdentifier: Double]
+    private let nexts: [ObjectIdentifier: Putt]
 
     init(_ putts: [Putt]) {
         var byHole: [HoleKey: [Putt]] = [:]
@@ -30,19 +30,24 @@ struct MissLeave {
             byHole[key, default: []].append(putt)
         }
 
-        var leaves: [ObjectIdentifier: Double] = [:]
+        var nexts: [ObjectIdentifier: Putt] = [:]
         for hole in byHole.values {
             let sorted = hole.sorted { $0.puttNumber < $1.puttNumber }
             for (putt, next) in zip(sorted, sorted.dropFirst()) where next.puttNumber > putt.puttNumber {
-                leaves[ObjectIdentifier(putt)] = next.distanceM
+                nexts[ObjectIdentifier(putt)] = next
             }
         }
-        self.leaves = leaves
+        self.nexts = nexts
     }
 
     /// The next putt's distance, or nil where none was recorded.
     func leave(after putt: Putt) -> Double? {
-        leaves[ObjectIdentifier(putt)]
+        nexts[ObjectIdentifier(putt)]?.distanceM
+    }
+
+    /// The putt that followed on the same hole, or nil where none was recorded.
+    func next(after putt: Putt) -> Putt? {
+        nexts[ObjectIdentifier(putt)]
     }
 
     /// -1 short of the hole, +1 run well past it, 0 for everything else —

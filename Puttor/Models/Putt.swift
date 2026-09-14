@@ -32,6 +32,13 @@ final class Putt {
     /// and long-right. Only the angle input records one; everything else
     /// leaves it nil and keeps to the eight directions of `result`.
     var missAngleDeg: Double?
+    /// What the putt was meant to do and whether it came off — see
+    /// PuttIntention. Only the intention field records them.
+    var intentionGoalRaw: String?
+    var intentionSpeedRaw: String?
+    var intentionLineRaw: String?
+    var intentionSituationRaw: String?
+    var intentionExecuted: Bool?
 
     // Legacy columns from when each putt carried its own strokes-gained value.
     // Strokes gained is now a per-hole figure derived from the hole's putts, and
@@ -50,6 +57,25 @@ final class Putt {
     var doubleBreak: DoubleBreakType? {
         get { doubleBreakRaw.flatMap { DoubleBreakType(rawValue: $0) } }
         set { doubleBreakRaw = newValue?.rawValue }
+    }
+
+    var intention: PuttIntention {
+        get {
+            PuttIntention(
+                goal: intentionGoalRaw.flatMap { PuttGoal(rawValue: $0) },
+                speed: intentionSpeedRaw.flatMap { PuttSpeed(rawValue: $0) },
+                line: intentionLineRaw.flatMap { PuttLine(rawValue: $0) },
+                situation: intentionSituationRaw.flatMap { PuttSituation(rawValue: $0) },
+                executed: intentionExecuted
+            )
+        }
+        set {
+            intentionGoalRaw = newValue.goal?.rawValue
+            intentionSpeedRaw = newValue.speed?.rawValue
+            intentionLineRaw = newValue.line?.rawValue
+            intentionSituationRaw = newValue.situation?.rawValue
+            intentionExecuted = newValue.isEmpty ? nil : newValue.executed
+        }
     }
 
     var puttFor: ScoreCategory {

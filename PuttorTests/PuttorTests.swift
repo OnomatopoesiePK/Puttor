@@ -1576,6 +1576,68 @@ struct PuttorTests {
         #expect(abs(MissGridCell.allCases.map(grid.percent).reduce(0, +) - 100) < 0.001)
     }
 
+    /// Putts are read by each part of their intention: makes, how often it
+    /// came off and what that did, which way the misses went and how far,
+    /// the high side of a break, the lag circle and the uphill leave.
+    @MainActor
+    @Test func intentionsAreReadByWhatCameOfThem() async throws {
+        func hole(_ number: Int, _ intention: PuttIntention, _ result: PuttResult, side: Double = 0, leave: Double? = nil, uphill: Bool? = nil) -> [Putt] {
+            let first = Putt(holeNumber: number, puttNumber: 1, distanceM: 6, sideSlopePct: side, puttFor: .par, result: result)
+            first.intention = intention
+            guard let leave else { return [first] }
+            let next = Putt(holeNumber: number, puttNumber: 2, distanceM: leave, hillSlopePct: uphill.map { $0 ? 1 : -1 } ?? 0, puttFor: .bogey, result: .holed)
+            return [first, next]
+        }
+        let putts = hole(1, PuttIntention(goal: .make, speed: .dieIn, executed: true), .holed)
+            + hole(2, PuttIntention(goal: .make, speed: .dieIn, executed: true), .short, leave: 0.4)
+            + hole(3, PuttIntention(goal: .lag, speed: .dieIn, executed: false), .shortLeft, side: -2, leave: 0.8)
+            + hole(4, PuttIntention(goal: .lag, speed: .firm, executed: true), .longRight, side: -2, leave: 1.5)
+            + hole(5, PuttIntention(goal: .position), .long, leave: 1.0, uphill: true)
+            + [Putt(holeNumber: 6, puttNumber: 1, distanceM: 3, puttFor: .par, result: .left)]
+
+        #expect(IntentionOutcome.parts(in: putts) == [.goal, .speed])
+
+        let goals = IntentionOutcome.outcomes(in: putts, by: .goal)
+        #expect(goals.map(\.id) == ["make", "lag", "position"])
+        let make = goals[0]
+        #expect(make.putts == 2 && make.made == 1)
+        #expect(make.executed == 2 && make.madeWhenExecuted == 1)
+        #expect(make.short == 1)
+        #expect(abs((make.averageLeave ?? 0) - 0.4) < 0.001)
+
+        let lag = goals[1]
+        #expect(lag.putts == 2 && lag.made == 0)
+        #expect(lag.answered == 2 && lag.executed == 1)
+        #expect(lag.short == 1 && lag.long == 1 && lag.left == 1 && lag.right == 1)
+        // Slope falling left: a miss left is below the hole, a miss right above it.
+        #expect(lag.breakingMisses == 2 && lag.highSide == 1)
+        #expect(lag.settled == 2 && lag.inCircle == 1)
+
+        let position = goals[2]
+        #expect(position.answered == 0)
+        #expect(position.uphillLeavePercent == 100)
+
+        let speeds = IntentionOutcome.outcomes(in: putts, by: .speed)
+        #expect(speeds.map(\.id) == ["dieIn", "firm"])
+        #expect(speeds[0].putts == 3)
+
+        let execution = IntentionExecution(putts)
+        #expect(execution.executedMade == 1)
+        #expect(execution.executedMissed == 2)
+        #expect(execution.notExecutedMade == 0)
+        #expect(execution.notExecutedMissed == 1)
+    }
+
+    /// An intention field saved before it had parts asks for all of them, and
+    /// the parts keep the order they are asked in.
+    @Test func intentionFieldKeepsItsPartsInOrder() throws {
+        let old = #"{"id":"6F9619FF-8B86-D011-B42D-00C04FC964FF","kind":"intention","complexity":"simple"}"#
+        var field = try JSONDecoder().decode(CustomField.self, from: Data(old.utf8))
+        #expect(field.intentionParts == IntentionPart.allCases)
+        field.intentionParts = [.situation, .goal]
+        #expect(field.intentionParts == [.goal, .situation])
+    }
+
     /// Rounds are filtered by how their putts were read, and the filter keeps
     /// that through its stored text.
     @MainActor

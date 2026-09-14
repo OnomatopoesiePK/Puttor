@@ -195,6 +195,46 @@ struct CustomModeSettingsView: View {
     }
 
     private func fieldRow(_ field: CustomField) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldHeader(field)
+            if field.kind == .intention {
+                ForEach(IntentionPart.allCases) { part in
+                    intentionToggle(part, of: field)
+                }
+            }
+        }
+        .listRowBackground(Theme.surface)
+    }
+
+    /// Switches one part of the intention on or off; the last one stays on.
+    private func intentionToggle(_ part: IntentionPart, of field: CustomField) -> some View {
+        let isOn = field.intentionParts.contains(part)
+        return Toggle(isOn: Binding(
+            get: { isOn },
+            set: { on in
+                guard let idx = draftConfig.fields.firstIndex(where: { $0.id == field.id }) else { return }
+                var parts = draftConfig.fields[idx].intentionParts
+                if on { parts.append(part) } else { parts.removeAll { $0 == part } }
+                draftConfig.fields[idx].intentionParts = parts
+                hasPendingChanges = true
+            }
+        )) {
+            HStack(spacing: 8) {
+                Image(systemName: part.icon)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                    .frame(width: 20)
+                Text(L(part == .situation ? "intention.settings.situation" : part.titleKey))
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.text)
+            }
+        }
+        .tint(Theme.primary)
+        .padding(.leading, 32)
+        .disabled(!isEditing || (isOn && field.intentionParts.count == 1))
+    }
+
+    private func fieldHeader(_ field: CustomField) -> some View {
         HStack {
             Image(systemName: field.kind.icon).foregroundStyle(Theme.primary).frame(width: 24)
             Text(L(field.kind.titleKey)).foregroundStyle(Theme.text)
@@ -217,7 +257,6 @@ struct CustomModeSettingsView: View {
                 .disabled(!isEditing)
             }
         }
-        .listRowBackground(Theme.surface)
     }
 
     private var addFieldSheet: some View {

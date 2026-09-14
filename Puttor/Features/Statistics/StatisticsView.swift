@@ -971,6 +971,13 @@ private struct StatisticsPane: View {
                     )
                 }
             }
+        case .intentionOutcome:
+            // Only once putts were entered with an intention.
+            if data.allPutts.contains(where: { !$0.intention.isEmpty }) {
+                CollapsibleStatSection(title: L("stats.intention"), storageKey: "intentionOutcome", infoKey: "stats.intention.info") {
+                    IntentionOutcomeView(putts: data.allPutts, useFeet: useFeet)
+                }
+            }
         }
     }
 
