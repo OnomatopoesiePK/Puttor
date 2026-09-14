@@ -16,6 +16,10 @@ enum GameType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Drills whose misses are marked left or right, so a side that keeps
+    /// coming up shows.
+    var recordsMissSide: Bool { self == .gate || self == .clock || self == .routine }
+
     var icon: String {
         switch self {
         case .gate: return "🥅"

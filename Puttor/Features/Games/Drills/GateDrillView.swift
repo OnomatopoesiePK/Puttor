@@ -31,6 +31,10 @@ struct GateDrillView: View {
                 Text(L(GameType.gate.goalKey))
                     .font(.system(size: 14))
                     .foregroundStyle(Theme.textSecondary)
+                // Straight, so a miss is the start line and never the break.
+                Label(L("game.gate.straightPutt"), systemImage: "arrow.up")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
 
                 configCard {
                     Text(L("game.distance")).font(.caption).foregroundStyle(Theme.textMuted)
@@ -90,6 +94,8 @@ struct GateDrillView: View {
     }
 }
 
+/// After the set: how many were made and how many missed left. Whatever was
+/// neither went right.
 private struct GateTallyEntryView: View {
     let reps: Int
     let configSummary: String
@@ -97,38 +103,52 @@ private struct GateTallyEntryView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @State private var madeText: String = ""
-    @FocusState private var fieldFocused: Bool
+    @State private var madeText = ""
+    @State private var leftText = ""
+    @FocusState private var focused: Field?
 
-    private var madeCount: Int? {
-        guard let v = Int(madeText), v >= 0, v <= reps else { return nil }
-        return v
+    private enum Field { case made, left }
+
+    private func count(_ text: String) -> Int? {
+        guard let value = Int(text), value >= 0, value <= reps else { return nil }
+        return value
+    }
+
+    private var missedRight: Int? {
+        guard let made = count(madeText), let left = count(leftText), made + left <= reps else { return nil }
+        return reps - made - left
+    }
+
+    private var tooMany: Bool {
+        guard let made = count(madeText), let left = count(leftText) else { return false }
+        return made + left > reps
     }
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.xl) {
+        VStack(spacing: Theme.Spacing.lg) {
             Spacer()
 
-            VStack(spacing: 10) {
-                Text(L("game.gate.howMany"))
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Theme.text)
-                    .multilineTextAlignment(.center)
-                Text(String(format: L("game.gate.outOf"), reps))
-                    .font(.system(size: 13))
-                    .foregroundStyle(Theme.textMuted)
-            }
+            Text(String(format: L("game.gate.outOf"), reps))
+                .font(.system(size: 13))
+                .foregroundStyle(Theme.textMuted)
 
-            TextField("0", text: $madeText)
-                .keyboardType(.numberPad)
-                .focused($fieldFocused)
-                .multilineTextAlignment(.center)
-                .font(.system(size: 56, weight: .black))
-                .foregroundStyle(Theme.primary)
-                .frame(width: 180, height: 100)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(fieldFocused ? Theme.primary : Theme.border, lineWidth: 2))
-                .onTapGesture { fieldFocused = true }
+            HStack(alignment: .top, spacing: Theme.Spacing.md) {
+                entry(L("game.gate.howMany"), text: $madeText, field: .made, colour: Theme.primary)
+                entry(L("game.gate.howManyLeft"), text: $leftText, field: .left, colour: Theme.error)
+            }
+            .padding(.horizontal, Theme.Spacing.edge)
+
+            Group {
+                if let missedRight {
+                    Text(String(format: L("game.gate.restRight"), missedRight))
+                        .foregroundStyle(Theme.textSecondary)
+                } else if tooMany {
+                    Text(String(format: L("game.gate.tooMany"), reps))
+                        .foregroundStyle(Theme.error)
+                }
+            }
+            .font(.system(size: 15, weight: .semibold))
+            .multilineTextAlignment(.center)
 
             Spacer()
 
@@ -140,10 +160,10 @@ private struct GateTallyEntryView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(madeCount != nil ? Theme.primary : Theme.border))
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(missedRight != nil ? Theme.primary : Theme.border))
             }
             .buttonStyle(.plain)
-            .disabled(madeCount == nil)
+            .disabled(missedRight == nil)
             .padding(.horizontal, Theme.Spacing.edge)
             .padding(.bottom, Theme.Spacing.lg)
         }
@@ -163,15 +183,39 @@ private struct GateTallyEntryView: View {
         }
         .toolbarBackground(Theme.background, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
-        .onAppear { fieldFocused = true }
+        .onAppear { focused = .made }
+    }
+
+    private func entry(_ title: String, text: Binding<String>, field: Field, colour: Color) -> some View {
+        VStack(spacing: 10) {
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Theme.text)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            TextField("0", text: text)
+                .keyboardType(.numberPad)
+                .focused($focused, equals: field)
+                .multilineTextAlignment(.center)
+                .font(.system(size: 44, weight: .black))
+                .foregroundStyle(colour)
+                .frame(maxWidth: .infinity)
+                .frame(height: 84)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).stroke(focused == field ? colour : Theme.border, lineWidth: 2))
+                .onTapGesture { focused = field }
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func finish() {
-        guard let made = madeCount else { return }
+        guard let made = count(madeText), let left = count(leftText), let right = missedRight else { return }
         let session = GameSession(gameType: .gate)
         session.configSummary = configSummary
         session.attemptsTotal = reps
         session.madeTotal = made
+        session.missedLeft = left
+        session.missedRight = right
         session.score = reps > 0 ? Double(made) / Double(reps) * 100 : 0
         session.isComplete = true
         modelContext.insert(session)

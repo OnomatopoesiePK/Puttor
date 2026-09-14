@@ -56,7 +56,6 @@ struct CoachView: View {
             .background(Theme.background.ignoresSafeArea())
             .safeAreaInset(edge: .top) {
                 ScreenTitle(text: L("tab.coach"))
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .screenHeaderPadding()
                     .background(Theme.background)
             }
@@ -174,6 +173,11 @@ struct CoachView: View {
                 if let pcg = report.practice.pcgPerAttempt {
                     practiceMetric(pcg, label: L("coach.practice.perPutt"))
                 }
+            }
+
+            // Which way the drill misses go, and whether one side keeps coming up.
+            if report.practice.missSides.misses > 0 {
+                MissSideCard(tally: report.practice.missSides)
             }
 
         }

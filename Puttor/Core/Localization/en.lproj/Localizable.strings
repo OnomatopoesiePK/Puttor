@@ -127,7 +127,7 @@
 "onCourse.complete" = "Complete";
 "onCourse.inProgress" = "In Progress";
 "onCourse.noRounds" = "No rounds yet.";
-"onCourse.noRoundsHint" = "Tap \"Start New Round\" to begin tracking.";
+"onCourse.noRoundsHint" = "Tap + to start tracking a round.";
 "onCourse.edit" = "Edit";
 "onCourse.editSettings" = "Edit Round Settings";
 "onCourse.open" = "Open";
@@ -312,10 +312,10 @@
 "evolution.bogeys" = "BOGEYS";
 "evolution.doubles" = "DOUBLE BOGEYS OR WORSE";
 "evolution.arrange" = "Arrange the charts";
-"evolution.doneArranging" = "Done arranging";
-"evolution.shown" = "Shown";
-"evolution.hidden" = "Taken out";
-"evolution.add" = "Add %@";
+"arrange.done" = "Done arranging";
+"arrange.shown" = "Shown";
+"arrange.hidden" = "Taken out";
+"arrange.add" = "Add %@";
 "evolution.noneShown" = "No charts are shown. Bring some back with the three lines in the corner.";
 "evolution.gir" = "GIR %";
 "evolution.conversion" = "BIRDIE CONVERSION %";
@@ -359,6 +359,8 @@
 "stats.noMatch" = "No rounds match this filter.";
 "stats.rounds" = "ROUNDS";
 "stats.sgPutting" = "STROKES GAINED PUTTING";
+"stats.section.totals" = "PUTTS · HOLES · Ø PUTTS/HOLE";
+"stats.arrange" = "Arrange the sections";
 "stats.sgSubtitle" = "avg / round vs PGA Tour baseline";
 "stats.pcgSubtitle" = "avg / round from the tour make rates";
 "stats.scoreVsPutting" = "SCORE VS PUTTING";
@@ -601,7 +603,7 @@
 "game.aroundTheWorld.goal" = "Simulates a complete round and shows you where your weaknesses still are.";
 
 /* Games — full explanations */
-"game.gate.explanation" = "Push two tees into the ground just in front of the ball, spaced just wide enough for the putter head/ball to pass through (a \"gate\"). Then putt through this gate toward your target line.";
+"game.gate.explanation" = "Push two tees into the ground just in front of the ball, spaced just wide enough for the putter head/ball to pass through (a \"gate\"). Then putt through this gate toward your target line. Use a straight putt for it.";
 "game.clock.explanation" = "Place balls in a circle around the hole, like numbers on a clock face (e.g. 12, 3, 6 and 9 o'clock), all at the same distance. Then putt each ball in turn — working your way around clockwise.";
 "game.ninePutt.explanation" = "Choose three positions at different distances (e.g. 1 m, 2 m, 3 m) and putt 3 balls from each — 9 putts total. All 9 must go in, or you start over from the beginning.";
 "game.routine.explanation" = "Randomly prescribed putts — choose which distances and break ranges should be possible. Play these putts one after another exactly as given, each with your full pre-shot routine, no practice putts or do-overs.";
@@ -668,6 +670,17 @@
 "game.gate.reps" = "Reps";
 "game.gate.howMany" = "How many did you make?";
 "game.gate.outOf" = "out of %ld";
+"game.missedLeft" = "Missed left";
+"game.missedRight" = "Missed right";
+"game.gate.howManyLeft" = "How many missed left?";
+"game.gate.restRight" = "Missed right: %ld";
+"game.gate.tooMany" = "That is more than the %ld reps.";
+"game.gate.straightPutt" = "Use a straight putt, so every miss comes from the start line and none from a break.";
+"game.side.title" = "MISSES BY SIDE";
+"game.side.leanLeft" = "%1$ld of %2$ld misses went left. Check where the putter face points at impact, and your start line.";
+"game.side.leanRight" = "%1$ld of %2$ld misses went right. Check where the putter face points at impact, and your start line.";
+"game.side.even" = "Neither side stands out: your misses go both ways.";
+"game.side.tooFew" = "From %ld misses on, this shows whether one side keeps coming up.";
 /* Clock Drill */
 "game.clock.positions" = "Positions";
 "game.clock.laps" = "Laps";

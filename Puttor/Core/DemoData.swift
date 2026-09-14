@@ -19,6 +19,10 @@ enum DemoData {
     static func seedIfRequested(_ container: ModelContainer) {
         guard ProcessInfo.processInfo.arguments.contains(launchArgument) else { return }
         let context = ModelContext(container)
+        // The arrangements back to where they start, so every launch shows the
+        // default stack.
+        UserDefaults.standard.removeObject(forKey: "stats.sectionLayout")
+        UserDefaults.standard.removeObject(forKey: "evolution.chartLayout")
         try? context.delete(model: Putt.self)
         try? context.delete(model: Round.self)
 

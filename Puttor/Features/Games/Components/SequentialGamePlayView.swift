@@ -31,7 +31,7 @@ struct SequentialGamePlayView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var index = 0
-    @State private var results: [(item: GamePlanItem, success: Bool)] = []
+    @State private var results: [(item: GamePlanItem, success: Bool, side: Int)] = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,12 +39,22 @@ struct SequentialGamePlayView: View {
             Spacer()
             currentItemCard
             Spacer()
-            SuccessFailButtons(
-                successLabel: L("game.made"),
-                failLabel: L("game.missed"),
-                onSuccess: { mark(true) },
-                onFail: { mark(false) }
-            )
+            Group {
+                if gameType.recordsMissSide {
+                    MissSideButtons(
+                        onMissLeft: { mark(false, side: -1) },
+                        onMade: { mark(true) },
+                        onMissRight: { mark(false, side: 1) }
+                    )
+                } else {
+                    SuccessFailButtons(
+                        successLabel: L("game.made"),
+                        failLabel: L("game.missed"),
+                        onSuccess: { mark(true) },
+                        onFail: { mark(false) }
+                    )
+                }
+            }
             .padding(.horizontal, Theme.Spacing.edge)
             .padding(.bottom, Theme.Spacing.lg)
         }
@@ -99,8 +109,8 @@ struct SequentialGamePlayView: View {
         .padding(.horizontal, Theme.Spacing.edge)
     }
 
-    private func mark(_ success: Bool) {
-        results.append((plan[index], success))
+    private func mark(_ success: Bool, side: Int = 0) {
+        results.append((plan[index], success, side))
         if index + 1 < plan.count {
             index += 1
         } else {
@@ -113,6 +123,8 @@ struct SequentialGamePlayView: View {
         session.configSummary = configSummary
         session.attemptsTotal = results.count
         session.madeTotal = results.filter { $0.success }.count
+        session.missedLeft = results.filter { $0.side < 0 }.count
+        session.missedRight = results.filter { $0.side > 0 }.count
         session.score = scoreOverride?(session.madeTotal, session.attemptsTotal)
             ?? (session.attemptsTotal > 0 ? Double(session.madeTotal) / Double(session.attemptsTotal) * 100 : 0)
         session.isComplete = true
@@ -120,7 +132,8 @@ struct SequentialGamePlayView: View {
         for (i, r) in results.enumerated() {
             let attempt = GameAttempt(
                 groupIndex: r.item.groupIndex, index: i, label: r.item.label,
-                distanceM: r.item.distanceM, breakPct: r.item.breakPct ?? 0, success: r.success
+                distanceM: r.item.distanceM, breakPct: r.item.breakPct ?? 0, success: r.success,
+                missSide: r.side
             )
             attempt.session = session
             session.attempts.append(attempt)

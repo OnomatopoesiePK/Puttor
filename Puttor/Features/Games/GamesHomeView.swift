@@ -48,7 +48,6 @@ struct GamesHomeView: View {
             .background(Theme.background.ignoresSafeArea())
             .safeAreaInset(edge: .top) {
                 ScreenTitle(text: L("games.title"))
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .screenHeaderPadding()
                     .background(Theme.background)
             }

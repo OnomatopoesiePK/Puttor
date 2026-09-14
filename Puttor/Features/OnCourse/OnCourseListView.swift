@@ -48,8 +48,11 @@ struct OnCourseListView: View {
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
+                    // Room under the last round for the start button.
+                    .contentMargins(.bottom, 84, for: .scrollContent)
                 }
             }
+            .overlay(alignment: .bottomTrailing) { startButton }
             .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $showingSetup) {
@@ -76,32 +79,28 @@ struct OnCourseListView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-            ScreenTitle(text: "On Course")
-                .frame(maxWidth: .infinity, alignment: .leading)
-            startButton
-        }
-        .screenHeaderPadding()
+        ScreenTitle(text: "On Course")
+            .screenHeaderPadding()
     }
 
-    /// Across the screen rather than beside the title: German needs the width,
-    /// and a shallow button costs the list almost nothing.
+    /// A plus in the corner above the tabs: a new round needs no more words
+    /// than that, and the list keeps the space the wide button took.
     private var startButton: some View {
         Button {
             showingSetup = true
         } label: {
-            HStack(spacing: 8) {
-                Text(L("onCourse.startNewRound"))
-                    .font(.system(size: 15, weight: .heavy))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 9)
-            .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.primary))
+            Image(systemName: "plus")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 60, height: 60)
+                .background(Circle().fill(Theme.primary))
+                .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
+                .contentShape(Circle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(L("onCourse.startNewRound"))
+        .padding(.trailing, Theme.Spacing.lg)
+        .padding(.bottom, Theme.Spacing.md)
     }
 
     private var emptyState: some View {

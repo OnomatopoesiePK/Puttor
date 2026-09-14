@@ -127,7 +127,7 @@
 "onCourse.complete" = "Terminada";
 "onCourse.inProgress" = "En curso";
 "onCourse.noRounds" = "Aún no hay rondas.";
-"onCourse.noRoundsHint" = "Toca «Nueva ronda» para empezar a registrar.";
+"onCourse.noRoundsHint" = "Toca + para empezar a registrar una ronda.";
 "onCourse.edit" = "Editar";
 "onCourse.editSettings" = "Editar datos de la ronda";
 "onCourse.open" = "Abrir";
@@ -312,10 +312,10 @@
 "evolution.bogeys" = "BOGEYS";
 "evolution.doubles" = "DOBLES BOGEYS O PEOR";
 "evolution.arrange" = "Ordenar los gráficos";
-"evolution.doneArranging" = "Terminar de ordenar";
-"evolution.shown" = "Visibles";
-"evolution.hidden" = "Ocultos";
-"evolution.add" = "Añadir %@";
+"arrange.done" = "Terminar de ordenar";
+"arrange.shown" = "Visibles";
+"arrange.hidden" = "Ocultos";
+"arrange.add" = "Añadir %@";
 "evolution.noneShown" = "No se muestra ningún gráfico. Vuelve a añadirlos con las tres líneas de la esquina.";
 "evolution.gir" = "GIR %";
 "evolution.conversion" = "CONVERSIÓN DE BIRDIE %";
@@ -359,6 +359,8 @@
 "stats.noMatch" = "Ninguna ronda cumple este filtro.";
 "stats.rounds" = "RONDAS";
 "stats.sgPutting" = "GOLPES GANADOS EN PUTT";
+"stats.section.totals" = "PUTTS · HOYOS · Ø PUTTS/HOYO";
+"stats.arrange" = "Ordenar las secciones";
 "stats.sgSubtitle" = "media / ronda frente a la base del PGA Tour";
 "stats.pcgSubtitle" = "media / ronda a partir de las tasas de acierto del tour";
 "stats.scoreVsPutting" = "SCORE VS PUTT";
@@ -601,7 +603,7 @@
 "game.aroundTheWorld.goal" = "Simula una ronda completa y te enseña dónde siguen estando tus debilidades.";
 
 /* Games — full explanations */
-"game.gate.explanation" = "Clava dos tees en el suelo justo delante de la bola, separados lo justo para que pase la cabeza del putter y la bola (una «puerta»). Después putea a través de esa puerta hacia tu línea objetivo.";
+"game.gate.explanation" = "Clava dos tees en el suelo justo delante de la bola, separados lo justo para que pase la cabeza del putter y la bola (una «puerta»). Después putea a través de esa puerta hacia tu línea objetivo. Usa para ello un putt recto.";
 "game.clock.explanation" = "Coloca bolas en círculo alrededor del hoyo, como las horas de un reloj (por ejemplo a las 12, 3, 6 y 9), todas a la misma distancia. Después putea cada bola por turno, avanzando en el sentido de las agujas del reloj.";
 "game.ninePutt.explanation" = "Elige tres posiciones a distintas distancias (por ejemplo 1 m, 2 m, 3 m) y putea 3 bolas desde cada una: 9 putts en total. Las 9 tienen que entrar o vuelves a empezar desde el principio.";
 "game.routine.explanation" = "Putts marcados al azar: elige qué distancias y qué caídas pueden salir. Juega esos putts uno tras otro exactamente como vienen, cada uno con tu rutina completa, sin putts de prueba ni repeticiones.";
@@ -668,6 +670,17 @@
 "game.gate.reps" = "Repeticiones";
 "game.gate.howMany" = "¿Cuántos has metido?";
 "game.gate.outOf" = "de %ld";
+"game.missedLeft" = "Fallo a la izquierda";
+"game.missedRight" = "Fallo a la derecha";
+"game.gate.howManyLeft" = "¿Cuántos fallaron por la izquierda?";
+"game.gate.restRight" = "Fallos a la derecha: %ld";
+"game.gate.tooMany" = "Son más que las %ld repeticiones.";
+"game.gate.straightPutt" = "Usa un putt recto: así cada fallo viene de la línea de salida y ninguno de la caída.";
+"game.side.title" = "FALLOS POR LADO";
+"game.side.leanLeft" = "%1$ld de %2$ld fallos fueron a la izquierda. Fíjate hacia dónde apunta la cara del putter en el impacto y en tu línea de salida.";
+"game.side.leanRight" = "%1$ld de %2$ld fallos fueron a la derecha. Fíjate hacia dónde apunta la cara del putter en el impacto y en tu línea de salida.";
+"game.side.even" = "Ningún lado destaca: tus fallos van hacia los dos lados.";
+"game.side.tooFew" = "A partir de %ld fallos se ve aquí si un lado se repite.";
 /* Clock Drill */
 "game.clock.positions" = "Posiciones";
 "game.clock.laps" = "Vueltas";

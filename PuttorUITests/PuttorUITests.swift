@@ -496,6 +496,110 @@ final class PuttorUITests: XCTestCase {
         sleep(2)
     }
 
+    /// The statistics sections are arranged by name from the three lines in
+    /// the header: one taken out is gone from the tab.
+    @MainActor
+    func testStatisticsSectionsArrangeByName() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let statsTab = app.tabBars.buttons["Stats"]
+        XCTAssertTrue(statsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        statsTab.tap()
+        let rounds = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'ROUNDS ('")).firstMatch
+        XCTAssertTrue(rounds.waitForExistence(timeout: 10))
+        snapshot("1 statistics")
+
+        app.buttons["Arrange the sections"].tap()
+        let done = app.buttons["Done arranging"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3))
+        sleep(1)
+        snapshot("2 sections by name")
+
+        let row = app.cells.containing(NSPredicate(format: "label ENDSWITH 'ROUNDS'")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 3))
+        row.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.5)).withOffset(CGVector(dx: 22, dy: 0)).tap()
+        let confirm = app.buttons.matching(NSPredicate(format: "label IN {'Delete', 'Löschen', 'Entfernen', 'Eliminar'}")).firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3), "the minus opens a delete button")
+        confirm.tap()
+        let bringBack = app.buttons["Add ROUNDS"]
+        for _ in 0..<4 where !(bringBack.exists && bringBack.isHittable) {
+            drag(app, from: 0.75, to: 0.35)
+        }
+        XCTAssertTrue(bringBack.waitForExistence(timeout: 3), "the taken-out section offers itself back")
+        snapshot("3 rounds taken out")
+
+        done.tap()
+        XCTAssertTrue(app.staticTexts["STROKES GAINED PUTTING"].waitForExistence(timeout: 5))
+        XCTAssertFalse(rounds.exists)
+        sleep(1)
+        snapshot("4 statistics without rounds")
+    }
+
+    /// The Gate Drill counts the set by side afterwards — made and missed left,
+    /// the rest missed right — and the Clock Drill marks each putt left, made
+    /// or right; both show the misses by side when they are done.
+    @MainActor
+    func testDrillsKeepTrackOfTheSideOfEachMiss() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let gamesTab = app.tabBars.buttons["Games"]
+        XCTAssertTrue(gamesTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        gamesTab.tap()
+
+        // Gate Drill: on a straight putt, counted after the set.
+        let gate = app.staticTexts["Gate Drill"].firstMatch
+        XCTAssertTrue(gate.waitForExistence(timeout: 5))
+        gate.tap()
+        let straight = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Use a straight putt'")).firstMatch
+        XCTAssertTrue(straight.waitForExistence(timeout: 5))
+        snapshot("1 gate setup")
+        app.buttons["Start"].tap()
+
+        let made = app.textFields.element(boundBy: 0)
+        let left = app.textFields.element(boundBy: 1)
+        XCTAssertTrue(left.waitForExistence(timeout: 5))
+        made.tap()
+        made.typeText("12")
+        left.tap()
+        left.typeText("5")
+        let rest = app.staticTexts["Missed right: 3"]
+        XCTAssertTrue(rest.waitForExistence(timeout: 3), "the rest of the set counts as missed right")
+        rest.tap() // closes the number pad
+        sleep(1)
+        snapshot("2 gate counted by side")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.staticTexts["MISSES BY SIDE"].waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("3 gate result")
+        app.buttons["Done"].tap()
+
+        // Clock Drill: four positions, two laps, each putt marked by side.
+        let clock = app.staticTexts["Clock Drill"].firstMatch
+        XCTAssertTrue(clock.waitForExistence(timeout: 5))
+        clock.tap()
+        XCTAssertTrue(app.buttons["Start"].waitForExistence(timeout: 5))
+        app.buttons["Start"].tap()
+        let missedLeft = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Missed left'")).firstMatch
+        let holed = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Made'")).firstMatch
+        let missedRight = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Missed right'")).firstMatch
+        XCTAssertTrue(missedLeft.waitForExistence(timeout: 5))
+        snapshot("4 clock buttons")
+        for button in [missedLeft, missedLeft, holed, missedRight, missedLeft, holed, missedLeft, missedLeft] {
+            button.tap()
+        }
+        XCTAssertTrue(app.staticTexts["MISSES BY SIDE"].waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("5 clock result")
+    }
+
     private func swipeFromLeftEdge(_ app: XCUIApplication) {
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.55))
             .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.55)))

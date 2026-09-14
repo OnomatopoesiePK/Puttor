@@ -21,6 +21,9 @@ final class GameAttempt {
     var success: Bool = false
     /// Strokes taken on this "hole" — only meaningful for Around the World.
     var strokes: Int = 0
+    /// Which way a miss went, in the drills that ask: -1 left, +1 right, 0 for
+    /// a make or a drill that doesn't ask.
+    var missSide: Int = 0
     var createdAt: Date = Date()
 
     init(
@@ -30,7 +33,8 @@ final class GameAttempt {
         distanceM: Double = 0,
         breakPct: Double = 0,
         success: Bool = false,
-        strokes: Int = 0
+        strokes: Int = 0,
+        missSide: Int = 0
     ) {
         self.id = UUID()
         self.groupIndex = groupIndex
@@ -40,6 +44,7 @@ final class GameAttempt {
         self.breakPct = breakPct
         self.success = success
         self.strokes = strokes
+        self.missSide = missSide
         self.createdAt = Date()
     }
 }

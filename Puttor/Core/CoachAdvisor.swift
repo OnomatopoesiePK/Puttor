@@ -112,6 +112,8 @@ struct CoachPractice {
     var makePercent: Double { attempts > 0 ? Double(made) / Double(attempts) * 100 : 0 }
     /// The drill the player converts worst in, by PCG per attempt.
     var weakestDrill: GameType?
+    /// Which way the misses went, over every drill that asks.
+    var missSides = MissSideTally(left: 0, right: 0)
 }
 
 struct CoachReport {
@@ -383,6 +385,7 @@ enum CoachAdvisor {
             attempts: complete.reduce(0) { $0 + $1.attemptsTotal },
             made: complete.reduce(0) { $0 + $1.madeTotal }
         )
+        practice.missSides = MissSideTally(sessions: complete)
 
         // Attempt-level PCG, per drill, over the attempts that carry a
         // distance. Drills counted on the green rather than in the app record

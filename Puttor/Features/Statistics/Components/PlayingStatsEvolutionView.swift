@@ -10,7 +10,7 @@
 
 import SwiftUI
 
-enum PlayingStatsMetric: String, CaseIterable, Identifiable {
+enum PlayingStatsMetric: String, CaseIterable, Identifiable, Arrangeable {
     // The order the charts stack in until they are arranged otherwise: the
     // putting figures first, then the round's — the score with its holes by
     // score under it — and the total just above the putts it splits into.
@@ -78,56 +78,8 @@ struct PlayingStatsPoint: Identifiable, Equatable {
     }
 }
 
-/// Which evolution charts show, in what order, and which were taken out, kept
-/// as one line of text: the figures in order, the taken-out ones marked. A
-/// figure the text has never heard of joins the end of the shown ones.
-struct EvolutionChartLayout: Equatable {
-    private(set) var shown: [PlayingStatsMetric]
-    private(set) var hidden: [PlayingStatsMetric]
-
-    init(text: String) {
-        var shown: [PlayingStatsMetric] = []
-        var hidden: [PlayingStatsMetric] = []
-        for entry in text.split(separator: ",") {
-            let isHidden = entry.hasPrefix("-")
-            guard let metric = PlayingStatsMetric(rawValue: String(isHidden ? entry.dropFirst() : entry)),
-                  !shown.contains(metric), !hidden.contains(metric)
-            else { continue }
-            if isHidden { hidden.append(metric) } else { shown.append(metric) }
-        }
-        shown += PlayingStatsMetric.allCases.filter { !shown.contains($0) && !hidden.contains($0) }
-        self.shown = shown
-        self.hidden = hidden
-    }
-
-    var text: String {
-        (shown.map(\.rawValue) + hidden.map { "-" + $0.rawValue }).joined(separator: ",")
-    }
-
-    func moving(from source: IndexSet, to destination: Int) -> EvolutionChartLayout {
-        var copy = self
-        copy.shown.move(fromOffsets: source, toOffset: destination)
-        return copy
-    }
-
-    /// Taken out, and first in line to come back.
-    func hiding(at offsets: IndexSet) -> EvolutionChartLayout {
-        var copy = self
-        let taken = offsets.map { shown[$0] }
-        copy.shown.remove(atOffsets: offsets)
-        copy.hidden = taken + copy.hidden
-        return copy
-    }
-
-    /// Back in, at the bottom of the stack.
-    func showing(_ metric: PlayingStatsMetric) -> EvolutionChartLayout {
-        guard let index = hidden.firstIndex(of: metric) else { return self }
-        var copy = self
-        copy.hidden.remove(at: index)
-        copy.shown.append(metric)
-        return copy
-    }
-}
+/// Which evolution charts show, in what order, and which were taken out.
+typealias EvolutionChartLayout = Arrangement<PlayingStatsMetric>
 
 struct PlayingStatsEvolutionView: View {
     let points: [PlayingStatsPoint]
@@ -252,7 +204,7 @@ struct PlayingStatsEvolutionView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(L(arranging ? "evolution.doneArranging" : "evolution.arrange"))
+            .accessibilityLabel(L(arranging ? "arrange.done" : "evolution.arrange"))
         }
         .padding(.trailing, Theme.Spacing.edge)
     }
@@ -260,48 +212,11 @@ struct PlayingStatsEvolutionView: View {
     /// The charts by name, to put in order, take out and bring back. Only the
     /// names move, not the charts, so a long stack is arranged at a glance.
     private var chartArranger: some View {
-        List {
-            Section(L("evolution.shown")) {
-                ForEach(layout.shown) { metric in
-                    arrangerName(metric)
-                        .listRowBackground(Theme.surface)
-                }
-                .onMove { source, destination in layout = layout.moving(from: source, to: destination) }
-                .onDelete { offsets in layout = layout.hiding(at: offsets) }
-            }
-            if !layout.hidden.isEmpty {
-                Section(L("evolution.hidden")) {
-                    ForEach(layout.hidden) { metric in
-                        HStack(spacing: 12) {
-                            Button {
-                                withAnimation { layout = layout.showing(metric) }
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 22))
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .green)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(String(format: L("evolution.add"), L(metric.titleKey)))
-                            arrangerName(metric)
-                        }
-                        .listRowBackground(Theme.surface)
-                    }
-                }
-            }
-        }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
-        .environment(\.editMode, .constant(.active))
-    }
-
-    private func arrangerName(_ metric: PlayingStatsMetric) -> some View {
-        Text(L(metric.titleKey))
-            .font(.system(size: 13, weight: .bold))
-            .tracking(1.0)
-            .foregroundStyle(colour(for: metric))
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
+        ArrangementList(
+            arrangement: Binding(get: { layout }, set: { layout = $0 }),
+            name: { L($0.titleKey) },
+            colour: { colour(for: $0) }
+        )
     }
 
     /// Every point carries its number while the rounds sit far enough apart

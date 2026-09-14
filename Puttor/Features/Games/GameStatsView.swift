@@ -38,6 +38,13 @@ struct GameStatsView: View {
                 if let benchmark = DrillBenchmarkCalculator.benchmark(for: recent) {
                     DrillBenchmarkCard(benchmark: benchmark, useFeet: unitsPref == "imperial")
                 }
+                // Over the recent sessions, which way the misses go.
+                if gameType.recordsMissSide {
+                    let sides = MissSideTally(sessions: recent)
+                    if sides.misses > 0 {
+                        MissSideCard(tally: sides)
+                    }
+                }
                 if history.isEmpty {
                     emptyState
                 } else {

@@ -210,7 +210,6 @@ struct SettingsView: View {
             .navigationBarHidden(true)
             .safeAreaInset(edge: .top) {
                 ScreenTitle(text: L("settings.title"))
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .screenHeaderPadding()
                     .background(Theme.background)
             }

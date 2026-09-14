@@ -14,10 +14,13 @@ struct ScreenTitle: View {
 
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
+    /// Centred upright. In landscape the tab bar floats in the middle of the
+    /// top edge and would cover a centred title, so there it keeps to the left.
     var body: some View {
         Text(text)
             .font(.system(size: verticalSizeClass == .compact ? 20 : 28, weight: .heavy))
             .foregroundStyle(Theme.primary)
+            .frame(maxWidth: .infinity, alignment: verticalSizeClass == .compact ? .leading : .center)
     }
 }
 

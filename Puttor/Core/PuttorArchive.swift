@@ -88,6 +88,9 @@ struct PuttorArchive: Codable {
         var difficultyRaw: String?
         var configDistanceM: Double
         var targetRounds: Int
+        /// Optional, so archives from before sides were kept still read.
+        var missedLeft: Int?
+        var missedRight: Int?
         var attempts: [AttemptRecord]
     }
 
@@ -100,6 +103,7 @@ struct PuttorArchive: Codable {
         var breakPct: Double
         var success: Bool
         var strokes: Int
+        var missSide: Int?
         var createdAt: Date
     }
 
@@ -214,6 +218,8 @@ struct PuttorArchive: Codable {
                 difficultyRaw: session.difficultyRaw,
                 configDistanceM: session.configDistanceM,
                 targetRounds: session.targetRounds,
+                missedLeft: session.missedLeft,
+                missedRight: session.missedRight,
                 attempts: session.attempts
                     .sorted { ($0.groupIndex, $0.index) < ($1.groupIndex, $1.index) }
                     .map { attempt in
@@ -226,6 +232,7 @@ struct PuttorArchive: Codable {
                             breakPct: attempt.breakPct,
                             success: attempt.success,
                             strokes: attempt.strokes,
+                            missSide: attempt.missSide,
                             createdAt: attempt.createdAt
                         )
                     }
@@ -334,6 +341,8 @@ struct PuttorArchive: Codable {
             session.difficultyRaw = record.difficultyRaw
             session.configDistanceM = record.configDistanceM
             session.targetRounds = record.targetRounds
+            session.missedLeft = record.missedLeft ?? 0
+            session.missedRight = record.missedRight ?? 0
             context.insert(session)
 
             for attemptRecord in record.attempts {
@@ -344,7 +353,8 @@ struct PuttorArchive: Codable {
                     distanceM: attemptRecord.distanceM,
                     breakPct: attemptRecord.breakPct,
                     success: attemptRecord.success,
-                    strokes: attemptRecord.strokes
+                    strokes: attemptRecord.strokes,
+                    missSide: attemptRecord.missSide ?? 0
                 )
                 attempt.id = attemptRecord.id
                 attempt.createdAt = attemptRecord.createdAt

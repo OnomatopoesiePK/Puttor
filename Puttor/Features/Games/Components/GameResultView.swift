@@ -51,6 +51,10 @@ struct GameResultView<Breakdown: View>: View {
                     statBox(L("game.made"), "\(session.madeTotal)")
                 }
 
+                if gameType.recordsMissSide, session.missedLeft + session.missedRight > 0 {
+                    MissSideCard(tally: MissSideTally(left: session.missedLeft, right: session.missedRight))
+                }
+
                 if !session.configSummary.isEmpty {
                     Text(session.configSummary)
                         .font(.system(size: 12))

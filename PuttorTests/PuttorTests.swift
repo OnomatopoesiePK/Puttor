@@ -1547,6 +1547,27 @@ struct PuttorTests {
         #expect(merged.doublesOrWorse == 2)
     }
 
+    /// A drill's misses name a side once there are enough of them and one side
+    /// clearly has most.
+    @Test func drillMissesNameASideOnceEnoughLeanOneWay() async throws {
+        #expect(MissSideTally(left: 6, right: 2).leaning == -1)
+        #expect(MissSideTally(left: 2, right: 7).leaning == 1)
+        #expect(MissSideTally(left: 4, right: 4).leaning == nil)
+        #expect(MissSideTally(left: 5, right: 1).leaning == nil)
+        #expect(MissSideTally(left: 5, right: 4).leaning == nil)
+    }
+
+    /// The statistics sections start out all shown, in their own order, and
+    /// keep what was arranged through the stored text.
+    @Test func statisticsSectionsStartInOrderAndKeepTheirArrangement() async throws {
+        let fresh = Arrangement<StatisticsSection>(text: "")
+        #expect(fresh.shown == StatisticsSection.allCases)
+        let arranged = fresh.hiding(at: IndexSet(integer: 0)).moving(from: IndexSet(integer: 4), to: 0)
+        #expect(arranged.hidden == [.rounds])
+        #expect(arranged.shown.first == .dispersion)
+        #expect(Arrangement<StatisticsSection>(text: arranged.text) == arranged)
+    }
+
     /// The charts keep the order they were put in and stay out once taken
     /// out, through the stored text; one the text never knew shows at the end.
     @Test func evolutionChartLayoutKeepsItsOrderAndWhatWasTakenOut() async throws {

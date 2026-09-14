@@ -21,6 +21,10 @@ final class GameSession {
     var madeTotal: Int = 0
     /// Human-readable setup recap, e.g. "4 Tees · 1.2 m · 3 Runden".
     var configSummary: String = ""
+    /// How many misses went left and right, in the drills that ask. The Gate
+    /// Drill counts them after the set rather than putt by putt.
+    var missedLeft: Int = 0
+    var missedRight: Int = 0
 
     // Training drills (Around The Hole) carry a little more: how long it took,
     // how hard it felt afterwards, and the setup it was played at — the last

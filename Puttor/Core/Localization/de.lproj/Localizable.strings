@@ -127,7 +127,7 @@
 "onCourse.complete" = "Fertig";
 "onCourse.inProgress" = "Läuft";
 "onCourse.noRounds" = "Noch keine Runden.";
-"onCourse.noRoundsHint" = "Tippe auf „Neue Runde starten“, um loszulegen.";
+"onCourse.noRoundsHint" = "Tippe auf +, um eine Runde zu erfassen.";
 "onCourse.edit" = "Bearbeiten";
 "onCourse.editSettings" = "Runden-Einstellungen bearbeiten";
 "onCourse.open" = "Öffnen";
@@ -312,10 +312,10 @@
 "evolution.bogeys" = "BOGEYS";
 "evolution.doubles" = "DOPPELBOGEYS ODER SCHLECHTER";
 "evolution.arrange" = "Graphen anordnen";
-"evolution.doneArranging" = "Anordnen beenden";
-"evolution.shown" = "Angezeigt";
-"evolution.hidden" = "Ausgeblendet";
-"evolution.add" = "%@ hinzufügen";
+"arrange.done" = "Anordnen beenden";
+"arrange.shown" = "Angezeigt";
+"arrange.hidden" = "Ausgeblendet";
+"arrange.add" = "%@ hinzufügen";
 "evolution.noneShown" = "Es werden keine Graphen angezeigt. Über die drei Striche im Eck lassen sie sich wieder hinzufügen.";
 "evolution.gir" = "GIR %";
 "evolution.conversion" = "BIRDIE-KONVERSION %";
@@ -359,6 +359,8 @@
 "stats.noMatch" = "Keine Runden für diesen Filter.";
 "stats.rounds" = "RUNDEN";
 "stats.sgPutting" = "STROKES GAINED PUTTING";
+"stats.section.totals" = "PUTTS · LÖCHER · Ø PUTTS/LOCH";
+"stats.arrange" = "Abschnitte anordnen";
 "stats.sgSubtitle" = "Ø / Runde vs. PGA-Tour-Baseline";
 "stats.pcgSubtitle" = "Ø / Runde aus den Tour-Trefferquoten";
 "stats.scoreVsPutting" = "SCORE VS. PUTTEN";
@@ -601,7 +603,7 @@
 "game.aroundTheWorld.goal" = "Simuliert eine komplette Runde und zeigt, wo noch Schwächen liegen.";
 
 /* Spiele — vollständige Erklärungen */
-"game.gate.explanation" = "Du steckst zwei Tees kurz vor dem Ball so in den Boden, dass zwischen ihnen gerade so viel Platz ist, dass Putterkopf bzw. Ball hindurchpassen („Tor“). Dann puttest du durch dieses Tor auf die Ziellinie.";
+"game.gate.explanation" = "Du steckst zwei Tees kurz vor dem Ball so in den Boden, dass zwischen ihnen gerade so viel Platz ist, dass Putterkopf bzw. Ball hindurchpassen („Tor“). Dann puttest du durch dieses Tor auf die Ziellinie. Nimm dafür einen geraden Putt.";
 "game.clock.explanation" = "Du legst Bälle im Kreis um das Loch, wie Zahlen auf einer Uhr (z. B. auf 12, 3, 6 und 9 Uhr), alle im gleichen Abstand. Dann puttest du jeden Ball der Reihe nach ins Loch – rundherum wie im Uhrzeigersinn.";
 "game.ninePutt.explanation" = "Du wählst drei Positionen mit unterschiedlicher Distanz (z. B. 1 m, 2 m, 3 m) und puttest von jeder Position 3 Bälle – insgesamt 9 Putts. Alle 9 müssen versenkt werden, sonst beginnst du von vorne.";
 "game.routine.explanation" = "Du gibst zufällig Putts vor – wähle, welche Distanzen und Break-Bereiche möglich sein sollen. Diese Putts führst du dann nacheinander genau wie vorgegeben aus – jeweils mit deiner vollständigen Pre-Shot-Routine, ohne Probeputts oder Wiederholungen.";
@@ -668,6 +670,17 @@
 "game.gate.reps" = "Wiederholungen";
 "game.gate.howMany" = "Wie viele hast du geschafft?";
 "game.gate.outOf" = "von %ld";
+"game.missedLeft" = "Links vorbei";
+"game.missedRight" = "Rechts vorbei";
+"game.gate.howManyLeft" = "Wie viele gingen links vorbei?";
+"game.gate.restRight" = "Rechts vorbei: %ld";
+"game.gate.tooMany" = "Das sind mehr als die %ld Wiederholungen.";
+"game.gate.straightPutt" = "Nimm einen geraden Putt: So kommt jeder Miss von der Startlinie und keiner vom Break.";
+"game.side.title" = "MISSES NACH SEITE";
+"game.side.leanLeft" = "%1$ld von %2$ld Misses gingen links vorbei. Achte darauf, wohin die Schlagfläche im Treffmoment zeigt, und auf deine Startlinie.";
+"game.side.leanRight" = "%1$ld von %2$ld Misses gingen rechts vorbei. Achte darauf, wohin die Schlagfläche im Treffmoment zeigt, und auf deine Startlinie.";
+"game.side.even" = "Keine Seite sticht heraus: Deine Misses gehen in beide Richtungen.";
+"game.side.tooFew" = "Ab %ld Misses zeigt sich hier, ob eine Seite öfter vorkommt.";
 /* Uhr-Drill */
 "game.clock.positions" = "Positionen";
 "game.clock.laps" = "Runden";
