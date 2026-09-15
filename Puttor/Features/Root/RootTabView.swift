@@ -63,6 +63,11 @@ struct RootTabView: View {
             }
             // The tutorial's steps on the input screen, over the tabs as well.
             .overlay { TutorialOverlay(screen: .input) }
+            // Held upright while the tutorial runs, so its openings stay over
+            // what they point at.
+            .onChange(of: TutorialController.shared.step != nil, initial: true) { _, running in
+                OrientationLock.lock(portrait: running)
+            }
     }
 
     private var tabs: some View {

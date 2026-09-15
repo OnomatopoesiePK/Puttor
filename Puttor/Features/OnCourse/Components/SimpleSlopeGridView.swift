@@ -4,7 +4,7 @@
 //
 //  Simplified 3x3 slope grid for Custom mode: every combination of
 //  uphill/flat/downhill x right-to-left/straight/left-to-right, laid out
-//  like the professional grid but without the fine-grained degree steps.
+//  like the professional grid but without the fine-grained percent steps.
 //  Shares the same sideValue/hillValue storage as SlopeGridPickerView.
 //
 
@@ -31,28 +31,35 @@ struct SimpleSlopeGridView: View {
                 }
             }
 
-            VStack(spacing: 6) {
-                ForEach(simpleHill, id: \.self) { hill in
-                    HStack(spacing: 6) {
-                        ForEach(simpleAxis, id: \.self) { side in
-                            cell(side: side, hill: hill)
+            // Left and right beside the grid rather than under it, where they
+            // would read as part of the downhill row.
+            HStack(spacing: 6) {
+                sideLabel(L("input.left"))
+                VStack(spacing: 6) {
+                    ForEach(simpleHill, id: \.self) { hill in
+                        HStack(spacing: 6) {
+                            ForEach(simpleAxis, id: \.self) { side in
+                                cell(side: side, hill: hill)
+                            }
                         }
                     }
                 }
-            }
-
-            HStack {
-                Text(L("input.left")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                Spacer()
-                Text(L("input.straight")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                Spacer()
-                Text(L("input.right")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
+                sideLabel(L("input.right"))
             }
 
             Text(selectionText)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(Theme.text)
         }
+    }
+
+    private func sideLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(Theme.textMuted)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .frame(width: 44)
     }
 
     private func cell(side: Double, hill: Double) -> some View {

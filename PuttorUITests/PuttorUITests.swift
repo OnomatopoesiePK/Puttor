@@ -772,6 +772,7 @@ final class PuttorUITests: XCTestCase {
             XCTAssertTrue(waitUntilHittable(next, timeout: 10), "no Next on input step \(step)")
             sleep(1)
             if step == 1 { snapshot("5 pace") }
+            if step == 2 { snapshot("5b putt for") }
             if step == 3 { snapshot("6 slope") }
             next.tap()
         }

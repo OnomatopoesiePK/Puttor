@@ -123,6 +123,7 @@
 "onCourse.title" = "On Course";
 "onCourse.startNewRound" = "Start New Round";
 "onCourse.recentRounds" = "RECENT ROUNDS";
+"onCourse.recentRounds.info" = "Your rounds, newest first.\n\n* after a name: the round was saved over 9 holes, so its totals are not those of a full round.\n\nTR: a tournament round, played in competition. The coach compares these with your casual rounds.\n\nTap a round to open it; ⋮ lets you edit it, change its settings or delete it.";
 "onCourse.unnamedCourse" = "Unnamed Course";
 "onCourse.complete" = "Complete";
 "onCourse.inProgress" = "In Progress";
@@ -210,8 +211,8 @@
 "input.flat" = "Flat";
 "input.rl" = "R-L";
 "input.lr" = "L-R";
-"input.up" = "U";
-"input.down" = "D";
+"input.up" = "uphill";
+"input.down" = "downhill";
 "input.doubleBreak" = "DOUBLE BREAK";
 "input.missBoard" = "MISS BOARD";
 "input.missBoard.info" = "Tap the centre for holed, or the ring around it for a lip-out.\n\nAn outer sector records the direction and distance the putt missed relative to the hole.";
@@ -1058,12 +1059,12 @@
 "tutorial.greenSpeed" = "Set how fast the greens are rolling today. The speed is saved with the round, so fast and slow days can be told apart later.";
 "tutorial.weather" = "Wind, temperature and rain change how the ball rolls. Tap what you are playing in today.";
 "tutorial.format" = "%1$@ is the standard mode. Choose %2$@ when you play hole by hole against someone.";
-"tutorial.inputModes" = "Choose how much you want to record.\n\n%1$@ records everything: slope, miss angle and miss reasons.\n%2$@ only takes distance, putt for and made or missed – that information can't be used for most statistics.\n%3$@ shows exactly the fields you set up in Settings.\n\nYour first round is played in %1$@.";
+"tutorial.inputModes" = "Choose how much you want to record:\n\n• %1$@ records everything: slope, miss angle and miss reasons.\n• %2$@ records distance, “putt for” (birdie, par, …) and holed or not holed. Little data goes into the statistics in this mode.\n• In %3$@ you can add fields as you like and change how detailed they are.\n\nYour first round is played in %1$@.";
 "tutorial.startRound" = "All set! Tap %@ to begin.";
 "tutorial.distance" = "This is the distance to the hole. The number it starts with can be set in Settings. Just type the new distance – there's no need to delete the old one. Grey means it isn't saved yet: press %@, and once it turns black, it's saved.";
 "tutorial.pace" = "Tip: a slightly long step is usually about %@, so you can pace the distance off. Best try out for yourself how long your step is.";
-"tutorial.puttFor" = "Choose what the putt is for. A birdie or eagle putt also counts as a green in regulation (GIR).";
-"tutorial.slope" = "Tap where the slope lies. Always start from the centre: up from it is uphill, down is downhill, and the further left or right of the centre, the stronger the break that way. Custom mode also offers a simplified grid.";
+"tutorial.puttFor" = "Choose “putt for” (birdie, par, …): the score this putt is for. A birdie or eagle putt also counts as a green in regulation (GIR).";
+"tutorial.slope" = "Tap what the slope is like. The centre is 0: a straight, flat putt. Always start from the centre – up from it is uphill, down is downhill, and the further left or right of the centre, the stronger the putt breaks that way. The numbers are the slope in percent. Custom mode also offers a simplified grid.";
 "tutorial.missAngle" = "Missed? Drag round the hole to where the ball stopped in relation to the hole. How far away it finished isn't asked – the distance of your next putt is used for that. Tap the centre if the putt went in.";
 "tutorial.missReasons" = "If you know why the putt missed, mark it here. You don't have to – but you can.";
 "tutorial.record" = "Tap %1$@ to save the putt – it works once a result is set on the dial above. %2$@ can be pressed at any time: it saves a holed putt from %3$@, the break doesn't matter, and it counts for the score it was entered with.";
@@ -1074,7 +1075,7 @@
 "tutorial.puttChips" = "Up here you see every putt of the hole you are on. Tap one to look at it or change it.";
 "tutorial.endRound" = "Tap %@ at the top right to finish the round. The bin deletes all putts of a hole. You can't break anything – so try every button. Whenever it matters, Puttor asks you again.";
 "tutorial.settings" = "In Settings you choose units, language and the distance a putt starts with, set up the fields of Custom mode and much more.";
-"tutorial.finish" = "That's it – enjoy your round!";
+"tutorial.finish" = "That's it! Try everything out – and turn your phone sideways too: landscape brings extra functions and layouts. Enjoy your round!";
 "settings.tutorial.replay" = "Show the tutorial again";
 "settings.tutorial.replay.desc" = "Walks you through your next round";
 "settings.tutorial.pending" = "Starts with your next round";

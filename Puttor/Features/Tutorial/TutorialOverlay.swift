@@ -78,7 +78,10 @@ struct TutorialOverlay: View {
                 // Only the washed-out part takes touches; the opening passes
                 // them on to what it shows.
                 .contentShape(TutorialScrim(hole: cutout, cornerRadius: radius), eoFill: true)
-                .allowsHitTesting(!step.passesTouches)
+                // Taps and drags on the wash go nowhere, so nothing under it
+                // reacts or scrolls.
+                .onTapGesture {}
+                .gesture(DragGesture(minimumDistance: 0))
 
             if hole != nil {
                 // Inside the opening, so none of it is cut off at the
@@ -116,10 +119,14 @@ struct TutorialOverlay: View {
 
     private func card(_ step: TutorialStep) -> some View {
         VStack(spacing: 14) {
-            Text(text(for: step))
+            let body = text(for: step)
+            // A list reads down its left edge; a sentence sits in the middle.
+            let isList = body.contains("\n•")
+            Text(body)
                 .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(Self.ink)
-                .multilineTextAlignment(.center)
+                .multilineTextAlignment(isList ? .leading : .center)
+                .frame(maxWidth: .infinity, alignment: isList ? .leading : .center)
                 .fixedSize(horizontal: false, vertical: true)
 
             if step == .courseName {

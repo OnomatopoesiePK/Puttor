@@ -34,15 +34,20 @@ struct OnCourseListView: View {
                                     .listRowInsets(EdgeInsets(top: 4, leading: Theme.Spacing.edge, bottom: 4, trailing: Theme.Spacing.edge))
                             }
                         } header: {
-                            Text(L("onCourse.recentRounds"))
-                                .font(.system(size: 11, weight: .bold))
-                                .tracking(1.4)
-                                .foregroundStyle(Theme.textMuted)
-                                // Headers carry their own default insets, which
-                                // don't match the ones set on the rows — without
-                                // this the heading sits left of the cards.
-                                .listRowInsets(EdgeInsets(top: 10, leading: Theme.Spacing.edge, bottom: 6, trailing: Theme.Spacing.edge))
-                                .textCase(nil)
+                            HStack(spacing: 6) {
+                                Text(L("onCourse.recentRounds"))
+                                    .font(.system(size: 11, weight: .bold))
+                                    .tracking(1.4)
+                                    .foregroundStyle(Theme.textMuted)
+                                // What the * and the TR tag beside a name mean.
+                                FieldInfoButton(titleKey: "onCourse.recentRounds", textKey: "onCourse.recentRounds.info")
+                                Spacer(minLength: 0)
+                            }
+                            // Headers carry their own default insets, which
+                            // don't match the ones set on the rows — without
+                            // this the heading sits left of the cards.
+                            .listRowInsets(EdgeInsets(top: 10, leading: Theme.Spacing.edge, bottom: 6, trailing: Theme.Spacing.edge))
+                            .textCase(nil)
                         }
                     }
                     .listStyle(.plain)

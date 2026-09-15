@@ -88,6 +88,13 @@ enum ScoreCategory: String, CaseIterable, Codable, Identifiable {
         }
     }
 
+    /// Writing on a patch filled with this colour: dark on the light ones —
+    /// the white of double bogey on the dark theme, the gold of eagle — and
+    /// white on the rest.
+    var ink: Color {
+        color.isLight ? Color(hex: 0x111418) : .white
+    }
+
     /// One category worse than `self`, clamped at the deepest one.
     var next: ScoreCategory {
         switch self {

@@ -63,7 +63,7 @@ struct ScoreCategoryRow: View {
         } label: {
             Text(L(category.shortLabelKey))
                 .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(selected ? .white : category.color)
+                .foregroundStyle(selected ? category.ink : category.color)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: width == nil ? .infinity : nil)

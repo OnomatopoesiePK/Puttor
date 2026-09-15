@@ -127,16 +127,22 @@ struct SlopeGridPickerView: View {
             }
             .aspectRatio(SlopeGridGeometry.imgW / SlopeGridGeometry.imgH, contentMode: .fit)
             .scaleEffect(1.18)
+            // Left and right beside the grid, level with its upper rows where
+            // the fan leaves room at the sides. Underneath it they read as
+            // part of the downhill end.
+            .overlay {
+                GeometryReader { geo in
+                    sideLabel(L("input.left"))
+                        .frame(width: geo.size.width * 0.18)
+                        .position(x: geo.size.width * 0.09, y: geo.size.height * 0.22)
+                    sideLabel(L("input.right"))
+                        .frame(width: geo.size.width * 0.18)
+                        .position(x: geo.size.width * 0.91, y: geo.size.height * 0.22)
+                }
+                .allowsHitTesting(false)
+            }
             .padding(.vertical, Theme.Spacing.md)
             .zIndex(1)
-
-            HStack {
-                Text(L("input.left")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                Spacer()
-                Text(L("input.straight")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-                Spacer()
-                Text(L("input.right")).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.textMuted)
-            }
 
             Text(L("input.downhill"))
                 .font(.system(size: 11, weight: .bold))
@@ -149,13 +155,22 @@ struct SlopeGridPickerView: View {
         }
     }
 
+    private func sideLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(Theme.textMuted)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+    }
+
+    /// The slope in percent, the way the grid's numbers count it.
     private var selectionText: String {
         let side = sideValue == 0
             ? L("input.flat")
-            : "\(SlopeGridGeometry.labelFor(sideValue))° \(sideValue < 0 ? L("input.rl") : L("input.lr"))"
+            : "\(SlopeGridGeometry.labelFor(sideValue))% \(sideValue < 0 ? L("input.rl") : L("input.lr"))"
         let hill = hillValue == 0
             ? L("input.flat")
-            : "\(SlopeGridGeometry.labelFor(hillValue))° \(hillValue > 0 ? L("input.up") : L("input.down"))"
+            : "\(SlopeGridGeometry.labelFor(hillValue))% \(hillValue > 0 ? L("input.up") : L("input.down"))"
         return "\(side) / \(hill)"
     }
 }

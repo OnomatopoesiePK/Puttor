@@ -123,6 +123,7 @@
 "onCourse.title" = "En el campo";
 "onCourse.startNewRound" = "Nueva ronda";
 "onCourse.recentRounds" = "RONDAS RECIENTES";
+"onCourse.recentRounds.info" = "Tus rondas, la más reciente primero.\n\n* tras el nombre: la ronda se guardó a 9 hoyos, así que sus totales no son los de una ronda completa.\n\nTR: una ronda de torneo, jugada en competición. El entrenador la compara con tus rondas informales.\n\nToca una ronda para abrirla; con ⋮ puedes editarla, cambiar sus ajustes o borrarla.";
 "onCourse.unnamedCourse" = "Campo sin nombre";
 "onCourse.complete" = "Terminada";
 "onCourse.inProgress" = "En curso";
@@ -210,8 +211,8 @@
 "input.flat" = "Llano";
 "input.rl" = "D-I";
 "input.lr" = "I-D";
-"input.up" = "A";
-"input.down" = "B";
+"input.up" = "subida";
+"input.down" = "bajada";
 "input.doubleBreak" = "DOBLE CAÍDA";
 "input.missBoard" = "DIANA DE FALLO";
 "input.missBoard.info" = "Toca el centro si entró, o el anillo alrededor si fue un lip-out.\n\nUn sector exterior registra la dirección y la distancia del fallo respecto al hoyo.";
@@ -1058,12 +1059,12 @@
 "tutorial.greenSpeed" = "Indica lo rápidos que están hoy los greens. La velocidad se guarda con la ronda, así podrás distinguir después los días rápidos de los lentos.";
 "tutorial.weather" = "El viento, la temperatura y la lluvia cambian cómo rueda la bola. Toca las condiciones en las que juegas hoy.";
 "tutorial.format" = "%1$@ es el modo estándar. Elige %2$@ cuando juegues hoyo a hoyo contra alguien.";
-"tutorial.inputModes" = "Elige cuánto quieres registrar.\n\n%1$@ lo registra todo: pendiente, ángulo del fallo y motivos del fallo.\n%2$@ solo guarda distancia, putt para y embocado o fallado; la mayoría de las estadísticas no pueden usar esa información.\n%3$@ muestra exactamente los campos que configures en Ajustes.\n\nTu primera ronda se juega en %1$@.";
+"tutorial.inputModes" = "Elige cuánto quieres registrar:\n\n• %1$@ lo registra todo: pendiente, ángulo del fallo y motivos del fallo.\n• %2$@ registra la distancia, «putt para» (birdie, par, …) y embocado o no embocado. En este modo entran pocos datos en las estadísticas.\n• En %3$@ puedes añadir campos a tu gusto y cambiar su nivel de detalle.\n\nTu primera ronda se juega en %1$@.";
 "tutorial.startRound" = "¡Todo listo! Toca %@ para empezar.";
 "tutorial.distance" = "Esta es la distancia al hoyo. El número con el que empieza se configura en Ajustes. Escribe la nueva distancia sin borrar la anterior. En gris aún no está guardada: pulsa %@ y, cuando se vuelva negra, queda guardada.";
 "tutorial.pace" = "Consejo: un paso algo largo suele medir unos %@, así puedes medir la distancia a pasos. Lo mejor es que compruebes tú mismo cuánto mide tu paso.";
-"tutorial.puttFor" = "Elige para qué es el putt. Un putt para birdie o eagle también cuenta como green en regulación (GIR).";
-"tutorial.slope" = "Toca dónde está la pendiente. Parte siempre del centro: hacia arriba es cuesta arriba, hacia abajo cuesta abajo, y cuanto más a la izquierda o a la derecha del centro, más cae el putt hacia ese lado. En el modo Personalizado también hay una cuadrícula simplificada.";
+"tutorial.puttFor" = "Elige «putt para» (birdie, par, …): el resultado por el que es este putt. Un putt para birdie o eagle también cuenta como green en regulación (GIR).";
+"tutorial.slope" = "Toca cómo es la pendiente. El centro es 0: un putt recto y llano. Parte siempre del centro: hacia arriba es cuesta arriba, hacia abajo cuesta abajo, y cuanto más a la izquierda o a la derecha del centro, más cae el putt hacia ese lado. Los números indican la pendiente en porcentaje. En el modo Personalizado también hay una cuadrícula simplificada.";
 "tutorial.missAngle" = "¿Fallado? Arrastra alrededor del hoyo hasta donde se quedó la bola respecto al hoyo. No se pregunta a qué distancia quedó: se usa la distancia de tu siguiente putt. Toca el centro si el putt entró.";
 "tutorial.missReasons" = "Si sabes por qué falló el putt, márcalo aquí. No es obligatorio, pero puedes hacerlo.";
 "tutorial.record" = "Toca %1$@ para guardar el putt; funciona en cuanto hay un resultado marcado en el círculo de arriba. %2$@ se puede pulsar en cualquier momento: cuenta como un putt embocado desde %3$@, la caída da igual y cuenta para el resultado con el que se registró.";
@@ -1074,7 +1075,7 @@
 "tutorial.puttChips" = "Aquí arriba ves cada putt del hoyo en el que estás. Toca uno para verlo o cambiarlo.";
 "tutorial.endRound" = "Toca %@ arriba a la derecha para terminar la ronda. La papelera borra todos los putts de un hoyo. No puedes romper nada, así que prueba todos los botones: cuando importa, Puttor vuelve a preguntar.";
 "tutorial.settings" = "En Ajustes eliges unidades, idioma y la distancia con la que empieza un putt, configuras los campos del modo Personalizado y mucho más.";
-"tutorial.finish" = "¡Eso es todo! Disfruta de tu ronda.";
+"tutorial.finish" = "¡Eso es todo! Pruébalo todo y gira también el móvil: en horizontal hay funciones y diseños adicionales. ¡Disfruta de tu ronda!";
 "settings.tutorial.replay" = "Ver el tutorial de nuevo";
 "settings.tutorial.replay.desc" = "Te guía por tu próxima ronda";
 "settings.tutorial.pending" = "Empieza con tu próxima ronda";

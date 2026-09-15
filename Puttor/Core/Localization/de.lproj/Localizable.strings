@@ -123,6 +123,7 @@
 "onCourse.title" = "Auf dem Platz";
 "onCourse.startNewRound" = "Neue Runde starten";
 "onCourse.recentRounds" = "LETZTE RUNDEN";
+"onCourse.recentRounds.info" = "Deine Runden, die neueste zuerst.\n\n* hinter dem Namen: Die Runde wurde über 9 Löcher gespeichert – ihre Summen sind also nicht die einer ganzen Runde.\n\nTR: eine Turnierrunde, im Wettkampf gespielt. Der Coach vergleicht sie mit deinen normalen Runden.\n\nTippe eine Runde an, um sie zu öffnen; über ⋮ kannst du sie bearbeiten, ihre Einstellungen ändern oder sie löschen.";
 "onCourse.unnamedCourse" = "Unbenannter Platz";
 "onCourse.complete" = "Fertig";
 "onCourse.inProgress" = "Läuft";
@@ -186,7 +187,7 @@
 "inputMode.pro" = "Pro";
 "inputMode.pro.desc" = "Volle Details: Neigung, Miss-Winkel, Miss-Gründe";
 "inputMode.quick" = "Quick";
-"inputMode.quick.desc" = "Nur Distanz, Putt-Kategorie und Treffer/Fehler";
+"inputMode.quick.desc" = "Nur Distanz, Putt für und eingelocht/nicht eingelocht";
 "inputMode.custom" = "Custom";
 "inputMode.custom.desc" = "Deine eigene Feldauswahl, konfigurierbar in den Einstellungen";
 
@@ -210,8 +211,8 @@
 "input.flat" = "Flach";
 "input.rl" = "R-L";
 "input.lr" = "L-R";
-"input.up" = "B.auf";
-"input.down" = "B.ab";
+"input.up" = "aufwärts";
+"input.down" = "abwärts";
 "input.doubleBreak" = "DOPPELBREAK";
 "input.missBoard" = "MISS-SCHEIBE";
 "input.missBoard.info" = "Tippe in die Mitte für gelocht oder auf den Ring darum für einen Lip-Out.\n\nEin äußerer Bereich hält Richtung und Distanz fest, in der der Putt das Loch verfehlt hat.";
@@ -747,7 +748,7 @@
 "custom.field.distance.desc" = "Wie weit der Putt war, immer als erstes Feld gezeigt";
 "custom.field.result" = "Resultat";
 "custom.result.desc" = "Einfach = nur getroffen/verfehlt.\n\nScheibe = Dartscheibe mit Richtung und Lip-Out.\n\nWinkel = ein Ring um das Loch, der in Fünf-Grad-Schritten dorthin gezogen wird, wo der Ball liegen blieb — oben ist der Ring geteilt, jeder Miss geht also links oder rechts vorbei. So erfasst auch der Pro-Modus.";
-"custom.field.puttFor" = "Putt-Kategorie";
+"custom.field.puttFor" = "Putt für";
 "custom.field.puttFor.desc" = "Eagle/Birdie/Par/Bogey/Doppelbogey oder schlechter, mit automatischer Stufe nach einem Fehlversuch";
 "custom.field.slope" = "Gefälle";
 "custom.field.slope.desc" = "Einfach = 9-Punkte-Grid (bergauf/bergab/flach x links/gerade/rechts).\n\nKomplex = das volle professionelle Grid.";
@@ -1058,15 +1059,15 @@
 "tutorial.greenSpeed" = "Stell ein, wie schnell die Grüns heute rollen. Die Geschwindigkeit wird mit der Runde gespeichert, so lassen sich schnelle und langsame Tage später auseinanderhalten.";
 "tutorial.weather" = "Wind, Temperatur und Regen verändern, wie der Ball rollt. Tippe an, bei welchem Wetter du heute spielst.";
 "tutorial.format" = "%1$@ ist der Standardmodus. Wähle %2$@, wenn du Loch für Loch gegen jemanden spielst.";
-"tutorial.inputModes" = "Wähle, wie viel du erfassen willst.\n\n%1$@ erfasst alles: Gefälle, Miss-Winkel und Miss-Gründe.\n%2$@ nimmt nur Distanz, Putt for und gelocht oder nicht – diese Informationen können die meisten Statistiken nicht nutzen.\n%3$@ zeigt genau die Felder, die du in den Einstellungen festlegst.\n\nDeine erste Runde spielst du mit %1$@.";
+"tutorial.inputModes" = "Wähle, wie viel du erfassen willst:\n\n• %1$@ erfasst alles: Gefälle, Miss-Winkel und Miss-Gründe.\n• %2$@ erfasst Distanz, „Putt für“ (Birdie, Par, …) und eingelocht oder nicht eingelocht. Für die Statistik gehen bei diesem Modus wenig Daten ein.\n• Bei %3$@ können nach Belieben Felder hinzugefügt und die Komplexität verändert werden.\n\nDeine erste Runde spielst du mit %1$@.";
 "tutorial.startRound" = "Alles bereit! Tippe auf %@.";
-"tutorial.distance" = "Das ist die Distanz zum Loch. Mit welcher Zahl sie startet, stellst du in den Einstellungen ein. Tipp einfach die neue Distanz – die alte musst du nicht löschen. Grau heißt noch nicht gespeichert: Drück %@, und sobald sie schwarz ist, ist sie gespeichert.";
+"tutorial.distance" = "Das ist die Distanz zum Loch. Mit welcher Zahl sie startet, legst du in den Einstellungen fest. Tipp einfach die neue Distanz ein – die alte musst du nicht löschen. Grau heißt: noch nicht gespeichert. Drück %@ – sobald die Zahl schwarz ist, ist sie gespeichert.";
 "tutorial.pace" = "Tipp: Ein etwas längerer Schritt ist meist etwa %@ – so kannst du die Distanz abschreiten. Am besten probierst du aber selbst aus, wie lang dein Schritt ist.";
-"tutorial.puttFor" = "Wähle, wofür der Putt ist. Ein Birdie- oder Eagle-Putt zählt dabei auch als Green in Regulation (GIR).";
-"tutorial.slope" = "Tippe an, wo das Gefälle liegt. Geh immer von der Mitte aus: nach oben ist bergauf, nach unten bergab, und je weiter links oder rechts der Mitte, desto stärker bricht der Putt in diese Richtung. Im Custom-Modus gibt es auch ein vereinfachtes Raster.";
-"tutorial.missAngle" = "Vorbei? Zieh rund ums Loch dorthin, wo der Ball im Verhältnis zum Loch liegen geblieben ist. Wie weit er weg liegt, gibst du nicht ein – dafür wird die Distanz deines nächsten Putts verwendet. Tippe in die Mitte, wenn der Putt gefallen ist.";
+"tutorial.puttFor" = "Wähle „Putt für“ (Birdie, Par, …): für welchen Score dieser Putt ist. Ein Birdie- oder Eagle-Putt zählt dabei auch als Green in Regulation (GIR).";
+"tutorial.slope" = "Tippe an, wie das Gefälle ist. Die Mitte ist 0: ein gerader, flacher Putt. Geh immer von der Mitte aus – nach oben ist bergauf, nach unten bergab, und je weiter links oder rechts der Mitte, desto stärker bricht der Putt in diese Richtung. Die Zahlen geben das Gefälle in Prozent an. Im Custom-Modus gibt es auch ein vereinfachtes Raster.";
+"tutorial.missAngle" = "Nicht eingelocht? Zieh am Kreis rund ums Loch dorthin, wo der Ball im Verhältnis zum Loch liegen geblieben ist. Die Entfernung musst du nicht eingeben – dafür wird die Distanz deines nächsten Putts verwendet. Ist der Putt gefallen, tippst du in die Mitte.";
 "tutorial.missReasons" = "Wenn du weißt, warum der Putt vorbeiging, markiere es hier. Du musst nicht – aber du kannst.";
-"tutorial.record" = "Tippe auf %1$@, um den Putt zu speichern – das geht, sobald oben am Kreis ein Ergebnis gesetzt ist. %2$@ kannst du jederzeit drücken: Er zählt als gelochter Putt aus %3$@, das Break spielt keine Rolle, und er zählt für den Score, mit dem er eingetragen wurde.";
+"tutorial.record" = "Tippe auf %1$@, um den Putt zu speichern – das geht, sobald oben am Kreis ein Ergebnis gesetzt ist. %2$@ kannst du jederzeit drücken: Er zählt als eingelochter Putt aus %3$@, das Break spielt keine Rolle, und er zählt für den Score, mit dem er eingetragen wurde.";
 "tutorial.tryRest" = "Jetzt bist du dran: Trag den Rest dieses Lochs selbst ein. Der nächste Putt startet dort, wo der Ball liegen geblieben ist.";
 "tutorial.pickUp" = "Ball aufgehoben? Mit diesem Symbol beendest du ein Loch, ohne einzulochen, und trägst deinen Score ein.";
 "tutorial.holePicker" = "Tippe links oben auf die Lochnummer, um zu jedem anderen Loch zu springen.";
@@ -1074,7 +1075,7 @@
 "tutorial.puttChips" = "Hier oben siehst du jeden Putt des Lochs, auf dem du gerade bist. Tippe einen an, um ihn anzusehen oder zu ändern.";
 "tutorial.endRound" = "Mit %@ rechts oben beendest du die Runde. Der Papierkorb löscht alle Putts eines Lochs. Kaputt machen kannst du nichts – probier also unbedingt jeden Knopf aus. Wo es darauf ankommt, fragt Puttor ohnehin noch einmal nach.";
 "tutorial.settings" = "In den Einstellungen wählst du Einheiten, Sprache und die Distanz, mit der ein Putt startet, legst die Felder des Custom-Modus fest und vieles mehr.";
-"tutorial.finish" = "Das war's – viel Spaß bei deiner Runde!";
+"tutorial.finish" = "Das war's! Probier alles aus – und dreh dein Handy auch einmal quer: Im Querformat gibt es zusätzliche Funktionen und Layouts. Viel Spaß bei deiner Runde!";
 "settings.tutorial.replay" = "Tutorial erneut zeigen";
 "settings.tutorial.replay.desc" = "Führt dich durch deine nächste Runde";
 "settings.tutorial.pending" = "Startet mit deiner nächsten Runde";

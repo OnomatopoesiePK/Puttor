@@ -28,6 +28,7 @@ enum LaunchClock {
 
 @main
 struct PuttorApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     /// Created once per launch, so the title screen shows on a cold start and
     /// never again when the app comes back from the background.
     @State private var showingTitle = true

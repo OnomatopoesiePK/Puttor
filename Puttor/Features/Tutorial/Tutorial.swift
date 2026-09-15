@@ -60,10 +60,6 @@ enum TutorialStep: Int, CaseIterable {
         self == .courseName || self == .startRound || self == .record
     }
 
-    /// The whole screen stays usable, not only the opening: Record needs a
-    /// result, and the dial above may not have one yet.
-    var passesTouches: Bool { self == .record }
-
     var textKey: String { "tutorial.\(self)" }
 }
 
@@ -179,7 +175,11 @@ private struct TutorialScrolling: ViewModifier {
     let proxy: ScrollViewProxy
 
     func body(content: Content) -> some View {
-        content.onChange(of: TutorialController.shared.step, initial: true) { _, step in
+        let tutorial = TutorialController.shared
+        content
+            // While a step shows, the screen stays where the tutorial put it.
+            .scrollDisabled(tutorial.step != nil && !tutorial.practising)
+            .onChange(of: tutorial.step, initial: true) { _, step in
             guard let target = step?.target else { return }
             withAnimation(.easeInOut(duration: 0.45)) {
                 proxy.scrollTo(target, anchor: UnitPoint(x: 0.5, y: 0.1))

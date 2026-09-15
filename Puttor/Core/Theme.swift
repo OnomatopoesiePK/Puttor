@@ -80,12 +80,14 @@ enum Theme {
     static var dispersionLengthLow: Color { t(0x7FBBFF, 0x1D5FCC) }
     static var dispersionLengthHigh: Color { t(0x7FBBFF, 0x1D5FCC) }
 
-    // Putt-for score category (eagle -> double+, best to worst)
+    // Putt-for score category (eagle -> double+, best to worst). Bogey is a
+    // blue that reads on both grounds; double bogey and worse are black on the
+    // light theme and white on the dark one, so they never sink into it.
     static var categoryEagle: Color { t(0xF5D26B, 0x9A7A0A) }
     static var categoryBirdie: Color { t(0xFF5C6C, 0xD62839) }
-    static var categoryBogey: Color { t(0xC24A56, 0x8A2530) }
-    static var categoryDoubleOrWorse: Color { t(0x7A2E38, 0x4A1219) }
-    static var categoryTripleOrWorse: Color { t(0x561E26, 0x2E0A0F) }
+    static var categoryBogey: Color { t(0x5AA2FF, 0x1C62CC) }
+    static var categoryDoubleOrWorse: Color { t(0xF2F4F6, 0x111418) }
+    static var categoryTripleOrWorse: Color { t(0xF2F4F6, 0x111418) }
 
     enum Spacing {
         static let xs: CGFloat = 4
@@ -114,6 +116,13 @@ extension Color {
         let g = Double((hex >> 8) & 0xFF) / 255.0
         let b = Double(hex & 0xFF) / 255.0
         self.init(.sRGB, red: r, green: g, blue: b, opacity: alpha)
+    }
+
+    /// Bright enough that white writing on it would be hard to read.
+    var isLight: Bool {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a) else { return false }
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.65
     }
 
     func opacity8(_ percent: Double) -> Color {
