@@ -751,25 +751,20 @@
 "custom.field.doubleBreak" = "Doppelbreak";
 "custom.field.doubleBreak.desc" = "Markiert einen Putt, der erst in die eine, dann in die andere Richtung bricht";
 "custom.field.intention" = "Absicht";
-"custom.field.intention.desc" = "Was der Putt soll – Ziel, Tempo, Linie, Matchplay-Situation – und ob es gelungen ist";
+"custom.field.intention.desc" = "Was der Putt soll – Tempo, Linie, Matchplay-Situation – und ob es gelungen ist";
 "input.intention" = "ABSICHT";
-"intention.part.goal" = "Ziel des Putts";
 "intention.part.speed" = "Tempo";
 "intention.part.line" = "Linie";
 "intention.part.situation" = "Situation";
-"intention.part.goal.short" = "Ziel";
 "intention.part.speed.short" = "Tempo";
 "intention.part.line.short" = "Linie";
 "intention.part.situation.short" = "Situation";
 "intention.settings.situation" = "Situativ (nur Matchplay)";
+"intention.settings.normalPace" = "Normales Tempo, über das Loch";
 "intention.matchPlayOnly" = "Die Situation wird nur im Matchplay abgefragt.";
-"intention.goal.make" = "Lochen";
-"intention.goal.lag" = "Annähern";
-"intention.goal.position" = "Absichern";
-"intention.goal.tapIn" = "Tap-in";
 "intention.speed.dieIn" = "Sterbend";
-"intention.speed.pelz" = "Pelz";
-"intention.speed.pelz.detail" = "~%@ drüber";
+"intention.speed.normal" = "Normal";
+"intention.speed.normal.detail" = "~%@ drüber";
 "intention.speed.firm" = "Fest";
 "intention.line.centre" = "Mitte";
 "intention.line.insideEdge" = "Innenkante";
@@ -781,7 +776,7 @@
 "intention.executed" = "Umgesetzt";
 "intention.notExecuted" = "Nicht umgesetzt";
 "stats.intention" = "INTENTION – OUTCOME";
-"stats.intention.info" = "Jeder Putt, der mit einer Absicht eingetragen wurde. Oben: umgesetzt oder nicht, gegen gelocht oder nicht. Darunter für jedes Ziel, Tempo, jede Linie oder Matchplay-Situation: wie oft der Putt gefallen ist, wie oft du umgesetzt hast, was du vorhattest, wie oft er fiel, wenn du es umgesetzt hast und wenn nicht, wohin die Misses gingen, wie weit sie im Schnitt liegen blieben und wie viele Break-Misses auf der Pro-Seite (oberhalb) blieben. Beim Annähern zusätzlich, wie oft der Ball innerhalb von einem Meter (3 ft) lag, beim Absichern, wie oft der Restputt bergauf war.\n\nEin Putt, der gespielt ist wie geplant und nicht fällt, ist kein Fehler.\n\nBraucht das Feld Absicht: Custom-Modus mit diesem Feld.";
+"stats.intention.info" = "Jeder Putt, der mit einer Absicht eingetragen wurde. Oben: umgesetzt oder nicht, gegen gelocht oder nicht. Darunter für jedes Tempo, jede Linie oder Matchplay-Situation: wie oft der Putt gefallen ist, wie oft du umgesetzt hast, was du vorhattest, wie oft er fiel, wenn du es umgesetzt hast und wenn nicht, wohin die Misses gingen, wie weit sie im Schnitt liegen blieben und wie viele Break-Misses auf der Pro-Seite (oberhalb) blieben.\n\nEin Putt, der gespielt ist wie geplant und nicht fällt, ist kein Fehler.\n\nBraucht das Feld Absicht: Custom-Modus mit diesem Feld.";
 "intention.matrix.made" = "Gelocht";
 "intention.matrix.missed" = "Verfehlt";
 "intention.matrix.note" = "%1$@ der Misses waren umgesetzt – ein Putt, der tut, was du wolltest, und trotzdem nicht fällt, ist kein Fehler.";
@@ -794,8 +789,6 @@
 "intention.missLength" = "Misses kurz %1$@ · lang %2$@";
 "intention.missSide" = "Misses links %1$@ · rechts %2$@";
 "intention.proSide" = "Break-Misses auf der Pro-Seite (oberhalb): %1$@";
-"intention.inCircle" = "Innerhalb von %1$@ liegen geblieben: %2$@";
-"intention.uphillLeave" = "Restputt bergauf: %1$@";
 "custom.field.missReasons" = "Miss-Gründe";
 "custom.field.missReasons.desc" = "Verlesen, schlechter Stroke oder falsch gezielt";
 

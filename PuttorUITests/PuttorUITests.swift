@@ -683,11 +683,13 @@ final class PuttorUITests: XCTestCase {
             }
             return (centres, frames.map(\.height).max() ?? 0)
         }
-        XCTAssertEqual(switchRows().centres.count, 4)
-        if let last = app.switches.allElementsBoundByIndex.last { scrollIntoView(last, in: app, bottomMargin: 120) }
+        XCTAssertEqual(switchRows().centres.count, 3)
+        let normalPace = app.sliders.firstMatch
+        XCTAssertTrue(normalPace.waitForExistence(timeout: 3), "no slider for the normal pace")
+        scrollIntoView(normalPace, in: app, bottomMargin: 120)
         snapshot("1 intention switches")
         let rows = switchRows()
-        XCTAssertEqual(rows.centres.count, 4)
+        XCTAssertEqual(rows.centres.count, 3)
         for (upper, lower) in zip(rows.centres, rows.centres.dropFirst()) {
             XCTAssertGreaterThanOrEqual(lower - upper, rows.height - 0.5, "switches overlap")
         }

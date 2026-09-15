@@ -34,7 +34,6 @@ final class Putt {
     var missAngleDeg: Double?
     /// What the putt was meant to do and whether it came off — see
     /// PuttIntention. Only the intention field records them.
-    var intentionGoalRaw: String?
     var intentionSpeedRaw: String?
     var intentionLineRaw: String?
     var intentionSituationRaw: String?
@@ -62,7 +61,6 @@ final class Putt {
     var intention: PuttIntention {
         get {
             PuttIntention(
-                goal: intentionGoalRaw.flatMap { PuttGoal(rawValue: $0) },
                 speed: intentionSpeedRaw.flatMap { PuttSpeed(rawValue: $0) },
                 line: intentionLineRaw.flatMap { PuttLine(rawValue: $0) },
                 situation: intentionSituationRaw.flatMap { PuttSituation(rawValue: $0) },
@@ -70,7 +68,6 @@ final class Putt {
             )
         }
         set {
-            intentionGoalRaw = newValue.goal?.rawValue
             intentionSpeedRaw = newValue.speed?.rawValue
             intentionLineRaw = newValue.line?.rawValue
             intentionSituationRaw = newValue.situation?.rawValue

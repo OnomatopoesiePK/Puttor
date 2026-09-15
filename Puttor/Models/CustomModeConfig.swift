@@ -85,13 +85,28 @@ struct CustomField: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
     var kind: CustomFieldKind
     var complexity: FieldComplexity = .simple
-    /// The parts the intention field asks for. Optional in storage so fields
-    /// saved before there were parts still decode; nil asks for all of them.
-    var intentionPartsRaw: [IntentionPart]? = nil
+    /// The parts the intention field asks for, by name. Optional in storage so
+    /// fields saved before there were parts still decode, and names rather than
+    /// the parts themselves so a part since taken out is skipped instead of
+    /// failing the whole layout. Nil, or nothing left, asks for all of them.
+    var intentionPartsRaw: [String]? = nil
+    /// How far past the hole the intention's normal pace finishes; nil is the default.
+    var intentionNormalPastM: Double? = nil
 
     var intentionParts: [IntentionPart] {
-        get { intentionPartsRaw ?? IntentionPart.allCases }
-        set { intentionPartsRaw = IntentionPart.allCases.filter(newValue.contains) }
+        get {
+            let parts = IntentionPart.allCases.filter { intentionPartsRaw?.contains($0.rawValue) ?? true }
+            return parts.isEmpty ? IntentionPart.allCases : parts
+        }
+        set { intentionPartsRaw = IntentionPart.allCases.filter(newValue.contains).map(\.rawValue) }
+    }
+
+    var normalPastM: Double {
+        get {
+            let range = PuttSpeed.normalPastRange
+            return min(max(intentionNormalPastM ?? PuttSpeed.defaultNormalPastM, range.lowerBound), range.upperBound)
+        }
+        set { intentionNormalPastM = newValue }
     }
 }
 

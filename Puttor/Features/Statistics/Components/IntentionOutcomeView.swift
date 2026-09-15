@@ -13,7 +13,7 @@ import SwiftUI
 struct IntentionOutcomeView: View {
     let putts: [Putt]
     var useFeet = false
-    @AppStorage("stats.intentionPart") private var partRaw = IntentionPart.goal.rawValue
+    @AppStorage("stats.intentionPart") private var partRaw = IntentionPart.speed.rawValue
 
     var body: some View {
         let parts = IntentionOutcome.parts(in: putts)
@@ -35,7 +35,7 @@ struct IntentionOutcomeView: View {
             }
 
             if let part {
-                ForEach(IntentionOutcome.outcomes(in: putts, by: part, useFeet: useFeet)) { outcome in
+                ForEach(IntentionOutcome.outcomes(in: putts, by: part)) { outcome in
                     card(outcome, part: part)
                 }
             }
@@ -153,16 +153,6 @@ struct IntentionOutcomeView: View {
                 }
                 if let highSide = outcome.highSidePercent {
                     line(String(format: L("intention.proSide"), percentText(highSide)))
-                }
-                if part == .goal, outcome.id == PuttGoal.lag.rawValue, let inCircle = outcome.inCirclePercent {
-                    line(String(
-                        format: L("intention.inCircle"),
-                        UnitConverter.formatDistance(IntentionOutcome.circle(useFeet: useFeet), useFeet: useFeet),
-                        percentText(inCircle)
-                    ))
-                }
-                if part == .goal, outcome.id == PuttGoal.position.rawValue, let uphill = outcome.uphillLeavePercent {
-                    line(String(format: L("intention.uphillLeave"), percentText(uphill)))
                 }
             }
         }

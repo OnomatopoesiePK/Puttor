@@ -751,25 +751,20 @@
 "custom.field.doubleBreak" = "Doble caída";
 "custom.field.doubleBreak.desc" = "Marca un putt que cae hacia un lado y después hacia el otro";
 "custom.field.intention" = "Intención";
-"custom.field.intention.desc" = "Qué debe hacer el putt – objetivo, velocidad, línea, situación del match – y si se consiguió";
+"custom.field.intention.desc" = "Qué debe hacer el putt – velocidad, línea, situación del match – y si se consiguió";
 "input.intention" = "INTENCIÓN";
-"intention.part.goal" = "Objetivo del putt";
 "intention.part.speed" = "Velocidad";
 "intention.part.line" = "Línea";
 "intention.part.situation" = "Situación";
-"intention.part.goal.short" = "Objetivo";
 "intention.part.speed.short" = "Velocidad";
 "intention.part.line.short" = "Línea";
 "intention.part.situation.short" = "Situación";
 "intention.settings.situation" = "Situación (solo match play)";
+"intention.settings.normalPace" = "Velocidad normal, pasado el hoyo";
 "intention.matchPlayOnly" = "La situación solo se pregunta en match play.";
-"intention.goal.make" = "Embocar";
-"intention.goal.lag" = "Aproximar";
-"intention.goal.position" = "Quedar abajo";
-"intention.goal.tapIn" = "Tap-in";
 "intention.speed.dieIn" = "Muriendo";
-"intention.speed.pelz" = "Pelz";
-"intention.speed.pelz.detail" = "~%@ pasado";
+"intention.speed.normal" = "Normal";
+"intention.speed.normal.detail" = "~%@ pasado";
 "intention.speed.firm" = "Firme";
 "intention.line.centre" = "Centro";
 "intention.line.insideEdge" = "Borde interior";
@@ -781,7 +776,7 @@
 "intention.executed" = "Conseguido";
 "intention.notExecuted" = "No conseguido";
 "stats.intention" = "INTENCIÓN – RESULTADO";
-"stats.intention.info" = "Cada putt registrado con una intención. Arriba: jugado como se quería o no, frente a si entró. Debajo, para cada objetivo, velocidad, línea o situación del match: cuántas veces entró, cuántas veces hiciste lo que querías, cuántas veces entró cuando lo conseguiste y cuando no, hacia dónde fueron los fallos, a qué distancia media quedaron y cuántos fallos con caída quedaron por el lado alto (pro). Al aproximar, además, cuántas veces quedó a menos de un metro (3 ft); al quedar abajo, cuántas veces el siguiente putt fue cuesta arriba.\n\nUn putt jugado como se quería que no entra no es un error.\n\nNecesita el campo de intención: modo Personalizado con ese campo.";
+"stats.intention.info" = "Cada putt registrado con una intención. Arriba: jugado como se quería o no, frente a si entró. Debajo, para cada velocidad, línea o situación del match: cuántas veces entró, cuántas veces hiciste lo que querías, cuántas veces entró cuando lo conseguiste y cuando no, hacia dónde fueron los fallos, a qué distancia media quedaron y cuántos fallos con caída quedaron por el lado alto (pro).\n\nUn putt jugado como se quería que no entra no es un error.\n\nNecesita el campo de intención: modo Personalizado con ese campo.";
 "intention.matrix.made" = "Embocado";
 "intention.matrix.missed" = "Fallado";
 "intention.matrix.note" = "El %1$@ de los fallos se jugaron como se quería: un putt que hace lo que querías y aun así no entra no es un error.";
@@ -794,8 +789,6 @@
 "intention.missLength" = "Fallos cortos %1$@ · largos %2$@";
 "intention.missSide" = "Fallos a la izquierda %1$@ · a la derecha %2$@";
 "intention.proSide" = "Fallos con caída por el lado alto (pro): %1$@";
-"intention.inCircle" = "Quedó a menos de %1$@: %2$@";
-"intention.uphillLeave" = "Siguiente putt cuesta arriba: %1$@";
 "custom.field.missReasons" = "Motivos del fallo";
 "custom.field.missReasons.desc" = "Mala lectura, mal golpe o mala orientación";
 

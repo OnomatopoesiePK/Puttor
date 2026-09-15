@@ -167,6 +167,7 @@ struct RoundInputCustomView: View {
                 parts: field.intentionParts,
                 isMatchPlay: round.playFormat == .matchPlay,
                 useFeet: useFeet,
+                normalPastM: field.normalPastM,
                 intention: Binding(get: { session.draftIntention }, set: { session.draftIntention = $0 })
             )
         case .missReasons:

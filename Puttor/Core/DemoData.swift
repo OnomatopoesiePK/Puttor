@@ -142,16 +142,13 @@ enum DemoData {
         }
     }
 
-    /// Short ones to hole, long ones to lag; played as meant more often when
-    /// they drop.
+    /// Long ones dying at the hole, the rest mostly at a normal pace; played
+    /// as meant more often when they drop.
     private static func intention(at distance: Double, holed: Bool, rng: inout SeededGenerator) -> PuttIntention {
-        let goal: PuttGoal = distance < 4 ? .make
-            : distance > 9 ? .lag
-            : [.make, .lag, .position].randomElement(using: &rng)!
-        let speed: PuttSpeed = goal == .lag ? .dieIn : [.dieIn, .pelz, .pelz, .firm].randomElement(using: &rng)!
+        let speed: PuttSpeed = distance > 9 ? .dieIn : [.dieIn, .normal, .normal, .firm].randomElement(using: &rng)!
         let line = PuttLine.allCases.randomElement(using: &rng)!
         let executed = Double.random(in: 0...1, using: &rng) < (holed ? 0.85 : 0.55)
-        return PuttIntention(goal: goal, speed: speed, line: line, executed: executed)
+        return PuttIntention(speed: speed, line: line, executed: executed)
     }
 
     // MARK: - Simulated rounds
@@ -221,25 +218,19 @@ enum DemoData {
 
             guard let angle else { return }
             category = steppedDown(category)
-            distance = simulatedLeave(angle: angle, intention: intention, rng: &rng)
+            distance = simulatedLeave(angle: angle, intention: intention, from: distance, rng: &rng)
         }
     }
 
-    /// Short ones to hole, long ones to lag, a line that allows for more the
-    /// more it breaks, and in match play what the other player left.
+    /// Tap-ins firm, long ones dying at the hole, a line that allows for more
+    /// the more it breaks, and in match play what the other player left.
     private static func simulatedIntention(distance: Double, side: Double, matchPlay: Bool, rng: inout SeededGenerator) -> PuttIntention {
-        let goal: PuttGoal
-        if distance < 0.8 { goal = .tapIn }
-        else if distance < 3.5 { goal = .make }
-        else if distance > 9 { goal = .lag }
-        else { goal = [.make, .make, .position, .lag].randomElement(using: &rng)! }
-
         let speed: PuttSpeed
-        switch goal {
-        case .tapIn: speed = .firm
-        case .lag: speed = .dieIn
-        case .position: speed = [.dieIn, .pelz].randomElement(using: &rng)!
-        case .make: speed = [.dieIn, .pelz, .pelz, .firm].randomElement(using: &rng)!
+        switch distance {
+        case ..<0.8: speed = .firm
+        case ..<3.5: speed = [.dieIn, .normal, .normal, .firm].randomElement(using: &rng)!
+        case ...9.0: speed = [.dieIn, .normal].randomElement(using: &rng)!
+        default: speed = .dieIn
         }
 
         let line: PuttLine
@@ -251,10 +242,10 @@ enum DemoData {
         }
 
         let situation: PuttSituation? = !matchPlay ? nil
-            : goal == .lag ? .secure
+            : distance > 9 ? .secure
             : PuttSituation.allCases.randomElement(using: &rng)!
-        let executed = Double.random(in: 0...1, using: &rng) < (goal == .tapIn ? 0.95 : 0.7)
-        return PuttIntention(goal: goal, speed: speed, line: line, situation: situation, executed: executed)
+        let executed = Double.random(in: 0...1, using: &rng) < (distance < 0.8 ? 0.95 : 0.7)
+        return PuttIntention(speed: speed, line: line, situation: situation, executed: executed)
     }
 
     /// Where a miss finished on the dial: more often below the hole than above
@@ -274,17 +265,17 @@ enum DemoData {
     }
 
     /// How far the miss finished: close at a dying pace, further back from a
-    /// firm one, a long way short on a lag that came up short.
-    private static func simulatedLeave(angle: Double, intention: PuttIntention, rng: inout SeededGenerator) -> Double {
+    /// firm one, and a long way off from a long way out.
+    private static func simulatedLeave(angle: Double, intention: PuttIntention, from distance: Double, rng: inout SeededGenerator) -> Double {
         let long = abs(angle) > 90
         var range = long ? 0.4...1.6 : 0.3...1.2
         switch intention.speed {
         case .dieIn: range = long ? 0.3...0.8 : 0.3...1.0
-        case .pelz: range = long ? 0.3...0.9 : 0.3...1.0
+        case .normal: range = long ? 0.3...0.9 : 0.3...1.0
         case .firm: range = long ? 0.8...2.2 : 0.4...1.0
         case nil: break
         }
-        if intention.goal == .lag { range = long ? 0.4...1.5 : 0.5...2.0 }
+        if distance > 9 { range = long ? 0.4...1.5 : 0.5...2.0 }
         return max(0.3, tenth(Double.random(in: range, using: &rng)))
     }
 

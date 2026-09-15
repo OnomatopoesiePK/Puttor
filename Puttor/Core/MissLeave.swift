@@ -45,11 +45,6 @@ struct MissLeave {
         nexts[ObjectIdentifier(putt)]?.distanceM
     }
 
-    /// The putt that followed on the same hole, or nil where none was recorded.
-    func next(after putt: Putt) -> Putt? {
-        nexts[ObjectIdentifier(putt)]
-    }
-
     /// -1 short of the hole, +1 run well past it, 0 for everything else —
     /// including a putt that stopped within a metre past. A long miss with no
     /// putt after it keeps its length, since nothing says how far it ran.

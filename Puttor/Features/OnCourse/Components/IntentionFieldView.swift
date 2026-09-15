@@ -13,6 +13,8 @@ struct IntentionFieldView: View {
     let parts: [IntentionPart]
     let isMatchPlay: Bool
     var useFeet = false
+    /// How far past the hole a normal pace finishes, as set in Settings.
+    var normalPastM = PuttSpeed.defaultNormalPastM
     @Binding var intention: PuttIntention
 
     private var shownParts: [IntentionPart] {
@@ -61,15 +63,9 @@ struct IntentionFieldView: View {
     @ViewBuilder
     private func options(_ part: IntentionPart) -> some View {
         switch part {
-        case .goal:
-            ForEach(PuttGoal.allCases) { goal in
-                chip(L(goal.labelKey), active: intention.goal == goal) {
-                    update { $0.goal = $0.goal == goal ? nil : goal }
-                }
-            }
         case .speed:
             ForEach(PuttSpeed.allCases) { speed in
-                chip(L(speed.labelKey), detail: speed == .pelz ? pelzDetail : nil, active: intention.speed == speed) {
+                chip(L(speed.labelKey), detail: speed == .normal ? normalDetail : nil, active: intention.speed == speed) {
                     update { $0.speed = $0.speed == speed ? nil : speed }
                 }
             }
@@ -88,8 +84,8 @@ struct IntentionFieldView: View {
         }
     }
 
-    private var pelzDetail: String {
-        String(format: L("intention.speed.pelz.detail"), useFeet ? "1 ft" : "30 cm")
+    private var normalDetail: String {
+        String(format: L("intention.speed.normal.detail"), PuttSpeed.pastText(normalPastM, useFeet: useFeet))
     }
 
     /// Changes the intention; with nothing left chosen, whether it came off

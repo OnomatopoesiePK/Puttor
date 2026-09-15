@@ -21,6 +21,7 @@ struct CustomModeSettingsView: View {
     @State private var hasPendingChanges = false
     @State private var showAddField = false
     @State private var showUnsavedConfirm = false
+    @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
 
     private var availableKinds: [CustomFieldKind] {
         CustomFieldKind.allCases.filter { kind in !draftConfig.fields.contains { $0.kind == kind } }
@@ -201,9 +202,46 @@ struct CustomModeSettingsView: View {
                 ForEach(IntentionPart.allCases) { part in
                     intentionToggle(part, of: field)
                 }
+                // Opens while the fields are edited, as long as the pace is asked.
+                if isEditing && field.intentionParts.contains(.speed) {
+                    normalPaceSlider(of: field)
+                        .transition(.opacity)
+                }
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: isEditing)
         .listRowBackground(Theme.surface)
+    }
+
+    /// How far past the hole the normal pace finishes, from 20 to 80 cm.
+    private func normalPaceSlider(of field: CustomField) -> some View {
+        let useFeet = unitsPref == "imperial"
+        let shown = PuttSpeed.pastText(field.normalPastM, useFeet: useFeet)
+        let binding = Binding(
+            get: { field.normalPastM },
+            set: { newValue in
+                guard let idx = draftConfig.fields.firstIndex(where: { $0.id == field.id }) else { return }
+                draftConfig.fields[idx].normalPastM = newValue
+                hasPendingChanges = true
+            }
+        )
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(L("intention.settings.normalPace"))
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.text)
+                Spacer()
+                Text(shown)
+                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(Theme.primary)
+            }
+            Slider(value: binding, in: PuttSpeed.normalPastRange, step: useFeet ? 0.0254 : 0.01)
+                .tint(Theme.primary)
+                .accessibilityLabel(L("intention.settings.normalPace"))
+                .accessibilityValue(shown)
+        }
+        .padding(.leading, 32)
+        .padding(.vertical, 6)
     }
 
     /// Switches one part of the intention on or off; the last one stays on.

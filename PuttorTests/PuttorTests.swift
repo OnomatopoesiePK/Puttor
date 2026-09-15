@@ -1578,48 +1578,43 @@ struct PuttorTests {
 
     /// Putts are read by each part of their intention: makes, how often it
     /// came off and what that did, which way the misses went and how far,
-    /// the high side of a break, the lag circle and the uphill leave.
+    /// and the high side of a break.
     @MainActor
     @Test func intentionsAreReadByWhatCameOfThem() async throws {
-        func hole(_ number: Int, _ intention: PuttIntention, _ result: PuttResult, side: Double = 0, leave: Double? = nil, uphill: Bool? = nil) -> [Putt] {
+        func hole(_ number: Int, _ intention: PuttIntention, _ result: PuttResult, side: Double = 0, leave: Double? = nil) -> [Putt] {
             let first = Putt(holeNumber: number, puttNumber: 1, distanceM: 6, sideSlopePct: side, puttFor: .par, result: result)
             first.intention = intention
             guard let leave else { return [first] }
-            let next = Putt(holeNumber: number, puttNumber: 2, distanceM: leave, hillSlopePct: uphill.map { $0 ? 1 : -1 } ?? 0, puttFor: .bogey, result: .holed)
-            return [first, next]
+            return [first, Putt(holeNumber: number, puttNumber: 2, distanceM: leave, puttFor: .bogey, result: .holed)]
         }
-        let putts = hole(1, PuttIntention(goal: .make, speed: .dieIn, executed: true), .holed)
-            + hole(2, PuttIntention(goal: .make, speed: .dieIn, executed: true), .short, leave: 0.4)
-            + hole(3, PuttIntention(goal: .lag, speed: .dieIn, executed: false), .shortLeft, side: -2, leave: 0.8)
-            + hole(4, PuttIntention(goal: .lag, speed: .firm, executed: true), .longRight, side: -2, leave: 1.5)
-            + hole(5, PuttIntention(goal: .position), .long, leave: 1.0, uphill: true)
+        let putts = hole(1, PuttIntention(speed: .dieIn, line: .centre, executed: true), .holed)
+            + hole(2, PuttIntention(speed: .dieIn, line: .centre, executed: true), .short, leave: 0.4)
+            + hole(3, PuttIntention(speed: .normal, executed: false), .shortLeft, side: -2, leave: 0.8)
+            + hole(4, PuttIntention(speed: .normal, executed: true), .longRight, side: -2, leave: 1.5)
+            + hole(5, PuttIntention(line: .outsideEdge), .long, leave: 1.0)
             + [Putt(holeNumber: 6, puttNumber: 1, distanceM: 3, puttFor: .par, result: .left)]
 
-        #expect(IntentionOutcome.parts(in: putts) == [.goal, .speed])
-
-        let goals = IntentionOutcome.outcomes(in: putts, by: .goal)
-        #expect(goals.map(\.id) == ["make", "lag", "position"])
-        let make = goals[0]
-        #expect(make.putts == 2 && make.made == 1)
-        #expect(make.executed == 2 && make.madeWhenExecuted == 1)
-        #expect(make.short == 1)
-        #expect(abs((make.averageLeave ?? 0) - 0.4) < 0.001)
-
-        let lag = goals[1]
-        #expect(lag.putts == 2 && lag.made == 0)
-        #expect(lag.answered == 2 && lag.executed == 1)
-        #expect(lag.short == 1 && lag.long == 1 && lag.left == 1 && lag.right == 1)
-        // Slope falling left: a miss left is below the hole, a miss right above it.
-        #expect(lag.breakingMisses == 2 && lag.highSide == 1)
-        #expect(lag.settled == 2 && lag.inCircle == 1)
-
-        let position = goals[2]
-        #expect(position.answered == 0)
-        #expect(position.uphillLeavePercent == 100)
+        #expect(IntentionOutcome.parts(in: putts) == [.speed, .line])
 
         let speeds = IntentionOutcome.outcomes(in: putts, by: .speed)
-        #expect(speeds.map(\.id) == ["dieIn", "firm"])
-        #expect(speeds[0].putts == 3)
+        #expect(speeds.map(\.id) == [PuttSpeed.dieIn.rawValue, PuttSpeed.normal.rawValue])
+        let dieIn = speeds[0]
+        #expect(dieIn.putts == 2 && dieIn.made == 1)
+        #expect(dieIn.executed == 2 && dieIn.madeWhenExecuted == 1)
+        #expect(dieIn.short == 1)
+        #expect(abs((dieIn.averageLeave ?? 0) - 0.4) < 0.001)
+
+        let normal = speeds[1]
+        #expect(normal.putts == 2 && normal.made == 0)
+        #expect(normal.answered == 2 && normal.executed == 1)
+        #expect(normal.short == 1 && normal.long == 1 && normal.left == 1 && normal.right == 1)
+        // Slope falling left: a miss left is below the hole, a miss right above it.
+        #expect(normal.breakingMisses == 2 && normal.highSide == 1)
+        #expect(abs((normal.averageLeave ?? 0) - 1.15) < 0.001)
+
+        let lines = IntentionOutcome.outcomes(in: putts, by: .line)
+        #expect(lines.map(\.id) == ["centre", "outsideEdge"])
+        #expect(lines[1].answered == 0 && lines[1].long == 1)
 
         let execution = IntentionExecution(putts)
         #expect(execution.executedMade == 1)
@@ -1628,14 +1623,25 @@ struct PuttorTests {
         #expect(execution.notExecutedMissed == 1)
     }
 
-    /// An intention field saved before it had parts asks for all of them, and
-    /// the parts keep the order they are asked in.
-    @Test func intentionFieldKeepsItsPartsInOrder() throws {
+    /// An intention field saved before it had parts asks for all of them; a
+    /// part since taken out is skipped without losing the rest; the normal
+    /// pace stays inside its range and reads in the player's units.
+    @Test func intentionFieldKeepsItsPartsAndNormalPace() throws {
         let old = #"{"id":"6F9619FF-8B86-D011-B42D-00C04FC964FF","kind":"intention","complexity":"simple"}"#
         var field = try JSONDecoder().decode(CustomField.self, from: Data(old.utf8))
         #expect(field.intentionParts == IntentionPart.allCases)
-        field.intentionParts = [.situation, .goal]
-        #expect(field.intentionParts == [.goal, .situation])
+        #expect(field.normalPastM == PuttSpeed.defaultNormalPastM)
+        field.intentionParts = [.situation, .speed]
+        #expect(field.intentionParts == [.speed, .situation])
+
+        let withGoal = #"{"id":"6F9619FF-8B86-D011-B42D-00C04FC964FF","kind":"intention","complexity":"simple","intentionPartsRaw":["goal","line"]}"#
+        let decoded = try JSONDecoder().decode(CustomField.self, from: Data(withGoal.utf8))
+        #expect(decoded.intentionParts == [.line])
+
+        field.normalPastM = 1.2
+        #expect(field.normalPastM == PuttSpeed.normalPastRange.upperBound)
+        #expect(PuttSpeed.pastText(0.3, useFeet: false) == "30 cm")
+        #expect(PuttSpeed.pastText(0.3048, useFeet: true) == "12 in")
     }
 
     /// Rounds are filtered by how their putts were read, and the filter keeps
