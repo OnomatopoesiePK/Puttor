@@ -365,28 +365,17 @@ struct RoundSetupView: View {
 
     private var stimpCard: some View {
         VStack(spacing: 10) {
-            HStack {
-                Text(L("setup.slow")).opacity(stimp <= 8.5 ? 1 : 0.3)
-                Spacer()
-                Text(L("setup.medium")).opacity(stimp > 8.5 && stimp < 11 ? 1 : 0.3)
-                Spacer()
-                Text(L("setup.fast")).opacity(stimp >= 11 ? 1 : 0.3)
-            }
-            .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(Theme.textSecondary)
+            // The reading on top names its scale, so the number is plainly a Stimp.
+            Text(String(format: L("setup.stimpValue"), Self.stimpText(for: stimp), stimpLabel))
+                .font(.system(size: 15, weight: .heavy))
+                .foregroundStyle(stimpLabelColor)
+                .frame(maxWidth: .infinity)
 
             Slider(value: $stimp, in: stimpRange, step: 0.5)
                 .tint(Theme.primary)
 
             HStack {
                 Text(Self.stimpText(for: stimpRange.lowerBound)).font(.caption).foregroundStyle(Theme.textMuted)
-                Spacer()
-                Text(Self.stimpText(for: stimp))
-                    .font(.system(size: 15, weight: .heavy))
-                    .foregroundStyle(stimpLabelColor)
-                Text(stimpLabel)
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(stimpLabelColor)
                 Spacer()
                 Text(Self.stimpText(for: stimpRange.upperBound)).font(.caption).foregroundStyle(Theme.textMuted)
             }
@@ -401,7 +390,8 @@ struct RoundSetupView: View {
     private static func stimpText(for value: Double) -> String {
         if value <= stimpBounds.lowerBound { return "<7" }
         if value >= stimpBounds.upperBound { return ">12" }
-        return String(format: "%.1f", value)
+        // Whole Stimps without a decimal: 9, 9.5, 10.
+        return String(format: value.rounded() == value ? "%.0f" : "%.1f", value)
     }
 
     private var stimpLabel: String {

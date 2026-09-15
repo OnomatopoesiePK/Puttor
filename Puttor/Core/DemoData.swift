@@ -35,6 +35,9 @@ enum DemoData {
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains(tutorialArgument) {
             UserDefaults.standard.removeObject(forKey: AppStorageKeys.tutorialFinished)
+            // Units never chosen, so the tutorial asks for them first.
+            UserDefaults.standard.removeObject(forKey: AppStorageKeys.units)
+            UserDefaults.standard.removeObject(forKey: AppStorageKeys.defaultFirstPuttDistance)
         } else if arguments.contains(where: { $0.hasPrefix("-Puttor") }) {
             UserDefaults.standard.set(true, forKey: AppStorageKeys.tutorialFinished)
         }

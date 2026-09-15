@@ -739,6 +739,13 @@ final class PuttorUITests: XCTestCase {
         sleep(3) // past the title screen
         start.tap()
 
+        // Units were never chosen, so they are asked before anything else.
+        let metres = app.buttons["Metres"]
+        XCTAssertTrue(metres.waitForExistence(timeout: 5), "units were not asked first")
+        sleep(1)
+        snapshot("0 units")
+        metres.tap()
+
         let next = app.buttons["Next"]
         XCTAssertTrue(next.waitForExistence(timeout: 5))
         sleep(1)
@@ -780,11 +787,12 @@ final class PuttorUITests: XCTestCase {
         snapshot("7 record")
         app.buttons["Tap-In"].tap()
 
-        // Pick up, hole picker, arrows, putt chips, end, settings.
-        for step in 0..<6 {
+        // Pick up, hole picker, arrows, putt chips, end, editing later, settings.
+        for step in 0..<7 {
             XCTAssertTrue(waitUntilHittable(next, timeout: 5), "no Next after the hole, step \(step)")
             sleep(1)
             if step == 0 { snapshot("8 pick up") }
+            if step == 5 { snapshot("8b edit later") }
             next.tap()
         }
         let done = app.buttons["Let's go"]

@@ -1683,8 +1683,14 @@ struct PuttorTests {
         defaults.removePersistentDomain(forName: suite)
         let tutorial = TutorialController(defaults: defaults)
 
+        // Units never chosen: asked first, and feet bring a first putt of 10 ft.
+        #expect(tutorial.asksForUnits)
         tutorial.startIfNeeded()
-        #expect(tutorial.step == .welcome)
+        #expect(tutorial.step == .units)
+        tutorial.chooseUnits(imperial: true)
+        #expect(tutorial.step == .welcome && !tutorial.asksForUnits)
+        #expect(defaults.string(forKey: AppStorageKeys.units) == "imperial")
+        #expect(abs(defaults.double(forKey: AppStorageKeys.defaultFirstPuttDistance) - UnitConverter.feetToMetres(10)) < 0.0001)
         tutorial.next()
         #expect(tutorial.step == .courseName)
         tutorial.advance(from: .startRound)

@@ -22,9 +22,11 @@ enum TutorialScreen {
 }
 
 enum TutorialStep: Int, CaseIterable {
+    /// Metres or feet, asked first — only of someone who never chose.
+    case units
     case welcome, courseName, putter, greenSpeed, weather, format, inputModes, startRound
     case distance, pace, puttFor, slope, missAngle, missReasons, record, tryRest
-    case pickUp, holePicker, navArrows, puttChips, endRound, settings, finish
+    case pickUp, holePicker, navArrows, puttChips, endRound, editLater, settings, finish
 
     var screen: TutorialScreen {
         rawValue <= TutorialStep.startRound.rawValue ? .setup : .input
@@ -32,7 +34,7 @@ enum TutorialStep: Int, CaseIterable {
 
     var target: TutorialTarget? {
         switch self {
-        case .welcome, .tryRest, .settings, .finish: return nil
+        case .units, .welcome, .tryRest, .editLater, .settings, .finish: return nil
         case .courseName: return .courseName
         case .putter: return .putter
         case .greenSpeed: return .greenSpeed
@@ -54,10 +56,10 @@ enum TutorialStep: Int, CaseIterable {
         }
     }
 
-    /// Moved on by doing what it asks — naming the course, starting the
-    /// round, recording the putt — rather than by Next.
+    /// Moved on by doing what it asks — choosing the units, naming the
+    /// course, starting the round, recording the putt — rather than by Next.
     var waitsForAction: Bool {
-        self == .courseName || self == .startRound || self == .record
+        self == .units || self == .courseName || self == .startRound || self == .record
     }
 
     var textKey: String { "tutorial.\(self)" }
@@ -89,11 +91,29 @@ final class TutorialController {
         return step
     }
 
+    /// Metres or feet were never chosen, so the tutorial asks before it starts.
+    var asksForUnits: Bool { defaults.object(forKey: AppStorageKeys.units) == nil }
+
     /// With a new round, unless it was finished or skipped before.
     func startIfNeeded() {
         guard step == nil, !isFinished else { return }
         practising = false
-        step = .welcome
+        step = asksForUnits ? .units : .welcome
+    }
+
+    /// The answer to the first question. Feet chosen for the first time
+    /// bring a first putt of 10 ft with them, a round number in that unit.
+    func chooseUnits(imperial: Bool) {
+        guard step == .units else { return }
+        if imperial {
+            if asksForUnits {
+                defaults.set(UnitConverter.feetToMetres(10), forKey: AppStorageKeys.defaultFirstPuttDistance)
+            }
+            defaults.set("imperial", forKey: AppStorageKeys.units)
+        } else {
+            defaults.set("metric", forKey: AppStorageKeys.units)
+        }
+        move(on: .units)
     }
 
     func next() {

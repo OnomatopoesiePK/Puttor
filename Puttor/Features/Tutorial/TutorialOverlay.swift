@@ -143,26 +143,34 @@ struct TutorialOverlay: View {
                     .foregroundStyle(Theme.primary)
             }
 
-            HStack(spacing: 12) {
-                if step != .finish {
-                    Button(L("tutorial.skip")) { confirmingSkip = true }
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Self.ink.opacity(0.5))
-                        .buttonStyle(.plain)
+            if step == .units {
+                // The question is the way in, so it is answered rather than skipped.
+                HStack(spacing: 12) {
+                    unitsButton(L("settings.metres"), imperial: false)
+                    unitsButton(L("settings.feet"), imperial: true)
                 }
-                Spacer(minLength: 0)
-                if let key = buttonKey(for: step) {
-                    Button {
-                        tutorial.next()
-                    } label: {
-                        Text(L(key))
-                            .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 11)
-                            .background(Capsule().fill(Theme.primary))
+            } else {
+                HStack(spacing: 12) {
+                    if step != .finish {
+                        Button(L("tutorial.skip")) { confirmingSkip = true }
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Self.ink.opacity(0.5))
+                            .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+                    Spacer(minLength: 0)
+                    if let key = buttonKey(for: step) {
+                        Button {
+                            tutorial.next()
+                        } label: {
+                            Text(L(key))
+                                .font(.system(size: 16, weight: .heavy))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 11)
+                                .background(Capsule().fill(Theme.primary))
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
@@ -172,6 +180,20 @@ struct TutorialOverlay: View {
         .background(RoundedRectangle(cornerRadius: Self.holeRadius, style: .continuous).fill(Self.paper))
         .overlay(RoundedRectangle(cornerRadius: Self.holeRadius, style: .continuous).strokeBorder(Theme.primary, lineWidth: 3))
         .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+    }
+
+    private func unitsButton(_ title: String, imperial: Bool) -> some View {
+        Button {
+            tutorial.chooseUnits(imperial: imperial)
+        } label: {
+            Text(title)
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .background(Capsule().fill(Theme.primary))
+        }
+        .buttonStyle(.plain)
     }
 
     /// Next where nothing is asked; nothing where the step waits for the
@@ -200,15 +222,20 @@ struct TutorialOverlay: View {
         case .distance:
             return String(format: L(step.textKey), L("numpad.enter"))
         case .pace:
-            // A slightly long step: about a metre, or three feet.
-            let step = unitsPref == "imperial" ? "3 \(L("unit.ft"))" : "1 \(L("unit.m"))"
-            return String(format: L(TutorialStep.pace.textKey), step)
+            // A slightly long step: about a metre, or about a yard.
+            return L(unitsPref == "imperial" ? "tutorial.pace.imperial" : step.textKey)
         case .record:
             // The distance a tap-in is saved at: 30 cm, or exactly a foot.
             let tapIn = unitsPref == "imperial" ? "1 \(L("unit.ft"))" : "30 cm"
             return String(format: L(step.textKey), L("input.recordShort"), L("input.tapInShort"), tapIn)
+        case .tryRest:
+            // What a putt after a miss starts at: a metre, or two feet.
+            let followUp = unitsPref == "imperial" ? "2 \(L("unit.ft"))" : "1 \(L("unit.m"))"
+            return String(format: L(step.textKey), followUp)
         case .endRound:
             return String(format: L(step.textKey), L("input.end"))
+        case .editLater:
+            return String(format: L(step.textKey), L("summary.editHole"))
         default:
             return L(step.textKey)
         }
