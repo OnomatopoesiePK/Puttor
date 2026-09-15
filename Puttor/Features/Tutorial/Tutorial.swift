@@ -23,7 +23,7 @@ enum TutorialScreen {
 
 enum TutorialStep: Int, CaseIterable {
     case welcome, courseName, putter, greenSpeed, weather, format, inputModes, startRound
-    case distance, puttFor, slope, missAngle, missReasons, record, tryRest
+    case distance, pace, puttFor, slope, missAngle, missReasons, record, tryRest
     case pickUp, holePicker, navArrows, puttChips, endRound, settings, finish
 
     var screen: TutorialScreen {
@@ -40,7 +40,7 @@ enum TutorialStep: Int, CaseIterable {
         case .format: return .format
         case .inputModes: return .inputModes
         case .startRound: return .startRound
-        case .distance: return .distance
+        case .distance, .pace: return .distance
         case .puttFor: return .puttFor
         case .slope: return .slope
         case .missAngle: return .missAngle

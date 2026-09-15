@@ -1061,6 +1061,7 @@
 "tutorial.inputModes" = "Elige cuánto quieres registrar.\n\n%1$@ lo registra todo: pendiente, ángulo del fallo y motivos del fallo.\n%2$@ solo guarda distancia, putt para y embocado o fallado; la mayoría de las estadísticas no pueden usar esa información.\n%3$@ muestra exactamente los campos que configures en Ajustes.\n\nTu primera ronda se juega en %1$@.";
 "tutorial.startRound" = "¡Todo listo! Toca %@ para empezar.";
 "tutorial.distance" = "Esta es la distancia al hoyo. El número con el que empieza se configura en Ajustes. Escribe la nueva distancia sin borrar la anterior. En gris aún no está guardada: pulsa %@ y, cuando se vuelva negra, queda guardada.";
+"tutorial.pace" = "Consejo: un paso algo largo suele medir unos %@, así puedes medir la distancia a pasos. Lo mejor es que compruebes tú mismo cuánto mide tu paso.";
 "tutorial.puttFor" = "Elige para qué es el putt. Un putt para birdie o eagle también cuenta como green en regulación (GIR).";
 "tutorial.slope" = "Toca dónde está la pendiente. Parte siempre del centro: hacia arriba es cuesta arriba, hacia abajo cuesta abajo, y cuanto más a la izquierda o a la derecha del centro, más cae el putt hacia ese lado. En el modo Personalizado también hay una cuadrícula simplificada.";
 "tutorial.missAngle" = "¿Fallado? Arrastra alrededor del hoyo hasta donde se quedó la bola respecto al hoyo. No se pregunta a qué distancia quedó: se usa la distancia de tu siguiente putt. Toca el centro si el putt entró.";

@@ -1061,6 +1061,7 @@
 "tutorial.inputModes" = "Wähle, wie viel du erfassen willst.\n\n%1$@ erfasst alles: Gefälle, Miss-Winkel und Miss-Gründe.\n%2$@ nimmt nur Distanz, Putt for und gelocht oder nicht – diese Informationen können die meisten Statistiken nicht nutzen.\n%3$@ zeigt genau die Felder, die du in den Einstellungen festlegst.\n\nDeine erste Runde spielst du mit %1$@.";
 "tutorial.startRound" = "Alles bereit! Tippe auf %@.";
 "tutorial.distance" = "Das ist die Distanz zum Loch. Mit welcher Zahl sie startet, stellst du in den Einstellungen ein. Tipp einfach die neue Distanz – die alte musst du nicht löschen. Grau heißt noch nicht gespeichert: Drück %@, und sobald sie schwarz ist, ist sie gespeichert.";
+"tutorial.pace" = "Tipp: Ein etwas längerer Schritt ist meist etwa %@ – so kannst du die Distanz abschreiten. Am besten probierst du aber selbst aus, wie lang dein Schritt ist.";
 "tutorial.puttFor" = "Wähle, wofür der Putt ist. Ein Birdie- oder Eagle-Putt zählt dabei auch als Green in Regulation (GIR).";
 "tutorial.slope" = "Tippe an, wo das Gefälle liegt. Geh immer von der Mitte aus: nach oben ist bergauf, nach unten bergab, und je weiter links oder rechts der Mitte, desto stärker bricht der Putt in diese Richtung. Im Custom-Modus gibt es auch ein vereinfachtes Raster.";
 "tutorial.missAngle" = "Vorbei? Zieh rund ums Loch dorthin, wo der Ball im Verhältnis zum Loch liegen geblieben ist. Wie weit er weg liegt, gibst du nicht ein – dafür wird die Distanz deines nächsten Putts verwendet. Tippe in die Mitte, wenn der Putt gefallen ist.";

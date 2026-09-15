@@ -767,12 +767,12 @@ final class PuttorUITests: XCTestCase {
         snapshot("4 start round")
         app.buttons["Start Round"].tap()
 
-        // Distance, putt for, slope, miss angle, miss reasons.
-        for step in 0..<5 {
+        // Distance, pacing it off, putt for, slope, miss angle, miss reasons.
+        for step in 0..<6 {
             XCTAssertTrue(waitUntilHittable(next, timeout: 10), "no Next on input step \(step)")
             sleep(1)
-            if step == 0 { snapshot("5 distance") }
-            if step == 2 { snapshot("6 slope") }
+            if step == 1 { snapshot("5 pace") }
+            if step == 3 { snapshot("6 slope") }
             next.tap()
         }
         sleep(1)

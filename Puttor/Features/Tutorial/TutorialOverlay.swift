@@ -192,6 +192,10 @@ struct TutorialOverlay: View {
             return String(format: L(step.textKey), L("setup.startRound"))
         case .distance:
             return String(format: L(step.textKey), L("numpad.enter"))
+        case .pace:
+            // A slightly long step: about a metre, or three feet.
+            let step = unitsPref == "imperial" ? "3 \(L("unit.ft"))" : "1 \(L("unit.m"))"
+            return String(format: L(TutorialStep.pace.textKey), step)
         case .record:
             // The distance a tap-in is saved at: 30 cm, or exactly a foot.
             let tapIn = unitsPref == "imperial" ? "1 \(L("unit.ft"))" : "30 cm"

@@ -1061,6 +1061,7 @@
 "tutorial.inputModes" = "Choose how much you want to record.\n\n%1$@ records everything: slope, miss angle and miss reasons.\n%2$@ only takes distance, putt for and made or missed – that information can't be used for most statistics.\n%3$@ shows exactly the fields you set up in Settings.\n\nYour first round is played in %1$@.";
 "tutorial.startRound" = "All set! Tap %@ to begin.";
 "tutorial.distance" = "This is the distance to the hole. The number it starts with can be set in Settings. Just type the new distance – there's no need to delete the old one. Grey means it isn't saved yet: press %@, and once it turns black, it's saved.";
+"tutorial.pace" = "Tip: a slightly long step is usually about %@, so you can pace the distance off. Best try out for yourself how long your step is.";
 "tutorial.puttFor" = "Choose what the putt is for. A birdie or eagle putt also counts as a green in regulation (GIR).";
 "tutorial.slope" = "Tap where the slope lies. Always start from the centre: up from it is uphill, down is downhill, and the further left or right of the centre, the stronger the break that way. Custom mode also offers a simplified grid.";
 "tutorial.missAngle" = "Missed? Drag round the hole to where the ball stopped in relation to the hole. How far away it finished isn't asked – the distance of your next putt is used for that. Tap the centre if the putt went in.";
