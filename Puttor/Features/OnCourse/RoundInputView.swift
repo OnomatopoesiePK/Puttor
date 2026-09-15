@@ -167,6 +167,12 @@ struct RoundInputView: View {
             DoubleBreakButtonsView(value: Binding(get: { session.draftDoubleBreak }, set: { session.draftDoubleBreak = $0 }))
         }
         .tutorialTarget(.slope)
+        // The tutorial shows a real reading: 3 % downhill, breaking 2 % left to right.
+        .onChange(of: TutorialController.shared.step) { _, step in
+            guard step == .slope, session.draftSideSlopePct == 0, session.draftHillSlopePct == 0 else { return }
+            session.draftSideSlopePct = 2
+            session.draftHillSlopePct = -3
+        }
     }
 
     private func resultField(_ session: RoundSession, boardSize: CGFloat = 280) -> some View {

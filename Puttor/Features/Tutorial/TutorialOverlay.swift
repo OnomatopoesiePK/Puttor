@@ -14,6 +14,7 @@ struct TutorialOverlay: View {
     let screen: TutorialScreen
 
     @State private var confirmingSkip = false
+    @State private var cardHeight: CGFloat = 0
     @AppStorage(AppStorageKeys.units) private var unitsPref = "metric"
     private let tutorial = TutorialController.shared
 
@@ -93,28 +94,44 @@ struct TutorialOverlay: View {
                     .allowsHitTesting(false)
             }
 
-            VStack(spacing: 0) {
-                if let hole, cardBelow {
-                    Color.clear
-                        .frame(height: hole.maxY + Self.margin)
-                        .allowsHitTesting(false)
-                } else {
-                    Spacer(minLength: 60)
+            card(step)
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { height in
+                    cardHeight = height
                 }
-                card(step)
-                if let hole, !cardBelow {
-                    Color.clear
-                        .frame(height: max(0, size.height - hole.minY + Self.margin))
-                        .allowsHitTesting(false)
-                } else {
-                    Spacer(minLength: 40)
-                }
-            }
-            .padding(.horizontal, Self.margin)
-            .frame(width: size.width, height: size.height)
+                .padding(.horizontal, Self.margin)
+                .frame(width: size.width)
+                .offset(y: cardTop(hole: hole, preferBelow: cardBelow, size: size))
         }
         .frame(width: size.width, height: size.height, alignment: .topLeading)
         .animation(Self.movement, value: cutout)
+        .animation(Self.movement, value: cardHeight)
+    }
+
+    /// Where the card's top goes: beside the opening on the side with room,
+    /// and when neither side has room — a tall opening on a small screen —
+    /// over the opening's lower part, so the card and its Next button always
+    /// stay inside the screen's safe area.
+    private func cardTop(hole: CGRect?, preferBelow: Bool, size: CGSize) -> CGFloat {
+        let insets = Self.windowInsets
+        let highest = insets.top + Self.margin
+        let lowest = max(highest, size.height - insets.bottom - Self.margin - cardHeight)
+        guard let hole else { return min(max(highest, (size.height - cardHeight) / 2), lowest) }
+        let below = hole.maxY + Self.margin
+        let above = hole.minY - Self.margin - cardHeight
+        let fitsBelow = below <= lowest
+        let fitsAbove = above >= highest
+        if preferBelow ? fitsBelow : !fitsAbove && fitsBelow { return below }
+        if fitsAbove { return above }
+        return lowest
+    }
+
+    private static var windowInsets: UIEdgeInsets {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)?.safeAreaInsets ?? .zero
     }
 
     private func card(_ step: TutorialStep) -> some View {
@@ -221,6 +238,9 @@ struct TutorialOverlay: View {
             return String(format: L(step.textKey), L("setup.startRound"))
         case .distance:
             return String(format: L(step.textKey), L("numpad.enter"))
+        case .slope:
+            // Only the escaped percent signs to resolve.
+            return String(format: L(step.textKey))
         case .pace:
             // A slightly long step: about a metre, or about a yard.
             return L(unitsPref == "imperial" ? "tutorial.pace.imperial" : step.textKey)
