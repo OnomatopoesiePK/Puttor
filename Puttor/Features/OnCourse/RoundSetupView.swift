@@ -73,17 +73,23 @@ struct RoundSetupView: View {
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
                     // The first heading sits right under the bar; the rest keep
                     // their gap to whatever is above them.
-                    label(L("setup.course"), top: 0)
-                    TextField(L("setup.courseNamePlaceholder"), text: $courseName)
-                        .textFieldStyle(.plain)
-                        .padding(Theme.Spacing.md)
-                        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-                        .foregroundStyle(Theme.text)
+                    VStack(alignment: .leading, spacing: 4) {
+                        label(L("setup.course"), top: 0)
+                        TextField(L("setup.courseNamePlaceholder"), text: $courseName)
+                            .textFieldStyle(.plain)
+                            .padding(Theme.Spacing.md)
+                            .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+                            .foregroundStyle(Theme.text)
+                            .submitLabel(.done)
+                            .onSubmit { TutorialController.shared.advance(from: .courseName) }
+                    }
+                    .tutorialTarget(.courseName)
 
                     label(L("setup.date"))
                     DatePicker("", selection: $date)
@@ -91,11 +97,18 @@ struct RoundSetupView: View {
                         .labelsHidden()
                         .colorScheme(.dark)
 
-                    label(L("setup.putter"))
-                    putterSection
+                    VStack(alignment: .leading, spacing: 4) {
+                        label(L("setup.putter"))
+                        putterSection
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .tutorialTarget(.putter)
 
-                    label(L("setup.stimp"))
-                    stimpCard
+                    VStack(alignment: .leading, spacing: 4) {
+                        label(L("setup.stimp"))
+                        stimpCard
+                    }
+                    .tutorialTarget(.greenSpeed)
                     // Grain is part of how the greens roll, so it sits with
                     // their pace rather than with the weather.
                     switchRow(titleKey: "setup.grainyGreens", infoKey: "setup.grainyGreens.info", isOn: $grainyGreens)
@@ -103,17 +116,23 @@ struct RoundSetupView: View {
 
                     // Wind, temperature and precipitation are one question
                     // asked three ways, so they sit under one heading.
-                    label(L("setup.weather"))
-                    VStack(spacing: 8) {
-                        threeToggle(selection: $wind, options: WindLevel.allCases)
-                        threeToggle(selection: $weather, options: WeatherTemp.allCases)
-                        twoToggle(selection: $precipitation, options: Precipitation.allCases)
+                    VStack(alignment: .leading, spacing: 4) {
+                        label(L("setup.weather"))
+                        VStack(spacing: 8) {
+                            threeToggle(selection: $wind, options: WindLevel.allCases)
+                            threeToggle(selection: $weather, options: WeatherTemp.allCases)
+                            twoToggle(selection: $precipitation, options: Precipitation.allCases)
+                        }
                     }
+                    .tutorialTarget(.weather)
 
                     // How the round is scored, then whether it counts.
-                    label(L("setup.mode"))
-                    formatRow
-                        .padding(.top, 16)
+                    VStack(alignment: .leading, spacing: 4) {
+                        label(L("setup.mode"))
+                        formatRow
+                            .padding(.top, 16)
+                    }
+                    .tutorialTarget(.format)
                     switchRow(titleKey: "setup.tournament", infoKey: "setup.tournament.info", isOn: $isTournament)
                         .padding(.top, 8)
 
@@ -128,6 +147,7 @@ struct RoundSetupView: View {
                         pillButton(title: "10", selected: startingHole == 10) { startingHole = 10 }
                     }
 
+                    VStack(alignment: .leading, spacing: 4) {
                     label(L("setup.inputMode"))
                     VStack(spacing: 8) {
                         ForEach(InputMode.allCases, id: \.self) { mode in
@@ -151,11 +171,15 @@ struct RoundSetupView: View {
                             .buttonStyle(.plain)
                         }
                     }
+                    }
+                    .tutorialTarget(.inputModes)
 
                 }
                 .padding(.horizontal, Theme.Spacing.edge)
                 .padding(.top, 8)
                 .padding(.bottom, Theme.Spacing.lg)
+            }
+            .tutorialScrolling(proxy)
             }
             .background(Theme.background.ignoresSafeArea())
             // Always in reach, so a round starts without scrolling past every
@@ -175,6 +199,11 @@ struct RoundSetupView: View {
                 }
             }
             .toolbarBackground(Theme.background, for: .navigationBar)
+        }
+        .overlay { TutorialOverlay(screen: .setup) }
+        // The first round, played along with the tutorial, is entered in Pro.
+        .onChange(of: TutorialController.shared.step) { _, step in
+            if step == .inputModes { inputMode = .pro }
         }
         .preferredColorScheme(ThemeManager.shared.colorScheme)
     }
@@ -468,6 +497,7 @@ struct RoundSetupView: View {
     /// out behind it so it never reads as one of them.
     private var floatingStartButton: some View {
         startButton
+            .tutorialTarget(.startRound)
             .padding(.horizontal, Theme.Spacing.edge)
             .padding(.top, Theme.Spacing.lg)
             .padding(.bottom, Theme.Spacing.sm)
@@ -485,8 +515,11 @@ struct RoundSetupView: View {
     }
 
     private func startRound() {
+        let tutorial = TutorialController.shared
+        // The first round, played along with the tutorial, is entered in Pro.
+        let mode: InputMode = tutorial.step == .startRound ? .pro : inputMode
         let selectedPutter = putters.first { $0.persistentModelID == putterID }
-        UserDefaults.standard.set(inputMode.rawValue, forKey: AppStorageKeys.lastInputMode)
+        UserDefaults.standard.set(mode.rawValue, forKey: AppStorageKeys.lastInputMode)
 
         if let existingRound {
             existingRound.courseName = courseName.trimmingCharacters(in: .whitespaces)
@@ -519,11 +552,12 @@ struct RoundSetupView: View {
             isTournament: isTournament,
             playFormat: playFormat,
             startingHole: startingHole,
-            inputMode: inputMode
+            inputMode: mode
         )
         round.readingMethod = readingMethod
         modelContext.insert(round)
         try? modelContext.save()
+        tutorial.advance(from: .startRound)
         onCreated(round)
     }
 }

@@ -86,6 +86,7 @@ struct OnCourseListView: View {
     /// than that, and the list keeps the space the wide button took.
     private var startButton: some View {
         Button {
+            TutorialController.shared.startIfNeeded()
             showingSetup = true
         } label: {
             Image(systemName: "plus")

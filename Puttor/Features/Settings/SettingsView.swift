@@ -16,6 +16,7 @@ struct SettingsView: View {
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
     @AppStorage(AppStorageKeys.haptics) private var hapticsEnabled: Bool = true
     @AppStorage(AppStorageKeys.defaultFirstPuttDistance) private var defaultDistance: Double = 5.0
+    @AppStorage(AppStorageKeys.tutorialFinished) private var tutorialFinished = false
     @ObservedObject private var localization = LocalizationManager.shared
     @ObservedObject private var themeManager = ThemeManager.shared
 
@@ -170,6 +171,9 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
 
+                    tutorialRow
+                        .padding(.top, 8)
+
                     sectionHeader(L("settings.data"))
                     DataTransferSection()
                         .padding(.bottom, 8)
@@ -225,6 +229,33 @@ struct SettingsView: View {
                 Text(putterToDelete.map { String(format: L("settings.deletePutterMessage"), $0.name) } ?? "")
             }
         }
+    }
+
+    /// Brings the tutorial back for the next round, once it was finished or
+    /// skipped.
+    private var tutorialRow: some View {
+        Button {
+            TutorialController.shared.replay()
+        } label: {
+            HStack {
+                Image(systemName: "graduationcap.fill").foregroundStyle(Theme.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("settings.tutorial.replay")).foregroundStyle(Theme.text)
+                    Text(L(tutorialFinished ? "settings.tutorial.replay.desc" : "settings.tutorial.pending"))
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                Spacer()
+                if !tutorialFinished {
+                    Image(systemName: "checkmark").foregroundStyle(Theme.primary)
+                }
+            }
+            .padding(Theme.Spacing.md)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .disabled(!tutorialFinished)
     }
 
     private func sectionHeader(_ text: String) -> some View {

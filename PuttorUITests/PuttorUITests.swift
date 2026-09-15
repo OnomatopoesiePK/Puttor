@@ -724,6 +724,75 @@ final class PuttorUITests: XCTestCase {
         snapshot("4 intention cards")
     }
 
+    /// The first round walks through the tutorial: the setup steps over the
+    /// round settings, the course named, the round started, a putt tapped in,
+    /// the rest on Next — and skipping asks first.
+    @MainActor
+    func testTutorialWalksThroughTheFirstRound() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorNoRounds", "-PuttorTutorial"]
+        app.launch()
+
+        let start = app.buttons["Start New Round"]
+        XCTAssertTrue(start.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        start.tap()
+
+        let next = app.buttons["Next"]
+        XCTAssertTrue(next.waitForExistence(timeout: 5))
+        sleep(1)
+        snapshot("1 welcome")
+        app.buttons["Skip tutorial"].tap()
+        let keepGoing = app.buttons["Keep going"]
+        XCTAssertTrue(keepGoing.waitForExistence(timeout: 3), "skipping did not ask first")
+        keepGoing.tap()
+        next.tap()
+
+        let field = app.textFields["Course name (optional)"]
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        sleep(1)
+        snapshot("2 course name")
+        field.tap()
+        field.typeText("Tutorial Links\n")
+
+        // Putter, green speed, weather, format, input modes.
+        for step in 0..<5 {
+            XCTAssertTrue(waitUntilHittable(next), "no Next on setup step \(step)")
+            sleep(1)
+            if step == 4 { snapshot("3 input modes") }
+            next.tap()
+        }
+        sleep(1)
+        snapshot("4 start round")
+        app.buttons["Start Round"].tap()
+
+        // Distance, putt for, slope, miss angle, miss reasons.
+        for step in 0..<5 {
+            XCTAssertTrue(waitUntilHittable(next, timeout: 10), "no Next on input step \(step)")
+            sleep(1)
+            if step == 0 { snapshot("5 distance") }
+            if step == 2 { snapshot("6 slope") }
+            next.tap()
+        }
+        sleep(1)
+        snapshot("7 record")
+        app.buttons["Tap-In"].tap()
+
+        // Pick up, hole picker, arrows, putt chips, end, settings.
+        for step in 0..<6 {
+            XCTAssertTrue(waitUntilHittable(next, timeout: 5), "no Next after the hole, step \(step)")
+            sleep(1)
+            if step == 0 { snapshot("8 pick up") }
+            next.tap()
+        }
+        let done = app.buttons["Let's go"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3))
+        snapshot("9 stay curious")
+        done.tap()
+        XCTAssertTrue(done.waitForNonExistence(timeout: 3))
+    }
+
     /// With no rounds, the list says so and points down at the plus.
     @MainActor
     func testEmptyRoundListPointsToThePlus() throws {

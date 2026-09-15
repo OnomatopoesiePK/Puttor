@@ -26,10 +26,18 @@ enum DemoData {
     /// with `-PuttorNoRounds` as well, the three are all there is.
     static let simulatedRoundsArgument = "-PuttorSimulatedRounds"
     static let simulatedCourse = "Simulated"
+    /// The tutorial as a first launch has it. Any other launch argument means
+    /// a test that is not about the tutorial, so it stays out of the way.
+    static let tutorialArgument = "-PuttorTutorial"
     static let roundCount = 12
 
     static func seedIfRequested(_ container: ModelContainer) {
         let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains(tutorialArgument) {
+            UserDefaults.standard.removeObject(forKey: AppStorageKeys.tutorialFinished)
+        } else if arguments.contains(where: { $0.hasPrefix("-Puttor") }) {
+            UserDefaults.standard.set(true, forKey: AppStorageKeys.tutorialFinished)
+        }
         if arguments.contains(slopeNumbersArgument) {
             var config = CustomModeConfig.defaultConfig
             config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .numbers)]

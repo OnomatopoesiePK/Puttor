@@ -61,6 +61,8 @@ struct RootTabView: View {
             .overlay(alignment: .top) {
                 if isLandscape { tabStrip }
             }
+            // The tutorial's steps on the input screen, over the tabs as well.
+            .overlay { TutorialOverlay(screen: .input) }
     }
 
     private var tabs: some View {

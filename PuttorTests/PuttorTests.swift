@@ -1673,6 +1673,56 @@ struct PuttorTests {
         #expect(ReadingMethod(raw: "nonsense") == nil)
     }
 
+    /// The tutorial walks on with Next and with what its steps wait for,
+    /// takes a missed putt to trying the rest and a finished hole to the
+    /// pick-up, and once finished or skipped does not start on its own again.
+    @MainActor
+    @Test func tutorialStepsFollowWhatThePlayerDoes() async throws {
+        let suite = "PuttorTutorialTests"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        let tutorial = TutorialController(defaults: defaults)
+
+        tutorial.startIfNeeded()
+        #expect(tutorial.step == .welcome)
+        tutorial.next()
+        #expect(tutorial.step == .courseName)
+        tutorial.advance(from: .startRound)
+        #expect(tutorial.step == .courseName, "moved on for a step it was not at")
+        tutorial.advance(from: .courseName)
+        #expect(tutorial.step == .putter)
+        for _ in 0..<10 where tutorial.step != .startRound { tutorial.next() }
+        #expect(tutorial.visibleStep(on: .setup) == .startRound)
+        tutorial.advance(from: .startRound)
+        #expect(tutorial.visibleStep(on: .setup) == nil)
+        #expect(tutorial.visibleStep(on: .input) == .distance)
+
+        for _ in 0..<10 where tutorial.step != .record { tutorial.next() }
+        #expect(tutorial.step == .record)
+        tutorial.recorded(.missed)
+        #expect(tutorial.step == .tryRest)
+        tutorial.next()
+        #expect(tutorial.practising && tutorial.visibleStep(on: .input) == nil)
+        tutorial.recorded(.missed)
+        #expect(tutorial.step == .tryRest)
+        tutorial.recorded(.advancedToNextHole)
+        #expect(tutorial.step == .pickUp && !tutorial.practising)
+
+        for _ in 0..<10 where tutorial.step != .finish { tutorial.next() }
+        #expect(tutorial.step == .finish)
+        tutorial.next()
+        #expect(tutorial.step == nil && tutorial.isFinished)
+        tutorial.startIfNeeded()
+        #expect(tutorial.step == nil)
+
+        tutorial.replay()
+        tutorial.startIfNeeded()
+        #expect(tutorial.step == .welcome)
+        tutorial.skip()
+        #expect(tutorial.step == nil && tutorial.isFinished)
+        defaults.removePersistentDomain(forName: suite)
+    }
+
     /// Named ways of reading are added once, trimmed, and taken out again.
     @MainActor
     @Test func namedWaysOfReadingAreAddedOnceAndRemoved() async throws {

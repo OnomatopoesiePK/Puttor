@@ -145,6 +145,7 @@ struct RoundInputView: View {
         section {
             DistanceNumpadView(value: Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 }), useFeet: useFeet)
         }
+        .tutorialTarget(.distance)
     }
 
     private func puttForField(_ session: RoundSession, axis: Axis) -> some View {
@@ -154,6 +155,7 @@ struct RoundInputView: View {
                 axis: axis
             )
         }
+        .tutorialTarget(.puttFor)
     }
 
     private func slopeField(_ session: RoundSession) -> some View {
@@ -164,6 +166,7 @@ struct RoundInputView: View {
             )
             DoubleBreakButtonsView(value: Binding(get: { session.draftDoubleBreak }, set: { session.draftDoubleBreak = $0 }))
         }
+        .tutorialTarget(.slope)
     }
 
     private func resultField(_ session: RoundSession, boardSize: CGFloat = 280) -> some View {
@@ -177,11 +180,14 @@ struct RoundInputView: View {
                 angle: Binding(get: { session.draftMissAngle }, set: { session.draftMissAngle = $0 }),
                 size: boardSize
             )
+            .tutorialTarget(.missAngle)
             missReasonRow(session)
+                .tutorialTarget(.missReasons)
         }
     }
 
     private func portraitFields(_ session: RoundSession) -> some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(spacing: Theme.Spacing.md) {
                 holeOutCard(session)
@@ -192,6 +198,8 @@ struct RoundInputView: View {
             }
             .padding(.horizontal, Theme.Spacing.edge)
             .padding(.vertical, Theme.Spacing.md)
+        }
+        .tutorialScrolling(proxy)
         }
     }
 
@@ -211,6 +219,7 @@ struct RoundInputView: View {
     }
 
     private func scrollingFields(_ session: RoundSession, columnWidth: CGFloat) -> some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(spacing: Theme.Spacing.md) {
                 holeOutCard(session)
@@ -238,9 +247,12 @@ struct RoundInputView: View {
             .padding(.top, 52)
             .padding(.bottom, 6)
         }
+        .tutorialScrolling(proxy)
+        }
     }
 
     private func handleOutcome(_ outcome: RoundOutcome, _ session: RoundSession) {
+        TutorialController.shared.recorded(outcome)
         if outcome == .reachedSequenceEnd {
             showSequenceEndAlert = true
         }
@@ -282,11 +294,13 @@ struct RoundInputView: View {
     private func topBar(_ session: RoundSession) -> some View {
         HStack(spacing: 8) {
             holeButton(session)
+                .tutorialTarget(.holeButton)
             PuttChipsView(session: session)
-            PickUpHoleButton(session: session) { handleOutcome($0, session) }
+                .tutorialTarget(.puttChips)
+            PickUpHoleButton(session: session) { handleOutcome($0, session) }.tutorialTarget(.pickUp)
             deleteHoleButton(session)
             totalCount(session)
-            endButton()
+            endButton().tutorialTarget(.endButton)
         }
         .padding(.horizontal, Theme.Spacing.edge)
         .padding(.vertical, Theme.Spacing.sm)
@@ -301,16 +315,18 @@ struct RoundInputView: View {
             // Both corners the same height, set by the smaller of the two.
             island(height: landscapeIslandHeight) {
                 holeButton(session, compact: true)
+                    .tutorialTarget(.holeButton)
                 // Capped, or the chips' scroll view stretches the island into
                 // a bar across a row that has nothing else in it.
                 PuttChipsView(session: session).frame(maxWidth: 132)
-                PickUpHoleButton(session: session) { handleOutcome($0, session) }
+                    .tutorialTarget(.puttChips)
+                PickUpHoleButton(session: session) { handleOutcome($0, session) }.tutorialTarget(.pickUp)
                 deleteHoleButton(session)
             }
             Spacer(minLength: 0)
             island(height: landscapeIslandHeight) {
                 totalCount(session)
-                endButton()
+                endButton().tutorialTarget(.endButton)
             }
         }
         .padding(.horizontal, Theme.Spacing.edge)
@@ -416,9 +432,13 @@ struct RoundInputView: View {
 
     private func bottomBar(_ session: RoundSession) -> some View {
         HStack(spacing: 8) {
-            navArrows(session)
-            recordButton(session, fills: true)
-            tapInButton(session)
+            HStack(spacing: 8) { navArrows(session) }
+                .tutorialTarget(.navArrows)
+            HStack(spacing: 8) {
+                recordButton(session, fills: true)
+                tapInButton(session)
+            }
+            .tutorialTarget(.recordBar)
         }
         .padding(Theme.Spacing.md)
         .background(Theme.surface)
@@ -429,9 +449,13 @@ struct RoundInputView: View {
     /// with nothing painted across the empty half of the row.
     private func landscapeBottomBar(_ session: RoundSession, width: CGFloat) -> some View {
         island {
-            navArrows(session)
-            recordButton(session, fills: true)
-            tapInButton(session)
+            HStack(spacing: 8) { navArrows(session) }
+                .tutorialTarget(.navArrows)
+            HStack(spacing: 8) {
+                recordButton(session, fills: true)
+                tapInButton(session)
+            }
+            .tutorialTarget(.recordBar)
         }
         // The width goes on the island itself; padding outside it would eat
         // into the column width the board above is drawn at.
