@@ -152,9 +152,12 @@
 "setup.weather" = "WEATHER";
 "setup.mode" = "MODE";
 "setup.readingMode" = "READING";
-"reading.aimPoint" = "AimPoint";
+"reading.aimPoint" = "Foot Feel";
 "reading.visual" = "Visual";
 "reading.hybrid" = "Hybrid";
+"setup.addReading" = "Add a way of reading";
+"setup.readingNamePlaceholder" = "Your way of reading…";
+"setup.removeReading" = "Remove";
 "stats.filter.reading" = "Reading";
 "dispersion.grid.long" = "Long";
 "dispersion.grid.justPast" = "Just past";

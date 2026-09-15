@@ -173,7 +173,7 @@ enum DemoData {
                 playFormat: index == 1 ? .matchPlay : .strokePlay,
                 inputMode: .custom
             )
-            round.readingMode = [.aimPoint, .hybrid, .aimPoint][index]
+            round.readingMethod = [ReadingMethod(.aimPoint), ReadingMethod(.hybrid), ReadingMethod(custom: "Plumb bob")][index]
             round.tracksScoreCategory = true
             round.isComplete = true
             context.insert(round)

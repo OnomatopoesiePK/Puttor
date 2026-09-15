@@ -753,11 +753,23 @@ final class PuttorUITests: XCTestCase {
         sleep(3) // past the title screen
         start.tap()
 
-        let aimPoint = app.buttons["AimPoint"]
-        XCTAssertTrue(aimPoint.waitForExistence(timeout: 5))
-        scrollIntoView(aimPoint, in: app, bottomMargin: 180)
-        aimPoint.tap()
-        snapshot("1 reading picked")
+        let footFeel = app.buttons["Foot Feel"]
+        XCTAssertTrue(footFeel.waitForExistence(timeout: 5))
+        scrollIntoView(footFeel, in: app, bottomMargin: 220)
+        footFeel.tap()
+        XCTAssertTrue(footFeel.isSelected, "foot feel is not picked")
+
+        // A way of reading of one's own, named behind the +.
+        app.buttons["Add a way of reading"].tap()
+        let name = app.textFields["Your way of reading…"]
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        name.tap()
+        name.typeText("Plumb bob\n")
+        let plumbBob = app.buttons["Plumb bob"]
+        XCTAssertTrue(plumbBob.waitForExistence(timeout: 3), "no pill for the new way of reading")
+        XCTAssertTrue(plumbBob.isSelected, "the new way of reading is not picked")
+        XCTAssertFalse(footFeel.isSelected)
+        snapshot("1 own reading picked")
 
         let custom = app.staticTexts["Custom"].firstMatch
         scrollIntoView(custom, in: app, bottomMargin: 180)

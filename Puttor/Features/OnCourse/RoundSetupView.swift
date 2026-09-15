@@ -32,7 +32,10 @@ struct RoundSetupView: View {
     @State private var startingHole: Int
     @State private var inputMode: InputMode
     /// Optional: nil until a way of reading is picked.
-    @State private var readingMode: ReadingMode?
+    @State private var readingMethod: ReadingMethod?
+    @State private var addingReading = false
+    @State private var newReadingName = ""
+    @AppStorage(AppStorageKeys.customReadingMethods) private var customReadingStored = ""
 
     @State private var addingPutter = false
     @State private var newPutterName = ""
@@ -60,7 +63,7 @@ struct RoundSetupView: View {
         _grainyGreens = State(initialValue: existingRound?.grainyGreens ?? false)
         _isTournament = State(initialValue: existingRound?.isTournament ?? false)
         _playFormat = State(initialValue: existingRound?.playFormat ?? .strokePlay)
-        _readingMode = State(initialValue: existingRound?.readingMode)
+        _readingMethod = State(initialValue: existingRound?.readingMethod)
         _startingHole = State(initialValue: existingRound?.startingHole ?? 1)
         // New rounds start on whichever mode was used last, so a player who
         // always uses the same one never has to re-pick it.
@@ -117,13 +120,7 @@ struct RoundSetupView: View {
                     // How the putts get read. Optional: tapping the chosen one
                     // again leaves it open.
                     label(L("setup.readingMode"))
-                    HStack(spacing: 10) {
-                        ForEach(ReadingMode.allCases) { mode in
-                            pillButton(title: L(mode.labelKey), selected: readingMode == mode) {
-                                readingMode = readingMode == mode ? nil : mode
-                            }
-                        }
-                    }
+                    readingSection
 
                     label(L("setup.startingHole"))
                     HStack(spacing: 10) {
@@ -274,6 +271,69 @@ struct RoundSetupView: View {
         }
     }
 
+    /// The built-in ways, the ones the player named, and a + to name another.
+    /// Holding a named one removes it; rounds read that way keep their name.
+    private var readingSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            FlowLayout(spacing: 8) {
+                ForEach(offeredReadingMethods) { method in
+                    pillButton(title: method.label, selected: readingMethod == method) {
+                        readingMethod = readingMethod == method ? nil : method
+                    }
+                    .contextMenu {
+                        if let name = method.customName {
+                            Button(role: .destructive) {
+                                customReadingStored = CustomReadingMethods.removing(name, from: customReadingStored)
+                                if readingMethod == method { readingMethod = nil }
+                            } label: {
+                                Label(L("setup.removeReading"), systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+                if !addingReading {
+                    pillButton(title: "+", selected: false) { addingReading = true }
+                        .accessibilityLabel(L("setup.addReading"))
+                }
+            }
+            if addingReading {
+                HStack {
+                    TextField(L("setup.readingNamePlaceholder"), text: $newReadingName)
+                        .textFieldStyle(.plain)
+                        .padding(10)
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.card))
+                        .foregroundStyle(Theme.text)
+                        .submitLabel(.done)
+                        .onSubmit(addReading)
+                    Button(L("common.add"), action: addReading)
+                        .buttonStyle(.borderedProminent)
+                        .tint(Theme.primary)
+                    Button("✕") { addingReading = false; newReadingName = "" }
+                        .foregroundStyle(Theme.textMuted)
+                }
+            }
+        }
+    }
+
+    /// The built-in ways and the named ones, and the round's own if it was
+    /// read a way since removed.
+    private var offeredReadingMethods: [ReadingMethod] {
+        var methods = ReadingMethod.builtIns + CustomReadingMethods.names(in: customReadingStored).map { ReadingMethod(custom: $0) }
+        if let current = readingMethod, !methods.contains(current) {
+            methods.append(current)
+        }
+        return methods
+    }
+
+    private func addReading() {
+        let result = CustomReadingMethods.adding(newReadingName, to: customReadingStored)
+        guard let method = result.method else { return }
+        customReadingStored = result.stored
+        readingMethod = method
+        newReadingName = ""
+        addingReading = false
+    }
+
     private var stimpCard: some View {
         VStack(spacing: 10) {
             HStack {
@@ -387,6 +447,7 @@ struct RoundSetupView: View {
                 .overlay(Capsule().stroke(selected ? Theme.primary : Theme.border, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private var startButton: some View {
@@ -438,7 +499,7 @@ struct RoundSetupView: View {
             existingRound.grainyGreens = grainyGreens
             existingRound.isTournament = isTournament
             existingRound.playFormat = playFormat
-            existingRound.readingMode = readingMode
+            existingRound.readingMethod = readingMethod
             existingRound.startingHole = startingHole
             existingRound.inputMode = inputMode
             try? modelContext.save()
@@ -460,7 +521,7 @@ struct RoundSetupView: View {
             startingHole: startingHole,
             inputMode: inputMode
         )
-        round.readingMode = readingMode
+        round.readingMethod = readingMethod
         modelContext.insert(round)
         try? modelContext.save()
         onCreated(round)

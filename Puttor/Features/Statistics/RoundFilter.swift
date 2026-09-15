@@ -72,7 +72,7 @@ struct RoundFilter: Equatable {
     /// nil for either format.
     var format: PlayFormat?
     /// nil for any way of reading.
-    var readingMode: ReadingMode?
+    var readingMethod: ReadingMethod?
     /// Whether the green-speed range is being asked about at all. Its two
     /// bounds are separately open, so "enabled with both ends open" is a
     /// perfectly good state — it just filters nothing yet.
@@ -85,7 +85,7 @@ struct RoundFilter: Equatable {
     static let stimpSteps: [Double] = Array(stride(from: 6.5, through: 12.5, by: 0.5))
 
     var isActive: Bool {
-        putterID != nil || grain != .any || tournament != .any || weather != nil || format != nil || readingMode != nil
+        putterID != nil || grain != .any || tournament != .any || weather != nil || format != nil || readingMethod != nil
             || (stimpEnabled && (stimpMin != nil || stimpMax != nil))
     }
 
@@ -95,7 +95,7 @@ struct RoundFilter: Equatable {
         guard tournament.matches(round.isTournament) else { return false }
         if let weather, !weather.matches(round) { return false }
         if let format, round.playFormat != format { return false }
-        if let readingMode, round.readingMode != readingMode { return false }
+        if let readingMethod, round.readingMethod != readingMethod { return false }
         if stimpEnabled {
             if let stimpMin, round.stimp < stimpMin - 0.001 { return false }
             if let stimpMax, round.stimp > stimpMax + 0.001 { return false }
@@ -114,7 +114,11 @@ struct RoundFilter: Equatable {
         if tournament != .any { parts.append("tr=\(tournament.rawValue)") }
         if let weather { parts.append("weather=\(weather.rawValue)") }
         if let format { parts.append("format=\(format.rawValue)") }
-        if let readingMode { parts.append("reading=\(readingMode.rawValue)") }
+        if let readingMethod {
+            // Percent-encoded: a name the player gave may hold the separators.
+            let value = readingMethod.raw.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? readingMethod.raw
+            parts.append("reading=\(value)")
+        }
         if stimpEnabled {
             parts.append("stimp=1")
             if let stimpMin { parts.append("smin=\(stimpMin)") }
@@ -135,7 +139,7 @@ struct RoundFilter: Equatable {
             case "tr": filter.tournament = FilterTriState(rawValue: value) ?? .any
             case "weather": filter.weather = WeatherFilter(rawValue: value)
             case "format": filter.format = PlayFormat(rawValue: value)
-            case "reading": filter.readingMode = ReadingMode(rawValue: value)
+            case "reading": filter.readingMethod = ReadingMethod(raw: value.removingPercentEncoding ?? value)
             case "stimp": filter.stimpEnabled = value == "1"
             case "smin": filter.stimpMin = Double(value)
             case "smax": filter.stimpMax = Double(value)

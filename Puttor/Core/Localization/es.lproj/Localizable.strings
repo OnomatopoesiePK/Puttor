@@ -152,9 +152,12 @@
 "setup.weather" = "TIEMPO";
 "setup.mode" = "MODO";
 "setup.readingMode" = "LECTURA";
-"reading.aimPoint" = "AimPoint";
+"reading.aimPoint" = "Con los pies";
 "reading.visual" = "Visual";
 "reading.hybrid" = "Híbrida";
+"setup.addReading" = "Añadir un modo de lectura";
+"setup.readingNamePlaceholder" = "Tu modo de lectura…";
+"setup.removeReading" = "Quitar";
 "stats.filter.reading" = "Lectura";
 "dispersion.grid.long" = "Largo";
 "dispersion.grid.justPast" = "Justo largo";

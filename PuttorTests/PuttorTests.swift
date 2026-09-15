@@ -1644,20 +1644,50 @@ struct PuttorTests {
         #expect(PuttSpeed.pastText(0.3048, useFeet: true) == "12 in")
     }
 
-    /// Rounds are filtered by how their putts were read, and the filter keeps
-    /// that through its stored text.
+    /// Rounds are filtered by how their putts were read — a built-in way or
+    /// one the player named — and the filter keeps that through its stored
+    /// text, whatever the name holds.
     @MainActor
     @Test func roundsFilterByHowTheyWereRead() async throws {
-        let aimed = Round(courseName: "A", date: Date(), stimp: 10, isTournament: false)
-        aimed.readingMode = .aimPoint
-        let unsaid = Round(courseName: "B", date: Date(), stimp: 10, isTournament: false)
-        var filter = RoundFilter()
-        filter.readingMode = .aimPoint
+        let felt = Round(courseName: "A", date: Date(), stimp: 10, isTournament: false)
+        felt.readingMethod = ReadingMethod(.aimPoint)
+        let named = Round(courseName: "B", date: Date(), stimp: 10, isTournament: false)
+        named.readingMethod = ReadingMethod(custom: "Feet; then eyes = both")
+        let unsaid = Round(courseName: "C", date: Date(), stimp: 10, isTournament: false)
 
+        var filter = RoundFilter()
+        filter.readingMethod = ReadingMethod(.aimPoint)
         #expect(filter.isActive)
-        #expect(filter.matches(aimed))
+        #expect(filter.matches(felt))
+        #expect(!filter.matches(named))
         #expect(!filter.matches(unsaid))
         #expect(RoundFilter.decode(filter.encoded) == filter)
+
+        filter.readingMethod = named.readingMethod
+        #expect(filter.matches(named) && !filter.matches(felt))
+        #expect(RoundFilter.decode(filter.encoded) == filter)
+
+        // A name that happens to be a built-in's raw value stays a name.
+        #expect(ReadingMethod(custom: "visual") != ReadingMethod(.visual))
+        #expect(ReadingMethod(raw: "custom:visual")?.builtIn == nil)
+        #expect(ReadingMethod(raw: "nonsense") == nil)
+    }
+
+    /// Named ways of reading are added once, trimmed, and taken out again.
+    @MainActor
+    @Test func namedWaysOfReadingAreAddedOnceAndRemoved() async throws {
+        var stored = ""
+        let first = CustomReadingMethods.adding("  Plumb bob ", to: stored)
+        stored = first.stored
+        #expect(first.method == ReadingMethod(custom: "Plumb bob"))
+        let twin = CustomReadingMethods.adding("plumb BOB", to: stored)
+        #expect(twin.stored == stored && twin.method == ReadingMethod(custom: "Plumb bob"))
+        #expect(CustomReadingMethods.adding("   ", to: stored).method == nil)
+        stored = CustomReadingMethods.adding("Express", to: stored).stored
+        #expect(CustomReadingMethods.names(in: stored) == ["Plumb bob", "Express"])
+        stored = CustomReadingMethods.removing("Plumb bob", from: stored)
+        #expect(CustomReadingMethods.names(in: stored) == ["Express"])
+        #expect(ReadingMethod.all(saved: stored, rounds: []).map(\.raw) == ["aimPoint", "visual", "hybrid", "custom:Express"])
     }
 
     /// A drill's misses name a side once there are enough of them and one side

@@ -23,7 +23,7 @@ final class Round {
     /// Stroke play unless said otherwise — the format rounds were recorded in
     /// before the question was asked.
     var playFormatRaw: String = PlayFormat.strokePlay.rawValue
-    /// How the putts were read: AimPoint, by eye, or both. Nil when not said.
+    /// How the putts were read — see ReadingMethod. Nil when not said.
     var readingModeRaw: String?
     var startingHole: Int = 1
     var inputModeRaw: String = InputMode.pro.rawValue
@@ -49,9 +49,9 @@ final class Round {
         set { playFormatRaw = newValue.rawValue }
     }
 
-    var readingMode: ReadingMode? {
-        get { readingModeRaw.flatMap(ReadingMode.init(rawValue:)) }
-        set { readingModeRaw = newValue?.rawValue }
+    var readingMethod: ReadingMethod? {
+        get { readingModeRaw.flatMap(ReadingMethod.init(raw:)) }
+        set { readingModeRaw = newValue?.raw }
     }
 
     var wind: WindLevel {

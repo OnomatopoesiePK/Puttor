@@ -59,6 +59,7 @@ private struct ScrollSnapshot: Equatable {
 private struct StatisticsPane: View {
     @Query(sort: \Round.date, order: .reverse) private var allRounds: [Round]
     @Query(sort: \Putter.name) private var putters: [Putter]
+    @AppStorage(AppStorageKeys.customReadingMethods) private var customReadingStored = ""
 
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
     @AppStorage private var filterModeRaw: String
@@ -1107,9 +1108,10 @@ private struct StatisticsPane: View {
             }
 
             Menu(L("stats.filter.reading")) {
-                Button(L("stats.filter.any")) { filter.readingMode = nil }
-                ForEach(ReadingMode.allCases) { mode in
-                    Button(L(mode.labelKey)) { filter.readingMode = mode }
+                Button(L("stats.filter.any")) { filter.readingMethod = nil }
+                // The built-in ways, the named ones, and any a round still carries.
+                ForEach(ReadingMethod.all(saved: customReadingStored, rounds: allRounds)) { method in
+                    Button(method.label) { filter.readingMethod = method }
                 }
             }
 
@@ -1217,8 +1219,8 @@ private struct StatisticsPane: View {
         if let format = filter.format {
             chips.append(("\(format.emoji) \(L(format.labelKey))", { filter.format = nil }))
         }
-        if let readingMode = filter.readingMode {
-            chips.append(("\(L("stats.filter.reading")): \(L(readingMode.labelKey))", { filter.readingMode = nil }))
+        if let readingMethod = filter.readingMethod {
+            chips.append(("\(L("stats.filter.reading")): \(readingMethod.label)", { filter.readingMethod = nil }))
         }
         if filter.stimpEnabled {
             chips.append((stimpChipLabel, {
