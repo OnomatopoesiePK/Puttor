@@ -195,6 +195,9 @@
 				Base,
 				de,
 				es,
+				"en-US",
+				"zh-Hans",
+				ja,
 			);
 			mainGroup = EC84C4713011FD0C00C7016C;
 			minimizedProjectReferenceProxies = 1;

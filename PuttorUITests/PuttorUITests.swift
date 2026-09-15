@@ -793,6 +793,35 @@ final class PuttorUITests: XCTestCase {
         XCTAssertTrue(done.waitForNonExistence(timeout: 3))
     }
 
+    /// The new languages carry the key screens — the round list, the
+    /// statistics, the coach and the settings — in Japanese and in Chinese.
+    @MainActor
+    func testKeyScreensInJapaneseAndChinese() throws {
+        XCUIDevice.shared.orientation = .portrait
+        for language in ["ja", "zh-Hans"] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-PuttorNoRounds", "-PuttorSimulatedRounds", "-appLanguage", language]
+            app.launch()
+            let tabs = app.tabBars.buttons
+            XCTAssertTrue(tabs.element(boundBy: 0).waitForExistence(timeout: 15))
+            sleep(3) // past the title screen
+            snapshot("\(language) 1 rounds")
+            tabs.element(boundBy: 1).tap()
+            sleep(2)
+            snapshot("\(language) 2 statistics")
+            drag(app, from: 0.85, to: 0.2)
+            sleep(1)
+            snapshot("\(language) 3 statistics further")
+            tabs.element(boundBy: 2).tap()
+            sleep(2)
+            snapshot("\(language) 4 coach")
+            tabs.element(boundBy: 4).tap()
+            sleep(2)
+            snapshot("\(language) 5 settings")
+            app.terminate()
+        }
+    }
+
     /// With no rounds, the list says so and points down at the plus.
     @MainActor
     func testEmptyRoundListPointsToThePlus() throws {

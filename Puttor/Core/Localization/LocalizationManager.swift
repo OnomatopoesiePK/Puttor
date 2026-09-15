@@ -11,15 +11,18 @@ import Combine
 final class LocalizationManager: ObservableObject {
     static let shared = LocalizationManager()
 
-    static let supportedLanguages = ["en", "de", "es"]
+    static let supportedLanguages = ["en", "en-US", "de", "es", "zh-Hans", "ja"]
 
     /// Each language named in itself — a picker that says "Spanish" to someone
     /// looking for "Español" is no help.
     static func languageName(_ code: String) -> String {
         switch code {
+        case "en-US": return "English (US)"
         case "de": return "Deutsch"
         case "es": return "Español"
-        default: return "English"
+        case "zh-Hans": return "简体中文"
+        case "ja": return "日本語"
+        default: return "English (UK)"
         }
     }
     private static let storageKey = "appLanguage"

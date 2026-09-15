@@ -9,7 +9,7 @@ enum AppStorageKeys {
     static let units = "unitsPreference"                       // "metric" | "imperial"
     static let haptics = "hapticsEnabled"                       // Bool, default true
     static let defaultFirstPuttDistance = "defaultFirstPuttDistanceM" // Double, default 6.0
-    static let appLanguage = "appLanguage"                      // "en" | "de"
+    static let appLanguage = "appLanguage"                      // see LocalizationManager.supportedLanguages
     static let customModeConfig = "customModeConfigJSON"        // JSON-encoded CustomModeConfig
     static let lastInputMode = "lastInputMode"                  // InputMode rawValue, preselected for the next round
     static let customReadingMethods = "customReadingMethods"   // Ways of reading the player named, one per line

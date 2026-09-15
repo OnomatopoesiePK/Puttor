@@ -78,7 +78,7 @@ struct OnCourseListView: View {
     }
 
     private var header: some View {
-        ScreenTitle(text: "On Course")
+        ScreenTitle(text: L("onCourse.title"))
             .screenHeaderPadding()
     }
 
