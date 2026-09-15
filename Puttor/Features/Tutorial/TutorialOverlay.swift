@@ -14,6 +14,7 @@ struct TutorialOverlay: View {
     let screen: TutorialScreen
 
     @State private var confirmingSkip = false
+    @AppStorage(AppStorageKeys.units) private var unitsPref = "metric"
     private let tutorial = TutorialController.shared
 
     /// Light in either theme, the way the tutorial was drawn: a pale wash
@@ -192,7 +193,9 @@ struct TutorialOverlay: View {
         case .distance:
             return String(format: L(step.textKey), L("numpad.enter"))
         case .record:
-            return String(format: L(step.textKey), L("input.recordShort"), L("input.tapInShort"))
+            // The distance a tap-in is saved at: 30 cm, or exactly a foot.
+            let tapIn = unitsPref == "imperial" ? "1 \(L("unit.ft"))" : "30 cm"
+            return String(format: L(step.textKey), L("input.recordShort"), L("input.tapInShort"), tapIn)
         case .endRound:
             return String(format: L(step.textKey), L("input.end"))
         default:

@@ -1065,7 +1065,7 @@
 "tutorial.slope" = "Toca dónde está la pendiente. Parte siempre del centro: hacia arriba es cuesta arriba, hacia abajo cuesta abajo, y cuanto más a la izquierda o a la derecha del centro, más cae el putt hacia ese lado. En el modo Personalizado también hay una cuadrícula simplificada.";
 "tutorial.missAngle" = "¿Fallado? Arrastra alrededor del hoyo hasta donde se quedó la bola respecto al hoyo. No se pregunta a qué distancia quedó: se usa la distancia de tu siguiente putt. Toca el centro si el putt entró.";
 "tutorial.missReasons" = "Si sabes por qué falló el putt, márcalo aquí. No es obligatorio, pero puedes hacerlo.";
-"tutorial.record" = "Toca %1$@ para guardar el putt; funciona en cuanto hay un resultado marcado en el círculo de arriba. %2$@ se puede pulsar en cualquier momento: la caída da igual y el putt cuenta para el resultado con el que se registró.";
+"tutorial.record" = "Toca %1$@ para guardar el putt; funciona en cuanto hay un resultado marcado en el círculo de arriba. %2$@ se puede pulsar en cualquier momento: cuenta como un putt embocado desde %3$@, la caída da igual y cuenta para el resultado con el que se registró.";
 "tutorial.tryRest" = "Ahora te toca a ti: registra el resto de este hoyo. El siguiente putt empieza donde se quedó la bola.";
 "tutorial.pickUp" = "¿Has levantado la bola? Toca este símbolo para terminar un hoyo sin embocar e indicar tu resultado.";
 "tutorial.holePicker" = "Toca el número de hoyo arriba a la izquierda para saltar a cualquier otro hoyo.";

@@ -1065,7 +1065,7 @@
 "tutorial.slope" = "Tap where the slope lies. Always start from the centre: up from it is uphill, down is downhill, and the further left or right of the centre, the stronger the break that way. Custom mode also offers a simplified grid.";
 "tutorial.missAngle" = "Missed? Drag round the hole to where the ball stopped in relation to the hole. How far away it finished isn't asked – the distance of your next putt is used for that. Tap the centre if the putt went in.";
 "tutorial.missReasons" = "If you know why the putt missed, mark it here. You don't have to – but you can.";
-"tutorial.record" = "Tap %1$@ to save the putt – it works once a result is set on the dial above. %2$@ can be pressed at any time: the break doesn't matter there, and the putt counts for the score it was entered with.";
+"tutorial.record" = "Tap %1$@ to save the putt – it works once a result is set on the dial above. %2$@ can be pressed at any time: it saves a holed putt from %3$@, the break doesn't matter, and it counts for the score it was entered with.";
 "tutorial.tryRest" = "Now it's your turn: enter the rest of this hole yourself. The next putt starts where the ball stopped.";
 "tutorial.pickUp" = "Picked up your ball? Tap this symbol to finish a hole without holing out and enter your score.";
 "tutorial.holePicker" = "Tap the hole number at the top left to jump to any other hole.";

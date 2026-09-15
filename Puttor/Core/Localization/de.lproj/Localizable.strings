@@ -1065,7 +1065,7 @@
 "tutorial.slope" = "Tippe an, wo das Gefälle liegt. Geh immer von der Mitte aus: nach oben ist bergauf, nach unten bergab, und je weiter links oder rechts der Mitte, desto stärker bricht der Putt in diese Richtung. Im Custom-Modus gibt es auch ein vereinfachtes Raster.";
 "tutorial.missAngle" = "Vorbei? Zieh rund ums Loch dorthin, wo der Ball im Verhältnis zum Loch liegen geblieben ist. Wie weit er weg liegt, gibst du nicht ein – dafür wird die Distanz deines nächsten Putts verwendet. Tippe in die Mitte, wenn der Putt gefallen ist.";
 "tutorial.missReasons" = "Wenn du weißt, warum der Putt vorbeiging, markiere es hier. Du musst nicht – aber du kannst.";
-"tutorial.record" = "Tippe auf %1$@, um den Putt zu speichern – das geht, sobald oben am Kreis ein Ergebnis gesetzt ist. %2$@ kannst du jederzeit drücken: Das Break spielt dabei keine Rolle, und der Putt zählt für den Score, mit dem er eingetragen wurde.";
+"tutorial.record" = "Tippe auf %1$@, um den Putt zu speichern – das geht, sobald oben am Kreis ein Ergebnis gesetzt ist. %2$@ kannst du jederzeit drücken: Er zählt als gelochter Putt aus %3$@, das Break spielt keine Rolle, und er zählt für den Score, mit dem er eingetragen wurde.";
 "tutorial.tryRest" = "Jetzt bist du dran: Trag den Rest dieses Lochs selbst ein. Der nächste Putt startet dort, wo der Ball liegen geblieben ist.";
 "tutorial.pickUp" = "Ball aufgehoben? Mit diesem Symbol beendest du ein Loch, ohne einzulochen, und trägst deinen Score ein.";
 "tutorial.holePicker" = "Tippe links oben auf die Lochnummer, um zu jedem anderen Loch zu springen.";
