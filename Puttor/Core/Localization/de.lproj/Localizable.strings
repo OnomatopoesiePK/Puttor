@@ -372,7 +372,7 @@
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.section.totals" = "PUTTS · LÖCHER · Ø PUTTS/LOCH";
 "stats.arrange" = "Abschnitte anordnen";
-"stats.sgSubtitle" = "Ø / Runde vs. PGA-Tour-Baseline";
+"stats.sgSubtitle" = "Ø / Runde vs. Tour-Baseline";
 "stats.pcgSubtitle" = "Ø / Runde aus den Tour-Trefferquoten";
 "stats.scoreVsPutting" = "SCORE VS. PUTTEN";
 "stats.svp.scoreLegend" = "gespielter Score";
@@ -858,7 +858,7 @@
 "settings.reference.desc" = "Strokes Gained, PKR und die Tour-Baseline";
 "reference.title" = "Strokes Gained & PKR";
 "reference.expectedPutts" = "ERW. PUTTS";
-"reference.intro" = "Zwei Zahlen, beide am PGA-Tour-Schnitt gemessen — sie beantworten aber verschiedene Fragen.";
+"reference.intro" = "Zwei Zahlen, beide am Tour-Schnitt gemessen — sie beantworten aber verschiedene Fragen.";
 "reference.sgText" = "Strokes Gained bewertet ein ganzes Loch: die Putts, die die Tour ab deiner ersten Distanz bräuchte, minus die, die du gebraucht hast. Ein einzelner Putt hat kein eigenes SG, denn wie gut ein Lag war, zeigt sich erst am Ende des Lochs.";
 "reference.pcgText" = "Die PKR bewertet einen einzelnen Schlag an der Trefferquote von dieser Distanz. Einen fast unmöglichen Putt zu lochen ist fast einen ganzen Punkt wert; ein Tap-in zu verfehlen kostet fast einen.";
 "reference.example" = "BEISPIEL";

@@ -372,7 +372,7 @@
 "stats.sgPutting" = "STROKES GAINED PUTTING";
 "stats.section.totals" = "PUTTS · HOLES · Ø PUTTS/HOLE";
 "stats.arrange" = "Arrange the sections";
-"stats.sgSubtitle" = "avg / round vs PGA Tour baseline";
+"stats.sgSubtitle" = "avg / round vs tour baseline";
 "stats.pcgSubtitle" = "avg / round from the tour make rates";
 "stats.scoreVsPutting" = "SCORE VS PUTTING";
 "stats.svp.scoreLegend" = "score played";
@@ -858,7 +858,7 @@
 "settings.reference.desc" = "Strokes gained, PCG and the tour baseline";
 "reference.title" = "Strokes Gained & PCG";
 "reference.expectedPutts" = "EXP. PUTTS";
-"reference.intro" = "Two numbers, both measured against the PGA Tour average — but they answer different questions.";
+"reference.intro" = "Two numbers, both measured against the tour average — but they answer different questions.";
 "reference.sgText" = "Strokes gained judges a whole hole: the putts the tour would need from your first distance, minus the putts you actually took. A single putt has none of its own, because how good a lag was only shows once the hole is over.";
 "reference.pcgText" = "PCG judges one stroke against the odds of holing from that distance. Sinking a putt nobody makes is worth nearly a full point; missing a tap-in costs nearly one.";
 "reference.example" = "EXAMPLE";

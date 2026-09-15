@@ -372,7 +372,7 @@
 "stats.sgPutting" = "GOLPES GANADOS EN PUTT";
 "stats.section.totals" = "PUTTS · HOYOS · Ø PUTTS/HOYO";
 "stats.arrange" = "Ordenar las secciones";
-"stats.sgSubtitle" = "media / ronda frente a la base del PGA Tour";
+"stats.sgSubtitle" = "media / ronda frente a la base del tour";
 "stats.pcgSubtitle" = "media / ronda a partir de las tasas de acierto del tour";
 "stats.scoreVsPutting" = "SCORE VS PUTT";
 "stats.svp.scoreLegend" = "score jugado";
@@ -858,7 +858,7 @@
 "settings.reference.desc" = "Golpes ganados, PCG y la base del tour";
 "reference.title" = "Golpes ganados y PCG";
 "reference.expectedPutts" = "PUTTS ESP.";
-"reference.intro" = "Dos números, ambos medidos contra la media del PGA Tour, pero que responden a preguntas distintas.";
+"reference.intro" = "Dos números, ambos medidos contra la media del tour, pero que responden a preguntas distintas.";
 "reference.sgText" = "Los golpes ganados juzgan un hoyo entero: los putts que el tour necesitaría desde tu primera distancia, menos los que realmente usaste. Un putt suelto no tiene los suyos, porque lo bueno que fue un lag solo se ve cuando el hoyo termina.";
 "reference.pcgText" = "El PCG juzga un solo golpe frente a la probabilidad de embocar desde esa distancia. Meter un putt que casi nadie mete vale casi un punto entero; fallar un tap-in cuesta casi uno.";
 "reference.example" = "EJEMPLO";
