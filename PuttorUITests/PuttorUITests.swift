@@ -781,6 +781,7 @@ final class PuttorUITests: XCTestCase {
             if step == 1 { snapshot("5 pace") }
             if step == 2 { snapshot("5b putt for") }
             if step == 3 { snapshot("6 slope") }
+            if step == 4 { snapshot("6b result") }
             next.tap()
         }
         sleep(1)

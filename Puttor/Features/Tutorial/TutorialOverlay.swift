@@ -94,19 +94,42 @@ struct TutorialOverlay: View {
                     .allowsHitTesting(false)
             }
 
-            card(step)
-                .onGeometryChange(for: CGFloat.self) { proxy in
-                    proxy.size.height
-                } action: { height in
-                    cardHeight = height
-                }
-                .padding(.horizontal, Self.margin)
-                .frame(width: size.width)
-                .offset(y: cardTop(hole: hole, preferBelow: cardBelow, size: size))
+            // As large as fits beside the opening, shrinking down to a size
+            // still easy to read; where even that has no room, full size over
+            // the opening.
+            ViewThatFits(in: .vertical) {
+                measuredCard(step, fontSize: 19)
+                measuredCard(step, fontSize: 17)
+                measuredCard(step, fontSize: 15)
+                measuredCard(step, fontSize: 14)
+                measuredCard(step, fontSize: 19)
+            }
+            .frame(width: size.width, height: roomBeside(hole: hole, size: size), alignment: .top)
+            .offset(y: cardTop(hole: hole, preferBelow: cardBelow, size: size))
         }
         .frame(width: size.width, height: size.height, alignment: .topLeading)
         .animation(Self.movement, value: cutout)
         .animation(Self.movement, value: cardHeight)
+    }
+
+    private func measuredCard(_ step: TutorialStep, fontSize: CGFloat) -> some View {
+        card(step, fontSize: fontSize)
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.height
+            } action: { height in
+                cardHeight = height
+            }
+            .padding(.horizontal, Self.margin)
+    }
+
+    /// The most height the card has on either side of the opening, or on
+    /// the whole screen when there is no opening.
+    private func roomBeside(hole: CGRect?, size: CGSize) -> CGFloat {
+        let insets = Self.windowInsets
+        let highest = insets.top + Self.margin
+        let bottom = size.height - insets.bottom - Self.margin
+        guard let hole else { return max(0, bottom - highest) }
+        return max(0, bottom - hole.maxY - Self.margin, hole.minY - Self.margin - highest)
     }
 
     /// Where the card's top goes: beside the opening on the side with room,
@@ -134,13 +157,13 @@ struct TutorialOverlay: View {
             .first(where: \.isKeyWindow)?.safeAreaInsets ?? .zero
     }
 
-    private func card(_ step: TutorialStep) -> some View {
+    private func card(_ step: TutorialStep, fontSize: CGFloat) -> some View {
         VStack(spacing: 14) {
             let body = text(for: step)
             // A list reads down its left edge; a sentence sits in the middle.
             let isList = body.contains("\n•")
             Text(body)
-                .font(.system(size: 19, weight: .bold))
+                .font(.system(size: fontSize, weight: .bold))
                 .foregroundStyle(Self.ink)
                 .multilineTextAlignment(isList ? .leading : .center)
                 .frame(maxWidth: .infinity, alignment: isList ? .leading : .center)
@@ -148,7 +171,7 @@ struct TutorialOverlay: View {
 
             if step == .courseName {
                 Text(L("tutorial.courseName.hint"))
-                    .font(.system(size: 17, weight: .bold))
+                    .font(.system(size: fontSize - 2, weight: .bold))
                     .foregroundStyle(Self.ink)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
