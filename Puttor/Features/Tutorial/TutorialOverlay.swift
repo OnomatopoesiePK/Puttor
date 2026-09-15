@@ -21,10 +21,13 @@ struct TutorialOverlay: View {
     private static let scrim = Color(white: 0.92).opacity(0.66)
     private static let paper = Color(white: 0.92)
     private static let ink = Color.black
-    private static let holePadding: CGFloat = 8
-    private static let holeRadius: CGFloat = 20
-    /// How close the opening may come to the screen's sides.
-    private static let edgeMargin: CGFloat = 4
+    /// The app's own margin, used for every gap here: round what is shown,
+    /// between the opening and the card, and between the card and the
+    /// screen's sides. Something as wide as the screen opens to its edges.
+    private static let margin = Theme.Spacing.edge
+    /// A box's corner plus the margin, so the opening's corners run
+    /// parallel to the corners of what it shows.
+    private static let holeRadius = Theme.Radius.lg + margin
     private static let movement = Animation.smooth(duration: 0.45)
 
     var body: some View {
@@ -57,14 +60,9 @@ struct TutorialOverlay: View {
         guard let target = step.target,
               let frame = tutorial.frames[target],
               frame.width > 1, frame.height > 1 else { return nil }
-        let rect = frame
+        return frame
             .offsetBy(dx: -origin.x, dy: -origin.y)
-            .insetBy(dx: -Self.holePadding, dy: -Self.holePadding)
-        // Kept off the sides of the screen, so its rounded corners stay in
-        // view around something as wide as the screen.
-        let minX = max(rect.minX, Self.edgeMargin)
-        let maxX = min(rect.maxX, size.width - Self.edgeMargin)
-        return CGRect(x: minX, y: rect.minY, width: max(0, maxX - minX), height: rect.height)
+            .insetBy(dx: -Self.margin, dy: -Self.margin)
     }
 
     private func layer(_ step: TutorialStep, hole: CGRect?, size: CGSize) -> some View {
@@ -82,8 +80,10 @@ struct TutorialOverlay: View {
                 .allowsHitTesting(!step.passesTouches)
 
             if hole != nil {
+                // Inside the opening, so none of it is cut off at the
+                // screen's edge.
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .stroke(Theme.primary, lineWidth: 3)
+                    .strokeBorder(Theme.primary, lineWidth: 3)
                     .frame(width: cutout.width, height: cutout.height)
                     .offset(x: cutout.minX, y: cutout.minY)
                     .allowsHitTesting(false)
@@ -92,7 +92,7 @@ struct TutorialOverlay: View {
             VStack(spacing: 0) {
                 if let hole, cardBelow {
                     Color.clear
-                        .frame(height: hole.maxY + 14)
+                        .frame(height: hole.maxY + Self.margin)
                         .allowsHitTesting(false)
                 } else {
                     Spacer(minLength: 60)
@@ -100,13 +100,13 @@ struct TutorialOverlay: View {
                 card(step)
                 if let hole, !cardBelow {
                     Color.clear
-                        .frame(height: max(0, size.height - hole.minY + 14))
+                        .frame(height: max(0, size.height - hole.minY + Self.margin))
                         .allowsHitTesting(false)
                 } else {
                     Spacer(minLength: 40)
                 }
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, Self.margin)
             .frame(width: size.width, height: size.height)
         }
         .frame(width: size.width, height: size.height, alignment: .topLeading)
@@ -161,8 +161,8 @@ struct TutorialOverlay: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 20)
         .frame(maxWidth: 520)
-        .background(RoundedRectangle(cornerRadius: 30, style: .continuous).fill(Self.paper))
-        .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Theme.primary, lineWidth: 3.5))
+        .background(RoundedRectangle(cornerRadius: Self.holeRadius, style: .continuous).fill(Self.paper))
+        .overlay(RoundedRectangle(cornerRadius: Self.holeRadius, style: .continuous).strokeBorder(Theme.primary, lineWidth: 3))
         .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
     }
 
