@@ -547,7 +547,7 @@
 "dispersion.distanceRange" = "Longitud del putt";
 "dispersion.shading.none" = "Sin color";
 "dispersion.shading.break" = "Fuerza de la caída";
-"dispersion.shading.breakLegend" = "Caída en porcentaje, en las clases de la rejilla de entrada";
+"dispersion.shading.breakLegend" = "Caída en porcentaje, de llano a 4 % o más sin saltos";
 "dispersion.shading.length" = "Longitud del putt";
 "dispersion.shading.slope" = "Cuesta arriba / abajo";
 "dispersion.shading.flat" = "Llano";
@@ -757,6 +757,10 @@
 "intention.part.speed" = "Velocidad";
 "intention.part.line" = "Línea";
 "intention.part.situation" = "Situación";
+"intention.part.goal.short" = "Objetivo";
+"intention.part.speed.short" = "Velocidad";
+"intention.part.line.short" = "Línea";
+"intention.part.situation.short" = "Situación";
 "intention.settings.situation" = "Situación (solo match play)";
 "intention.matchPlayOnly" = "La situación solo se pregunta en match play.";
 "intention.goal.make" = "Embocar";
@@ -765,6 +769,7 @@
 "intention.goal.tapIn" = "Tap-in";
 "intention.speed.dieIn" = "Muriendo";
 "intention.speed.pelz" = "Pelz";
+"intention.speed.pelz.detail" = "~%@ pasado";
 "intention.speed.firm" = "Firme";
 "intention.line.centre" = "Centro";
 "intention.line.insideEdge" = "Borde interior";

@@ -195,7 +195,7 @@ struct CustomModeSettingsView: View {
     }
 
     private func fieldRow(_ field: CustomField) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 2) {
             fieldHeader(field)
             if field.kind == .intention {
                 ForEach(IntentionPart.allCases) { part in
@@ -209,7 +209,7 @@ struct CustomModeSettingsView: View {
     /// Switches one part of the intention on or off; the last one stays on.
     private func intentionToggle(_ part: IntentionPart, of field: CustomField) -> some View {
         let isOn = field.intentionParts.contains(part)
-        return Toggle(isOn: Binding(
+        let binding = Binding(
             get: { isOn },
             set: { on in
                 guard let idx = draftConfig.fields.firstIndex(where: { $0.id == field.id }) else { return }
@@ -218,27 +218,38 @@ struct CustomModeSettingsView: View {
                 draftConfig.fields[idx].intentionParts = parts
                 hasPendingChanges = true
             }
-        )) {
-            HStack(spacing: 8) {
-                Image(systemName: part.icon)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.textSecondary)
-                    .frame(width: 20)
-                Text(L(part == .situation ? "intention.settings.situation" : part.titleKey))
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.text)
-            }
+        )
+        // Laid out by hand: the switch sets the row's height, so rows never
+        // run into each other however the label wraps.
+        return HStack(spacing: 8) {
+            Image(systemName: part.icon)
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.textSecondary)
+                .frame(width: 20)
+            Text(L(part == .situation ? "intention.settings.situation" : part.titleKey))
+                .font(.subheadline)
+                .foregroundStyle(Theme.text)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+            Toggle("", isOn: binding)
+                .labelsHidden()
+                .fixedSize()
+                .tint(Theme.primary)
         }
-        .tint(Theme.primary)
+        .frame(minHeight: 44)
         .padding(.leading, 32)
         .disabled(!isEditing || (isOn && field.intentionParts.count == 1))
     }
 
     private func fieldHeader(_ field: CustomField) -> some View {
-        HStack {
-            Image(systemName: field.kind.icon).foregroundStyle(Theme.primary).frame(width: 24)
-            Text(L(field.kind.titleKey)).foregroundStyle(Theme.text)
-            Spacer()
+        // The choice sits under the name, so editing — with its delete and
+        // move controls taking width — never squeezes the name out.
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: field.kind.icon).foregroundStyle(Theme.primary).frame(width: 24)
+                Text(L(field.kind.titleKey)).foregroundStyle(Theme.text).lineLimit(1)
+                Spacer()
+            }
             if field.kind.supportsComplexity {
                 Picker("", selection: Binding(
                     get: { field.complexity },
@@ -253,7 +264,7 @@ struct CustomModeSettingsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 230)
+                .padding(.leading, 32)
                 .disabled(!isEditing)
             }
         }

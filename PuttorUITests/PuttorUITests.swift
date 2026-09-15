@@ -653,6 +653,75 @@ final class PuttorUITests: XCTestCase {
         XCTAssertTrue(justPast.waitForNonExistence(timeout: 3), "no plot after swiping back")
     }
 
+    /// Three rounds entered the way custom mode asks now: the intention's
+    /// switches stand clear of each other, break shading blends on the miss
+    /// plot, and the intentions come out in their own section.
+    @MainActor
+    func testSimulatedRoundsWithSlopeKeypadDialAndIntentions() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorNoRounds", "-PuttorSimulatedRounds"]
+        app.launch()
+
+        let settingsTab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(settingsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+
+        // The intention's parts, each on a row of its own.
+        settingsTab.tap()
+        let customRow = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Custom Mode Fields'")).firstMatch
+        XCTAssertTrue(customRow.waitForExistence(timeout: 5))
+        customRow.tap()
+        app.buttons["Edit"].tap()
+        // A switch reports itself more than once, so the rows are counted by
+        // where the switches sit, and each row must be at least a switch tall.
+        func switchRows() -> (centres: [CGFloat], height: CGFloat) {
+            let frames = app.switches.allElementsBoundByIndex.map(\.frame)
+            var centres: [CGFloat] = []
+            for y in frames.map(\.midY).sorted() where centres.last.map({ y - $0 > 4 }) ?? true {
+                centres.append(y)
+            }
+            return (centres, frames.map(\.height).max() ?? 0)
+        }
+        XCTAssertEqual(switchRows().centres.count, 4)
+        if let last = app.switches.allElementsBoundByIndex.last { scrollIntoView(last, in: app, bottomMargin: 120) }
+        snapshot("1 intention switches")
+        let rows = switchRows()
+        XCTAssertEqual(rows.centres.count, 4)
+        for (upper, lower) in zip(rows.centres, rows.centres.dropFirst()) {
+            XCTAssertGreaterThanOrEqual(lower - upper, rows.height - 0.5, "switches overlap")
+        }
+
+        // Break strength on the miss plot.
+        app.tabBars.buttons["Stats"].tap()
+        let dispersion = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'MISS DISPERSION'")).firstMatch
+        for _ in 0..<20 where !(dispersion.exists && dispersion.frame.minY < 260) {
+            drag(app, from: 0.75, to: 0.45)
+        }
+        sleep(1)
+        // A menu picker shows as a pop-up button, its choices as buttons.
+        app.descendants(matching: .any).matching(NSPredicate(format: "label == 'No Shading'")).firstMatch.tap()
+        let breakStrength = app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Break Strength'")).firstMatch
+        XCTAssertTrue(breakStrength.waitForExistence(timeout: 3))
+        breakStrength.tap()
+        sleep(1)
+        drag(app, from: 0.6, to: 0.45)
+        sleep(1)
+        snapshot("2 break shading")
+
+        // The intentions.
+        let intention = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'INTENTION – OUTCOME'")).firstMatch
+        for _ in 0..<30 where !(intention.exists && intention.frame.minY < 200) {
+            drag(app, from: 0.75, to: 0.45)
+        }
+        XCTAssertTrue(intention.exists, "no intention section")
+        sleep(1)
+        snapshot("3 intention outcome")
+        drag(app, from: 0.8, to: 0.3)
+        sleep(1)
+        snapshot("4 intention cards")
+    }
+
     /// With no rounds, the list says so and points down at the plus.
     @MainActor
     func testEmptyRoundListPointsToThePlus() throws {
@@ -709,6 +778,15 @@ final class PuttorUITests: XCTestCase {
 
         XCTAssertTrue((side.value as? String ?? "").contains("L→R"), "side break reads \(side.value ?? "nothing")")
         XCTAssertTrue((hill.value as? String ?? "").contains("downhill"), "up or down reads \(hill.value ?? "nothing")")
+
+        // The sign pressed before the number counts too.
+        lowestButton(labelled: "±", in: app).tap()
+        lowestButton(labelled: "3", in: app).tap()
+        enterKey(in: app).tap()
+        sleep(1)
+        snapshot("3 minus first")
+        let sideNow = side.value as? String ?? ""
+        XCTAssertTrue(sideNow.contains("-3") && sideNow.contains("R→L"), "side break reads \(sideNow)")
     }
 
     /// Short drags until the element's bottom sits above the margin.

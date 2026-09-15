@@ -17,6 +17,8 @@ enum IntentionPart: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     var titleKey: String { "intention.part.\(rawValue)" }
+    /// For a four-way picker, where the full title does not fit.
+    var shortTitleKey: String { "intention.part.\(rawValue).short" }
 
     var icon: String {
         switch self {
@@ -48,7 +50,7 @@ enum PuttSpeed: String, Codable, CaseIterable, Identifiable {
     /// Dying at the hole: all of its width, but more break and less forgiving
     /// of a misjudged pace.
     case dieIn
-    /// Dave Pelz's pace: enough to finish about 43 cm past the hole.
+    /// Dave Pelz's pace: enough to finish about 30 cm — a foot — past the hole.
     case pelz
     /// Firm: less break and less of the hole, but past the bumps round the
     /// edge — at the cost of a longer one back.
@@ -57,7 +59,7 @@ enum PuttSpeed: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var labelKey: String { "intention.speed.\(rawValue)" }
 
-    static let pelzPastM = 0.43
+    static let pelzPastM = 0.3
 }
 
 /// Where the putt is aimed at the hole.

@@ -88,10 +88,19 @@ struct SlopeNumpadView: View {
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(Theme.textMuted)
                 }
-                Text(direction(field, typing ? (typedValue ?? value(field)) : value(field)))
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Theme.accent)
-                    .lineLimit(1)
+                // A minus pressed before any digit already says which way.
+                let preview = typing ? (typedValue ?? (draft == "-" ? -1 : value(field))) : value(field)
+                HStack(spacing: 6) {
+                    Image(systemName: arrow(field, preview))
+                        .font(.system(size: 26, weight: .heavy))
+                        .foregroundStyle(arrowTint(field, preview))
+                    Text(direction(field, preview))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .frame(height: 30)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
@@ -117,6 +126,23 @@ struct SlopeNumpadView: View {
             if number > 0 { return L("slopeNumpad.uphill") }
             if number < 0 { return L("slopeNumpad.downhill") }
             return L("slopeNumpad.flat")
+        }
+    }
+
+    /// The way the ball breaks, or runs up or down, as a big arrow.
+    private func arrow(_ field: Field, _ number: Double) -> String {
+        guard number != 0 else { return "minus" }
+        switch field {
+        case .side: return number < 0 ? "arrow.left" : "arrow.right"
+        case .hill: return number > 0 ? "arrow.up" : "arrow.down"
+        }
+    }
+
+    private func arrowTint(_ field: Field, _ number: Double) -> Color {
+        guard number != 0 else { return Theme.textMuted }
+        switch field {
+        case .side: return number < 0 ? Theme.breakLeft : Theme.breakRight
+        case .hill: return number > 0 ? Theme.uphill : Theme.downhill
         }
     }
 
@@ -213,13 +239,11 @@ struct SlopeNumpadView: View {
         draft += decimalSeparator
     }
 
-    /// Before a number is typed it turns the stored one round; while typing,
-    /// the typed one.
+    /// Turns the sign of what is being typed. Pressed first, it holds a minus
+    /// for the digits still to come; pressed and entered without any, it
+    /// turns the stored number round.
     private func toggleSign() {
-        if draft.isEmpty {
-            setValue(active, -value(active))
-            cleared = false
-        } else if draft.hasPrefix("-") {
+        if draft.hasPrefix("-") {
             draft.removeFirst()
         } else {
             draft = "-" + draft
@@ -241,6 +265,9 @@ struct SlopeNumpadView: View {
     private func commitDraft() {
         if let typedValue {
             setValue(active, typedValue)
+        } else if draft == "-" && !cleared {
+            // A minus with no digits after it: the shown number, turned round.
+            setValue(active, -value(active))
         }
         draft = ""
     }

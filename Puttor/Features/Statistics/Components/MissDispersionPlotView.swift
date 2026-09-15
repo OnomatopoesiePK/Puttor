@@ -349,7 +349,7 @@ struct MissDispersionPlotView: View {
         case .none:
             return 0
         case .breakMagnitude:
-            return Double(breakClass(value)) / 4
+            return min(abs(value), Self.strongestBreak) / Self.strongestBreak
         case .puttLength:
             return scale > 0.0001 ? min(1, max(0, value / scale)) : 0
         case .slope:
@@ -357,19 +357,21 @@ struct MissDispersionPlotView: View {
         }
     }
 
-    /// Break strength is stepped, not blended: the grid the putt was entered
-    /// on has five classes, so the plot uses the same five and the same
-    /// colours.
-    private func breakClass(_ percent: Double) -> Int {
-        let value = abs(percent)
-        if value < 0.5 { return 0 }
-        if value < 1.5 { return 1 }
-        if value < 2.5 { return 2 }
-        if value < 3.25 { return 3 }
-        return 4
-    }
+    /// Break at which the colour runs out: 4 % and more all look the same.
+    private static let strongestBreak = 4.0
+    private static let breakLegendLabels = ["0", "1", "2", "3", "4+"]
 
-    private static let breakClassLabels = ["0", "1", "2", "3", ">3"]
+    /// Break strength blends through the slope grid's colours — flat at 0 %,
+    /// then 1, 2, 3 and 4 % and more — instead of stepping between them. The
+    /// slope is typed to a tenth of a percent, so 1.4 % sits between the 1 and
+    /// 2 colours rather than being rounded onto one of them.
+    private func breakColor(_ percent: Double) -> Color {
+        let colors = Theme.slopeClassColors
+        let position = min(abs(percent), Self.strongestBreak) / Self.strongestBreak * Double(colors.count - 1)
+        let lower = Int(position.rounded(.down))
+        guard lower < colors.count - 1 else { return colors[colors.count - 1] }
+        return mix(colors[lower], colors[lower + 1], position - Double(lower))
+    }
 
     private var rampEnds: (low: Color, high: Color) {
         switch shading {
@@ -387,7 +389,7 @@ struct MissDispersionPlotView: View {
     private func shadingColor(_ value: Double, scale: Double) -> Color {
         let strength = normalisedStrength(value, scale: scale)
         if shading == .breakMagnitude {
-            return Theme.slopeClassColors[breakClass(value)].opacity(dotOpacity(strength))
+            return breakColor(value).opacity(dotOpacity(strength))
         }
         guard scale > 0.0001 else { return Theme.error.opacity(maxDotOpacity) }
         let ends = rampEnds
@@ -419,21 +421,25 @@ struct MissDispersionPlotView: View {
         }
     }
 
-    /// One swatch per class, labelled with the percent it stands for.
+    /// The blend the dots are coloured from, marked at each whole percent.
     private var breakLegend: some View {
         VStack(spacing: 4) {
-            HStack(spacing: 4) {
-                ForEach(Array(Theme.slopeClassColors.enumerated()), id: \.offset) { index, color in
-                    VStack(spacing: 3) {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(color.opacity(dotOpacity(Double(index) / 4)))
-                            .frame(height: 10)
-                        Text(Self.breakClassLabels[index])
-                            .font(.system(size: 9, weight: .semibold))
-                            .foregroundStyle(Theme.textMuted)
-                    }
+            let colors = Theme.slopeClassColors
+            LinearGradient(
+                colors: colors.indices.map { colors[$0].opacity(dotOpacity(Double($0) / Double(colors.count - 1))) },
+                startPoint: .leading, endPoint: .trailing
+            )
+            .frame(height: 10)
+            .clipShape(Capsule())
+
+            HStack(spacing: 0) {
+                ForEach(Array(Self.breakLegendLabels.enumerated()), id: \.offset) { index, label in
+                    if index > 0 { Spacer(minLength: 0) }
+                    Text(label)
                 }
             }
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(Theme.textMuted)
             Text(L("dispersion.shading.breakLegend"))
                 .font(.system(size: 9))
                 .foregroundStyle(Theme.textMuted)

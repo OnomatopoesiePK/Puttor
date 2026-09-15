@@ -547,7 +547,7 @@
 "dispersion.distanceRange" = "Putt-Länge";
 "dispersion.shading.none" = "Keine Färbung";
 "dispersion.shading.break" = "Break-Stärke";
-"dispersion.shading.breakLegend" = "Break in Prozent, in den Klassen des Eingabe-Grids";
+"dispersion.shading.breakLegend" = "Break in Prozent, stufenlos von eben bis 4 % und mehr";
 "dispersion.shading.length" = "Putt-Länge";
 "dispersion.shading.slope" = "Bergauf / Bergab";
 "dispersion.shading.flat" = "Eben";
@@ -757,6 +757,10 @@
 "intention.part.speed" = "Tempo";
 "intention.part.line" = "Linie";
 "intention.part.situation" = "Situation";
+"intention.part.goal.short" = "Ziel";
+"intention.part.speed.short" = "Tempo";
+"intention.part.line.short" = "Linie";
+"intention.part.situation.short" = "Situation";
 "intention.settings.situation" = "Situativ (nur Matchplay)";
 "intention.matchPlayOnly" = "Die Situation wird nur im Matchplay abgefragt.";
 "intention.goal.make" = "Lochen";
@@ -765,6 +769,7 @@
 "intention.goal.tapIn" = "Tap-in";
 "intention.speed.dieIn" = "Sterbend";
 "intention.speed.pelz" = "Pelz";
+"intention.speed.pelz.detail" = "~%@ drüber";
 "intention.speed.firm" = "Fest";
 "intention.line.centre" = "Mitte";
 "intention.line.insideEdge" = "Innenkante";

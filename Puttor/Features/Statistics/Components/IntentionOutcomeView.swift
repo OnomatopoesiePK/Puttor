@@ -28,7 +28,7 @@ struct IntentionOutcomeView: View {
             if parts.count > 1 {
                 Picker("", selection: Binding(get: { part?.rawValue ?? partRaw }, set: { partRaw = $0 })) {
                     ForEach(parts) { option in
-                        Text(L(option.titleKey)).tag(option.rawValue)
+                        Text(L(option.shortTitleKey)).tag(option.rawValue)
                     }
                 }
                 .pickerStyle(.segmented)

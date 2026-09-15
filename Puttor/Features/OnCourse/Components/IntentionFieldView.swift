@@ -88,7 +88,9 @@ struct IntentionFieldView: View {
         }
     }
 
-    private var pelzDetail: String { useFeet ? "+17 in" : "+43 cm" }
+    private var pelzDetail: String {
+        String(format: L("intention.speed.pelz.detail"), useFeet ? "1 ft" : "30 cm")
+    }
 
     /// Changes the intention; with nothing left chosen, whether it came off
     /// goes too.

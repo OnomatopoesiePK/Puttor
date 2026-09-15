@@ -20,6 +20,12 @@ enum DemoData {
     static let slopeNumbersArgument = "-PuttorSlopeNumbers"
     /// Custom mode asking for the intention.
     static let intentionArgument = "-PuttorIntention"
+    /// Custom mode as it is played now — slope typed on the keypad, the result
+    /// on the dial, the intention asked — and three rounds entered with it.
+    /// Adds to the rounds already there, replacing only those simulated before;
+    /// with `-PuttorNoRounds` as well, the three are all there is.
+    static let simulatedRoundsArgument = "-PuttorSimulatedRounds"
+    static let simulatedCourse = "Simulated"
     static let roundCount = 12
 
     static func seedIfRequested(_ container: ModelContainer) {
@@ -39,6 +45,19 @@ enum DemoData {
             try? context.delete(model: Putt.self)
             try? context.delete(model: Round.self)
             try? context.save()
+            guard arguments.contains(simulatedRoundsArgument) else { return }
+        }
+        if arguments.contains(simulatedRoundsArgument) {
+            var config = CustomModeConfig.defaultConfig
+            config.fields = [
+                CustomField(kind: .puttForCategory),
+                CustomField(kind: .slope, complexity: .numbers),
+                CustomField(kind: .intention),
+            ]
+            config.resultStyle = .angle
+            config.save()
+            UserDefaults.standard.removeObject(forKey: "stats.sectionLayout")
+            simulateRounds(into: ModelContext(container))
             return
         }
         guard arguments.contains(launchArgument) else { return }
@@ -133,6 +152,144 @@ enum DemoData {
         let line = PuttLine.allCases.randomElement(using: &rng)!
         let executed = Double.random(in: 0...1, using: &rng) < (holed ? 0.85 : 0.55)
         return PuttIntention(goal: goal, speed: speed, line: line, executed: executed)
+    }
+
+    // MARK: - Simulated rounds
+
+    /// Three rounds as the custom mode enters them now: every putt's slope to a
+    /// tenth of a percent, every miss where it finished on the dial, every putt
+    /// with an intention — the second round in match play, so the situation is
+    /// asked too. Earlier simulated rounds make way; nothing else is touched.
+    static func simulateRounds(into context: ModelContext) {
+        let rounds = (try? context.fetch(FetchDescriptor<Round>())) ?? []
+        for round in rounds where round.courseName.hasPrefix(simulatedCourse) {
+            context.delete(round)
+        }
+
+        var rng = SeededGenerator(seed: 23)
+        for index in 0..<3 {
+            let round = Round(
+                courseName: "\(simulatedCourse) \(index + 1)",
+                date: Date().addingTimeInterval(-Double(index) * 86_400),
+                stimp: [9.5, 10.5, 11][index],
+                isTournament: index == 2,
+                playFormat: index == 1 ? .matchPlay : .strokePlay,
+                inputMode: .custom
+            )
+            round.readingMode = [.aimPoint, .hybrid, .aimPoint][index]
+            round.tracksScoreCategory = true
+            round.isComplete = true
+            context.insert(round)
+            for hole in 1...18 {
+                simulateHole(hole, of: round, in: context, rng: &rng)
+            }
+        }
+        try? context.save()
+    }
+
+    private static func simulateHole(_ hole: Int, of round: Round, in context: ModelContext, rng: inout SeededGenerator) {
+        let matchPlay = round.playFormat == .matchPlay
+        var category: ScoreCategory = [.birdie, .par, .par, .par, .bogey].randomElement(using: &rng)!
+        var distance = tenth(Double.random(in: 1...13, using: &rng))
+
+        for number in 1...4 {
+            // Follow-ups are short, so their slope reads gentler.
+            let reach = number == 1 ? 1.0 : 0.6
+            let side = tenth(Double.random(in: -4.5...4.5, using: &rng) * reach)
+            let hill = tenth(Double.random(in: -3...3, using: &rng) * reach)
+            let intention = simulatedIntention(distance: distance, side: side, matchPlay: matchPlay, rng: &rng)
+            // Played as meant, a putt drops more often.
+            let odds = StrokesGained.baseline(at: distance).makeProbability * (intention.executed == true ? 1.15 : 0.7)
+            let holed = number == 4 || Double.random(in: 0...1, using: &rng) < min(0.98, odds)
+            let angle = holed ? nil : simulatedMissAngle(side: side, speed: intention.speed, rng: &rng)
+
+            let putt = Putt(
+                holeNumber: hole,
+                puttNumber: number,
+                distanceM: distance,
+                sideSlopePct: side,
+                hillSlopePct: hill,
+                puttFor: category,
+                result: angle.map(MissAngle.result(for:)) ?? .holed,
+                lipOut: !holed && Double.random(in: 0...1, using: &rng) < 0.1,
+                missAngleDeg: angle
+            )
+            putt.intention = intention
+            putt.round = round
+            round.putts.append(putt)
+            context.insert(putt)
+
+            guard let angle else { return }
+            category = steppedDown(category)
+            distance = simulatedLeave(angle: angle, intention: intention, rng: &rng)
+        }
+    }
+
+    /// Short ones to hole, long ones to lag, a line that allows for more the
+    /// more it breaks, and in match play what the other player left.
+    private static func simulatedIntention(distance: Double, side: Double, matchPlay: Bool, rng: inout SeededGenerator) -> PuttIntention {
+        let goal: PuttGoal
+        if distance < 0.8 { goal = .tapIn }
+        else if distance < 3.5 { goal = .make }
+        else if distance > 9 { goal = .lag }
+        else { goal = [.make, .make, .position, .lag].randomElement(using: &rng)! }
+
+        let speed: PuttSpeed
+        switch goal {
+        case .tapIn: speed = .firm
+        case .lag: speed = .dieIn
+        case .position: speed = [.dieIn, .pelz].randomElement(using: &rng)!
+        case .make: speed = [.dieIn, .pelz, .pelz, .firm].randomElement(using: &rng)!
+        }
+
+        let line: PuttLine
+        switch abs(side) {
+        case ..<0.5: line = .centre
+        case ..<1.5: line = [.centre, .insideEdge, .insideEdge].randomElement(using: &rng)!
+        case ..<3: line = [.insideEdge, .outsideEdge].randomElement(using: &rng)!
+        default: line = [.outsideEdge, .outsideHole].randomElement(using: &rng)!
+        }
+
+        let situation: PuttSituation? = !matchPlay ? nil
+            : goal == .lag ? .secure
+            : PuttSituation.allCases.randomElement(using: &rng)!
+        let executed = Double.random(in: 0...1, using: &rng) < (goal == .tapIn ? 0.95 : 0.7)
+        return PuttIntention(goal: goal, speed: speed, line: line, situation: situation, executed: executed)
+    }
+
+    /// Where a miss finished on the dial: more often below the hole than above
+    /// it on a breaking putt, more often short at a dying pace and long at a
+    /// firm one.
+    private static func simulatedMissAngle(side: Double, speed: PuttSpeed?, rng: inout SeededGenerator) -> Double {
+        let longShare = speed == .firm ? 0.7 : speed == .dieIn ? 0.3 : 0.5
+        let long = Double.random(in: 0...1, using: &rng) < longShare
+        let magnitude = long ? Double.random(in: 95...170, using: &rng) : Double.random(in: 10...88, using: &rng)
+        // The slope falls the way its sign points: a negative side break runs
+        // off to the left, so the low side is a negative angle.
+        let lowSide: Double = side < 0 ? -1 : 1
+        let sign: Double = abs(side) < 0.5
+            ? (Bool.random(using: &rng) ? 1 : -1)
+            : (Double.random(in: 0...1, using: &rng) < 0.65 ? lowSide : -lowSide)
+        return MissAngle.snap(sign * magnitude)
+    }
+
+    /// How far the miss finished: close at a dying pace, further back from a
+    /// firm one, a long way short on a lag that came up short.
+    private static func simulatedLeave(angle: Double, intention: PuttIntention, rng: inout SeededGenerator) -> Double {
+        let long = abs(angle) > 90
+        var range = long ? 0.4...1.6 : 0.3...1.2
+        switch intention.speed {
+        case .dieIn: range = long ? 0.3...0.8 : 0.3...1.0
+        case .pelz: range = long ? 0.3...0.9 : 0.3...1.0
+        case .firm: range = long ? 0.8...2.2 : 0.4...1.0
+        case nil: break
+        }
+        if intention.goal == .lag { range = long ? 0.4...1.5 : 0.5...2.0 }
+        return max(0.3, tenth(Double.random(in: range, using: &rng)))
+    }
+
+    private static func tenth(_ value: Double) -> Double {
+        (value * 10).rounded() / 10
     }
 
     private static func steppedDown(_ category: ScoreCategory) -> ScoreCategory {
