@@ -920,6 +920,48 @@ final class PuttorUITests: XCTestCase {
         XCTAssertTrue(sideNow.contains("-3") && sideNow.contains("R→L"), "side break reads \(sideNow)")
     }
 
+    /// Ways of reading are kept in Settings beside the putters, and the heart
+    /// marks what a new round starts with.
+    @MainActor
+    func testWaysOfReadingAndFavouritesInSettings() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData"]
+        app.launch()
+
+        let settingsTab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(settingsTab.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        settingsTab.tap()
+
+        let readings = app.staticTexts["MY WAYS OF READING"].firstMatch
+        XCTAssertTrue(readings.waitForExistence(timeout: 5), "no ways of reading in the settings")
+        scrollIntoView(readings, in: app, bottomMargin: 420)
+        XCTAssertTrue(app.staticTexts["Foot Feel"].firstMatch.exists, "the built-in ways are not listed")
+
+        // A way of one's own, added here rather than on the course.
+        app.buttons["+ Add a way of reading"].firstMatch.tap()
+        let name = app.textFields["Your way of reading…"].firstMatch
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        name.tap()
+        name.typeText("Plumb bob\n")
+        XCTAssertTrue(app.staticTexts["Plumb bob"].firstMatch.waitForExistence(timeout: 3), "the new way of reading is not listed")
+
+        // The last heart belongs to the row just added.
+        let hearts = app.buttons.matching(NSPredicate(format: "label == 'Favourite'")).allElementsBoundByIndex
+        let lastHeart = hearts.max { $0.frame.minY < $1.frame.minY }
+        XCTAssertNotNil(lastHeart, "no hearts to mark a favourite with")
+        lastHeart?.tap()
+        sleep(1)
+        snapshot("1 ways of reading")
+
+        let putters = app.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'PUTTERS'")).firstMatch
+        XCTAssertTrue(putters.exists, "no putters section")
+        scrollIntoView(putters, in: app, bottomMargin: 520)
+        sleep(1)
+        snapshot("2 putters with hearts")
+    }
+
     /// The simplified slope grid says which way is uphill and which down, and
     /// the Custom mode settings fold out what the chosen fields are worth.
     @MainActor
