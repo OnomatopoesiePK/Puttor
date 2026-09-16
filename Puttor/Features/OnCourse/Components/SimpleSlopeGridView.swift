@@ -18,9 +18,9 @@ struct SimpleSlopeGridView: View {
     @Binding var hillValue: Double
 
     /// The big grid's own colours: its flat middle, and the shade it gives a
-    /// 2 % break at the sides.
+    /// 1 % break — which is what a tap on this grid records.
     private static let flatColor = Theme.slopeClassColors[0]
-    private static let breakColor = Theme.slopeClassColors[2]
+    private static let breakColor = Theme.slopeClassColors[1]
 
     var body: some View {
         VStack(spacing: 8) {
