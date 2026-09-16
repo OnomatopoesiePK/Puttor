@@ -48,6 +48,13 @@ enum DemoData {
             config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .numbers)]
             config.save()
         }
+        if arguments.contains(where: { $0.hasPrefix("-Puttor") }) {
+            // A test starts from a clean slate: nothing carries a heart, and
+            // no way of reading is named yet.
+            UserDefaults.standard.removeObject(forKey: AppStorageKeys.favouritePutter)
+            UserDefaults.standard.removeObject(forKey: AppStorageKeys.favouriteReadingMethod)
+            UserDefaults.standard.removeObject(forKey: AppStorageKeys.customReadingMethods)
+        }
         if arguments.contains(simpleSlopeArgument) {
             var config = CustomModeConfig.defaultConfig
             config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .simple)]

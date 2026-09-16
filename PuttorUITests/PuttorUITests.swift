@@ -960,6 +960,23 @@ final class PuttorUITests: XCTestCase {
         let putters = app.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'PUTTERS'")).firstMatch
         XCTAssertTrue(putters.exists, "no putters section")
         scrollBackIntoView(putters, in: app, topMargin: 180)
+
+        // A putter of one's own, so its heart can be marked as well.
+        app.buttons["+ Add Putter"].firstMatch.tap()
+        let putterName = app.textFields["Putter name…"].firstMatch
+        XCTAssertTrue(putterName.waitForExistence(timeout: 3))
+        putterName.tap()
+        putterName.typeText("Anser")
+        app.buttons["Add"].firstMatch.tap()
+        let anser = app.staticTexts["Anser"].firstMatch
+        XCTAssertTrue(anser.waitForExistence(timeout: 3), "the putter was not added")
+
+        let putterHeart = app.buttons.matching(NSPredicate(format: "label == 'Favourite'"))
+            .allElementsBoundByIndex
+            .first { abs($0.frame.midY - anser.frame.midY) < 22 }
+        XCTAssertNotNil(putterHeart, "no heart beside the putter")
+        putterHeart?.tap()
+        sleep(1)
         snapshot("2 putters with hearts")
     }
 
