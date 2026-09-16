@@ -952,13 +952,14 @@ final class PuttorUITests: XCTestCase {
         let lastHeart = hearts.max { $0.frame.minY < $1.frame.minY }
         XCTAssertNotNil(lastHeart, "no hearts to mark a favourite with")
         lastHeart?.tap()
-        sleep(1)
+        // Back up far enough that the section's own heading shows.
+        scrollBackIntoView(readings, in: app, topMargin: 180)
         snapshot("1 ways of reading")
 
+        // The putters sit above the readings, so this one scrolls back up.
         let putters = app.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'PUTTERS'")).firstMatch
         XCTAssertTrue(putters.exists, "no putters section")
-        scrollIntoView(putters, in: app, bottomMargin: 520)
-        sleep(1)
+        scrollBackIntoView(putters, in: app, topMargin: 180)
         snapshot("2 putters with hearts")
     }
 
@@ -1009,6 +1010,14 @@ final class PuttorUITests: XCTestCase {
         scrollIntoView(firstLine, in: app, bottomMargin: 460)
         sleep(1)
         snapshot("2 custom mode preview")
+    }
+
+    /// Short drags the other way, for something left above the screen's top.
+    private func scrollBackIntoView(_ element: XCUIElement, in app: XCUIApplication, topMargin: CGFloat) {
+        for _ in 0..<14 where !element.exists || element.frame.minY < topMargin {
+            drag(app, from: 0.45, to: 0.75)
+        }
+        sleep(1)
     }
 
     /// Short drags until the element's bottom sits above the margin.
