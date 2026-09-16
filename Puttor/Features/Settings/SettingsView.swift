@@ -24,6 +24,12 @@ struct SettingsView: View {
     @State private var newPutterName = ""
     @State private var putterToDelete: Putter?
 
+    @AppStorage(AppStorageKeys.customReadingMethods) private var customReadingStored = ""
+    @AppStorage(AppStorageKeys.favouritePutter) private var favouritePutter = ""
+    @AppStorage(AppStorageKeys.favouriteReadingMethod) private var favouriteReading = ""
+    @State private var addingReading = false
+    @State private var newReadingName = ""
+
     private var useFeet: Bool { unitsPref == "imperial" }
 
     private var defaultDistanceDisplay: Binding<Double> {
@@ -31,6 +37,100 @@ struct SettingsView: View {
             get: { useFeet ? UnitConverter.metresToFeet(defaultDistance).rounded() : defaultDistance },
             set: { newValue in defaultDistance = useFeet ? UnitConverter.feetToMetres(newValue) : newValue }
         )
+    }
+
+    /// The built-in ways of reading and the ones the player named. Only a
+    /// named one can be taken away again; the built-ins always stand.
+    private var readingMethods: [ReadingMethod] {
+        ReadingMethod.builtIns + CustomReadingMethods.names(in: customReadingStored).map { ReadingMethod(custom: $0) }
+    }
+
+    /// Named like the putters above it: a list, a heart on each, a ✕ on the
+    /// ones the player added, and a field to add another.
+    private var readingsCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(readingMethods) { method in
+                HStack {
+                    Text("👓")
+                    Text(method.label).foregroundStyle(Theme.text)
+                    Spacer()
+                    favouriteButton(on: favouriteReading == method.raw) {
+                        favouriteReading = Favourites.toggled(method.raw, current: favouriteReading)
+                    }
+                    if let name = method.customName {
+                        Button {
+                            removeReading(name, method: method)
+                        } label: {
+                            Text("✕").foregroundStyle(Theme.error)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        // The built-ins keep the room the ✕ takes, so every
+                        // row's heart sits in the same place.
+                        Text("✕").foregroundStyle(.clear)
+                    }
+                }
+                .padding(.vertical, 4)
+                .overlay(Rectangle().fill(Theme.borderLight).frame(height: 1), alignment: .bottom)
+            }
+
+            if addingReading {
+                HStack {
+                    TextField(L("setup.readingNamePlaceholder"), text: $newReadingName)
+                        .textFieldStyle(.plain)
+                        .padding(10)
+                        .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.card))
+                        .foregroundStyle(Theme.text)
+                        .submitLabel(.done)
+                        .onSubmit(addReading)
+                    Button(L("common.add"), action: addReading)
+                        .buttonStyle(.borderedProminent)
+                        .tint(Theme.primary)
+                    Button("✕") { addingReading = false; newReadingName = "" }
+                        .foregroundStyle(Theme.textMuted)
+                }
+            } else {
+                Button("+ \(L("setup.addReading"))") { addingReading = true }
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Theme.primary)
+            }
+
+            favouriteHint
+        }
+        .padding(Theme.Spacing.md)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    private var favouriteHint: some View {
+        Text(L("settings.favourite.desc"))
+            .font(.caption)
+            .foregroundStyle(Theme.textMuted)
+            .padding(.top, 4)
+    }
+
+    private func favouriteButton(on: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: on ? "heart.fill" : "heart")
+                .foregroundStyle(on ? Theme.primary : Theme.textMuted)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L("settings.favourite"))
+    }
+
+    private func addReading() {
+        let result = CustomReadingMethods.adding(newReadingName, to: customReadingStored)
+        guard result.method != nil else { return }
+        customReadingStored = result.stored
+        newReadingName = ""
+        addingReading = false
+    }
+
+    /// Rounds read this way keep the name they were saved with; only the
+    /// offer of it goes, and with it the heart if it was on this one.
+    private func removeReading(_ name: String, method: ReadingMethod) {
+        customReadingStored = CustomReadingMethods.removing(name, from: customReadingStored)
+        if favouriteReading == method.raw { favouriteReading = "" }
     }
 
     var body: some View {
@@ -110,6 +210,9 @@ struct SettingsView: View {
                                 Text("🏌️")
                                 Text(p.name).foregroundStyle(Theme.text)
                                 Spacer()
+                                favouriteButton(on: favouritePutter == p.id.uuidString) {
+                                    favouritePutter = Favourites.toggled(p.id.uuidString, current: favouritePutter)
+                                }
                                 Button {
                                     putterToDelete = p
                                 } label: {
@@ -146,11 +249,17 @@ struct SettingsView: View {
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(Theme.primary)
                         }
+
+                        favouriteHint
                     }
                     .padding(Theme.Spacing.md)
                     .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
                     .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
                     .padding(.bottom, 8)
+
+                    sectionHeader(L("settings.myReadings"))
+                    readingsCard
+                        .padding(.bottom, 8)
 
                     sectionHeader(L("settings.reference"))
                     NavigationLink {

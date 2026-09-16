@@ -597,6 +597,9 @@
 "settings.haptics" = "Respuesta háptica";
 "settings.haptics.desc" = "Vibrar al encajar el deslizador";
 "settings.myPutters" = "MIS PUTTERS";
+"settings.myReadings" = "MIS FORMAS DE LEER";
+"settings.favourite" = "Favorito";
+"settings.favourite.desc" = "El corazón marca lo que viene ya elegido en una ronda nueva. Como máximo uno.";
 "settings.deletePutterTitle" = "Eliminar putter";
 "settings.deletePutterMessage" = "¿Quitar «%@»?";
 

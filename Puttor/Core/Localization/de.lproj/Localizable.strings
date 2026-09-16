@@ -597,6 +597,9 @@
 "settings.haptics" = "Haptisches Feedback";
 "settings.haptics.desc" = "Vibrieren beim Einrasten";
 "settings.myPutters" = "MEINE PUTTER";
+"settings.myReadings" = "MEINE LESARTEN";
+"settings.favourite" = "Favorit";
+"settings.favourite.desc" = "Das Herz legt fest, was bei einer neuen Runde schon eingestellt ist. Höchstens eines.";
 "settings.deletePutterTitle" = "Putter löschen";
 "settings.deletePutterMessage" = "„%@“ entfernen?";
 

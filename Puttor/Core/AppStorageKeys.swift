@@ -13,6 +13,8 @@ enum AppStorageKeys {
     static let customModeConfig = "customModeConfigJSON"        // JSON-encoded CustomModeConfig
     static let lastInputMode = "lastInputMode"                  // InputMode rawValue, preselected for the next round
     static let customReadingMethods = "customReadingMethods"   // Ways of reading the player named, one per line
+    static let favouritePutter = "favouritePutterID"           // UUID of the putter a new round starts with, empty for none
+    static let favouriteReadingMethod = "favouriteReadingMethod" // ReadingMethod raw value, likewise
     static let tutorialFinished = "tutorialFinished"           // Bool, set once the tutorial was finished or skipped
     static let statsCustomRoundCount = "statsCustomRoundCount"  // Int, rounds included by the Statistics "Custom" filter
     static let statsSelectedRoundIDs = "statsSelectedRoundIDs"  // Comma-joined round UUIDs for the Statistics "Choose rounds" filter

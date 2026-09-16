@@ -63,7 +63,11 @@ struct RoundSetupView: View {
         _grainyGreens = State(initialValue: existingRound?.grainyGreens ?? false)
         _isTournament = State(initialValue: existingRound?.isTournament ?? false)
         _playFormat = State(initialValue: existingRound?.playFormat ?? .strokePlay)
-        _readingMethod = State(initialValue: existingRound?.readingMethod)
+        // A new round starts with whatever carries the heart in Settings.
+        let favouriteReading = UserDefaults.standard.string(forKey: AppStorageKeys.favouriteReadingMethod) ?? ""
+        _readingMethod = State(initialValue: existingRound == nil
+            ? Favourites.readingMethod(stored: favouriteReading)
+            : existingRound?.readingMethod)
         _startingHole = State(initialValue: existingRound?.startingHole ?? 1)
         // New rounds start on whichever mode was used last, so a player who
         // always uses the same one never has to re-pick it.
@@ -100,6 +104,7 @@ struct RoundSetupView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         label(L("setup.putter"))
                         putterSection
+                            .onAppear(perform: preselectFavouritePutter)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .tutorialTarget(.putter)
@@ -352,6 +357,13 @@ struct RoundSetupView: View {
             methods.append(current)
         }
         return methods
+    }
+
+    /// The putter marked in Settings, on a new round where none is picked yet.
+    private func preselectFavouritePutter() {
+        guard existingRound == nil, putterID == nil else { return }
+        let stored = UserDefaults.standard.string(forKey: AppStorageKeys.favouritePutter) ?? ""
+        putterID = Favourites.putter(in: putters, stored: stored)?.persistentModelID
     }
 
     private func addReading() {

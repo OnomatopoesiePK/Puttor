@@ -597,6 +597,9 @@
 "settings.haptics" = "触感反馈";
 "settings.haptics.desc" = "滑块吸附时振动";
 "settings.myPutters" = "我的推杆";
+"settings.myReadings" = "我的读绿方式";
+"settings.favourite" = "常用";
+"settings.favourite.desc" = "心形决定新一轮开始时预先选好的项。最多一个。";
 "settings.deletePutterTitle" = "删除推杆";
 "settings.deletePutterMessage" = "移除“%@”？";
 

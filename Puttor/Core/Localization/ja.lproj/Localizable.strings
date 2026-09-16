@@ -597,6 +597,9 @@
 "settings.haptics" = "触覚フィードバック";
 "settings.haptics.desc" = "スライダーが目盛りに合うと振動";
 "settings.myPutters" = "マイパター";
+"settings.myReadings" = "自分の読み方";
+"settings.favourite" = "お気に入り";
+"settings.favourite.desc" = "ハートは新しいラウンドで最初から選ばれるものを決めます。1 つだけです。";
 "settings.deletePutterTitle" = "パターを削除";
 "settings.deletePutterMessage" = "「%@」を削除しますか？";
 

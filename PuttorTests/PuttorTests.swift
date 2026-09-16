@@ -1547,6 +1547,25 @@ struct PuttorTests {
         #expect(merged.doublesOrWorse == 2)
     }
 
+    /// The heart marks one putter and one way of reading: marking another
+    /// moves it, marking the same one again clears it.
+    @MainActor
+    @Test func favouritesKeepAtMostOne() async throws {
+        #expect(Favourites.toggled("a", current: "") == "a")
+        #expect(Favourites.toggled("b", current: "a") == "b")
+        #expect(Favourites.toggled("a", current: "a") == "")
+
+        #expect(Favourites.readingMethod(stored: "") == nil)
+        #expect(Favourites.readingMethod(stored: "hybrid") == ReadingMethod(.hybrid))
+        #expect(Favourites.readingMethod(stored: "custom:Plumb bob") == ReadingMethod(custom: "Plumb bob"))
+
+        let putters = [Putter(name: "Anser"), Putter(name: "Spider")]
+        #expect(Favourites.putter(in: putters, stored: putters[1].id.uuidString)?.name == "Spider")
+        #expect(Favourites.putter(in: putters, stored: "") == nil)
+        // A putter since deleted simply stops matching.
+        #expect(Favourites.putter(in: putters, stored: UUID().uuidString) == nil)
+    }
+
     /// The Custom mode preview says what a layout can be read for, and names
     /// what is missing for the rest.
     @MainActor

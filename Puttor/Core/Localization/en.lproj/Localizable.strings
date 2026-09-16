@@ -597,6 +597,9 @@
 "settings.haptics" = "Haptic feedback";
 "settings.haptics.desc" = "Vibrate on slider snaps";
 "settings.myPutters" = "MY PUTTERS";
+"settings.myReadings" = "MY WAYS OF READING";
+"settings.favourite" = "Favourite";
+"settings.favourite.desc" = "The heart picks what a new round starts with. At most one.";
 "settings.deletePutterTitle" = "Delete Putter";
 "settings.deletePutterMessage" = "Remove \"%@\"?";
 
