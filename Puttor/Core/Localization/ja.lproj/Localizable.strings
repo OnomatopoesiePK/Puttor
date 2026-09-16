@@ -729,8 +729,8 @@
 
 /* Custom mode field editor */
 "custom.title" = "カスタムモード";
-"custom.firstInput" = "最初の入力 · 常に含まれます";
-"custom.lastInput" = "最後の入力 · 常に含まれます";
+"custom.firstInput" = "常に含まれます（最初）";
+"custom.lastInput" = "常に含まれます（最後）";
 "custom.preview.title" = "プレビュー：この設定で何が分かるか";
 "custom.preview.desc" = "いまの選択がどの統計に使えるか、残りには何の項目が足りないかを示します。";
 "custom.preview.needs" = "必要：%@";

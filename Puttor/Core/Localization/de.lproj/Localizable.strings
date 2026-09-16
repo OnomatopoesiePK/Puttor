@@ -729,8 +729,8 @@
 
 /* Custom-Modus Feld-Editor */
 "custom.title" = "Custom-Modus";
-"custom.firstInput" = "ERSTE EINGABE · IMMER ENTHALTEN";
-"custom.lastInput" = "LETZTE EINGABE · IMMER ENTHALTEN";
+"custom.firstInput" = "IMMER ENTHALTEN, ALS ERSTES";
+"custom.lastInput" = "IMMER ENTHALTEN, ALS LETZTES";
 "custom.preview.title" = "Vorschau: Was du damit auswerten kannst";
 "custom.preview.desc" = "Zeigt, welche Auswertungen deine Auswahl füttert und welches Feld für die übrigen noch fehlt.";
 "custom.preview.needs" = "Braucht: %@";

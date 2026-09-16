@@ -729,8 +729,8 @@
 
 /* Custom mode field editor */
 "custom.title" = "Custom Mode";
-"custom.firstInput" = "FIRST INPUT · ALWAYS INCLUDED";
-"custom.lastInput" = "LAST INPUT · ALWAYS INCLUDED";
+"custom.firstInput" = "ALWAYS INCLUDED AS FIRST";
+"custom.lastInput" = "ALWAYS INCLUDED AS LAST";
 "custom.preview.title" = "Preview: what you can read from it";
 "custom.preview.desc" = "Shows which statistics your selection feeds, and which field is still missing for the rest.";
 "custom.preview.needs" = "Needs: %@";

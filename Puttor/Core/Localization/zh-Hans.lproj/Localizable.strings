@@ -729,8 +729,8 @@
 
 /* Custom mode field editor */
 "custom.title" = "自定义模式";
-"custom.firstInput" = "第一项输入 · 始终包含";
-"custom.lastInput" = "最后一项输入 · 始终包含";
+"custom.firstInput" = "始终包含，作为第一项";
+"custom.lastInput" = "始终包含，作为最后一项";
 "custom.preview.title" = "预览：这些设置能分析出什么";
 "custom.preview.desc" = "显示你的选择能支撑哪些统计，以及其余统计还缺哪个字段。";
 "custom.preview.needs" = "需要：%@";
