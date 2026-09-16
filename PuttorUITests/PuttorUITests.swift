@@ -920,6 +920,55 @@ final class PuttorUITests: XCTestCase {
         XCTAssertTrue(sideNow.contains("-3") && sideNow.contains("R→L"), "side break reads \(sideNow)")
     }
 
+    /// The simplified slope grid says which way is uphill and which down, and
+    /// the Custom mode settings fold out what the chosen fields are worth.
+    @MainActor
+    func testSimpleSlopeGridAndTheCustomModePreview() throws {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launchArguments = ["-PuttorDemoData", "-PuttorSimpleSlope"]
+        app.launch()
+
+        let start = app.buttons["Start New Round"]
+        XCTAssertTrue(start.waitForExistence(timeout: 15))
+        sleep(3) // past the title screen
+        start.tap()
+
+        let custom = app.staticTexts["Custom"].firstMatch
+        XCTAssertTrue(custom.waitForExistence(timeout: 5))
+        scrollIntoView(custom, in: app, bottomMargin: 180)
+        custom.tap()
+        app.buttons["Start Round"].tap()
+
+        let uphill = app.staticTexts["UPHILL"].firstMatch
+        XCTAssertTrue(uphill.waitForExistence(timeout: 10), "no uphill over the simple grid")
+        scrollIntoView(uphill, in: app, bottomMargin: 300)
+        sleep(1)
+        snapshot("1 simple slope grid")
+        XCTAssertTrue(app.staticTexts["DOWNHILL"].firstMatch.exists, "no downhill under the simple grid")
+
+        // The round stays open under the tab bar; the settings are a tap away.
+        app.tabBars.buttons["Settings"].tap()
+        let fields = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Custom Mode Fields'")).firstMatch
+        XCTAssertTrue(fields.waitForExistence(timeout: 5))
+        scrollIntoView(fields, in: app, bottomMargin: 120)
+        fields.tap()
+
+        let title = "Preview: what you can read from it"
+        let preview = app.buttons[title].firstMatch
+        let previewText = app.staticTexts[title].firstMatch
+        XCTAssertTrue(preview.waitForExistence(timeout: 5) || previewText.waitForExistence(timeout: 5), "no preview in the custom settings")
+        scrollIntoView(preview.exists ? preview : previewText, in: app, bottomMargin: 320)
+        (preview.exists ? preview : previewText).tap()
+        // The lines below the fold are not built until they are scrolled to,
+        // so the first one says whether it opened.
+        let firstLine = app.staticTexts["Strokes gained and putts per round"].firstMatch
+        XCTAssertTrue(firstLine.waitForExistence(timeout: 3), "the preview did not fold out")
+        scrollIntoView(firstLine, in: app, bottomMargin: 460)
+        sleep(1)
+        snapshot("2 custom mode preview")
+    }
+
     /// Short drags until the element's bottom sits above the margin.
     private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication, bottomMargin: CGFloat) {
         let screen = app.windows.firstMatch.frame

@@ -20,6 +20,8 @@ enum DemoData {
     static let slopeNumbersArgument = "-PuttorSlopeNumbers"
     /// Custom mode asking for the intention.
     static let intentionArgument = "-PuttorIntention"
+    /// Custom mode with the simplified slope grid rather than the big one.
+    static let simpleSlopeArgument = "-PuttorSimpleSlope"
     /// Custom mode as it is played now — slope typed on the keypad, the result
     /// on the dial, the intention asked — and three rounds entered with it.
     /// Adds to the rounds already there, replacing only those simulated before;
@@ -44,6 +46,11 @@ enum DemoData {
         if arguments.contains(slopeNumbersArgument) {
             var config = CustomModeConfig.defaultConfig
             config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .numbers)]
+            config.save()
+        }
+        if arguments.contains(simpleSlopeArgument) {
+            var config = CustomModeConfig.defaultConfig
+            config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .simple)]
             config.save()
         }
         if arguments.contains(intentionArgument) {
