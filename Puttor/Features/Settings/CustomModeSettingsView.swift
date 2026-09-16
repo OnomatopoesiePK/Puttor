@@ -22,6 +22,8 @@ struct CustomModeSettingsView: View {
     @State private var showAddField = false
     @State private var showUnsavedConfirm = false
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
+    /// The fold-out that says what this layout can be read for.
+    @State private var showPreview = false
 
     private var availableKinds: [CustomFieldKind] {
         CustomFieldKind.allCases.filter { kind in !draftConfig.fields.contains { $0.kind == kind } }
@@ -48,7 +50,7 @@ struct CustomModeSettingsView: View {
                 }
                 .listRowBackground(Theme.surface)
             } header: {
-                Text(L("custom.alwaysIncluded"))
+                Text(L("custom.firstInput"))
             } footer: {
                 Text(L("custom.distance.desc"))
             }
@@ -100,10 +102,12 @@ struct CustomModeSettingsView: View {
                 }
                 .listRowBackground(Theme.surface)
             } header: {
-                Text(L("custom.alwaysIncluded"))
+                Text(L("custom.lastInput"))
             } footer: {
                 Text(L("custom.result.desc"))
             }
+
+            previewSection
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
@@ -192,6 +196,40 @@ struct CustomModeSettingsView: View {
             showUnsavedConfirm = true
         } else {
             dismiss()
+        }
+    }
+
+    /// What the chosen fields are worth: a tap on the arrow lists the
+    /// statistics this layout feeds, and what is still missing for the rest.
+    private var previewSection: some View {
+        Section {
+            DisclosureGroup(isExpanded: $showPreview) {
+                ForEach(CustomModePreview.lines(for: draftConfig)) { line in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: line.available ? "checkmark.circle.fill" : "circle.dashed")
+                            .foregroundStyle(line.available ? Theme.primary : Theme.textMuted)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L(line.key))
+                                .font(.system(size: 14))
+                                .foregroundStyle(line.available ? Theme.text : Theme.textMuted)
+                            if let missing = line.missingKey {
+                                Text(String(format: L("custom.preview.needs"), L(missing)))
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Theme.textMuted)
+                            }
+                        }
+                    }
+                    .listRowBackground(Theme.surface)
+                }
+            } label: {
+                Text(L("custom.preview.title"))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Theme.text)
+            }
+            .tint(Theme.primary)
+            .listRowBackground(Theme.surface)
+        } footer: {
+            Text(L("custom.preview.desc"))
         }
     }
 

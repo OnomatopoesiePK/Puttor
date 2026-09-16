@@ -115,6 +115,10 @@ struct MissDispersionPlotView: View {
 
     /// The width the plot has to work with, measured rather than guessed.
     @State private var measuredWidth: CGFloat = 0
+    /// Zoomed in on the hole: the innermost ring reaches the plot's edge, so
+    /// the misses that finished close to it spread out instead of crowding
+    /// the middle.
+    @State private var zoomed = false
 
     private var hasVerticalArrow: Bool { filter == .up || filter == .down }
 
@@ -152,7 +156,15 @@ struct MissDispersionPlotView: View {
     /// in imperial — is what the plot is normalised to; a longer leave than
     /// that is drawn outside the rings rather than pinned to them.
     private var ringDistances: [Double] {
-        useFeet
+        if zoomed {
+            // A third of the way out, so the innermost ring — a metre, or
+            // three feet — becomes the whole picture. Its two inner rings are
+            // the bands the miss grid reads: just short, and just past.
+            return useFeet
+                ? [1, 2, 3].map { UnitConverter.feetToMetres($0) }
+                : [MissGrid.justShortM, MissGrid.justPastM, 1]
+        }
+        return useFeet
             ? [3, 6, 10].map { UnitConverter.feetToMetres($0) }
             : [1, 2, 3]
     }
@@ -162,7 +174,7 @@ struct MissDispersionPlotView: View {
     /// How far to the side the stretched plot reaches. A putt seldom misses
     /// far off line but often runs metres long or short, so the sides get half
     /// the reach of the top and bottom — 1.5 m against 3 m, 5 ft against 10.
-    private var lateralLimitM: Double { useFeet ? UnitConverter.feetToMetres(5) : 1.5 }
+    private var lateralLimitM: Double { outerDistance / 2 }
 
     /// Where a leave of this length sits, as a share of the outer ring. Never
     /// on top of the hole, and never further out than the plot has room for.
@@ -286,6 +298,7 @@ struct MissDispersionPlotView: View {
                             edgeLabel("dispersion.short")
                                 .frame(height: Self.edgeLabelBand)
                         }
+                        .overlay(alignment: .topTrailing) { zoomButton }
                         .aspectRatio(1, contentMode: .fit)
                         .frame(maxWidth: side)
                 }
@@ -320,6 +333,30 @@ struct MissDispersionPlotView: View {
                 }
             }
         }
+    }
+
+    /// A ring's distance. Zoomed in, the rings are shorter than the usual
+    /// format's smallest step, which would read them all as "<0.5 m".
+    private func ringLabel(_ distance: Double) -> String {
+        guard !useFeet, distance < 0.5 else {
+            return UnitConverter.formatDistance(distance, useFeet: useFeet)
+        }
+        return "\(Int((distance * 100).rounded())) cm"
+    }
+
+    private var zoomButton: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.25)) { zoomed.toggle() }
+        } label: {
+            Image(systemName: zoomed ? "minus.magnifyingglass" : "plus.magnifyingglass")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(zoomed ? Theme.primary : Theme.textSecondary)
+                .frame(width: 30, height: 30)
+                .background(Circle().fill(Theme.surfaceElevated))
+                .overlay(Circle().stroke(zoomed ? Theme.primary : Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L("dispersion.zoom"))
     }
 
     private func edgeLabel(_ key: String) -> some View {
@@ -539,11 +576,13 @@ struct MissDispersionPlotView: View {
             // don't run through it, and any miss that finished there drawn
             // over it rather than hidden by it.
             for distance in ringDistances {
-                let point = CGPoint(x: c.x, y: c.y - maxR * fraction(forLeave: distance))
-                let plate = CGRect(x: point.x - 15, y: point.y - 7, width: 30, height: 14)
+                // The outermost one stays inside the plot, clear of the LONG
+                // label sitting on the edge.
+                let point = CGPoint(x: c.x, y: c.y - maxR * min(fraction(forLeave: distance), 0.92))
+                let plate = CGRect(x: point.x - 17, y: point.y - 7, width: 34, height: 14)
                 context.fill(Path(roundedRect: plate, cornerRadius: 3), with: .color(Theme.surface))
                 context.draw(
-                    Text(UnitConverter.formatDistance(distance, useFeet: useFeet))
+                    Text(ringLabel(distance))
                         .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(Theme.textMuted),
                     at: point,
@@ -561,7 +600,11 @@ struct MissDispersionPlotView: View {
                 }
 
             for dot in ordered {
-                let r = min(22, 6 + CGFloat(dot.count - 1) * 2.4)
+                // Smaller markers zoomed in, where the misses lie further
+                // apart and each one can be told from the next.
+                let r = zoomed
+                    ? min(16, 5 + CGFloat(dot.count - 1) * 1.8)
+                    : min(22, 6 + CGFloat(dot.count - 1) * 2.4)
                 let centre = CGPoint(x: c.x + dot.x * maxR, y: c.y + dot.y * maxR)
                 let rect = CGRect(x: centre.x - r, y: centre.y - r, width: r * 2, height: r * 2)
 

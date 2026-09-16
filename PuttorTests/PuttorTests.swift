@@ -1547,33 +1547,90 @@ struct PuttorTests {
         #expect(merged.doublesOrWorse == 2)
     }
 
-    /// Misses land in the grid by side and by how far they finished: up to a
-    /// foot short is just short, up to two feet past just past, level with the
-    /// hole counts as past, and straight past splits between left and right.
+    /// The Custom mode preview says what a layout can be read for, and names
+    /// what is missing for the rest.
+    @MainActor
+    @Test func customModePreviewSaysWhatEachFieldIsWorth() async throws {
+        var config = CustomModeConfig.defaultConfig
+        config.fields = []
+        config.resultStyle = .simple
+        func line(_ key: String, in config: CustomModeConfig) throws -> CustomModePreviewLine {
+            try #require(CustomModePreview.lines(for: config).first { $0.key == key })
+        }
+
+        // Distance and the result are always in.
+        #expect(try line("custom.preview.strokesGained", in: config).available)
+        let score = try line("custom.preview.scoreRelation", in: config)
+        #expect(!score.available && score.missingKey == CustomFieldKind.puttForCategory.titleKey)
+        #expect(try !line("custom.preview.dispersion", in: config).available)
+        // Without the slope field it is the field that is missing, with it the
+        // typed-in percent.
+        #expect(try line("custom.preview.slopeExact", in: config).missingKey == CustomFieldKind.slope.titleKey)
+
+        config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .slope, complexity: .simple)]
+        config.resultStyle = .angle
+        #expect(try line("custom.preview.scoreRelation", in: config).available)
+        #expect(try line("custom.preview.dispersion", in: config).available)
+        #expect(try line("custom.preview.missSide", in: config).available)
+        #expect(try line("custom.preview.slope", in: config).available)
+        #expect(try line("custom.preview.slopeExact", in: config).missingKey == FieldComplexity.numbers.labelKey)
+
+        config.fields = [CustomField(kind: .slope, complexity: .numbers)]
+        #expect(try line("custom.preview.slopeExact", in: config).available)
+        #expect(try !line("custom.preview.intention", in: config).available)
+    }
+
+    /// Misses land in the grid by how far past or short they finished and how
+    /// far to the side — as far as the row itself reaches, 60 cm level with
+    /// the hole and 30 in front of it. An angle places a miss exactly; without
+    /// one it is split evenly, and every miss is counted once.
     @MainActor
     @Test func missesLandInTheGridBySideAndLeave() async throws {
-        func hole(_ number: Int, _ result: PuttResult, leave: Double) -> [Putt] {
+        func hole(_ number: Int, _ result: PuttResult, leave: Double, angle: Double? = nil) -> [Putt] {
             [
-                Putt(holeNumber: number, puttNumber: 1, distanceM: 5, puttFor: .par, result: result),
+                Putt(holeNumber: number, puttNumber: 1, distanceM: 5, puttFor: .par, result: result, missAngleDeg: angle),
                 Putt(holeNumber: number, puttNumber: 2, distanceM: leave, puttFor: .bogey, result: .holed),
             ]
         }
-        let putts = hole(1, .long, leave: 1.5)
-            + hole(2, .shortLeft, leave: 0.2)
-            + hole(3, .right, leave: 0.5)
-            + hole(4, .short, leave: 1.0)
-            + hole(5, .short, leave: MissGrid.justShortM)
+        // Straight beside the hole and well out; just left of it; straight
+        // short by a tap-in; long and barely off line; a corner miss; and one
+        // straight beside the hole with no angle at all.
+        let putts = hole(1, .right, leave: 1.5, angle: 90)
+            + hole(2, .left, leave: 0.4, angle: -90)
+            + hole(3, .short, leave: 0.2, angle: 0)
+            + hole(4, .longRight, leave: 2, angle: 175)
+            + hole(5, .shortLeft, leave: 0.5)
+            + hole(6, .left, leave: 0.5)
         let grid = MissGrid(putts: putts)
+        let share = 100.0 / 6
 
-        #expect(grid.total == 5)
-        #expect(grid.percent(.leftLong) == 10)
-        #expect(grid.percent(.rightLong) == 10)
-        #expect(grid.percent(.leftJustShort) == 20)
-        #expect(grid.percent(.rightJustPast) == 20)
-        #expect(grid.percent(.centreShort) == 20)
-        // A tap-in of exactly a foot is just short.
-        #expect(grid.percent(.centreJustShort) == 20)
+        func percent(_ cell: MissGridCell) -> Double { grid.percent(cell) }
+        #expect(grid.total == 6)
+        // Level with the hole, further out to the side than that row reaches.
+        #expect(abs(percent(.justPastFarRight) - share) < 0.001)
+        // Level with it and inside 60 cm: still a chance. One whole miss, and
+        // half of the one recorded without an angle.
+        #expect(abs(percent(.justPastLeft) - share * 1.5) < 0.001)
+        // Straight short with an angle: halved between the two sides.
+        #expect(abs(percent(.justShortLeft) - share / 2) < 0.001)
+        #expect(abs(percent(.justShortRight) - share / 2) < 0.001)
+        // Two metres away but barely off line: long, and in the inner column.
+        #expect(abs(percent(.longRight) - share) < 0.001)
+        // A corner miss out of the eight sectors runs at 45°: 35 cm short and
+        // 35 to the side, so past what the short rows reach.
+        #expect(abs(percent(.wayShortFarLeft) - share) < 0.001)
+        // Beside the hole without an angle: half level with it, half in front,
+        // and 50 cm is inside the one row and outside the other.
+        #expect(abs(percent(.justShortFarLeft) - share / 2) < 0.001)
         #expect(abs(MissGridCell.allCases.map(grid.percent).reduce(0, +) - 100) < 0.001)
+
+        // Every kind of miss with a leave lands somewhere, once.
+        for result in PuttResult.allCases where result != .holed && result != .missedGeneric {
+            for leave in [0.1, 0.45, 0.8, 3.0] {
+                let weights = MissGrid.cells(for: result, leave: leave).map(\.1).reduce(0, +)
+                #expect(abs(weights - 1) < 0.001, "\(result) at \(leave) was not counted once")
+            }
+        }
     }
 
     /// Putts are read by each part of their intention: makes, how often it

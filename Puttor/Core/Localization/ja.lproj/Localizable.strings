@@ -164,8 +164,10 @@
 "dispersion.grid.long" = "オーバー";
 "dispersion.grid.justPast" = "わずかにオーバー";
 "dispersion.grid.justShort" = "わずかにショート";
-"dispersion.grid.short" = "ショート";
-"dispersion.grid.caption" = "全ミスに占める割合。わずかにオーバー：カップの横か、その先。わずかにショート：タップインを含む。カップの真上を越えたミスは左右に半分ずつ数えます。";
+"dispersion.grid.farRight" = "大きく右";
+"dispersion.grid.farLeft" = "大きく左";
+"dispersion.grid.wayShort" = "大きくショート";
+"dispersion.grid.caption" = "全ミスに占める割合。行はカップの先か手前にどれだけ止まったか、列は横にどれだけ外れたかを表します。内側の 2 列に入るのは、まだ入る可能性があったパットか、どのみち OK のパットだけです：カップと同じ高さから先は横 60 cm まで、手前は 30 cm まで。角度のないミスは左右に半分ずつ分けられます。";
 "dispersion.page" = "%2$ld ページ中 %1$ld ページ目";
 "setup.grainyGreens" = "芝目の強いグリーン";
 "setup.grainyGreens.desc" = "グリーンに目立つ芝目がある";
@@ -568,6 +570,7 @@
 "dispersion.long" = "オーバー";
 "dispersion.short" = "ショート";
 "dispersion.noData" = "このフィルターにはミスのデータがありません。";
+"dispersion.zoom" = "ズーム";
 "dispersion.stretched" = "横に拡大：左右は %1$@、上下は %2$@ まで。";
 
 /* Games */
@@ -726,7 +729,22 @@
 
 /* Custom mode field editor */
 "custom.title" = "カスタムモード";
-"custom.alwaysIncluded" = "常に含まれる";
+"custom.firstInput" = "最初の入力 · 常に含まれます";
+"custom.lastInput" = "最後の入力 · 常に含まれます";
+"custom.preview.title" = "プレビュー：この設定で何が分かるか";
+"custom.preview.desc" = "いまの選択がどの統計に使えるか、残りには何の項目が足りないかを示します。";
+"custom.preview.needs" = "必要：%@";
+"custom.preview.strokesGained" = "ストロークゲインドとラウンドあたりのパット数";
+"custom.preview.distance" = "距離の統計：最初のパットの長さ、距離別の成功率";
+"custom.preview.scoreRelation" = "パーオン、バーディ率、スクランブル、PCG";
+"custom.preview.missSide" = "ミスの方向と傾向";
+"custom.preview.lipOuts" = "リップアウト";
+"custom.preview.dispersion" = "角度まで分かるミスの散らばりと、ミスのグリッド";
+"custom.preview.slope" = "曲がりと上り・下りでの絞り込み";
+"custom.preview.slopeExact" = "0.1 % 単位の曲がり、曲がりの色分け、ハイサイド";
+"custom.preview.doubleBreak" = "ダブルブレークのパットを分けて読む";
+"custom.preview.causes" = "ミスの理由と、それに続くコーチのヒント";
+"custom.preview.intention" = "意図と結果の対比";
 "custom.optionalFields" = "オプション項目";
 "custom.reorderHint" = "「編集」をタップすると、項目の並べ替えや削除ができます。項目は距離と結果の間にこの順番で表示されます。";
 "custom.unsavedTitle" = "変更を保存しますか？";
@@ -1063,7 +1081,7 @@
 "tutorial.format" = "%1$@（またはステーブルフォード）が標準の形式です。誰かとホールごとに対戦するときは%2$@を選びます。";
 "tutorial.inputModes" = "どこまで記録するかを選びます：\n\n• %1$@はすべてを記録します：傾斜、ミスの角度、ミスの理由。\n• %2$@は距離、「対象スコア」（バーディ、パー…）、入ったか入らなかったかを記録します。このモードでは統計に入るデータが少なくなります。\n• %3$@では項目を自由に追加し、細かさを変えられます。\n\n最初のラウンドは%1$@で回ります。";
 "tutorial.startRound" = "準備完了！「%@」をタップして始めましょう。";
-"tutorial.distance" = "ここにカップまでのパットの距離を入力します。初期値は設定で変更できます。欄の数字が黒なら入力は保存済みで、前の数字を消さずにそのまま新しい数字を入力できます。注意：グレーの数字を確定するには、必ず「%@」を押してください。";
+"tutorial.distance" = "ここにカップまでのパットの距離を入力します。初期値は設定で変更できます。欄の数字がはっきり表示されていれば入力は保存済みで、前の数字を消さずにそのまま新しい数字を入力できます。注意：薄く表示された数字はまだ保存されていません——確定するには必ず「%@」を押してください。";
 "tutorial.pace" = "ヒント：1 メートルがどれくらいか分からない？長さの分かっている距離を歩いて、一歩がちょうど 1 メートルになるよう歩幅を合わせるか、自分の一歩の長さを覚えて換算しましょう。ただ、たいていは少し大きめの一歩がほぼ 1 メートルです。";
 "tutorial.pace.imperial" = "ヒント：3 フィートがどれくらいか分からない？長さの分かっている距離を歩いて、一歩がちょうど 1 ヤード（3 フィート）になるよう歩幅を合わせるか、自分の一歩の長さを覚えて換算しましょう。ただ、たいていは少し大きめの一歩がほぼ 1 ヤードです。";
 "tutorial.puttFor" = "ここで「対象スコア」（バーディ、パー…）から、このパットが何のスコアを狙うものかを選びます。忘れるとあとで混乱のもとになるので、必ず選びましょう。";

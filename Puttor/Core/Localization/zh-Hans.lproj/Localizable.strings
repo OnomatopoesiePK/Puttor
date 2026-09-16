@@ -164,8 +164,10 @@
 "dispersion.grid.long" = "偏长";
 "dispersion.grid.justPast" = "刚过洞";
 "dispersion.grid.justShort" = "差一点";
-"dispersion.grid.short" = "偏短";
-"dispersion.grid.caption" = "占全部未进推球的比例。刚过洞：与洞平齐或越过洞。差一点：包括轻推入洞。从洞正上方越过的未进推球，左右各算一半。";
+"dispersion.grid.farRight" = "远右";
+"dispersion.grid.farLeft" = "远左";
+"dispersion.grid.wayShort" = "远远偏短";
+"dispersion.grid.caption" = "占全部未进推球的比例。行表示球停在洞后或洞前多远，列表示偏离多少。两个内侧列只包含仍有机会进洞、或本就算作给洞的推球：与洞平齐及越过洞时为侧向 60 厘米以内，洞前为 30 厘米以内。没有角度的未进推球在左右两侧平分。";
 "dispersion.page" = "第 %1$ld 页，共 %2$ld 页";
 "setup.grainyGreens" = "有草纹的果岭";
 "setup.grainyGreens.desc" = "果岭有明显草纹";
@@ -568,6 +570,7 @@
 "dispersion.long" = "长";
 "dispersion.short" = "短";
 "dispersion.noData" = "此筛选没有未进数据。";
+"dispersion.zoom" = "缩放";
 "dispersion.stretched" = "横向拉伸：两侧到 %1$@，上下到 %2$@。";
 
 /* Games */
@@ -726,7 +729,22 @@
 
 /* Custom mode field editor */
 "custom.title" = "自定义模式";
-"custom.alwaysIncluded" = "始终包含";
+"custom.firstInput" = "第一项输入 · 始终包含";
+"custom.lastInput" = "最后一项输入 · 始终包含";
+"custom.preview.title" = "预览：这些设置能分析出什么";
+"custom.preview.desc" = "显示你的选择能支撑哪些统计，以及其余统计还缺哪个字段。";
+"custom.preview.needs" = "需要：%@";
+"custom.preview.strokesGained" = "Strokes gained 与每轮推杆数";
+"custom.preview.distance" = "距离统计：首推长度、按距离的进洞率";
+"custom.preview.scoreRelation" = "GIR、小鸟转化率、救球和 PCG";
+"custom.preview.missSide" = "未进方向与未进倾向";
+"custom.preview.lipOuts" = "擦洞边出洞";
+"custom.preview.dispersion" = "精确到角度的未进分布，以及未进网格";
+"custom.preview.slope" = "按弯曲以及上坡、下坡筛选";
+"custom.preview.slopeExact" = "精确到 0.1% 的弯曲、弯曲配色和高位一侧";
+"custom.preview.doubleBreak" = "双弯推球可单独查看";
+"custom.preview.causes" = "未进原因以及对应的教练建议";
+"custom.preview.intention" = "意图与结果的对照";
 "custom.optionalFields" = "可选字段";
 "custom.reorderHint" = "点击“编辑”可以重新排序或移除字段。它们会按此顺序出现在距离和结果之间。";
 "custom.unsavedTitle" = "保存更改？";
@@ -1063,7 +1081,7 @@
 "tutorial.format" = "%1$@（或 Stableford 积分赛）是标准模式。当你和别人逐洞对决时，请选择%2$@。";
 "tutorial.inputModes" = "选择你想记录多少内容：\n\n• %1$@记录全部：坡度、未进角度和失误原因。\n• %2$@记录距离、“推球目标”（小鸟、帕……）以及进洞或未进。这种模式进入统计的数据很少。\n• 在%3$@中可以随意添加字段，并调整它们的详细程度。\n\n你的第一轮使用%1$@模式。";
 "tutorial.startRound" = "一切就绪！点击“%@”开始。";
-"tutorial.distance" = "在这里输入推球到洞的距离。预设数值可以在设置中更改。框中的数字是黑色时，表示已保存，你可以直接输入新数字，无需先删除旧的。注意：要确认灰色数字，必须按“%@”。";
+"tutorial.distance" = "在这里输入推球到洞的距离。预设数值可以在设置中更改。框中的数字显示得清晰时，表示已保存，你可以直接输入新数字，无需先删除旧的。注意：淡色的数字还没有保存——要确认它，必须按“%@”。";
 "tutorial.pace" = "提示：不知道一米有多远？走一段已知的长度：要么调整步幅，让一步正好一米；要么记住自己一步有多远，再换算。不过通常稍大的一步就差不多是一米。";
 "tutorial.pace.imperial" = "提示：不知道 3 英尺有多远？走一段已知的长度：要么调整步幅，让一步正好一码（3 英尺）；要么记住自己一步有多远，再换算。不过通常稍大的一步就差不多是一码。";
 "tutorial.puttFor" = "在这里的“推球目标”（小鸟、帕……）中选择这一推是为了什么成绩。别忘了这一项，否则之后可能会造成混乱。";

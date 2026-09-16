@@ -164,8 +164,10 @@
 "dispersion.grid.long" = "Largo";
 "dispersion.grid.justPast" = "Justo largo";
 "dispersion.grid.justShort" = "Justo corto";
-"dispersion.grid.short" = "Corto";
-"dispersion.grid.caption" = "Porcentaje de todos los fallos. Justo largo: a la altura del hoyo o más allá. Justo corto: incluye los tap-ins. Un fallo recto pasado el hoyo cuenta mitad a la izquierda y mitad a la derecha.";
+"dispersion.grid.farRight" = "MUY DCHA.";
+"dispersion.grid.farLeft" = "MUY IZQ.";
+"dispersion.grid.wayShort" = "Muy corto";
+"dispersion.grid.caption" = "Porcentaje de todos los fallos. Las filas indican cuánto pasó la bola el hoyo o cuánto se quedó corta; las columnas, cuánto se desvió de lado. En las dos columnas interiores solo están los putts que aún tenían opción o que estaban concedidos: hasta 60 cm de lado a la altura del hoyo y más allá, hasta 30 cm por delante. Un fallo sin ángulo se reparte por igual entre ambos lados.";
 "dispersion.page" = "Página %1$ld de %2$ld";
 "setup.grainyGreens" = "Greens con grano";
 "setup.grainyGreens.desc" = "Los greens tienen grano visible";
@@ -568,6 +570,7 @@
 "dispersion.long" = "LARGO";
 "dispersion.short" = "CORTO";
 "dispersion.noData" = "No hay datos de fallos para este filtro.";
+"dispersion.zoom" = "Zoom";
 "dispersion.stretched" = "Estirado a lo ancho: los lados llegan a %1$@, arriba y abajo a %2$@.";
 
 /* Games */
@@ -726,7 +729,22 @@
 
 /* Custom mode field editor */
 "custom.title" = "Modo personalizado";
-"custom.alwaysIncluded" = "SIEMPRE INCLUIDOS";
+"custom.firstInput" = "PRIMERA ENTRADA · SIEMPRE INCLUIDA";
+"custom.lastInput" = "ÚLTIMA ENTRADA · SIEMPRE INCLUIDA";
+"custom.preview.title" = "Vista previa: qué puedes analizar con esto";
+"custom.preview.desc" = "Muestra qué estadísticas alimenta tu selección y qué campo falta todavía para las demás.";
+"custom.preview.needs" = "Necesita: %@";
+"custom.preview.strokesGained" = "Strokes gained y putts por ronda";
+"custom.preview.distance" = "Estadística de distancia: longitud del primer putt y acierto por distancia";
+"custom.preview.scoreRelation" = "GIR, conversión de birdies, scramble y PCG";
+"custom.preview.missSide" = "Dirección y tendencia de los fallos";
+"custom.preview.lipOuts" = "Lip-outs";
+"custom.preview.dispersion" = "Dispersión de fallos con el ángulo exacto y la cuadrícula de fallos";
+"custom.preview.slope" = "Filtros por caída y por cuesta arriba o abajo";
+"custom.preview.slopeExact" = "Caída con precisión de 0,1 %, color por caída y lado alto";
+"custom.preview.doubleBreak" = "Putts de doble caída leídos por separado";
+"custom.preview.causes" = "Motivos del fallo y los consejos del entrenador que los siguen";
+"custom.preview.intention" = "Intención frente al resultado";
 "custom.optionalFields" = "CAMPOS OPCIONALES";
 "custom.reorderHint" = "Toca Editar para reordenar o quitar campos. Aparecen en este orden entre Distancia y Resultado.";
 "custom.unsavedTitle" = "¿Guardar los cambios?";
@@ -1063,7 +1081,7 @@
 "tutorial.format" = "%1$@ (o una ronda Stableford) es el modo estándar. Elige %2$@ cuando juegues hoyo a hoyo contra alguien.";
 "tutorial.inputModes" = "Elige cuánto quieres registrar:\n\n• %1$@ lo registra todo: pendiente, ángulo del fallo y motivos del fallo.\n• %2$@ registra la distancia, «putt para» (birdie, par, …) y embocado o no embocado. En este modo entran pocos datos en las estadísticas.\n• En %3$@ puedes añadir campos a tu gusto y cambiar su nivel de detalle.\n\nTu primera ronda se juega en %1$@.";
 "tutorial.startRound" = "¡Todo listo! Toca %@ para empezar.";
-"tutorial.distance" = "Aquí introduces la distancia del putt al hoyo. El número predeterminado se cambia en Ajustes. Si el número del campo está en negro, está guardado y puedes escribir uno nuevo SIN borrar antes el anterior. ATENCIÓN: para confirmar un número gris siempre tienes que pulsar %@.";
+"tutorial.distance" = "Aquí introduces la distancia del putt al hoyo. El número predeterminado se cambia en Ajustes. Si el número del campo se ve marcado, está guardado y puedes escribir uno nuevo SIN borrar antes el anterior. ATENCIÓN: un número atenuado aún no está guardado; para confirmarlo siempre tienes que pulsar %@.";
 "tutorial.pace" = "Consejo: ¿no sabes cuánto es un metro? Recorre a pasos una longitud conocida y ajusta tu zancada para que un paso sea un metro, o simplemente aprende cuánto mide tu paso y haz la cuenta. Aunque normalmente un paso algo largo equivale a un metro.";
 "tutorial.pace.imperial" = "Consejo: ¿no sabes cuánto son 3 pies? Recorre a pasos una longitud conocida y ajusta tu zancada para que un paso sea una yarda (3 pies), o simplemente aprende cuánto mide tu paso y haz la cuenta. Aunque normalmente un paso algo largo equivale a una yarda.";
 "tutorial.puttFor" = "Elige aquí en «putt para» (birdie, par, …) el resultado por el que juegas el putt. No lo olvides, porque después puede causar confusión.";

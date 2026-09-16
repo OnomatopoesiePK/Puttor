@@ -651,6 +651,15 @@ final class PuttorUITests: XCTestCase {
         origin.withOffset(CGVector(dx: 130, dy: gridRow))
             .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: 390, dy: gridRow)))
         XCTAssertTrue(justPast.waitForNonExistence(timeout: 3), "no plot after swiping back")
+
+        // The magnifier pulls the innermost ring out to the plot's edge.
+        let zoom = app.buttons["Zoom"].firstMatch
+        XCTAssertTrue(zoom.waitForExistence(timeout: 3), "no zoom on the dispersion plot")
+        sleep(1)
+        snapshot("2 dispersion plot")
+        zoom.tap()
+        sleep(1)
+        snapshot("3 dispersion zoomed")
     }
 
     /// Three rounds entered the way custom mode asks now: the intention's

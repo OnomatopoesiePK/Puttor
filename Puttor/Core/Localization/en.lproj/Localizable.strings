@@ -164,8 +164,10 @@
 "dispersion.grid.long" = "Long";
 "dispersion.grid.justPast" = "Just past";
 "dispersion.grid.justShort" = "Just short";
-"dispersion.grid.short" = "Short";
-"dispersion.grid.caption" = "Share of all misses. Just past: level with the hole or beyond it. Just short: tap-ins included. A miss straight past the hole counts half left, half right.";
+"dispersion.grid.farRight" = "FAR RIGHT";
+"dispersion.grid.farLeft" = "FAR LEFT";
+"dispersion.grid.wayShort" = "Way short";
+"dispersion.grid.caption" = "Share of all misses. The rows say how far past or short of the hole the ball finished, the columns how far to the side. The two inner columns hold only the putts that still had a chance or were gimmes anyway: up to 60 cm to the side level with the hole and beyond it, up to 30 cm in front of it. A miss recorded without an angle is split evenly between the two sides.";
 "dispersion.page" = "Page %1$ld of %2$ld";
 "setup.grainyGreens" = "Grainy greens";
 "setup.grainyGreens.desc" = "Greens have visible grain";
@@ -568,6 +570,7 @@
 "dispersion.long" = "LONG";
 "dispersion.short" = "SHORT";
 "dispersion.noData" = "No miss data for this filter.";
+"dispersion.zoom" = "Zoom";
 "dispersion.stretched" = "Stretched sideways: the sides reach %1$@, the top and bottom %2$@.";
 
 /* Games */
@@ -726,7 +729,22 @@
 
 /* Custom mode field editor */
 "custom.title" = "Custom Mode";
-"custom.alwaysIncluded" = "ALWAYS INCLUDED";
+"custom.firstInput" = "FIRST INPUT · ALWAYS INCLUDED";
+"custom.lastInput" = "LAST INPUT · ALWAYS INCLUDED";
+"custom.preview.title" = "Preview: what you can read from it";
+"custom.preview.desc" = "Shows which statistics your selection feeds, and which field is still missing for the rest.";
+"custom.preview.needs" = "Needs: %@";
+"custom.preview.strokesGained" = "Strokes gained and putts per round";
+"custom.preview.distance" = "Distance statistics: length of the first putt, make rate by distance";
+"custom.preview.scoreRelation" = "GIR, birdie conversion, scramble and PCG";
+"custom.preview.missSide" = "Miss direction and miss tendency";
+"custom.preview.lipOuts" = "Lip-outs";
+"custom.preview.dispersion" = "Miss dispersion to the exact angle, and the miss grid";
+"custom.preview.slope" = "Filters by break and by uphill or downhill";
+"custom.preview.slopeExact" = "Break to a tenth of a percent, break shading and the high side";
+"custom.preview.doubleBreak" = "Double-break putts read on their own";
+"custom.preview.causes" = "Miss reasons and the coach tips that follow them";
+"custom.preview.intention" = "Intention against outcome";
 "custom.optionalFields" = "OPTIONAL FIELDS";
 "custom.reorderHint" = "Tap Edit to reorder or remove fields. They appear in this order between Distance and Result.";
 "custom.unsavedTitle" = "Save changes?";
@@ -1063,7 +1081,7 @@
 "tutorial.format" = "%1$@ (or a Stableford round) is the standard mode. Choose %2$@ when you play hole by hole against someone.";
 "tutorial.inputModes" = "Choose how much you want to record:\n\n• %1$@ records everything: slope, miss angle and miss reasons.\n• %2$@ records distance, “putt for” (birdie, par, …) and holed or not holed. Little data goes into the statistics in this mode.\n• In %3$@ you can add fields as you like and change how detailed they are.\n\nYour first round is played in %1$@.";
 "tutorial.startRound" = "All set! Tap %@ to begin.";
-"tutorial.distance" = "Enter the distance from the putt to the hole here. The preset number can be changed in Settings. When the number in the field is black, the entry is saved and you can simply type a new number WITHOUT deleting the old one first. NOTE: to confirm a grey number, you always have to press %@.";
+"tutorial.distance" = "Enter the distance from the putt to the hole here. The preset number can be changed in Settings. When the number in the field is solid, the entry is saved and you can simply type a new number WITHOUT deleting the old one first. NOTE: a faded number is not saved yet — to confirm it you always have to press %@.";
 "tutorial.pace" = "Tip: not sure how far a metre is? Pace off a known length and either adjust your stride so one step is a metre, or simply know how far your step is and convert. Usually, though, a slightly longer step is about a metre.";
 "tutorial.pace.imperial" = "Tip: not sure how far 3 feet is? Pace off a known length and either adjust your stride so one step is a yard (3 feet), or simply know how far your step is and convert. Usually, though, a slightly longer step is about a yard.";
 "tutorial.puttFor" = "Choose here, under “putt for” (birdie, par, …), which score you are putting for. Don't forget this one – it can cause confusion later.";

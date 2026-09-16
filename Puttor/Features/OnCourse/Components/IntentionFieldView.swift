@@ -66,19 +66,19 @@ struct IntentionFieldView: View {
         case .speed:
             ForEach(PuttSpeed.allCases) { speed in
                 chip(L(speed.labelKey), detail: speed == .normal ? normalDetail : nil, active: intention.speed == speed) {
-                    update { $0.speed = $0.speed == speed ? nil : speed }
+                    pick { $0.speed = $0.speed == speed ? nil : speed }
                 }
             }
         case .line:
             ForEach(PuttLine.allCases) { line in
                 chip(L(line.labelKey), active: intention.line == line) {
-                    update { $0.line = $0.line == line ? nil : line }
+                    pick { $0.line = $0.line == line ? nil : line }
                 }
             }
         case .situation:
             ForEach(PuttSituation.allCases) { situation in
                 chip(L(situation.labelKey), active: intention.situation == situation) {
-                    update { $0.situation = $0.situation == situation ? nil : situation }
+                    pick { $0.situation = $0.situation == situation ? nil : situation }
                 }
             }
         }
@@ -86,6 +86,20 @@ struct IntentionFieldView: View {
 
     private var normalDetail: String {
         String(format: L("intention.speed.normal.detail"), PuttSpeed.pastText(normalPastM, useFeet: useFeet))
+    }
+
+    /// Choosing a part of the intention. Unless it was already answered, the
+    /// putt counts as played to plan — an intention with nothing said about
+    /// how it came off reads as a gap in the statistics.
+    private func pick(_ change: (inout PuttIntention) -> Void) {
+        var changed = intention
+        change(&changed)
+        if changed.isEmpty {
+            changed.executed = nil
+        } else if changed.executed == nil {
+            changed.executed = true
+        }
+        intention = changed
     }
 
     /// Changes the intention; with nothing left chosen, whether it came off

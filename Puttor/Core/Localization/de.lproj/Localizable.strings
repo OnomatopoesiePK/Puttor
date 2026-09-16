@@ -164,8 +164,10 @@
 "dispersion.grid.long" = "Lang";
 "dispersion.grid.justPast" = "Knapp lang";
 "dispersion.grid.justShort" = "Knapp kurz";
-"dispersion.grid.short" = "Kurz";
-"dispersion.grid.caption" = "Anteil an allen Misses. Knapp lang: auf Höhe des Lochs oder dahinter. Knapp kurz: Tap-ins eingeschlossen. Ein Miss gerade übers Loch zählt halb links, halb rechts.";
+"dispersion.grid.farRight" = "WEIT RECHTS";
+"dispersion.grid.farLeft" = "WEIT LINKS";
+"dispersion.grid.wayShort" = "Weit kurz";
+"dispersion.grid.caption" = "Anteil an allen Misses. Die Zeilen sagen, wie weit hinter oder vor dem Loch der Ball lag, die Spalten, wie weit daneben. In den beiden inneren Spalten liegen nur Putts, die noch eine Chance hatten oder ohnehin geschenkt waren: bis 60 cm seitlich auf Höhe des Lochs und dahinter, bis 30 cm seitlich davor. Ein Miss ohne Winkel wird gleichmäßig auf beide Seiten aufgeteilt.";
 "dispersion.page" = "Seite %1$ld von %2$ld";
 "setup.grainyGreens" = "Grüns mit Grain";
 "setup.grainyGreens.desc" = "Grüns haben sichtbares Grain";
@@ -568,6 +570,7 @@
 "dispersion.long" = "LANG";
 "dispersion.short" = "KURZ";
 "dispersion.noData" = "Keine Miss-Daten für diesen Filter.";
+"dispersion.zoom" = "Zoomen";
 "dispersion.stretched" = "Seitlich gestreckt: links und rechts bis %1$@, oben und unten bis %2$@.";
 
 /* Games */
@@ -726,7 +729,22 @@
 
 /* Custom-Modus Feld-Editor */
 "custom.title" = "Custom-Modus";
-"custom.alwaysIncluded" = "IMMER ENTHALTEN";
+"custom.firstInput" = "ERSTE EINGABE · IMMER ENTHALTEN";
+"custom.lastInput" = "LETZTE EINGABE · IMMER ENTHALTEN";
+"custom.preview.title" = "Vorschau: Was du damit auswerten kannst";
+"custom.preview.desc" = "Zeigt, welche Auswertungen deine Auswahl füttert und welches Feld für die übrigen noch fehlt.";
+"custom.preview.needs" = "Braucht: %@";
+"custom.preview.strokesGained" = "Strokes Gained und Putts pro Runde";
+"custom.preview.distance" = "Distanz-Auswertung: Länge des ersten Putts, Trefferquote nach Distanz";
+"custom.preview.scoreRelation" = "GIR, Birdie-Konversion, Scramble und PKG";
+"custom.preview.missSide" = "Miss-Richtung und Miss-Tendenz";
+"custom.preview.lipOuts" = "Lip-Outs";
+"custom.preview.dispersion" = "Miss-Streuung auf den Winkel genau und das Miss-Raster";
+"custom.preview.slope" = "Filter nach Break und nach bergauf oder bergab";
+"custom.preview.slopeExact" = "Break auf 0,1 % genau, Break-Färbung und hohe Seite";
+"custom.preview.doubleBreak" = "Doppel-Break-Putts getrennt lesbar";
+"custom.preview.causes" = "Miss-Gründe und die Coach-Tipps dazu";
+"custom.preview.intention" = "Intention gegen Ergebnis";
 "custom.optionalFields" = "OPTIONALE FELDER";
 "custom.reorderHint" = "Tippe auf Bearbeiten, um Felder zu verschieben oder zu entfernen. Sie erscheinen in dieser Reihenfolge zwischen Distanz und Resultat.";
 "custom.unsavedTitle" = "Änderungen speichern?";
@@ -1063,7 +1081,7 @@
 "tutorial.format" = "%1$@ (oder eine Stableford-Runde) ist der Standardmodus. Wähle %2$@ (Matchplay), wenn du Loch für Loch gegen jemanden spielst.";
 "tutorial.inputModes" = "Wähle, wie viel du erfassen willst:\n\n• %1$@ erfasst alles: Gefälle, Miss-Winkel und Miss-Gründe.\n• %2$@ erfasst Distanz, „Putt für“ (Birdie, Par, …) und eingelocht oder nicht eingelocht. Für die Statistik gehen bei diesem Modus wenig Daten ein.\n• Bei %3$@ können nach Belieben Felder hinzugefügt und die Komplexität verändert werden.\n\nDeine erste Runde spielst du mit %1$@.";
 "tutorial.startRound" = "Alles bereit! Tippe auf %@.";
-"tutorial.distance" = "Hier gibst du die Distanz des Putts zum Loch ein. Die voreingestellte Zahl kannst du in den Einstellungen ändern. Ist die Zahl im Feld schwarz, ist die Eingabe gespeichert, und du kannst einfach eine neue Zahl eingeben, OHNE vorher die alte löschen zu müssen. ACHTUNG: Um eine graue Zahl zu bestätigen, musst du immer %@ drücken.";
+"tutorial.distance" = "Hier gibst du die Distanz des Putts zum Loch ein. Die voreingestellte Zahl kannst du in den Einstellungen ändern. Steht die Zahl im Feld kräftig da, ist die Eingabe gespeichert, und du kannst einfach eine neue Zahl eingeben, OHNE vorher die alte löschen zu müssen. ACHTUNG: Eine blasse Zahl ist noch nicht gespeichert — dazu musst du immer %@ drücken.";
 "tutorial.pace" = "Tipp: Du weißt nicht, wie weit ein Meter ist? Dann schreite eine bekannte Länge ab und pass entweder deine Schrittlänge so an, dass ein Schritt einem Meter entspricht, oder du weißt einfach, wie weit dein Schritt ist, und rechnest um. Meist entspricht aber einfach ein etwas größerer Schritt einem Meter.";
 "tutorial.pace.imperial" = "Tipp: Du weißt nicht, wie weit 3 Fuß sind? Dann schreite eine bekannte Länge ab und pass entweder deine Schrittlänge so an, dass ein Schritt einem Yard (3 Fuß) entspricht, oder du weißt einfach, wie weit dein Schritt ist, und rechnest um. Meist entspricht aber einfach ein etwas größerer Schritt einem Yard.";
 "tutorial.puttFor" = "Wähle hier bei „Putt für“ (Birdie, Par, …), für welchen Score du puttest. Vergiss diesen Punkt nicht, denn er kann später für Verwirrung sorgen.";

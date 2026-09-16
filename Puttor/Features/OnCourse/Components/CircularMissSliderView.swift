@@ -163,7 +163,9 @@ struct CircularMissSliderView: View {
         if radius <= holedR {
             result = .holed
             angle = nil
-        } else if radius <= lipR {
+            // A putt that went in never caught the lip.
+            lipOut = false
+        } else if radius <= lipR, result != .holed {
             lipOut.toggle()
         }
     }

@@ -148,7 +148,9 @@ struct DartboardMissView: View {
 
                         if r <= holedR {
                             result = .holed
-                        } else if r <= lipOutR {
+                            // A putt that went in never caught the lip.
+                            lipOut = false
+                        } else if r <= lipOutR, result != .holed {
                             lipOut.toggle()
                         } else if r <= outerR {
                             let angle = atan2(dy, dx) * 180 / .pi

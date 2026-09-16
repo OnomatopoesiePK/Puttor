@@ -17,6 +17,11 @@ struct SimpleSlopeGridView: View {
     @Binding var sideValue: Double
     @Binding var hillValue: Double
 
+    /// The big grid's own colours: its flat middle, and the shade it gives a
+    /// 2 % break at the sides.
+    private static let flatColor = Theme.slopeClassColors[0]
+    private static let breakColor = Theme.slopeClassColors[2]
+
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
@@ -30,6 +35,11 @@ struct SimpleSlopeGridView: View {
                     FieldInfoButton(titleKey: "input.slopeGrid", textKey: "custom.field.slope.desc")
                 }
             }
+
+            Text(L("input.uphill"))
+                .font(.system(size: 11, weight: .bold))
+                .tracking(0.6)
+                .foregroundStyle(Theme.uphill)
 
             // Left and right beside the grid rather than under it, where they
             // would read as part of the downhill row.
@@ -46,6 +56,11 @@ struct SimpleSlopeGridView: View {
                 }
                 sideLabel(L("input.right"))
             }
+
+            Text(L("input.downhill"))
+                .font(.system(size: 11, weight: .bold))
+                .tracking(0.6)
+                .foregroundStyle(Theme.downhill)
 
             Text(selectionText)
                 .font(.system(size: 12, weight: .bold))
@@ -64,24 +79,46 @@ struct SimpleSlopeGridView: View {
 
     private func cell(side: Double, hill: Double) -> some View {
         let selected = sideValue == side && hillValue == hill
+        let fill = side == 0 && hill == 0 ? Self.flatColor : Self.breakColor
         return Button {
             sideValue = side
             hillValue = hill
         } label: {
-            Text(icon(side: side, hill: hill))
-                .font(.system(size: 20))
+            arrow(side: side, hill: hill)
+                .foregroundStyle(fill.isLight ? Color(hex: 0x111418) : .white)
                 .frame(maxWidth: .infinity, minHeight: 56)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(selected ? Theme.primary.opacity(0.25) : Theme.surfaceElevated))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(selected ? Theme.primary : Theme.border, lineWidth: selected ? 2 : 1))
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(fill))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(selected ? Theme.primary : Theme.border, lineWidth: selected ? 3 : 1))
         }
         .buttonStyle(.plain)
     }
 
-    private func icon(side: Double, hill: Double) -> String {
-        let h = hill > 0 ? "⬆" : (hill < 0 ? "⬇" : "")
-        let s = side < 0 ? "⬅" : (side > 0 ? "➡" : "")
-        if h.isEmpty && s.isEmpty { return "●" }
-        return "\(h)\(s)"
+    /// One arrow the app's own way, turned to where the putt runs: a corner is
+    /// the same arrow at 45°, and a flat, straight putt has no direction at all.
+    @ViewBuilder
+    private func arrow(side: Double, hill: Double) -> some View {
+        if side == 0 && hill == 0 {
+            Image(systemName: "circle.fill")
+                .font(.system(size: 12, weight: .bold))
+        } else {
+            Image(systemName: "arrow.up")
+                .font(.system(size: 22, weight: .bold))
+                .rotationEffect(.degrees(arrowDegrees(side: side, hill: hill)))
+        }
+    }
+
+    /// Clockwise from straight up: right is a quarter turn, down a half.
+    private func arrowDegrees(side: Double, hill: Double) -> Double {
+        switch (side, hill) {
+        case (0, 1...): return 0
+        case (1..., 1...): return 45
+        case (1..., 0): return 90
+        case (1..., _): return 135
+        case (0, _): return 180
+        case (_, ...(-0.0001)): return 225
+        case (_, 0): return 270
+        default: return 315
+        }
     }
 
     private var selectionText: String {
