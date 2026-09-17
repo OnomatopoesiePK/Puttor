@@ -187,6 +187,21 @@ struct RoundInputView: View {
                 size: boardSize
             )
             .tutorialTarget(.missAngle)
+            // The tutorial sets an example that makes the rule plain: the ball
+            // caught the left lip and finished long left, which is how it is
+            // marked even though the putt broke left to right.
+            .onChange(of: TutorialController.shared.step) { _, step in
+                guard step == .missAngle, session.draftResult == nil, session.draftMissAngle == nil else { return }
+                session.draftMissAngle = -150
+                session.draftResult = .longLeft
+                session.draftLipOut = true
+            }
+            // Told after the layout pass, not during it: writing to the
+            // tutorial while the view is being built wedges the update.
+            .onChange(of: session.draftResult, initial: true) { _, result in
+                let chosen = result != nil
+                Task { @MainActor in TutorialController.shared.resultChosen = chosen }
+            }
             missReasonRow(session)
                 .tutorialTarget(.missReasons)
         }

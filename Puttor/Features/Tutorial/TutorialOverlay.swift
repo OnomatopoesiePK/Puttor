@@ -15,6 +15,8 @@ struct TutorialOverlay: View {
 
     @State private var confirmingSkip = false
     @State private var cardHeight: CGFloat = 0
+    /// What the card measures at each size, so the fitting one can be picked.
+    @State private var cardHeights: [CGFloat: CGFloat] = [:]
     @AppStorage(AppStorageKeys.units) private var unitsPref = "metric"
     private let tutorial = TutorialController.shared
 
@@ -98,31 +100,59 @@ struct TutorialOverlay: View {
             // As large as fits beside the opening, shrinking down to a size
             // still easy to read; where even that has no room, full size over
             // the opening.
-            ViewThatFits(in: .vertical) {
-                measuredCard(step, fontSize: 17)
-                measuredCard(step, fontSize: 15)
-                measuredCard(step, fontSize: 14)
-                measuredCard(step, fontSize: 13)
-                // Nothing fits beside the opening, so the card lies over it:
-                // small, to cover as little of what it explains as possible.
-                measuredCard(step, fontSize: 13)
-            }
-            .frame(width: size.width, height: roomBeside(hole: hole, size: size), alignment: .top)
-            .offset(y: cardTop(hole: hole, preferBelow: cardBelow, size: size))
+            // The size is chosen here rather than by ViewThatFits: a card in
+            // a box only as tall as the room beside the opening kept its Next
+            // button outside that box, where a tap no longer reached it.
+            card(step, fontSize: fittingSize(room: roomBeside(hole: hole, size: size)))
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { height in
+                    cardHeight = height
+                }
+                .padding(.horizontal, Self.margin)
+                .frame(width: size.width)
+                .offset(y: cardTop(hole: hole, preferBelow: cardBelow, size: size))
+                .background {
+                    // The same card at every size, measured but never shown,
+                    // so the one on screen can be the largest that fits.
+                    ZStack {
+                        ForEach(Self.fontSizes, id: \.self) { size in
+                            card(step, fontSize: size)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .onGeometryChange(for: CGFloat.self) { proxy in
+                                    proxy.size.height
+                                } action: { height in
+                                    cardHeights[size] = height
+                                }
+                        }
+                    }
+                    .hidden()
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
         }
         .frame(width: size.width, height: size.height, alignment: .topLeading)
         .animation(Self.movement, value: cutout)
         .animation(Self.movement, value: cardHeight)
     }
 
-    private func measuredCard(_ step: TutorialStep, fontSize: CGFloat) -> some View {
-        card(step, fontSize: fontSize)
-            .onGeometryChange(for: CGFloat.self) { proxy in
-                proxy.size.height
-            } action: { height in
-                cardHeight = height
-            }
-            .padding(.horizontal, Self.margin)
+    /// The sizes a card is tried at, largest first. Chinese, Japanese and
+    /// Korean stop a step higher: their characters carry more strokes in the
+    /// same space, and what is still readable in Latin type is not there.
+    private static var fontSizes: [CGFloat] {
+        switch LocalizationManager.shared.languageCode {
+        case "zh-Hans", "ja", "ko": return [17, 16, 15, 14]
+        default: return [17, 15, 14, 13]
+        }
+    }
+
+    /// The largest size whose card fits beside the opening; where none does,
+    /// the smallest, so a card lying over the field covers as little as it can.
+    private func fittingSize(room: CGFloat) -> CGFloat {
+        for size in Self.fontSizes where (cardHeights[size] ?? .infinity) <= room {
+            return size
+        }
+        return Self.fontSizes[Self.fontSizes.count - 1]
     }
 
     /// The most height the card has on either side of the opening, or on
@@ -171,6 +201,14 @@ struct TutorialOverlay: View {
                 .multilineTextAlignment(isList ? .leading : .center)
                 .frame(maxWidth: .infinity, alignment: isList ? .leading : .center)
                 .fixedSize(horizontal: false, vertical: true)
+
+            if step == .missAngleDetail, !tutorial.resultChosen {
+                Text(L("tutorial.missAngleDetail.hint"))
+                    .font(.system(size: fontSize - 2, weight: .bold))
+                    .foregroundStyle(Self.ink)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             if step == .courseName {
                 Text(L("tutorial.courseName.hint"))
@@ -243,6 +281,9 @@ struct TutorialOverlay: View {
     /// player to do something.
     private func buttonKey(for step: TutorialStep) -> String? {
         if step.waitsForAction { return nil }
+        // The dial is the one field the tutorial insists on: without a result
+        // there is nothing to record, so there is no way past it either.
+        if step == .missAngleDetail, !tutorial.resultChosen { return nil }
         switch step {
         case .tryRest: return "tutorial.gotIt"
         case .finish: return "tutorial.done"

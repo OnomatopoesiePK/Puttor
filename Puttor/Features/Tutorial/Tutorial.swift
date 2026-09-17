@@ -25,7 +25,7 @@ enum TutorialStep: Int, CaseIterable {
     /// Metres or feet, asked first — only of someone who never chose.
     case units
     case welcome, courseName, putter, greenSpeed, weather, format, inputModes, startRound
-    case distance, pace, puttFor, slope, missAngle, missReasons, record, tryRest
+    case distance, pace, puttFor, slope, missAngle, missAngleDetail, missReasons, record, tryRest
     case pickUp, holePicker, navArrows, puttChips, endRound, editLater, settings, finish
 
     var screen: TutorialScreen {
@@ -45,7 +45,7 @@ enum TutorialStep: Int, CaseIterable {
         case .distance, .pace: return .distance
         case .puttFor: return .puttFor
         case .slope: return .slope
-        case .missAngle: return .missAngle
+        case .missAngle, .missAngleDetail: return .missAngle
         case .missReasons: return .missReasons
         case .record: return .recordBar
         case .pickUp: return .pickUp
@@ -78,6 +78,9 @@ final class TutorialController {
     /// The corner each target rounds itself off with, so the opening around it
     /// can share the same centre of curvature.
     var radii: [TutorialTarget: CGFloat] = [:]
+    /// Whether a result stands on the dial. The second card of the miss angle
+    /// waits for one rather than letting the player walk past the field.
+    var resultChosen = false
 
     @ObservationIgnored private let defaults: UserDefaults
 

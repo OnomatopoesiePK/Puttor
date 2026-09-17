@@ -102,18 +102,20 @@ struct RoundSetupView: View {
                         .colorScheme(.dark)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        label(L("setup.putter"))
+                        label(L("setup.putter"), top: 4)
                         putterSection
                             .onAppear(perform: preselectFavouritePutter)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .tutorialTarget(.putter, cornerRadius: Theme.Radius.md)
+                    .padding(.top, 12)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        label(L("setup.stimp"))
+                        label(L("setup.stimp"), top: 4)
                         stimpCard
                     }
                     .tutorialTarget(.greenSpeed, cornerRadius: Theme.Radius.md)
+                    .padding(.top, 12)
                     // Grain is part of how the greens roll, so it sits with
                     // their pace rather than with the weather.
                     switchRow(titleKey: "setup.grainyGreens", infoKey: "setup.grainyGreens.info", isOn: $grainyGreens)
@@ -122,7 +124,7 @@ struct RoundSetupView: View {
                     // Wind, temperature and precipitation are one question
                     // asked three ways, so they sit under one heading.
                     VStack(alignment: .leading, spacing: 4) {
-                        label(L("setup.weather"))
+                        label(L("setup.weather"), top: 4)
                         VStack(spacing: 8) {
                             threeToggle(selection: $wind, options: WindLevel.allCases)
                             threeToggle(selection: $weather, options: WeatherTemp.allCases)
@@ -130,13 +132,15 @@ struct RoundSetupView: View {
                         }
                     }
                     .tutorialTarget(.weather, cornerRadius: Theme.Radius.md)
+                    .padding(.top, 12)
 
                     // How the round is scored, then whether it counts.
                     VStack(alignment: .leading, spacing: 4) {
-                        label(L("setup.mode"))
+                        label(L("setup.mode"), top: 4)
                         formatRow
                     }
                     .tutorialTarget(.format, cornerRadius: Theme.Radius.md)
+                    .padding(.top, 12)
                     switchRow(titleKey: "setup.tournament", infoKey: "setup.tournament.info", isOn: $isTournament)
                         .padding(.top, 8)
 
@@ -152,7 +156,7 @@ struct RoundSetupView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
-                    label(L("setup.inputMode"))
+                    label(L("setup.inputMode"), top: 4)
                     VStack(spacing: 8) {
                         ForEach(InputMode.allCases, id: \.self) { mode in
                             Button {
@@ -177,6 +181,7 @@ struct RoundSetupView: View {
                     }
                     }
                     .tutorialTarget(.inputModes, cornerRadius: Theme.Radius.md)
+                    .padding(.top, 12)
 
                 }
                 .padding(.horizontal, Theme.Spacing.edge)
