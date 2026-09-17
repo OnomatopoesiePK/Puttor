@@ -192,7 +192,7 @@ struct RoundInputView: View {
             // marked even though the putt broke left to right.
             .onChange(of: TutorialController.shared.step) { _, step in
                 guard step == .missAngle, session.draftResult == nil, session.draftMissAngle == nil else { return }
-                session.draftMissAngle = -150
+                session.draftMissAngle = -MissAngle.limit
                 session.draftResult = .longLeft
                 session.draftLipOut = true
             }

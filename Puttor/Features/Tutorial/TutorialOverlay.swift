@@ -33,6 +33,10 @@ struct TutorialOverlay: View {
     /// the opening follows around whatever it shows.
     private static let holeRadius = Theme.Radius.lg + margin
     private static let movement = Animation.smooth(duration: 0.45)
+    /// How high a card may start. It reaches into the status bar's strip: the
+    /// tutorial holds the screen upright, so nothing else needs that space,
+    /// and the room bought there keeps the writing a size larger.
+    private static let topLimit = margin
 
     var body: some View {
         GeometryReader { geo in
@@ -158,9 +162,8 @@ struct TutorialOverlay: View {
     /// The most height the card has on either side of the opening, or on
     /// the whole screen when there is no opening.
     private func roomBeside(hole: CGRect?, size: CGSize) -> CGFloat {
-        let insets = Self.windowInsets
-        let highest = insets.top + Self.margin
-        let bottom = size.height - insets.bottom - Self.margin
+        let highest = Self.topLimit
+        let bottom = size.height - Self.windowInsets.bottom - Self.margin
         guard let hole else { return max(0, bottom - highest) }
         return max(0, bottom - hole.maxY - Self.margin, hole.minY - Self.margin - highest)
     }
@@ -170,9 +173,8 @@ struct TutorialOverlay: View {
     /// over the opening's lower part, so the card and its Next button always
     /// stay inside the screen's safe area.
     private func cardTop(hole: CGRect?, preferBelow: Bool, size: CGSize) -> CGFloat {
-        let insets = Self.windowInsets
-        let highest = insets.top + Self.margin
-        let lowest = max(highest, size.height - insets.bottom - Self.margin - cardHeight)
+        let highest = Self.topLimit
+        let lowest = max(highest, size.height - Self.windowInsets.bottom - Self.margin - cardHeight)
         guard let hole else { return min(max(highest, (size.height - cardHeight) / 2), lowest) }
         let below = hole.maxY + Self.margin
         let above = hole.minY - Self.margin - cardHeight
