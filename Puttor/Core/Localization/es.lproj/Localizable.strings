@@ -735,6 +735,8 @@
 "custom.firstInput" = "SIEMPRE INCLUIDO, EN PRIMER LUGAR";
 "custom.lastInput" = "SIEMPRE INCLUIDO, EN ÚLTIMO LUGAR";
 "custom.preview.title" = "Vista previa: qué puedes analizar con esto";
+"custom.preview.field" = "Vista previa";
+"custom.preview.field.hint" = "Así se ve el campo en una ronda. Tocar aquí no cambia nada.";
 "custom.preview.desc" = "Muestra qué estadísticas alimenta tu selección y qué campo falta todavía para las demás.";
 "custom.preview.needs" = "Necesita: %@";
 "custom.preview.strokesGained" = "Strokes gained y putts por ronda";

@@ -735,6 +735,8 @@
 "custom.firstInput" = "始终包含，作为第一项";
 "custom.lastInput" = "始终包含，作为最后一项";
 "custom.preview.title" = "预览：这些设置能分析出什么";
+"custom.preview.field" = "预览";
+"custom.preview.field.hint" = "这就是该字段在一轮中的样子。在这里点击不会改变任何数据。";
 "custom.preview.desc" = "显示你的选择能支撑哪些统计，以及其余统计还缺哪个字段。";
 "custom.preview.needs" = "需要：%@";
 "custom.preview.strokesGained" = "Strokes gained 与每轮推杆数";

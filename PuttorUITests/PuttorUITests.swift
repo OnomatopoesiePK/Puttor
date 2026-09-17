@@ -992,10 +992,15 @@ final class PuttorUITests: XCTestCase {
         let start = app.buttons["Start New Round"]
         XCTAssertTrue(start.waitForExistence(timeout: 15))
         sleep(3) // past the title screen
-        start.tap()
 
+        // Straight after the title screen the list is still settling, and a tap
+        // can land nowhere; ask again rather than fail over it.
         let custom = app.staticTexts["Custom"].firstMatch
-        XCTAssertTrue(custom.waitForExistence(timeout: 5))
+        for _ in 0..<3 where !custom.exists {
+            start.tap()
+            _ = custom.waitForExistence(timeout: 5)
+        }
+        XCTAssertTrue(custom.exists, "the round setup did not open")
         scrollIntoView(custom, in: app, bottomMargin: 180)
         custom.tap()
         app.buttons["Start Round"].tap()
@@ -1027,6 +1032,17 @@ final class PuttorUITests: XCTestCase {
         scrollIntoView(firstLine, in: app, bottomMargin: 460)
         sleep(1)
         snapshot("2 custom mode preview")
+
+        // Folded in again, so the fields below it are built at all.
+        (preview.exists ? preview : previewText).tap()
+
+        // A field's own arrow folds out the field as a round shows it.
+        let fieldPreview = app.buttons["Preview"].firstMatch
+        XCTAssertTrue(fieldPreview.waitForExistence(timeout: 5), "no preview arrow under the fields")
+        scrollIntoView(fieldPreview, in: app, bottomMargin: 420)
+        fieldPreview.tap()
+        sleep(1)
+        snapshot("3 field preview")
     }
 
     /// Short drags the other way, for something left above the screen's top.

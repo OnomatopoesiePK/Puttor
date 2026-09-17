@@ -735,6 +735,8 @@
 "custom.firstInput" = "IMMER ENTHALTEN, ALS ERSTES";
 "custom.lastInput" = "IMMER ENTHALTEN, ALS LETZTES";
 "custom.preview.title" = "Vorschau: Was du damit auswerten kannst";
+"custom.preview.field" = "Vorschau";
+"custom.preview.field.hint" = "So sieht das Feld in der Runde aus. Tippen ändert hier nichts.";
 "custom.preview.desc" = "Zeigt, welche Auswertungen deine Auswahl füttert und welches Feld für die übrigen noch fehlt.";
 "custom.preview.needs" = "Braucht: %@";
 "custom.preview.strokesGained" = "Strokes Gained und Putts pro Runde";

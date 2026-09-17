@@ -735,6 +735,8 @@
 "custom.firstInput" = "常に含まれます（最初）";
 "custom.lastInput" = "常に含まれます（最後）";
 "custom.preview.title" = "プレビュー：この設定で何が分かるか";
+"custom.preview.field" = "プレビュー";
+"custom.preview.field.hint" = "ラウンドでの見え方です。ここでタップしても何も変わりません。";
 "custom.preview.desc" = "いまの選択がどの統計に使えるか、残りには何の項目が足りないかを示します。";
 "custom.preview.needs" = "必要：%@";
 "custom.preview.strokesGained" = "ストロークゲインドとラウンドあたりのパット数";

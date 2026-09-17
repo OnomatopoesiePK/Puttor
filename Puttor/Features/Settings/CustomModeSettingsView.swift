@@ -24,6 +24,8 @@ struct CustomModeSettingsView: View {
     @AppStorage(AppStorageKeys.units) private var unitsPref: String = "metric"
     /// The fold-out that says what this layout can be read for.
     @State private var showPreview = false
+    /// Which fields have their own preview folded out, by field id.
+    @State private var expandedPreviews: Set<String> = []
 
     private var availableKinds: [CustomFieldKind] {
         CustomFieldKind.allCases.filter { kind in !draftConfig.fields.contains { $0.kind == kind } }
@@ -31,6 +33,9 @@ struct CustomModeSettingsView: View {
 
     var body: some View {
         List {
+            // What the layout is worth, before the layout itself.
+            previewSection
+
             Section {
                 HStack {
                     Image(systemName: "ruler").foregroundStyle(Theme.primary).frame(width: 24)
@@ -49,10 +54,11 @@ struct CustomModeSettingsView: View {
                     .disabled(!isEditing)
                 }
                 .listRowBackground(Theme.surface)
+
+                fieldPreview("distance", .distance(draftConfig.distanceStyle))
+                    .listRowBackground(Theme.surface)
             } header: {
                 Text(L("custom.firstInput"))
-            } footer: {
-                Text(L("custom.distance.desc"))
             }
 
             Section {
@@ -101,13 +107,12 @@ struct CustomModeSettingsView: View {
                     .disabled(!isEditing)
                 }
                 .listRowBackground(Theme.surface)
+
+                fieldPreview("result", .result(draftConfig.resultStyle))
+                    .listRowBackground(Theme.surface)
             } header: {
                 Text(L("custom.lastInput"))
-            } footer: {
-                Text(L("custom.result.desc"))
             }
-
-            previewSection
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
@@ -233,6 +238,25 @@ struct CustomModeSettingsView: View {
         }
     }
 
+    /// The arrow under a field: it folds out that field exactly as a round
+    /// shows it, so the choice above can be seen rather than described.
+    private func fieldPreview(_ id: String, _ subject: CustomFieldPreview.Subject) -> some View {
+        DisclosureGroup(isExpanded: Binding(
+            get: { expandedPreviews.contains(id) },
+            set: { open in
+                if open { expandedPreviews.insert(id) } else { expandedPreviews.remove(id) }
+            }
+        )) {
+            CustomFieldPreview(subject: subject, useFeet: unitsPref == "imperial")
+                .padding(.vertical, 4)
+        } label: {
+            Text(L("custom.preview.field"))
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Theme.textSecondary)
+        }
+        .tint(Theme.primary)
+    }
+
     private func fieldRow(_ field: CustomField) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             fieldHeader(field)
@@ -246,6 +270,8 @@ struct CustomModeSettingsView: View {
                         .transition(.opacity)
                 }
             }
+            fieldPreview(field.id.uuidString, .field(field))
+                .padding(.top, 2)
         }
         .animation(.easeInOut(duration: 0.2), value: isEditing)
         .listRowBackground(Theme.surface)
