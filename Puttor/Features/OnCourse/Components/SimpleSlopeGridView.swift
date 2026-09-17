@@ -36,10 +36,7 @@ struct SimpleSlopeGridView: View {
                 }
             }
 
-            Text(L("input.uphill"))
-                .font(.system(size: 11, weight: .bold))
-                .tracking(0.6)
-                .foregroundStyle(Theme.uphill)
+            sideLabel(L("input.uphill"))
 
             // Left and right beside the grid rather than under it, where they
             // would read as part of the downhill row.
@@ -57,10 +54,7 @@ struct SimpleSlopeGridView: View {
                 sideLabel(L("input.right"))
             }
 
-            Text(L("input.downhill"))
-                .font(.system(size: 11, weight: .bold))
-                .tracking(0.6)
-                .foregroundStyle(Theme.downhill)
+            sideLabel(L("input.downhill"))
 
             Text(selectionText)
                 .font(.system(size: 12, weight: .bold))
@@ -121,10 +115,12 @@ struct SimpleSlopeGridView: View {
         }
     }
 
+    /// Only the directions that are there; a putt with neither is flat.
     private var selectionText: String {
-        let side = sideValue == 0 ? L("input.flat") : (sideValue < 0 ? L("input.rl") : L("input.lr"))
-        let hill = hillValue == 0 ? L("input.flat") : (hillValue > 0 ? L("input.up") : L("input.down"))
-        return "\(side) / \(hill)"
+        var parts: [String] = []
+        if sideValue != 0 { parts.append(sideValue < 0 ? L("input.rl") : L("input.lr")) }
+        if hillValue != 0 { parts.append(hillValue > 0 ? L("input.up") : L("input.down")) }
+        return parts.isEmpty ? L("input.flat") : parts.joined(separator: " / ")
     }
 }
 

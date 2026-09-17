@@ -73,10 +73,7 @@ struct SlopeGridPickerView: View {
                 }
             }
 
-            Text(L("input.uphill"))
-                .font(.system(size: 11, weight: .bold))
-                .tracking(0.6)
-                .foregroundStyle(Theme.uphill)
+            sideLabel(L("input.uphill"))
 
             GeometryReader { geo in
                 let scale = geo.size.width / SlopeGridGeometry.imgW
@@ -138,16 +135,14 @@ struct SlopeGridPickerView: View {
                     sideLabel(L("input.right"))
                         .frame(width: geo.size.width * 0.18)
                         .position(x: geo.size.width * 0.91, y: geo.size.height * 0.22)
+                    sideLabel(L("input.downhill"))
+                        .frame(width: geo.size.width * 0.5)
+                        .position(x: geo.size.width * 0.5, y: geo.size.height * 0.95)
                 }
                 .allowsHitTesting(false)
             }
             .padding(.vertical, Theme.Spacing.md)
             .zIndex(1)
-
-            Text(L("input.downhill"))
-                .font(.system(size: 11, weight: .bold))
-                .tracking(0.6)
-                .foregroundStyle(Theme.downhill)
 
             Text(selectionText)
                 .font(.system(size: 12, weight: .bold))
@@ -163,15 +158,18 @@ struct SlopeGridPickerView: View {
             .minimumScaleFactor(0.6)
     }
 
-    /// The slope in percent, the way the grid's numbers count it.
+    /// The slope in percent, the way the grid's numbers count it. A direction
+    /// without break is left out rather than spelled "flat"; with neither,
+    /// flat is all there is to say.
     private var selectionText: String {
-        let side = sideValue == 0
-            ? L("input.flat")
-            : "\(SlopeGridGeometry.labelFor(sideValue))% \(sideValue < 0 ? L("input.rl") : L("input.lr"))"
-        let hill = hillValue == 0
-            ? L("input.flat")
-            : "\(SlopeGridGeometry.labelFor(hillValue))% \(hillValue > 0 ? L("input.up") : L("input.down"))"
-        return "\(side) / \(hill)"
+        var parts: [String] = []
+        if sideValue != 0 {
+            parts.append("\(SlopeGridGeometry.labelFor(sideValue))% \(sideValue < 0 ? L("input.rl") : L("input.lr"))")
+        }
+        if hillValue != 0 {
+            parts.append("\(SlopeGridGeometry.labelFor(hillValue))% \(hillValue > 0 ? L("input.up") : L("input.down"))")
+        }
+        return parts.isEmpty ? L("input.flat") : parts.joined(separator: " / ")
     }
 }
 

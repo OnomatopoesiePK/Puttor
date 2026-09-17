@@ -98,11 +98,13 @@ struct TutorialOverlay: View {
             // still easy to read; where even that has no room, full size over
             // the opening.
             ViewThatFits(in: .vertical) {
-                measuredCard(step, fontSize: 19)
                 measuredCard(step, fontSize: 17)
                 measuredCard(step, fontSize: 15)
                 measuredCard(step, fontSize: 14)
-                measuredCard(step, fontSize: 19)
+                measuredCard(step, fontSize: 13)
+                // Nothing fits beside the opening, so the card lies over it:
+                // small, to cover as little of what it explains as possible.
+                measuredCard(step, fontSize: 13)
             }
             .frame(width: size.width, height: roomBeside(hole: hole, size: size), alignment: .top)
             .offset(y: cardTop(hole: hole, preferBelow: cardBelow, size: size))
