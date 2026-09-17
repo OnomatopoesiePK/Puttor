@@ -300,13 +300,13 @@ struct RoundInputView: View {
     private func topBar(_ session: RoundSession) -> some View {
         HStack(spacing: 8) {
             holeButton(session)
-                .tutorialTarget(.holeButton)
+                .tutorialTarget(.holeButton, cornerRadius: Theme.Radius.sm)
             PuttChipsView(session: session)
-                .tutorialTarget(.puttChips)
-            PickUpHoleButton(session: session) { handleOutcome($0, session) }.tutorialTarget(.pickUp)
+                .tutorialTarget(.puttChips, cornerRadius: Theme.Radius.sm)
+            PickUpHoleButton(session: session) { handleOutcome($0, session) }.tutorialTarget(.pickUp, cornerRadius: Theme.Radius.full)
             deleteHoleButton(session)
             totalCount(session)
-            endButton().tutorialTarget(.endButton)
+            endButton().tutorialTarget(.endButton, cornerRadius: Theme.Radius.sm)
         }
         .padding(.horizontal, Theme.Spacing.edge)
         .padding(.vertical, Theme.Spacing.sm)
@@ -321,18 +321,18 @@ struct RoundInputView: View {
             // Both corners the same height, set by the smaller of the two.
             island(height: landscapeIslandHeight) {
                 holeButton(session, compact: true)
-                    .tutorialTarget(.holeButton)
+                    .tutorialTarget(.holeButton, cornerRadius: Theme.Radius.sm)
                 // Capped, or the chips' scroll view stretches the island into
                 // a bar across a row that has nothing else in it.
                 PuttChipsView(session: session).frame(maxWidth: 132)
-                    .tutorialTarget(.puttChips)
-                PickUpHoleButton(session: session) { handleOutcome($0, session) }.tutorialTarget(.pickUp)
+                    .tutorialTarget(.puttChips, cornerRadius: Theme.Radius.sm)
+                PickUpHoleButton(session: session) { handleOutcome($0, session) }.tutorialTarget(.pickUp, cornerRadius: Theme.Radius.full)
                 deleteHoleButton(session)
             }
             Spacer(minLength: 0)
             island(height: landscapeIslandHeight) {
                 totalCount(session)
-                endButton().tutorialTarget(.endButton)
+                endButton().tutorialTarget(.endButton, cornerRadius: Theme.Radius.sm)
             }
         }
         .padding(.horizontal, Theme.Spacing.edge)
@@ -439,7 +439,7 @@ struct RoundInputView: View {
     private func bottomBar(_ session: RoundSession) -> some View {
         HStack(spacing: 8) {
             HStack(spacing: 8) { navArrows(session) }
-                .tutorialTarget(.navArrows)
+                .tutorialTarget(.navArrows, cornerRadius: Theme.Radius.sm)
             HStack(spacing: 8) {
                 recordButton(session, fills: true)
                 tapInButton(session)
@@ -456,7 +456,7 @@ struct RoundInputView: View {
     private func landscapeBottomBar(_ session: RoundSession, width: CGFloat) -> some View {
         island {
             HStack(spacing: 8) { navArrows(session) }
-                .tutorialTarget(.navArrows)
+                .tutorialTarget(.navArrows, cornerRadius: Theme.Radius.sm)
             HStack(spacing: 8) {
                 recordButton(session, fills: true)
                 tapInButton(session)

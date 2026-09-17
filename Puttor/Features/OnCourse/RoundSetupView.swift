@@ -93,7 +93,7 @@ struct RoundSetupView: View {
                             .submitLabel(.done)
                             .onSubmit { TutorialController.shared.advance(from: .courseName) }
                     }
-                    .tutorialTarget(.courseName)
+                    .tutorialTarget(.courseName, cornerRadius: Theme.Radius.md)
 
                     label(L("setup.date"))
                     DatePicker("", selection: $date)
@@ -107,13 +107,13 @@ struct RoundSetupView: View {
                             .onAppear(perform: preselectFavouritePutter)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .tutorialTarget(.putter)
+                    .tutorialTarget(.putter, cornerRadius: Theme.Radius.md)
 
                     VStack(alignment: .leading, spacing: 4) {
                         label(L("setup.stimp"))
                         stimpCard
                     }
-                    .tutorialTarget(.greenSpeed)
+                    .tutorialTarget(.greenSpeed, cornerRadius: Theme.Radius.md)
                     // Grain is part of how the greens roll, so it sits with
                     // their pace rather than with the weather.
                     switchRow(titleKey: "setup.grainyGreens", infoKey: "setup.grainyGreens.info", isOn: $grainyGreens)
@@ -129,14 +129,14 @@ struct RoundSetupView: View {
                             twoToggle(selection: $precipitation, options: Precipitation.allCases)
                         }
                     }
-                    .tutorialTarget(.weather)
+                    .tutorialTarget(.weather, cornerRadius: Theme.Radius.md)
 
                     // How the round is scored, then whether it counts.
                     VStack(alignment: .leading, spacing: 4) {
                         label(L("setup.mode"))
                         formatRow
                     }
-                    .tutorialTarget(.format)
+                    .tutorialTarget(.format, cornerRadius: Theme.Radius.md)
                     switchRow(titleKey: "setup.tournament", infoKey: "setup.tournament.info", isOn: $isTournament)
                         .padding(.top, 8)
 
@@ -176,7 +176,7 @@ struct RoundSetupView: View {
                         }
                     }
                     }
-                    .tutorialTarget(.inputModes)
+                    .tutorialTarget(.inputModes, cornerRadius: Theme.Radius.md)
 
                 }
                 .padding(.horizontal, Theme.Spacing.edge)

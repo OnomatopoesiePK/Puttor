@@ -75,6 +75,9 @@ final class TutorialController {
     private(set) var practising = false
     /// Where each target is, in window coordinates.
     var frames: [TutorialTarget: CGRect] = [:]
+    /// The corner each target rounds itself off with, so the opening around it
+    /// can share the same centre of curvature.
+    var radii: [TutorialTarget: CGFloat] = [:]
 
     @ObservationIgnored private let defaults: UserDefaults
 
@@ -176,12 +179,13 @@ final class TutorialController {
 extension View {
     /// Something a tutorial step can point at: the tutorial is told where it
     /// is whenever it moves, and can scroll to it by its id.
-    func tutorialTarget(_ target: TutorialTarget) -> some View {
+    func tutorialTarget(_ target: TutorialTarget, cornerRadius: CGFloat = Theme.Radius.lg) -> some View {
         id(target)
             .onGeometryChange(for: CGRect.self) { proxy in
                 proxy.frame(in: .global)
             } action: { frame in
                 TutorialController.shared.frames[target] = frame
+                TutorialController.shared.radii[target] = cornerRadius
             }
     }
 

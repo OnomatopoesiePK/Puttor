@@ -27,8 +27,8 @@ struct TutorialOverlay: View {
     /// between the opening and the card, and between the card and the
     /// screen's sides. Something as wide as the screen opens to its edges.
     private static let margin = Theme.Spacing.edge
-    /// A box's corner plus the margin, so the opening's corners run
-    /// parallel to the corners of what it shows.
+    /// The card's own corner: a box's corner plus the margin, the same rule
+    /// the opening follows around whatever it shows.
     private static let holeRadius = Theme.Radius.lg + margin
     private static let movement = Animation.smooth(duration: 0.45)
 
@@ -70,7 +70,8 @@ struct TutorialOverlay: View {
     private func layer(_ step: TutorialStep, hole: CGRect?, size: CGSize) -> some View {
         // With nothing to point at, the opening closes to a point mid-screen.
         let cutout = hole ?? CGRect(x: size.width / 2, y: size.height / 2, width: 0, height: 0)
-        let radius = min(Self.holeRadius, cutout.width / 2, cutout.height / 2)
+        let fieldRadius = step.target.flatMap { tutorial.radii[$0] } ?? Theme.Radius.lg
+        let radius = min(fieldRadius + Self.margin, cutout.width / 2, cutout.height / 2)
         let cardBelow = hole.map { $0.midY < size.height / 2 } ?? true
 
         return ZStack(alignment: .topLeading) {
