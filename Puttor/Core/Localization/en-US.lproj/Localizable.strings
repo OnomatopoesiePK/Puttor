@@ -12,10 +12,10 @@
 "tab.stats" = "Stats";
 "tab.coach" = "Coach";
 "coach.summary" = "Read from your last %1$ld rounds and %2$ld putts.";
-"coach.weakestDistance" = "Your weakest distance right now is %@ — that is where you sit furthest below the tour.";
+"coach.weakestDistance" = "Your weakest distance right now is %@, that is where you sit furthest below the tour.";
 "coach.numbers" = "THE NUMBERS";
 "coach.mistakes" = "SHOULD NOT HAVE HAPPENED";
-"coach.mistakes.threePutts" = "%1$ld three-putts on %2$ld holes from a distance the tour two-putts — %3$.1f strokes handed back.";
+"coach.mistakes.threePutts" = "%1$ld three-putts on %2$ld holes from a distance the tour two-putts, %3$.1f strokes handed back.";
 "coach.mistakes.sureThings" = "%1$ld of %2$ld putts missed from where the ball drops %3$ld%% of the time.";
 "coach.mistakes.worstMiss" = "The one that stings: %1$@, a %2$ld%% putt.";
 "coach.practice" = "PRACTICE";
@@ -56,7 +56,7 @@
 "tip.where.under3m" = "Inside 3 m";
 "tip.where.from8m" = "From 8 m and further";
 "tip.moreBreak.title" = "Play more break";
-"tip.moreBreak.body" = "%@ the ball stays below the hole too often. Pick the high point of the line and, when in doubt, play more break — from above, the ball can still fall.";
+"tip.moreBreak.body" = "%@ the ball stays below the hole too often. Pick the high point of the line and, when in doubt, play more break, from above, the ball can still fall.";
 "tip.lessBreak.title" = "Play less break";
 "tip.lessBreak.body" = "%@ the ball keeps missing above the hole. Play a tighter line with enough pace that the ball does not take all of the break.";
 "tip.phantomBreak.title" = "Play straight putts straight";
@@ -68,7 +68,7 @@
 "tip.slopeOverRead.title" = "Don't overplay the slope";
 "tip.slopeOverRead.body" = "%@ you play more slope than there is. Start from the pace of a flat putt of the same length and adjust only a little.";
 "tip.dieAtHole.title" = "Get the ball to the hole";
-"tip.dieAtHole.body" = "%@ your misses come up short. Play for the ball to finish 30 to 40 cm past the hole — short never goes in.";
+"tip.dieAtHole.body" = "%@ your misses come up short. Play for the ball to finish 30 to 40 cm past the hole, short never goes in.";
 "tip.softerPace.title" = "Take some pace off";
 "tip.softerPace.body" = "%@ your misses run too far. Control length with the length of the backswing rather than the hit, and picture the ball dying at the edge of the cup.";
 "tip.startLineLeft.title" = "Start line: not left";
@@ -84,39 +84,39 @@
 "tip.badStroke.title" = "Make a calmer stroke";
 "tip.badStroke.body" = "%@ the stroke itself costs you putts. Swing back and through in the same rhythm and stay still over the ball until after impact.";
 "tip.readTime.title" = "Read more carefully";
-"tip.readTime.body" = "%@ you misread a lot of putts. Read them from behind and from the low side before you commit — then stick with your read.";
+"tip.readTime.body" = "%@ you misread a lot of putts. Read them from behind and from the low side before you commit, then stick with your read.";
 "tip.aim.title" = "Check your aim";
 "tip.aim.body" = "%@ you often aim off line. Point the line on the ball at your target and check it from behind before you set up.";
 "tip.holedLess.title" = "Take more time in these conditions";
 "tip.holedLess.body" = "%@ you hole clearly fewer putts. Take your time over the read and your routine, and do not rush.";
 "tip.lag.title" = "Lag long putts close";
-"tip.lag.body" = "%@ you three-putt more often. On the first putt, length matters more than line — aim for a one-meter circle around the hole.";
+"tip.lag.body" = "%@ you three-putt more often. On the first putt, length matters more than line, aim for a one-meter circle around the hole.";
 "tip.lagDistance.title" = "Work on lag putting";
 "tip.lagDistance.body" = "%@ too many putts finish more than a meter from the hole. On the first putt, put the focus on length and aim for a one-meter circle around the hole.";
 "coach.startWith" = "START WITH THESE";
 "coach.notEnough.title" = "Not enough to go on yet";
 "coach.notEnough.body" = "A read needs %1$ld finished rounds and %2$ld putts; there are %3$ld rounds and %4$ld putts so far. Until then, these three drills cover what every putter needs.";
 "coach.reason.weakDistance" = "Trains the range you are weakest from, around %@.";
-"coach.reason.lowSide" = "Your breaking putts keep missing on the low side — this drill is four breaking putts and a straight one.";
+"coach.reason.lowSide" = "Your breaking putts keep missing on the low side, this drill is four breaking putts and a straight one.";
 "coach.reason.startLine" = "Your short putts keep leaning one way, which is a start-line problem.";
 "coach.reason.straightLine" = "Even your straight putts keep missing on one side, which is a start-line problem.";
-"coach.reason.breakSide" = "On one break direction your misses keep going the same way — this drill has putts breaking both ways.";
-"coach.reason.slopePace" = "Up or down the hill, your pace keeps missing the same way — the Ladder Drill trains exactly that.";
-"coach.reason.midRangeLine" = "From 3 to 6 m your misses keep leaning one way — the Clock Drill trains exactly that range.";
-"coach.reason.lag" = "From 8 m and further too many putts stop outside a meter — the Ladder Drill trains exactly that pace.";
+"coach.reason.breakSide" = "On one break direction your misses keep going the same way, this drill has putts breaking both ways.";
+"coach.reason.slopePace" = "Up or down the hill, your pace keeps missing the same way, the Ladder Drill trains exactly that.";
+"coach.reason.midRangeLine" = "From 3 to 6 m your misses keep leaning one way, the Clock Drill trains exactly that range.";
+"coach.reason.lag" = "From 8 m and further too many putts stop outside a meter, the Ladder Drill trains exactly that pace.";
 "coach.reason.pace" = "Your misses are a pace problem before they are a line problem.";
 "coach.reason.threePutts" = "Three-putts are costing you strokes; this one is about getting the first putt close.";
 "coach.reason.neverPlayed" = "You have not tried this one yet.";
 "coach.reason.startHere" = "A place to start while the app learns your putting.";
-"coach.trend.improving" = "Your last rounds are %1$.2f strokes a round better than your average of %2$+.2f — you are putting your way up.";
+"coach.trend.improving" = "Your last rounds are %1$.2f strokes a round better than your average of %2$+.2f, you are putting your way up.";
 "coach.trend.steady" = "Your putting is holding steady across these rounds.";
-"coach.trend.slipping" = "Your last rounds are %1$.2f strokes a round below your average of %2$+.2f — something has slipped.";
-"coach.trend.steadyStrong" = "Holding steady at %2$+.2f strokes a round — and that is a good place to be standing.";
+"coach.trend.slipping" = "Your last rounds are %1$.2f strokes a round below your average of %2$+.2f, something has slipped.";
+"coach.trend.steadyStrong" = "Holding steady at %2$+.2f strokes a round, and that is a good place to be standing.";
 "coach.trend.steadySolid" = "Holding steady at %2$+.2f strokes a round: no swing either way lately.";
-"coach.trend.steadyWeak" = "Holding steady at %2$+.2f strokes a round — steady, but steadily losing strokes.";
+"coach.trend.steadyWeak" = "Holding steady at %2$+.2f strokes a round, steady, but steadily losing strokes.";
 "coach.trend.method" = "Your last %1$ld rounds against the average of all %2$ld being read.";
 "coach.costliestBand" = "PCG LOST";
-"coach.reason.idle" = "Last played %ld days ago — worth another turn.";
+"coach.reason.idle" = "Last played %ld days ago, worth another turn.";
 "tab.settings" = "Settings";
 
 /* On Course list */
@@ -147,7 +147,7 @@
 "setup.addPutter" = "Add Putter";
 "setup.putterNamePlaceholder" = "Putter name…";
 "setup.stimp" = "GREEN SPEED";
-"setup.stimpValue" = "STIMP %1$@ – %2$@";
+"setup.stimpValue" = "STIMP %1$@ · %2$@";
 "setup.slow" = "SLOW";
 "setup.medium" = "MEDIUM";
 "setup.fast" = "FAST";
@@ -305,10 +305,10 @@
 "summary.multipleReasons" = "Multiple";
 "summary.leaveByMiss" = "LEAVE DISTANCE BY MISS";
 "summary.leaveScale" = "Bars scaled to %@";
-"summary.holedOut" = "Holed out from off the green — 0 putts";
+"summary.holedOut" = "Holed out from off the green, 0 putts";
 "summary.editHole" = "Edit";
 "summary.addPutts" = "Add Putts";
-"summary.notPlayed" = "Not played yet — tap Add Putts to record this hole.";
+"summary.notPlayed" = "Not played yet, tap Add Putts to record this hole.";
 
 /* GIR / Scramble */
 "stats.playingStats" = "PLAYING STATS";
@@ -389,7 +389,7 @@
 "stats.svp.avgWithout" = "Ø SCORE · STANDARDIZED PUTTING";
 "stats.svp.perRound" = "per round";
 "stats.svp.needMore" = "%ld finished rounds are needed before scores and putting can be compared.";
-"stats.svp.note" = "Each round counts as it was played. “Standardized putting” adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting.\n\nEach band covers one standard deviation either side of that series' average, and the percentage compares the two.\n\nA narrower standardized band means the putter is what pulls your rounds apart: take it out and they converge. A wider one means the opposite, and it can only happen one way — the putter gained most on the rounds where the rest of the game went worst. That is putting covering for the long game, not putting being irrelevant.\n\nThe average strokes gained is a separate question: it says whether the putter is a net gain or a net cost, not whether it is what makes your rounds differ.";
+"stats.svp.note" = "Each round counts as it was played. “Standardized putting” adds your strokes gained back onto the card: the score the same long game would have shot with tour-average putting.\n\nEach band covers one standard deviation either side of that series' average, and the percentage compares the two.\n\nA narrower standardized band means the putter is what pulls your rounds apart: take it out and they converge. A wider one means the opposite, and it can only happen one way, the putter gained most on the rounds where the rest of the game went worst. That is putting covering for the long game, not putting being irrelevant.\n\nThe average strokes gained is a separate question: it says whether the putter is a net gain or a net cost, not whether it is what makes your rounds differ.";
 "stats.svp.bandLegend" = "score average ± spread";
 "stats.svp.bandLegendPro" = "standardized putting average ± spread";
 "stats.svp.impactHigh" = "PUTTING DRIVES YOUR SCORE";
@@ -402,7 +402,7 @@
 "stats.rounds.info" = "One tile per round in the current filter, showing that round's strokes gained putting.\n\nFor each hole: the putts the tour would expect from where the first putt stood, less the putts actually taken.";
 "stats.sgPutting.info" = "Strokes gained per hole, summed over a round and then averaged across the filtered rounds.\n\nPCG underneath is the same rounds' per-putt figure: how each result compares with the tour's odds of holing from that distance.";
 "stats.playingStats.info" = "Score is the average strokes over par per round.\n\nGIR counts holes played for eagle or birdie, birdie conversion how many of those greens were turned into a birdie or an eagle off one or two putts, scramble the par saves among holes played for par with the green missed.\n\nThe putting figures count only holes that were actually putted. 3-putts and lip-outs are averaged per round over every round in the filter; proximity is the length of the first putt on greens hit in regulation.\n\nAll of it needs the score reference (\"putt for\"): every mode has it except Custom without that field.\n\nThe arrow on the right slides in how each figure moved from round to round, over the same rounds as the filter above. Swipe right or tap the arrow on the left to come back.";
-"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. The rings mark 1, 2 and 3 meters of distance left. They are drawn as ellipses stretched sideways, because a putt seldom misses far to the side: the sides reach 1.5 m, the top and bottom 3 m. As soon as one miss lies more than 1.5 m to the side, the plot goes back to circles.\n\nThe first menu picks which break directions to show, the second what the colors mean: the strength of the break, the length of the putt, or how much it ran up or down the hill — the last two need the slope field as well.\n\nThe two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time.\n\nA bigger dot means more misses in the same spot, and once a color filter is on, each dot is shaded by the class it falls into.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nThe sentences underneath read every putt in the selection. A direction is only named when more than 60 percent of the misses go that way: over all misses, per break direction, on straight putts, uphill, downhill, inside 1.5 m, 1.5–3 m, 3–6 m and from 6 m. A slice that only repeats all misses is left out. Where one reason stands out behind a habit, it is named underneath. A miss only counts as long when the next putt is more than 1 m: a ball that stops just past the hole had the right pace. Two exceptions are named from 30 percent: misses inside 3 m that come up short, and putts from 8 m that finish more than 1 m from the hole. The findings are grouped into length, line and break, and distance left. Each group shows at most three, one per direction, and the groups and the findings in them are ordered by roughly how many putts they cost.";
+"stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. The rings mark 1, 2 and 3 meters of distance left. They are drawn as ellipses stretched sideways, because a putt seldom misses far to the side: the sides reach 1.5 m, the top and bottom 3 m. As soon as one miss lies more than 1.5 m to the side, the plot goes back to circles.\n\nThe first menu picks which break directions to show, the second what the colors mean: the strength of the break, the length of the putt, or how much it ran up or down the hill, the last two need the slope field as well.\n\nThe two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time.\n\nA bigger dot means more misses in the same spot, and once a color filter is on, each dot is shaded by the class it falls into.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nThe sentences underneath read every putt in the selection. A direction is only named when more than 60 percent of the misses go that way: over all misses, per break direction, on straight putts, uphill, downhill, inside 1.5 m, 1.5–3 m, 3–6 m and from 6 m. A slice that only repeats all misses is left out. Where one reason stands out behind a habit, it is named underneath. A miss only counts as long when the next putt is more than 1 m: a ball that stops just past the hole had the right pace. Two exceptions are named from 30 percent: misses inside 3 m that come up short, and putts from 8 m that finish more than 1 m from the hole. The findings are grouped into length, line and break, and distance left. Each group shows at most three, one per direction, and the groups and the findings in them are ordered by roughly how many putts they cost.";
 "pattern.title" = "WHAT YOUR MISSES KEEP DOING";
 "pattern.category.length" = "LENGTH";
 "pattern.category.line" = "LINE & BREAK";
@@ -411,7 +411,7 @@
 "pattern.missRight" = "%1$ld of %2$ld (%3$ld%%) misses go right of the hole.";
 "pattern.missShort" = "%1$ld of %2$ld (%3$ld%%) misses finish short.";
 "pattern.missLong" = "%1$ld of %2$ld (%3$ld%%) misses run past the hole.";
-"pattern.missLowSide" = "On breaking putts you miss below the hole %1$ld times out of %2$ld (%3$ld%%) — the side that never had a chance.";
+"pattern.missLowSide" = "On breaking putts you miss below the hole %1$ld times out of %2$ld (%3$ld%%), the side that never had a chance.";
 "pattern.missHighSide" = "On breaking putts you miss above the hole %1$ld times out of %2$ld (%3$ld%%).";
 "pattern.longPuttsShort" = "From 6 m and further, %1$ld of %2$ld (%3$ld%%) misses come up short.";
 "pattern.longPuttsLong" = "From 6 m and further, %1$ld of %2$ld (%3$ld%%) misses run past.";
@@ -445,8 +445,8 @@
 "pattern.band3to6.right" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses go right.";
 "pattern.band3to6.short" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses finish short.";
 "pattern.band3to6.long" = "From 3 to 6 m, %1$ld of %2$ld (%3$ld%%) misses run past.";
-"pattern.shortInside3m" = "Inside 3 m, %1$ld of %2$ld (%3$ld%%) misses come up short — short never goes in.";
-"pattern.lagOutsideMetre" = "From 8 m and further, %1$ld of %2$ld (%3$ld%%) putts finish more than 1 m from the hole — time to work on lag putting.";
+"pattern.shortInside3m" = "Inside 3 m, %1$ld of %2$ld (%3$ld%%) misses come up short, short never goes in.";
+"pattern.lagOutsideMetre" = "From 8 m and further, %1$ld of %2$ld (%3$ld%%) putts finish more than 1 m from the hole, time to work on lag putting.";
 "link.title" = "WHAT GOES TOGETHER";
 "cause.note" = "Of those, %1$ld of %2$ld (%3$ld%%) were %4$@.";
 "link.groupToCause" = "%1$@: %2$ld of %3$ld misses (%4$ld%%) were %5$@.";
@@ -545,9 +545,9 @@
 "link.groupPhrase.doubleBreak" = "were double breakers";
 "chart.makeVsTour.info" = "One row per distance bracket: the putts you holed over the putts you took from there, against the tour's average make rate across the same bracket.\n\nThe right-hand column totals PCG for that bracket, divided by the number of rounds.\n\nThe tour column is a flat average across the whole bracket, while PCG measures every putt against the curve at its own distance. So when your putts sit at the near end of a bracket, PCG can come out negative even though your make % is above the tour column.";
 "stats.makeBySituation.info" = "The same distance brackets, split by the score each putt was for, so a birdie putt and a par putt from the same range can be compared.\n\nNeeds the score reference (\"putt for\"), which Custom mode can leave out.";
-"summary.missTendency.info" = "Every miss placed in the direction it was entered. A sector reddens with how often that direction came up, and the middle holds the total.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex — a plain \"missed\" has no direction to place.";
+"summary.missTendency.info" = "Every miss placed in the direction it was entered. A sector reddens with how often that direction came up, and the middle holds the total.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex, a plain \"missed\" has no direction to place.";
 "summary.missReasons.info" = "How often each reason was checked on a missed putt. A putt with more than one reason is counted once, under \"multiple\".\n\nNeeds the miss reasons field: Pro mode, or Custom with that field added.\n\nUnderneath, every reason is checked against every direction and every kind of putt: break direction and strength, straight, uphill, downhill, the four distance bands, double break. A link is only named when more than 60 percent of a group's misses share the reason, at least 20 points more than the misses it is compared with, and a statistical test backs it. Only rounds where reasons were recorded count.\n\nFor misreads and wrong aims the break is read as well: its direction, its strength (gentle 1 percent, medium 2, strong 3 and more) and the hill. The side of the miss shows whether too little or too much break was played, or on a straight putt which break was seen. A misread or a wrong aim only counts on a putt that missed off line: one that only came up short or ran long was not misread, so it is left out here and in the counts above. This is named from 6 such misses, when more than 60 percent went the same way. Underneath each one is the narrowest distance range holding 80 percent of those misses.";
-"summary.leaveByMiss.info" = "Average distance left after a miss, grouped by the direction it went — measured from the distance of the next putt on that hole. Bars are scaled to the longest of those averages.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.";
+"summary.leaveByMiss.info" = "Average distance left after a miss, grouped by the direction it went, measured from the distance of the next putt on that hole. Bars are scaled to the longest of those averages.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.";
 
 /* Dispersion */
 "dispersion.all" = "All Slopes";
@@ -610,34 +610,34 @@
 "unit.m" = "m";
 "unit.ft" = "ft";
 
-/* Games — titles */
+/* Games, titles */
 "game.gate.title" = "Gate Drill";
 "game.clock.title" = "Clock Drill";
 "game.ninePutt.title" = "9-Putt Drill";
 "game.routine.title" = "Routine Putt Drill";
 "game.aroundTheWorld.title" = "Around the World";
 
-/* Games — goals */
+/* Games, goals */
 "game.gate.goal" = "Control your start line and a clean, straight stroke without twisting the putter face.";
 "game.clock.goal" = "Practice different breaks from the same distance without your feel for length changing.";
 "game.ninePutt.goal" = "Build consistency under light pressure and lock down short-to-mid putts.";
 "game.routine.goal" = "Simulates real on-course situations and trains your routine and focus on every single, different putt.";
 "game.aroundTheWorld.goal" = "Simulates a complete round and shows you where your weaknesses still are.";
 
-/* Games — full explanations */
+/* Games, full explanations */
 "game.gate.explanation" = "Push two tees into the ground just in front of the ball, spaced just wide enough for the putter head/ball to pass through (a \"gate\"). Then putt through this gate toward your target line. Use a straight putt for it.";
-"game.clock.explanation" = "Place balls in a circle around the hole, like numbers on a clock face (e.g. 12, 3, 6 and 9 o'clock), all at the same distance. Then putt each ball in turn — working your way around clockwise.";
-"game.ninePutt.explanation" = "Choose three positions at different distances (e.g. 1 m, 2 m, 3 m) and putt 3 balls from each — 9 putts total. All 9 must go in, or you start over from the beginning.";
-"game.routine.explanation" = "Randomly prescribed putts — choose which distances and break ranges should be possible. Play these putts one after another exactly as given, each with your full pre-shot routine, no practice putts or do-overs.";
-"game.aroundTheWorld.explanation" = "Build a course of 9 or 18 different putts on the green and play them like a mini round — each putt counts as a hole. Track your strokes per \"hole\" and add them up at the end.";
+"game.clock.explanation" = "Place balls in a circle around the hole, like numbers on a clock face (e.g. 12, 3, 6 and 9 o'clock), all at the same distance. Then putt each ball in turn, working your way around clockwise.";
+"game.ninePutt.explanation" = "Choose three positions at different distances (e.g. 1 m, 2 m, 3 m) and putt 3 balls from each, 9 putts total. All 9 must go in, or you start over from the beginning.";
+"game.routine.explanation" = "Randomly prescribed putts, choose which distances and break ranges should be possible. Play these putts one after another exactly as given, each with your full pre-shot routine, no practice putts or do-overs.";
+"game.aroundTheWorld.explanation" = "Build a course of 9 or 18 different putts on the green and play them like a mini round, each putt counts as a hole. Track your strokes per \"hole\" and add them up at the end.";
 
-/* Games — score units */
+/* Games, score units */
 "game.unit.percent" = "MAKE RATE";
 "game.unit.cycles" = "Rounds to clear";
 "game.unit.strokes" = "Strokes";
 "game.aroundTheHole.title" = "Around the Hole";
-"game.aroundTheHole.goal" = "Five tees around the cup — hole every one of them, lap after lap, without a single miss.";
-"game.aroundTheHole.explanation" = "Set five tees at the same distance around the hole: one straight uphill putt to start on, then right-to-left uphill, right-to-left downhill, left-to-right uphill and left-to-right downhill. Hole all five and the lap is done. Miss one and you go back to the first tee — the laps only count unbroken. Shorter putts ask for more laps: five at 1 m, three at 1.3 m, two at 2 m, one at 2.5 m. You can change that, and if you mark the drill as too easy afterwards, the next setup offers a lap more. It is a drill you finish rather than a score you chase, so what it keeps is how long it took and how often you turned up.";
+"game.aroundTheHole.goal" = "Five tees around the cup, hole every one of them, lap after lap, without a single miss.";
+"game.aroundTheHole.explanation" = "Set five tees at the same distance around the hole: one straight uphill putt to start on, then right-to-left uphill, right-to-left downhill, left-to-right uphill and left-to-right downhill. Hole all five and the lap is done. Miss one and you go back to the first tee, the laps only count unbroken. Shorter putts ask for more laps: five at 1 m, three at 1.3 m, two at 2 m, one at 2.5 m. You can change that, and if you mark the drill as too easy afterwards, the next setup offers a lap more. It is a drill you finish rather than a score you chase, so what it keeps is how long it took and how often you turned up.";
 "game.unit.minutes" = "Time";
 "game.ath.tees" = "tees";
 "game.ath.rounds" = "laps";
@@ -669,15 +669,15 @@
 "game.activity.more" = "more";
 "game.activity.total" = "%ld sessions";
 
-/* Games — info sheet */
+/* Games, info sheet */
 "game.info.goal" = "GOAL";
 "game.info.howTo" = "HOW TO PLAY";
 
-/* Games — home / card */
+/* Games, home / card */
 "game.best" = "Best";
 "game.noScoreYet" = "No score yet";
 
-/* Games — shared play chrome */
+/* Games, shared play chrome */
 "game.attempt" = "Attempt";
 "game.attempts" = "Attempts";
 "game.made" = "Made";
@@ -779,7 +779,7 @@
 "custom.field.doubleBreak" = "Double Break";
 "custom.field.doubleBreak.desc" = "Marks a putt that breaks one way then the other";
 "custom.field.intention" = "Intention";
-"custom.field.intention.desc" = "What the putt is meant to do — pace, line, match situation — and whether it came off";
+"custom.field.intention.desc" = "What the putt is meant to do, pace, line, match situation, and whether it came off";
 "input.intention" = "INTENTION";
 "intention.part.speed" = "Pace";
 "intention.part.line" = "Line";
@@ -803,11 +803,11 @@
 "intention.executedQuestion" = "Executed?";
 "intention.executed" = "Executed";
 "intention.notExecuted" = "Not executed";
-"stats.intention" = "INTENTION – OUTCOME";
+"stats.intention" = "INTENTION. OUTCOME";
 "stats.intention.info" = "Every putt entered with an intention. At the top: putts played as meant or not, against whether they dropped. Below, for each pace, line or match situation: how often it went in, how often you did what you meant to, how often it went in when you did and when you did not, which way the misses went, how far on average they finished, and how many breaking misses stayed on the high (pro) side.\n\nA putt played as meant that does not drop is not a mistake.\n\nNeeds the intention field: Custom mode with that field added.";
 "intention.matrix.made" = "Made";
 "intention.matrix.missed" = "Missed";
-"intention.matrix.note" = "%1$@ of the misses were played as meant — a putt that does what you wanted and still does not drop is not a mistake.";
+"intention.matrix.note" = "%1$@ of the misses were played as meant, a putt that does what you wanted and still does not drop is not a mistake.";
 "intention.stat.made" = "Made";
 "intention.stat.executed" = "Executed";
 "intention.stat.leave" = "Ø leave";
@@ -886,7 +886,7 @@
 "settings.reference.desc" = "Strokes gained, PCG and the tour baseline";
 "reference.title" = "Strokes Gained & PCG";
 "reference.expectedPutts" = "EXP. PUTTS";
-"reference.intro" = "Two numbers, both measured against the tour average — but they answer different questions.";
+"reference.intro" = "Two numbers, both measured against the tour average, but they answer different questions.";
 "reference.sgText" = "Strokes gained judges a whole hole: the putts the tour would need from your first distance, minus the putts you actually took. A single putt has none of its own, because how good a lag was only shows once the hole is over.";
 "reference.pcgText" = "PCG judges one stroke against the odds of holing from that distance. Sinking a putt nobody makes is worth nearly a full point; missing a tap-in costs nearly one.";
 "reference.example" = "EXAMPLE";
@@ -901,7 +901,7 @@
 "reference.tableTitle" = "TOUR BASELINE";
 "reference.sourceTitle" = "WHERE THESE NUMBERS COME FROM";
 "reference.sourceText" = "The yardstick is the PGA Tour average from Mark Broadie's putts-gained work, measured with ShotLink over millions of putts. The curves above are fitted to his figures; PCG is Puttor's own addition.";
-"reference.sourceLink" = "Broadie: Putts Gained — Measuring Putting on the PGA TOUR (PDF)";
+"reference.sourceLink" = "Broadie: Putts Gained. Measuring Putting on the PGA TOUR (PDF)";
 "reference.curvesTitle" = "THE CURVES BEHIND THE TABLE";
 "reference.curvesText" = "Both columns are read off fitted curves, with x = ln(distance in meters), from 0.3 m to 40 m.";
 "reference.curvesMake" = "MAKE PROBABILITY";
@@ -925,23 +925,23 @@
 "split.cond.uphill" = "uphill putts";
 "split.cond.doubleBreak" = "double breaks";
 "split.cond.singleBreak" = "single breaks";
-"split.missLong" = "On %1$@, %2$@%% of your misses run past the hole — on %3$@ %4$@%%.";
-"split.missShort" = "On %1$@, %2$@%% of your misses come up short — on %3$@ %4$@%%.";
-"split.missHighSide" = "On %1$@, %2$@%% of your breaking misses stay above the hole — on %3$@ %4$@%%.";
-"split.missLowSide" = "On %1$@, %2$@%% of your breaking misses fall below the hole — on %3$@ %4$@%%.";
-"split.missRead" = "On %1$@, %2$@%% of your misses come down to the read — on %3$@ %4$@%%.";
-"split.holedMore" = "On %1$@, %2$@%% of your putts drop — on %3$@ %4$@%%.";
-"split.holedLess" = "On %1$@, %2$@%% of your putts stay out — on %3$@ %4$@%%.";
-"split.threePutts" = "On %1$@ you three-putt %2$@ times a round — on %3$@ %4$@, from the same sort of distance.";
+"split.missLong" = "On %1$@, %2$@%% of your misses run past the hole, on %3$@ %4$@%%.";
+"split.missShort" = "On %1$@, %2$@%% of your misses come up short, on %3$@ %4$@%%.";
+"split.missHighSide" = "On %1$@, %2$@%% of your breaking misses stay above the hole, on %3$@ %4$@%%.";
+"split.missLowSide" = "On %1$@, %2$@%% of your breaking misses fall below the hole, on %3$@ %4$@%%.";
+"split.missRead" = "On %1$@, %2$@%% of your misses come down to the read, on %3$@ %4$@%%.";
+"split.holedMore" = "On %1$@, %2$@%% of your putts drop, on %3$@ %4$@%%.";
+"split.holedLess" = "On %1$@, %2$@%% of your putts stay out, on %3$@ %4$@%%.";
+"split.threePutts" = "On %1$@ you three-putt %2$@ times a round, on %3$@ %4$@, from the same sort of distance.";
 "coach.trendMetric" = "CHANGE / ROUND";
 "coach.readingTitle" = "HOW IT IS GOING";
 "coach.pcgTrendMetric" = "CHANGE / ROUND";
-"coach.summary.info" = "The trend is your last three rounds against the average of every round read here — the last seven, and only rounds that were finished.\n\nIt takes half a stroke a round either way before a direction is called; anything smaller is the same putting on different days.\n\nWhen nothing is moving, the wording depends on where you are standing still: above +0.5 a round is a good place to stand, below −0.5 is not.";
-"coach.numbers.info" = "The first two tiles show change, not level: your last three rounds against the average of your last seven. Green is ground made, red is ground lost, whatever the size.\n\nThe small Ø line underneath is that average itself — where the change is measured from. What your putting is worth overall belongs in the Statistics tab; here the question is which way it is moving.\n\nSG is strokes gained over a whole round: for every hole, the putts the tour would expect from where the first putt stood, less the putts you took. PCG is the same idea per putt, against the tour's odds of holing from that distance.\n\n3-putts are counted per round rather than as a share of holes. The last tile is the distance band costing you the most: the band, then the conversion gain lost there against the tour.\n\nAll of it is read from your finished rounds on the course. The drills are counted separately, further down.";
+"coach.summary.info" = "The trend is your last three rounds against the average of every round read here, the last seven, and only rounds that were finished.\n\nIt takes half a stroke a round either way before a direction is called; anything smaller is the same putting on different days.\n\nWhen nothing is moving, the wording depends on where you are standing still: above +0.5 a round is a good place to stand, below −0.5 is not.";
+"coach.numbers.info" = "The first two tiles show change, not level: your last three rounds against the average of your last seven. Green is ground made, red is ground lost, whatever the size.\n\nThe small Ø line underneath is that average itself, where the change is measured from. What your putting is worth overall belongs in the Statistics tab; here the question is which way it is moving.\n\nSG is strokes gained over a whole round: for every hole, the putts the tour would expect from where the first putt stood, less the putts you took. PCG is the same idea per putt, against the tour's odds of holing from that distance.\n\n3-putts are counted per round rather than as a share of holes. The last tile is the distance band costing you the most: the band, then the conversion gain lost there against the tour.\n\nAll of it is read from your finished rounds on the course. The drills are counted separately, further down.";
 "coach.practice.info" = "Read from the completed drills in the Games tab, and kept apart from the course numbers on purpose: practice without a card in your hand is not a round, and averaging the two would describe neither.\n\nPCG per putt appears for the drills that record the distance of each attempt; the ones counted on the green without the app do not have one.";
 "coach.whatIsHappening.info" = "Habits in your misses: a side they keep going, a length they keep coming up, a break they keep missing below.\n\nEach line needs at least eight misses of that kind (six within a slice), with more than six in ten going the same way, before it is called a habit. One bad putt is a bad putt.\n\nNeeds the complex result field: Pro mode, or Custom with the result set to complex.\n\nWhere one miss reason stands out behind a habit, it is named underneath. The lines with a link symbol tie reasons to directions and kinds of putts. For misreads and wrong aims it also says how the break was read. A miss only counts as long when the next putt is more than 1 m: a ball that stops just past the hole had the right pace. Two exceptions are named from 30 percent: misses inside 3 m that come up short, and putts from 8 m that finish more than 1 m from the hole. The findings are grouped into length, line and break, and distance left. Each group shows at most three, one per direction, and the groups and the findings in them are ordered by roughly how many putts they cost.";
-"coach.conditions.info" = "Every condition a round carries — the pace of the greens, rain, wind, cold, grain — and every condition a putt carries — break, slope, double break — is compared with its opposite over your own putts.\n\nA difference is only listed when it survives four checks: enough putts on both sides, both sides putting from comparable distances, a statistical test that the two shares really differ, and a correction for how many comparisons were made to find it. Search enough splits and random data throws up differences on its own; this is what keeps those off the card.\n\nThese are read from your last thirty rounds rather than ten. How you putt in the rain is a trait rather than a form, and rain is rare.";
-"coach.plan.info" = "In order: the distance costing you the most strokes, the drill that answers whatever your misses keep doing, the drill you convert worst in, and whatever has been left untouched for two weeks.\n\nThe number beside each drill is how many sessions to aim for before the next read — three when the trend is slipping, one when it is climbing, two otherwise.";
+"coach.conditions.info" = "Every condition a round carries, the pace of the greens, rain, wind, cold, grain, and every condition a putt carries, break, slope, double break, is compared with its opposite over your own putts.\n\nA difference is only listed when it survives four checks: enough putts on both sides, both sides putting from comparable distances, a statistical test that the two shares really differ, and a correction for how many comparisons were made to find it. Search enough splits and random data throws up differences on its own; this is what keeps those off the card.\n\nThese are read from your last thirty rounds rather than ten. How you putt in the rain is a trait rather than a form, and rain is rare.";
+"coach.plan.info" = "In order: the distance costing you the most strokes, the drill that answers whatever your misses keep doing, the drill you convert worst in, and whatever has been left untouched for two weeks.\n\nThe number beside each drill is how many sessions to aim for before the next read, three when the trend is slipping, one when it is climbing, two otherwise.";
 
 // Ladder drill and the weekly streak
 "game.category.startLine" = "START LINE";
@@ -953,7 +953,7 @@
 "game.stats.sessions" = "SESSIONS";
 "game.ladder.title" = "Ladder Drill";
 "game.ladder.goal" = "Trains pace on its own: the ball only has to stop in the right place, so distance control is the whole test.";
-"game.ladder.explanation" = "Putt from one spot to a row of target distances, working up the ladder. A putt counts when the ball finishes within 30 cm of its rung — short or long — so nothing has to be holed and the line never comes into it.\n\nTwo ladders to choose from. The large one goes in whole meters from 5 m out to 20 m, which is lag range. The fine one goes in half meters between 5 and 10 m, where the gaps are small enough that the stroke has to be measured rather than felt.\n\nMiss a rung and play it again before moving up. Like the other training drills, the app only asks whether you finished it or gave up — what it keeps is that you turned up and how long it took.";
+"game.ladder.explanation" = "Putt from one spot to a row of target distances, working up the ladder. A putt counts when the ball finishes within 30 cm of its rung, short or long, so nothing has to be holed and the line never comes into it.\n\nTwo ladders to choose from. The large one goes in whole meters from 5 m out to 20 m, which is lag range. The fine one goes in half meters between 5 and 10 m, where the gaps are small enough that the stroke has to be measured rather than felt.\n\nMiss a rung and play it again before moving up. Like the other training drills, the app only asks whether you finished it or gave up, what it keeps is that you turned up and how long it took.";
 "game.ladder.mode" = "LADDER";
 "game.ladder.mode.large" = "Large steps";
 "game.ladder.mode.fine" = "Fine steps";
@@ -969,7 +969,7 @@
 // Tournament rounds against casual ones
 "setup.tournament" = "Tournament round";
 "setup.tournament.desc" = "Counted separately by the coach: competition against practice";
-"setup.tournament.info" = "Tournament rounds are kept apart from casual ones. The coach compares your last five of each — strokes gained, PCG and how far the rounds spread — so you can see how your putting holds up when the card counts.\n\nTurn it on for every round played in competition.";
+"setup.tournament.info" = "Tournament rounds are kept apart from casual ones. The coach compares your last five of each, strokes gained, PCG and how far the rounds spread, so you can see how your putting holds up when the card counts.\n\nTurn it on for every round played in competition.";
 "coach.tournament" = "WHEN IT COUNTS";
 "coach.tournament.competition" = "TOURNAMENT";
 "coach.tournament.practice" = "CASUAL";
@@ -977,12 +977,12 @@
 "coach.tournament.better" = "In competition you gain %.2f strokes a round more than in a casual round.";
 "coach.tournament.worse" = "In competition you lose %.2f strokes a round against your casual rounds.";
 "coach.tournament.same" = "Competition and casual rounds come out the same, within %.2f strokes a round.";
-"coach.tournament.steadier" = "Your competition rounds sit closer together, by %.2f strokes — you putt more predictably when it counts.";
+"coach.tournament.steadier" = "Your competition rounds sit closer together, by %.2f strokes, you putt more predictably when it counts.";
 "coach.tournament.wilder" = "Your competition rounds are %.2f strokes further apart than your casual ones: the good days and bad days pull further away from each other.";
 "coach.tournament.sameSpread" = "Both sets are equally spread out, so a card counting changes nothing about how reliable you are.";
 "coach.tournament.outliers" = "ROUNDS THAT STOOD OUT";
-"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG — %4$.1f standard deviations from that set's average.";
-"coach.tournament.info" = "Your last five tournament rounds against your last five casual ones, reported whichever way it falls — the point is to know what your card says when it counts, and \"no difference\" is an answer to that.\n\nBoth measures are shown so it is clear what is being counted. SG is strokes gained putting over a round: the putts the tour would expect, less the putts you took. PCG is the same round's conversion gain, each putt against the tour's odds of holing it from where it stood.\n\nThe ± underneath is the standard deviation — how far a round typically strays from that average, which is the difference between reliable and merely good on the day. It appears once three rounds stand behind it.\n\nA round is listed as standing out when its SG is at least 1.8 standard deviations from the average of the five it belongs to.";
+"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG, %4$.1f standard deviations from that set's average.";
+"coach.tournament.info" = "Your last five tournament rounds against your last five casual ones, reported whichever way it falls, the point is to know what your card says when it counts, and \"no difference\" is an answer to that.\n\nBoth measures are shown so it is clear what is being counted. SG is strokes gained putting over a round: the putts the tour would expect, less the putts you took. PCG is the same round's conversion gain, each putt against the tour's odds of holing it from where it stood.\n\nThe ± underneath is the standard deviation, how far a round typically strays from that average, which is the difference between reliable and merely good on the day. It appears once three rounds stand behind it.\n\nA round is listed as standing out when its SG is at least 1.8 standard deviations from the average of the five it belongs to.";
 
 // Legal
 "settings.legal" = "LEGAL";
@@ -1001,7 +1001,7 @@
 "game.benchmark.tourAt" = "TOUR AT %@";
 "game.benchmark.perRound" = "PER ROUND";
 "game.benchmark.basis" = "Estimated on about %1$.1f putts a round landing within half a meter of %2$@.";
-"game.benchmark.info" = "Your make rate next to the tour's from the same distance, and what the difference between them is worth over eighteen holes.\n\nEvery putt holed above the tour's rate is a stroke gained, so the gap is multiplied by how many putts of that length a round actually contains — a drill at 1 m answers for ten putts a round, one at 8 m for two.\n\nThat frequency is an estimate of a club player's round of roughly 32 putts, not a measurement of yours. The figure is meant as an order of magnitude: it says whether a drill result matters on the card, not what your next round will score.";
+"game.benchmark.info" = "Your make rate next to the tour's from the same distance, and what the difference between them is worth over eighteen holes.\n\nEvery putt holed above the tour's rate is a stroke gained, so the gap is multiplied by how many putts of that length a round actually contains, a drill at 1 m answers for ten putts a round, one at 8 m for two.\n\nThat frequency is an estimate of a club player's round of roughly 32 putts, not a measurement of yours. The figure is meant as an order of magnitude: it says whether a drill result matters on the card, not what your next round will score.";
 "coach.perRound" = "PER ROUND";
 "coach.practice.perPutt" = "PER PUTT";
 
@@ -1025,22 +1025,22 @@
 // Picking the ball up
 "input.pickUp" = "Pick up ball";
 "input.pickUpConfirm" = "Pick up on hole %ld?";
-"input.pickUpMessage" = "The hole is left out of every putting figure. Give it the score it would have gone down as — a double bogey at worst — and it counts as a score everywhere, this round included in the score statistics. Left without one, it is written down as a double bogey and the round counts for putting only.";
+"input.pickUpMessage" = "The hole is left out of every putting figure. Give it the score it would have gone down as, a double bogey at worst, and it counts as a score everywhere, this round included in the score statistics. Left without one, it is written down as a double bogey and the round counts for putting only.";
 "stats.gbe" = "ADJ. GROSS";
-"summary.pickedUp" = "Ball picked up — out of the putting figures.";
+"summary.pickedUp" = "Ball picked up, out of the putting figures.";
 "summary.puttedHoles" = "%ld with putts";
 "stats.svp.impactEvens" = "PUTTING EVENS YOUR ROUNDS OUT";
 "stats.svp.note.separates" = "With tour-average putting your rounds would sit closer together, so what makes a good round good and a bad round bad is largely the putter.";
 "stats.svp.note.evensGain" = "Your rounds sit closer together than the rest of your game alone would leave them: on the days the long game was off, the putter gained the most and pulled the card back.";
 "stats.svp.note.evensLoss" = "Your rounds sit closer together than the rest of your game alone would leave them: on the days the long game was best, the putter gave the most back.";
-"stats.svp.note.evensFlat" = "Your rounds sit closer together than the rest of your game alone would leave them — the putter is evening out how much the long game swings.";
+"stats.svp.note.evensFlat" = "Your rounds sit closer together than the rest of your game alone would leave them, the putter is evening out how much the long game swings.";
 "stats.svp.note.neutral" = "Both halves swing about as much, so what separates your rounds is not the putting on its own.";
 "input.pickUpWith" = "Pick up · %@";
 "input.pickUpNoScore" = "No score";
 "input.pickedUpHole" = "Ball picked up";
 "input.pickUpScore" = "SCORE FOR THIS HOLE";
 "input.pickUpHint" = "A picked-up hole cannot be better than a double bogey. Without a score it is written down as one, and the round stays out of the score statistics.";
-"summary.pickedUpScored" = "Ball picked up — counted as %@, out of the putting figures.";
+"summary.pickedUpScored" = "Ball picked up, counted as %@, out of the putting figures.";
 
 // Stroke play or match play
 "setup.format" = "FORMAT";
@@ -1053,12 +1053,12 @@
 "custom.result.style.angle" = "Angle";
 "input.missAngle" = "MISS ANGLE";
 "input.missAngle.none" = "Drag around the hole";
-"input.missAngle.info" = "Drag around the ring to where the ball stopped, in steps of five degrees: straight short at the bottom, left and right at the sides, up to long-left and long-right at the two ends. The ring is split at the top, so every miss is either left or right.\n\nThe center is holed and the ring around it a lip-out, as on the board.\n\nOnly the direction is recorded — how far the ball ran is already known from the distance of the next putt.\n\nBelow the sides of the hole counts as short and above them as long, so 85° is still short. The angle reads 0° straight short, 90° beside the hole, and runs back down toward 0° as the miss goes long.";
+"input.missAngle.info" = "Drag around the ring to where the ball stopped, in steps of five degrees: straight short at the bottom, left and right at the sides, up to long-left and long-right at the two ends. The ring is split at the top, so every miss is either left or right.\n\nThe center is holed and the ring around it a lip-out, as on the board.\n\nOnly the direction is recorded, how far the ball ran is already known from the distance of the next putt.\n\nBelow the sides of the hole counts as short and above them as long, so 85° is still short. The angle reads 0° straight short, 90° beside the hole, and runs back down toward 0° as the miss goes long.";
 
 // Export and import
 "settings.data" = "DATA";
 "data.export" = "Export data";
-"data.export.desc" = "Every round and drill as one file — as a backup, or to move to another device.";
+"data.export.desc" = "Every round and drill as one file, as a backup, or to move to another device.";
 "data.import" = "Import data";
 "data.import.desc" = "Adds the rounds and drills from an export. Nothing already here is changed or doubled.";
 "data.exported.title" = "Exported";
@@ -1081,15 +1081,15 @@
 "tutorial.courseName" = "Here you can add the name of the course you want to play. If you only play 9 holes, an asterisk will be added to the name, and if you play a tournament, a %@ tag will be added.";
 "tutorial.courseName.hint" = "Tap the field to enter a name and confirm with Done.";
 "tutorial.putter" = "Add the putter you play with. Later you can compare your statistics putter by putter.";
-"tutorial.greenSpeed" = "Set how fast the greens are rolling today. The speed is given in Stimp – the higher the number, the faster the green. It is saved with the round, so you can later compare your putting on fast and slow greens.";
+"tutorial.greenSpeed" = "Set how fast the greens are rolling today. The speed is given in Stimp, the higher the number, the faster the green. It is saved with the round, so you can later compare your putting on fast and slow greens.";
 "tutorial.weather" = "Set the weather you are playing in. You can filter your statistics by it later.";
 "tutorial.format" = "%1$@ (or a Stableford round) is the standard mode. Choose %2$@ when you play hole by hole against someone.";
 "tutorial.inputModes" = "Choose how much you want to record:\n\n• %1$@ records everything: slope, miss angle and miss reasons.\n• %2$@ records distance, “putt for” (birdie, par, …) and holed or not holed. Little data goes into the statistics in this mode.\n• In %3$@ you can add fields as you like and change how detailed they are.\n\nYour first round is played in %1$@.";
 "tutorial.startRound" = "All set! Tap %@ to begin.";
-"tutorial.distance" = "Enter the distance from the putt to the hole here. The preset number can be changed in Settings. When the number in the field is solid, the entry is saved and you can simply type a new number WITHOUT deleting the old one first. NOTE: a faded number is not saved yet — to confirm it you always have to press %@.";
+"tutorial.distance" = "Enter the distance from the putt to the hole here. The preset number can be changed in Settings. When the number in the field is solid, the entry is saved and you can simply type a new number WITHOUT deleting the old one first. NOTE: a faded number is not saved yet, to confirm it you always have to press %@.";
 "tutorial.pace" = "Tip: not sure how far a meter is? Pace off a known length and either adjust your stride so one step is a meter, or simply know how far your step is and convert. Usually, though, a slightly longer step is about a meter.";
 "tutorial.pace.imperial" = "Tip: not sure how far 3 feet is? Pace off a known length and either adjust your stride so one step is a yard (3 feet), or simply know how far your step is and convert. Usually, though, a slightly longer step is about a yard.";
-"tutorial.puttFor" = "Choose here, under “putt for” (birdie, par, …), which score you are putting for. Don't forget this one – it can cause confusion later.";
+"tutorial.puttFor" = "Choose here, under “putt for” (birdie, par, …), which score you are putting for. Don't forget this one, it can cause confusion later.";
 "tutorial.slope" = "Tap the square that matches the slope of your putt. The putt set here runs 3%% downhill and breaks 2%% from left to right. Try to find your own slope. The straight putt is in the center, at 0. Custom mode has other ways of entering it too, and there are games to improve your green reading.";
 "tutorial.missAngle" = "Missed? Tap where the ball stopped in relation to the hole. The slider around the hole sets the exact angle, and the distance left is entered with the next putt. Tap the center if you holed the putt. If it lipped out, you can even tap the lip. For putts like that, though, it's better to mark where the ball would have finished if it hadn't caught the lip.";
 "tutorial.missReasons" = "If you know why the putt missed, mark it here. You don't have to, but you can.";
@@ -1099,10 +1099,10 @@
 "tutorial.holePicker" = "Tap the hole number at the top left to jump to any other hole.";
 "tutorial.navArrows" = "Use the arrows to move back and forth between holes.";
 "tutorial.puttChips" = "Up here you see every putt of the hole you are on. If there are several, tap one to look at it or change it.";
-"tutorial.endRound" = "Tap %@ at the top right to finish the round. The trash can deletes all putts of a hole. You can't break anything – so be sure to try every button, because wherever it matters, Puttor asks you again anyway.";
+"tutorial.endRound" = "Tap %@ at the top right to finish the round. The trash can deletes all putts of a hole. You can't break anything, so be sure to try every button, because wherever it matters, Puttor asks you again anyway.";
 "tutorial.editLater" = "Even after the round you can still edit your putts and change entries: open the round under “Recent Rounds” and tap “%@” on the hole.";
 "tutorial.settings" = "In Settings you choose units, language and the distance a putt starts with, set up the fields of Custom mode and much more.";
-"tutorial.finish" = "That's it! Try everything out – and turn your phone sideways too: landscape brings extra functions and layouts. Enjoy your round!";
+"tutorial.finish" = "That's it! Try everything out, and turn your phone sideways too: landscape brings extra functions and layouts. Enjoy your round!";
 "settings.tutorial.replay" = "Show the tutorial again";
 "settings.tutorial.replay.desc" = "Walks you through your next round";
 "settings.tutorial.pending" = "Starts with your next round";

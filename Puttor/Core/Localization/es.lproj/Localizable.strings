@@ -147,7 +147,7 @@
 "setup.addPutter" = "Añadir putter";
 "setup.putterNamePlaceholder" = "Nombre del putter…";
 "setup.stimp" = "VELOCIDAD DEL GREEN";
-"setup.stimpValue" = "STIMP %1$@ – %2$@";
+"setup.stimpValue" = "STIMP %1$@ · %2$@";
 "setup.slow" = "LENTO";
 "setup.medium" = "MEDIO";
 "setup.fast" = "RÁPIDO";
@@ -610,28 +610,28 @@
 "unit.m" = "m";
 "unit.ft" = "ft";
 
-/* Games — titles */
+/* Games, titles */
 "game.gate.title" = "Ejercicio de puerta";
 "game.clock.title" = "Ejercicio del reloj";
 "game.ninePutt.title" = "Ejercicio de 9 putts";
 "game.routine.title" = "Ejercicio de rutina";
 "game.aroundTheWorld.title" = "Around the World";
 
-/* Games — goals */
+/* Games, goals */
 "game.gate.goal" = "Controlar la línea de salida y un golpe recto y limpio, sin girar la cara del putter.";
 "game.clock.goal" = "Practicar caídas distintas desde la misma distancia sin que cambie tu sensación de longitud.";
 "game.ninePutt.goal" = "Ganar constancia bajo algo de presión y asegurar los putts cortos y medios.";
 "game.routine.goal" = "Simula situaciones reales de campo y entrena tu rutina y tu concentración en cada putt, todos distintos.";
 "game.aroundTheWorld.goal" = "Simula una ronda completa y te enseña dónde siguen estando tus debilidades.";
 
-/* Games — full explanations */
+/* Games, full explanations */
 "game.gate.explanation" = "Clava dos tees en el suelo justo delante de la bola, separados lo justo para que pase la cabeza del putter y la bola (una «puerta»). Después putea a través de esa puerta hacia tu línea objetivo. Usa para ello un putt recto.";
 "game.clock.explanation" = "Coloca bolas en círculo alrededor del hoyo, como las horas de un reloj (por ejemplo a las 12, 3, 6 y 9), todas a la misma distancia. Después putea cada bola por turno, avanzando en el sentido de las agujas del reloj.";
 "game.ninePutt.explanation" = "Elige tres posiciones a distintas distancias (por ejemplo 1 m, 2 m, 3 m) y putea 3 bolas desde cada una: 9 putts en total. Las 9 tienen que entrar o vuelves a empezar desde el principio.";
 "game.routine.explanation" = "Putts marcados al azar: elige qué distancias y qué caídas pueden salir. Juega esos putts uno tras otro exactamente como vienen, cada uno con tu rutina completa, sin putts de prueba ni repeticiones.";
 "game.aroundTheWorld.explanation" = "Monta un recorrido de 9 o 18 putts distintos en el green y juégalos como una mini ronda: cada putt cuenta como un hoyo. Anota tus golpes por «hoyo» y súmalos al final.";
 
-/* Games — score units */
+/* Games, score units */
 "game.unit.percent" = "TASA DE ACIERTO";
 "game.unit.cycles" = "Vueltas necesarias";
 "game.unit.strokes" = "Golpes";
@@ -669,15 +669,15 @@
 "game.activity.more" = "más";
 "game.activity.total" = "%ld sesiones";
 
-/* Games — info sheet */
+/* Games, info sheet */
 "game.info.goal" = "OBJETIVO";
 "game.info.howTo" = "CÓMO SE JUEGA";
 
-/* Games — home / card */
+/* Games, home / card */
 "game.best" = "Mejor";
 "game.noScoreYet" = "Aún sin marca";
 
-/* Games — shared play chrome */
+/* Games, shared play chrome */
 "game.attempt" = "Intento";
 "game.attempts" = "Intentos";
 "game.made" = "Dentro";
@@ -779,7 +779,7 @@
 "custom.field.doubleBreak" = "Doble caída";
 "custom.field.doubleBreak.desc" = "Marca un putt que cae hacia un lado y después hacia el otro";
 "custom.field.intention" = "Intención";
-"custom.field.intention.desc" = "Qué debe hacer el putt – velocidad, línea, situación del match – y si se consiguió";
+"custom.field.intention.desc" = "Qué debe hacer el putt, velocidad, línea, situación del match, y si se consiguió";
 "input.intention" = "INTENCIÓN";
 "intention.part.speed" = "Velocidad";
 "intention.part.line" = "Línea";
@@ -803,7 +803,7 @@
 "intention.executedQuestion" = "¿Conseguido?";
 "intention.executed" = "Conseguido";
 "intention.notExecuted" = "No conseguido";
-"stats.intention" = "INTENCIÓN – RESULTADO";
+"stats.intention" = "INTENCIÓN. RESULTADO";
 "stats.intention.info" = "Cada putt registrado con una intención. Arriba: jugado como se quería o no, frente a si entró. Debajo, para cada velocidad, línea o situación del match: cuántas veces entró, cuántas veces hiciste lo que querías, cuántas veces entró cuando lo conseguiste y cuando no, hacia dónde fueron los fallos, a qué distancia media quedaron y cuántos fallos con caída quedaron por el lado alto (pro).\n\nUn putt jugado como se quería que no entra no es un error.\n\nNecesita el campo de intención: modo Personalizado con ese campo.";
 "intention.matrix.made" = "Embocado";
 "intention.matrix.missed" = "Fallado";
@@ -901,7 +901,7 @@
 "reference.tableTitle" = "BASE DEL TOUR";
 "reference.sourceTitle" = "DE DÓNDE SALEN ESTOS NÚMEROS";
 "reference.sourceText" = "La referencia es la media del PGA Tour del trabajo sobre putts ganados de Mark Broadie, medida con ShotLink sobre millones de putts. Las curvas de arriba están ajustadas a sus cifras; el PCG es una aportación propia de Puttor.";
-"reference.sourceLink" = "Broadie: Putts Gained — Measuring Putting on the PGA TOUR (PDF)";
+"reference.sourceLink" = "Broadie: Putts Gained. Measuring Putting on the PGA TOUR (PDF)";
 "reference.curvesTitle" = "LAS CURVAS DETRÁS DE LA TABLA";
 "reference.curvesText" = "Ambas columnas se leen de curvas ajustadas, con x = ln(distancia en metros), de 0,3 m a 40 m.";
 "reference.curvesMake" = "PROBABILIDAD DE EMBOCAR";
@@ -981,7 +981,7 @@
 "coach.tournament.wilder" = "Tus rondas de competición están %.2f golpes más separadas que las amistosas: los días buenos y los malos se alejan más entre sí.";
 "coach.tournament.sameSpread" = "Ambos grupos se dispersan igual, así que una tarjeta que cuenta no cambia nada en tu fiabilidad.";
 "coach.tournament.outliers" = "RONDAS QUE DESTACAN";
-"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG — %4$.1f desviaciones estándar respecto a la media de ese grupo.";
+"coach.tournament.outlier" = "%1$@ (%2$@): %3$@ SG, %4$.1f desviaciones estándar respecto a la media de ese grupo.";
 "coach.tournament.info" = "Tus últimas cinco rondas de torneo frente a tus últimas cinco amistosas, con el resultado tal cual salga: la idea es saber qué dice tu tarjeta cuando cuenta, y «ninguna diferencia» también es una respuesta.\n\nSe muestran ambas medidas para que quede claro qué se cuenta. SG son los golpes ganados en putt a lo largo de una ronda: los putts que el tour esperaría menos los que usaste. El PCG es la conversión de esa misma ronda, cada putt frente a la probabilidad del tour de embocarlo desde donde estaba.\n\nEl ± de debajo es la desviación estándar: cuánto se aleja normalmente una ronda de esa media, que es la diferencia entre ser fiable y ser bueno solo en un buen día. Aparece a partir de tres rondas.\n\nUna ronda destaca cuando su SG está al menos a 1,8 desviaciones estándar de la media de las cinco a las que pertenece.";
 
 // Legal

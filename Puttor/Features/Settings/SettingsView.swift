@@ -372,8 +372,9 @@ struct SettingsView: View {
             .font(.system(size: 10, weight: .bold))
             .tracking(1.4)
             .foregroundStyle(Theme.textMuted)
-            .padding(.top, 14)
-            .padding(.bottom, 6)
+            .padding(.top, 16)
+            // The same gap a heading keeps from its fields everywhere else.
+            .padding(.bottom, RoundSetupView.labelGap)
     }
 
     /// One row that opens the list, rather than a button per language: a row

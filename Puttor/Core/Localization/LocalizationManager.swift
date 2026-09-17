@@ -11,7 +11,7 @@ import Combine
 final class LocalizationManager: ObservableObject {
     static let shared = LocalizationManager()
 
-    static let supportedLanguages = ["en", "en-US", "de", "es", "zh-Hans", "ja"]
+    static let supportedLanguages = ["en", "en-US", "de", "fr", "es", "ko", "zh-Hans", "ja"]
 
     /// Each language named in itself — a picker that says "Spanish" to someone
     /// looking for "Español" is no help.
@@ -19,7 +19,9 @@ final class LocalizationManager: ObservableObject {
         switch code {
         case "en-US": return "English (US)"
         case "de": return "Deutsch"
+        case "fr": return "Français"
         case "es": return "Español"
+        case "ko": return "한국어"
         case "zh-Hans": return "简体中文"
         case "ja": return "日本語"
         default: return "English (UK)"

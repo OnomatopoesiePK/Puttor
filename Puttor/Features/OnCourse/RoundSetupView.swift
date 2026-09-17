@@ -135,7 +135,6 @@ struct RoundSetupView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         label(L("setup.mode"))
                         formatRow
-                            .padding(.top, 16)
                     }
                     .tutorialTarget(.format)
                     switchRow(titleKey: "setup.tournament", infoKey: "setup.tournament.info", isOn: $isTournament)
@@ -227,7 +226,7 @@ struct RoundSetupView: View {
                 .tint(Theme.primary)
         }
         .padding(.horizontal, Theme.Spacing.md)
-        .padding(.vertical, 6)
+        .frame(minHeight: Self.rowHeight)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surface))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
     }
@@ -244,8 +243,7 @@ struct RoundSetupView: View {
                     Text(L(format.labelKey))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(selected ? Theme.primary : Theme.textSecondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, minHeight: Self.rowHeight)
                         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(selected ? Theme.primary.opacity(0.13) : Theme.surface))
                         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(selected ? Theme.primary : Theme.border, lineWidth: 1.5))
                 }
@@ -254,13 +252,20 @@ struct RoundSetupView: View {
         }
     }
 
+    /// Every heading sits the same distance above what it names, and that
+    /// distance is the one between the fields themselves.
+    static let labelGap: CGFloat = 8
+    /// One height for every row of this screen, so a switch never reads as
+    /// flatter than the buttons above it.
+    static let rowHeight: CGFloat = 46
+
     private func label(_ text: String, top: CGFloat = 16) -> some View {
         Text(text)
             .font(.system(size: 10, weight: .bold))
             .tracking(1.4)
             .foregroundStyle(Theme.textMuted)
             .padding(.top, top)
-            .padding(.bottom, 6)
+            .padding(.bottom, Self.labelGap)
     }
 
     private var putterSection: some View {

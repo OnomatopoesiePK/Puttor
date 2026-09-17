@@ -817,7 +817,7 @@ final class PuttorUITests: XCTestCase {
     @MainActor
     func testKeyScreensInJapaneseAndChinese() throws {
         XCUIDevice.shared.orientation = .portrait
-        for language in ["ja", "zh-Hans"] {
+        for language in ["ja", "zh-Hans", "fr", "ko"] {
             let app = XCUIApplication()
             app.launchArguments = ["-PuttorNoRounds", "-PuttorSimulatedRounds", "-appLanguage", language]
             app.launch()
@@ -887,6 +887,13 @@ final class PuttorUITests: XCTestCase {
         XCTAssertTrue(plumbBob.isSelected, "the new way of reading is not picked")
         XCTAssertFalse(footFeel.isSelected)
         snapshot("1 own reading picked")
+
+        // Every heading keeps the same distance from its fields, and the
+        // switch row stands as tall as the buttons above it.
+        let mode = app.staticTexts["MODE"].firstMatch
+        XCTAssertTrue(mode.exists, "no mode section")
+        scrollBackIntoView(mode, in: app, topMargin: 260)
+        snapshot("1b headings and rows")
 
         let custom = app.staticTexts["Custom"].firstMatch
         scrollIntoView(custom, in: app, bottomMargin: 180)
