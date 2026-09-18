@@ -520,8 +520,7 @@ struct RoundInputView: View {
     private func tapInButton(_ session: RoundSession) -> some View {
         if !session.isReviewing || session.canStartNewPutt {
             Button {
-                if session.isReviewing { session.startNewPutt() }
-                handleOutcome(session.recordTapIn(), session)
+                handleOutcome(session.tapIn(), session)
             } label: {
                 Text(L("input.tapInShort"))
                     .font(.system(size: 13, weight: .heavy))

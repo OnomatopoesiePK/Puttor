@@ -422,6 +422,19 @@ final class RoundSession {
         }
     }
 
+    /// Tap-in from wherever the player is. On the last putt of a hole — the
+    /// follow-up an edit just opened, say — the tap-in is that putt; only while
+    /// looking back at an earlier one does it go on the end of the hole.
+    @discardableResult
+    func tapIn() -> RoundOutcome {
+        if let reviewed = reviewedPutt,
+           reviewed.id != realPuttsOnHole(reviewed.holeNumber).last?.id,
+           canStartNewPutt {
+            startNewPutt()
+        }
+        return recordTapIn()
+    }
+
     /// Tap-in: holed at a fixed near-zero distance (0.3m metric, exactly 1ft imperial), break irrelevant.
     @discardableResult
     func recordTapIn() -> RoundOutcome {

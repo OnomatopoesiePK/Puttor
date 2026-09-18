@@ -184,6 +184,39 @@ struct PuttorTests {
         #expect(round.putts.filter { $0.holeNumber == 3 }.isEmpty)
     }
 
+    /// Un-holing the last putt opens a follow-up; tapping in right there must
+    /// fill that follow-up rather than add a putt after it and leave it blank.
+    @MainActor
+    @Test func tapInAfterUnholingFillsTheFollowUp() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+        let first = Putt(holeNumber: 1, puttNumber: 1, distanceM: 6, puttFor: .par, result: .short)
+        first.createdAt = Date(timeIntervalSinceNow: -60)
+        let second = Putt(holeNumber: 1, puttNumber: 2, distanceM: 1, puttFor: .bogey, result: .holed)
+        second.createdAt = Date(timeIntervalSinceNow: -30)
+        for putt in [first, second] {
+            putt.round = round
+            round.putts.append(putt)
+            context.insert(putt)
+        }
+        try context.save()
+
+        let session = RoundSession(round: round, modelContext: context)
+        session.loadDraft(fromReviewIndex: 1)
+        session.draftResult = .short
+        session.recordDraft()
+        #expect(session.realPuttsOnHole(1).count == 3)
+        #expect(session.reviewedPutt?.puttNumber == 3)
+
+        session.tapIn()
+
+        let putts = session.realPuttsOnHole(1)
+        #expect(putts.count == 3)
+        #expect(putts.map(\.puttNumber) == [1, 2, 3])
+        #expect(putts.last?.result == .holed)
+    }
+
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {
         #expect(ScoreCategory.bogey.next == .double)
         #expect(ScoreCategory.double.next == .plus3)

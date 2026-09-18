@@ -401,8 +401,7 @@ struct RoundInputCustomView: View {
     /// taken, for the simple result where that button isn't shown.
     private func tapInButton(_ session: RoundSession, fillsRow: Bool) -> some View {
         Button {
-            if session.isReviewing { session.startNewPutt() }
-            handleOutcome(session.recordTapIn(), session)
+            handleOutcome(session.tapIn(), session)
         } label: {
             Text(L("input.tapInShort"))
                 .font(.system(size: fillsRow ? 15 : 13, weight: .heavy))

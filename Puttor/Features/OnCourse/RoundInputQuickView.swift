@@ -237,8 +237,7 @@ struct RoundInputQuickView: View {
 
             if !session.isReviewing || session.canStartNewPutt {
                 Button {
-                    if session.isReviewing { session.startNewPutt() }
-                    handleOutcome(session.recordTapIn(), session)
+                    handleOutcome(session.tapIn(), session)
                 } label: {
                     Text(L("input.tapInShort"))
                         .font(.system(size: 15, weight: .heavy))
