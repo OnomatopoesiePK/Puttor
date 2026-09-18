@@ -38,6 +38,9 @@ final class RoundSession {
     var draftHillSlopePct: Double = 0
     var draftDoubleBreak: DoubleBreakType?
     var draftIntention = PuttIntention()
+    /// Whether the hole was a GIR opportunity. Only the first putt of a hole
+    /// asks, and only where the field is in the layout.
+    var draftGirOpportunity: Bool?
     var draftPuttFor: ScoreCategory = .birdie
     var draftResult: PuttResult?
     var draftLipOut = false
@@ -58,6 +61,14 @@ final class RoundSession {
     /// Set by the input view: does the surface the player is using actually ask
     /// which score the putt is for? Custom mode can leave that field out.
     var asksForScoreCategory: Bool = true
+
+    /// Set by the input view where the layout asks about the GIR opportunity:
+    /// what each hole's first putt starts on. Nil where it is not asked.
+    var girOpportunityPreset: Bool? {
+        didSet {
+            if reviewIndex == nil, draftIsFirstPutt { draftGirOpportunity = girOpportunityPreset }
+        }
+    }
 
     private let defaultFirstPuttDistance: Double
     private let useFeet: Bool
@@ -123,6 +134,13 @@ final class RoundSession {
         puttsOnHole(hole).filter { $0.puttNumber > 0 }
     }
 
+    /// The draft is the first putt of its hole — the one that says whether
+    /// the hole was a GIR opportunity.
+    var draftIsFirstPutt: Bool {
+        if let reviewedPutt { return reviewedPutt.puttNumber == 1 }
+        return realPuttsOnHole(currentHole).isEmpty
+    }
+
     var canRecord: Bool { draftResult != nil || draftLipOut }
 
     /// True only when a stored putt is loaded *and* the draft has actually been
@@ -144,6 +162,7 @@ final class RoundSession {
             || draftBadStroke != p.badStroke
             || draftBadStrokeType != p.badStrokeType
             || draftWrongAim != p.wrongAim
+            || (p.puttNumber == 1 && draftGirOpportunity != p.girOpportunity)
     }
 
     /// The displayed hole still needs another putt — either nothing is recorded
@@ -238,6 +257,7 @@ final class RoundSession {
         draftHillSlopePct = 0
         draftDoubleBreak = nil
         draftIntention = PuttIntention()
+        draftGirOpportunity = girOpportunityPreset
         draftPuttFor = .birdie
         draftResult = nil
         draftLipOut = false
@@ -255,6 +275,7 @@ final class RoundSession {
         draftHillSlopePct = 0
         draftDoubleBreak = nil
         draftIntention = PuttIntention()
+        draftGirOpportunity = nil
         draftPuttFor = previousPuttFor.next
         draftResult = nil
         draftLipOut = false
@@ -275,6 +296,7 @@ final class RoundSession {
         draftHillSlopePct = p.hillSlopePct
         draftDoubleBreak = p.doubleBreak
         draftIntention = p.intention
+        draftGirOpportunity = p.girOpportunity
         draftPuttFor = p.puttFor
         draftResult = p.result
         draftLipOut = p.lipOut
@@ -299,6 +321,7 @@ final class RoundSession {
             putt.hillSlopePct = draftHillSlopePct
             putt.doubleBreak = draftDoubleBreak
             putt.intention = draftIntention
+            if putt.puttNumber == 1 { putt.girOpportunity = draftGirOpportunity }
             putt.puttFor = draftPuttFor
             putt.result = effectiveResult
             putt.lipOut = draftLipOut
@@ -390,6 +413,7 @@ final class RoundSession {
             missAngleDeg: effectiveResult.isHoled ? nil : draftMissAngle
         )
         putt.intention = draftIntention
+        if puttNumber == 1 { putt.girOpportunity = draftGirOpportunity }
         putt.round = round
         round.putts.append(putt)
         modelContext.insert(putt)

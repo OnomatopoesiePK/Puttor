@@ -802,6 +802,11 @@ private struct StatisticsPane: View {
                             if dense {
                                 playingStatWide(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
                             }
+                            // A pair of their own under the grid, so the
+                            // grid keeps its shape with or without them.
+                            if showsGirOpportunity(data) {
+                                girOpportunityRow(data.scoreAggregated)
+                            }
                             scoreCoverageNote(data)
                         }
                         // A lazy grid asks for no width of its own: without
@@ -1331,6 +1336,30 @@ private struct StatisticsPane: View {
         .padding(.vertical, Theme.Spacing.sm)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    /// Where the layout asks about GIR opportunities, or rounds did.
+    private func showsGirOpportunity(_ data: StatsBundle) -> Bool {
+        data.scoreAggregated.girOpportunityAnswered > 0
+            || CustomModeConfig.load().fields.contains { $0.kind == .girOpportunity }
+    }
+
+    /// How often the approach gave a real chance at the green, and how often
+    /// that chance became a green in regulation.
+    private func girOpportunityRow(_ stats: RoundStats) -> some View {
+        HStack(spacing: Theme.Spacing.sm) {
+            playingStat(
+                L("stats.girOpportunity"),
+                stats.girOpportunityPercent.map { "\(Int($0.rounded()))%" } ?? "—",
+                subtitle: "\(stats.girOpportunities)/\(stats.girOpportunityAnswered)"
+            )
+            playingStat(
+                L("stats.girOpportunityConversion"),
+                stats.girOpportunityConversionPercent.map { "\(Int($0.rounded()))%" } ?? "—",
+                subtitle: "\(stats.girOpportunitiesConverted)/\(stats.girOpportunities)"
+            )
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.text, highlighted: Bool = false) -> some View {

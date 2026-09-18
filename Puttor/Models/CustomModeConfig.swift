@@ -44,6 +44,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
     case doubleBreak
     case missReasons
     case intention
+    case girOpportunity
 
     var id: String { rawValue }
 
@@ -54,6 +55,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .doubleBreak: return "custom.field.doubleBreak"
         case .missReasons: return "custom.field.missReasons"
         case .intention: return "custom.field.intention"
+        case .girOpportunity: return "custom.field.girOpportunity"
         }
     }
 
@@ -64,6 +66,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .doubleBreak: return "custom.field.doubleBreak.desc"
         case .missReasons: return "custom.field.missReasons.desc"
         case .intention: return "custom.field.intention.desc"
+        case .girOpportunity: return "custom.field.girOpportunity.desc"
         }
     }
 
@@ -74,6 +77,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .doubleBreak: return "arrow.triangle.branch"
         case .missReasons: return "exclamationmark.triangle.fill"
         case .intention: return "scope"
+        case .girOpportunity: return "flag.2.crossed.fill"
         }
     }
 
@@ -92,6 +96,13 @@ struct CustomField: Identifiable, Codable, Equatable {
     var intentionPartsRaw: [String]? = nil
     /// How far past the hole the intention's normal pace finishes; nil is the default.
     var intentionNormalPastM: Double? = nil
+    /// What the GIR opportunity field starts each hole on; nil is yes.
+    var girOpportunityPresetRaw: Bool? = nil
+
+    var girOpportunityPreset: Bool {
+        get { girOpportunityPresetRaw ?? true }
+        set { girOpportunityPresetRaw = newValue }
+    }
 
     var intentionParts: [IntentionPart] {
         get {

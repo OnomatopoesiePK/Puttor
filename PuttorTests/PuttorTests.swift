@@ -217,6 +217,53 @@ struct PuttorTests {
         #expect(putts.last?.result == .holed)
     }
 
+    /// The GIR opportunity rides on each hole's first putt: the preset fills
+    /// it in, follow-ups leave it alone, and the playing statistics read how
+    /// many chances there were and how many became greens in regulation.
+    @MainActor
+    @Test func girOpportunityIsAskedPerHoleAndCounted() async throws {
+        let context = try Self.makeInMemoryContext()
+        let round = Round(courseName: "Test", startingHole: 1)
+        context.insert(round)
+        try context.save()
+
+        let session = RoundSession(round: round, modelContext: context)
+        session.girOpportunityPreset = true
+        #expect(session.draftIsFirstPutt)
+        #expect(session.draftGirOpportunity == true)
+
+        // Hole 1: a chance, and the green hit — birdie putt missed, par holed.
+        session.draftPuttFor = .birdie
+        session.draftResult = .short
+        session.recordDraft()
+        #expect(!session.draftIsFirstPutt)
+        #expect(session.draftGirOpportunity == nil)
+        session.draftResult = .holed
+        session.recordDraft()
+
+        // Hole 2: a chance, green missed.
+        #expect(session.draftGirOpportunity == true)
+        session.draftPuttFor = .par
+        session.draftResult = .holed
+        session.recordDraft()
+
+        // Hole 3: no chance.
+        session.draftGirOpportunity = false
+        session.draftPuttFor = .par
+        session.draftResult = .holed
+        session.recordDraft()
+
+        let first = round.putts.filter { $0.puttNumber == 1 }.sorted { $0.holeNumber < $1.holeNumber }
+        #expect(first.map(\.girOpportunity) == [true, true, false])
+        #expect(round.putts.filter { $0.puttNumber == 2 }.allSatisfy { $0.girOpportunity == nil })
+
+        let stats = RoundStats.compute(putts: round.putts)
+        #expect(stats.girOpportunityAnswered == 3)
+        #expect(stats.girOpportunities == 2)
+        #expect(stats.girOpportunitiesConverted == 1)
+        #expect(stats.girOpportunityConversionPercent == 50)
+    }
+
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {
         #expect(ScoreCategory.bogey.next == .double)
         #expect(ScoreCategory.double.next == .plus3)

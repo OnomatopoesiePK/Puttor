@@ -47,6 +47,12 @@ enum CustomModePreview {
             line("custom.preview.doubleBreak", kinds.contains(.doubleBreak), CustomFieldKind.doubleBreak.titleKey),
             line("custom.preview.causes", kinds.contains(.missReasons), CustomFieldKind.missReasons.titleKey),
             line("custom.preview.intention", kinds.contains(.intention), CustomFieldKind.intention.titleKey),
+            // Shown with the playing statistics, so it needs the score reference too.
+            line(
+                "custom.preview.girOpportunity",
+                kinds.contains(.girOpportunity) && kinds.contains(.puttForCategory),
+                kinds.contains(.girOpportunity) ? CustomFieldKind.puttForCategory.titleKey : CustomFieldKind.girOpportunity.titleKey
+            ),
         ]
     }
 }

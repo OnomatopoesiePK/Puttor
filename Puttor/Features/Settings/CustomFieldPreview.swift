@@ -25,6 +25,7 @@ struct CustomFieldPreview: View {
     @State private var hill: Double = 0
     @State private var doubleBreak: DoubleBreakType?
     @State private var intention = PuttIntention()
+    @State private var girOpportunity: Bool?
     @State private var missRead = false
     @State private var badStroke = false
     @State private var badStrokeType: BadStrokeType?
@@ -99,6 +100,10 @@ struct CustomFieldPreview: View {
                 wrongAim: $wrongAim,
                 showsTitle: true
             )
+        case .girOpportunity:
+            // Starts on the preset chosen above, as a hole does.
+            GirOpportunityFieldView(value: $girOpportunity)
+                .onChange(of: field.girOpportunityPreset, initial: true) { _, preset in girOpportunity = preset }
         }
     }
 

@@ -43,6 +43,7 @@ struct RoundInputCustomView: View {
                     // Without that field every putt would carry the default par
                     // and the round would report a scorecard nobody entered.
                     new.asksForScoreCategory = config.fields.contains { $0.kind == .puttForCategory }
+                    new.girOpportunityPreset = config.fields.first { $0.kind == .girOpportunity }?.girOpportunityPreset
                     session = new
                 }
             }
@@ -89,7 +90,9 @@ struct RoundInputCustomView: View {
                         }
                     }
 
-                    ForEach(config.fields) { field in
+                    // The GIR opportunity is a question about the hole, asked
+                    // with its first putt only.
+                    ForEach(config.fields.filter { $0.kind != .girOpportunity || session.draftIsFirstPutt }) { field in
                         section {
                             fieldContent(field, session)
                         }
@@ -172,6 +175,8 @@ struct RoundInputCustomView: View {
             )
         case .missReasons:
             missReasonRow(session)
+        case .girOpportunity:
+            GirOpportunityFieldView(value: Binding(get: { session.draftGirOpportunity }, set: { session.draftGirOpportunity = $0 }))
         }
     }
 

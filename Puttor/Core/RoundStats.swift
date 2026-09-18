@@ -91,6 +91,19 @@ struct RoundStats {
     var girProximitySumM: Double = 0
     var girProximityCount: Int = 0
 
+    /// Holes where it was said whether the approach was a GIR opportunity,
+    /// the ones where it was, and of those the greens actually hit.
+    var girOpportunityAnswered: Int = 0
+    var girOpportunities: Int = 0
+    var girOpportunitiesConverted: Int = 0
+
+    var girOpportunityPercent: Double? {
+        girOpportunityAnswered > 0 ? Double(girOpportunities) / Double(girOpportunityAnswered) * 100 : nil
+    }
+    var girOpportunityConversionPercent: Double? {
+        girOpportunities > 0 ? Double(girOpportunitiesConverted) / Double(girOpportunities) * 100 : nil
+    }
+
     var avgPuttsOnGir: Double? { girPuttedHoles > 0 ? Double(girPutts) / Double(girPuttedHoles) : nil }
     var avgPuttsOffGir: Double? { nonGirPuttedHoles > 0 ? Double(nonGirPutts) / Double(nonGirPuttedHoles) : nil }
     var avgGirProximityM: Double? { girProximityCount > 0 ? girProximitySumM / Double(girProximityCount) : nil }
@@ -296,6 +309,15 @@ struct RoundStats {
                 stats.countHole(scored: score)
             }
 
+            // Asked with the hole's first putt, so read from that one.
+            if let opportunity = realOnHole.first(where: { $0.puttNumber == 1 })?.girOpportunity {
+                stats.girOpportunityAnswered += 1
+                if opportunity {
+                    stats.girOpportunities += 1
+                    if category.isGreenInRegulation { stats.girOpportunitiesConverted += 1 }
+                }
+            }
+
             if category.isGreenInRegulation {
                 stats.girCount += 1
                 // Converted means the hole came in under par off one or two
@@ -438,6 +460,9 @@ struct RoundStats {
         merged.doublesOrWorse = list.reduce(0) { $0 + $1.doublesOrWorse }
         merged.girCount = list.reduce(0) { $0 + $1.girCount }
         merged.girConversions = list.reduce(0) { $0 + $1.girConversions }
+        merged.girOpportunityAnswered = list.reduce(0) { $0 + $1.girOpportunityAnswered }
+        merged.girOpportunities = list.reduce(0) { $0 + $1.girOpportunities }
+        merged.girOpportunitiesConverted = list.reduce(0) { $0 + $1.girOpportunitiesConverted }
         merged.girPutts = list.reduce(0) { $0 + $1.girPutts }
         merged.girPuttedHoles = list.reduce(0) { $0 + $1.girPuttedHoles }
         merged.nonGirPutts = list.reduce(0) { $0 + $1.nonGirPutts }

@@ -79,6 +79,7 @@ struct PuttorArchive: Codable {
         var intentionLineRaw: String?
         var intentionSituationRaw: String?
         var intentionExecuted: Bool?
+        var girOpportunity: Bool?
     }
 
     struct SessionRecord: Codable {
@@ -210,7 +211,8 @@ struct PuttorArchive: Codable {
                             intentionSpeedRaw: putt.intentionSpeedRaw,
                             intentionLineRaw: putt.intentionLineRaw,
                             intentionSituationRaw: putt.intentionSituationRaw,
-                            intentionExecuted: putt.intentionExecuted
+                            intentionExecuted: putt.intentionExecuted,
+                            girOpportunity: putt.girOpportunity
                         )
                     }
             )
@@ -331,6 +333,7 @@ struct PuttorArchive: Codable {
                 putt.intentionLineRaw = puttRecord.intentionLineRaw
                 putt.intentionSituationRaw = puttRecord.intentionSituationRaw
                 putt.intentionExecuted = puttRecord.intentionExecuted
+                putt.girOpportunity = puttRecord.girOpportunity
                 putt.round = round
                 round.putts.append(putt)
                 context.insert(putt)
