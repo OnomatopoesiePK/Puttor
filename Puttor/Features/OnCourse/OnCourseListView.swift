@@ -193,7 +193,12 @@ struct OnCourseListView: View {
                             Text("·")
                             Text(putter.name)
                         }
+                        // How the round was recorded, which says how much the
+                        // statistics can read from it.
+                        Text("·")
+                        Text(L(round.inputMode.labelKey))
                     }
+                    .lineLimit(1)
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textSecondary)
                 }
