@@ -33,9 +33,9 @@ struct TutorialOverlay: View {
     /// the opening follows around whatever it shows.
     private static let holeRadius = Theme.Radius.lg + margin
     private static let movement = Animation.smooth(duration: 0.45)
-    /// How high a card may start: clear of the status bar, like everything
-    /// else on screen.
-    private static var topLimit: CGFloat { windowInsets.top + margin }
+    /// How high a card may start: a little into the status bar's strip, which
+    /// buys room for a larger size, but below the island rather than behind it.
+    private static var topLimit: CGFloat { max(margin, windowInsets.top - 12) }
 
     var body: some View {
         GeometryReader { geo in

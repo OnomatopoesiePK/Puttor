@@ -63,6 +63,16 @@ enum TutorialStep: Int, CaseIterable {
     }
 
     var textKey: String { "tutorial.\(self)" }
+
+    /// Where the field is scrolled to. Near the top, except the dial: putting
+    /// it at the foot leaves the card everything above it, and the miss
+    /// reasons below it stay off screen.
+    var scrollAnchor: UnitPoint {
+        switch self {
+        case .missAngle, .missAngleDetail: return UnitPoint(x: 0.5, y: 1)
+        default: return UnitPoint(x: 0.5, y: 0.1)
+        }
+    }
 }
 
 @Observable
@@ -207,9 +217,9 @@ private struct TutorialScrolling: ViewModifier {
             // While a step shows, the screen stays where the tutorial put it.
             .scrollDisabled(tutorial.step != nil && !tutorial.practising)
             .onChange(of: tutorial.step, initial: true) { _, step in
-            guard let target = step?.target else { return }
+            guard let step, let target = step.target else { return }
             withAnimation(.easeInOut(duration: 0.45)) {
-                proxy.scrollTo(target, anchor: UnitPoint(x: 0.5, y: 0.1))
+                proxy.scrollTo(target, anchor: step.scrollAnchor)
             }
         }
     }
