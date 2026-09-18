@@ -51,7 +51,6 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(readingMethods) { method in
                 HStack {
-                    Text("👓")
                     Text(method.label).foregroundStyle(Theme.text)
                     Spacer()
                     favouriteButton(on: favouriteReading == method.raw) {

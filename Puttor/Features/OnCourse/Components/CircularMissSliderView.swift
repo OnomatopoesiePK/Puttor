@@ -63,9 +63,7 @@ struct CircularMissSliderView: View {
             }
             .sensoryFeedback(.selection, trigger: angle) { _, _ in hapticsEnabled }
 
-            Text(readout)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(angle == nil && result == nil && !lipOut ? Theme.textMuted : Theme.text)
+            readoutRow
         }
     }
 
@@ -178,16 +176,62 @@ struct CircularMissSliderView: View {
         result = MissAngle.result(for: snapped)
     }
 
+    /// What the dial holds: the app's own arrow, turned to where the ball
+    /// finished, and the wording beside it. The arrow is amber for the three
+    /// exact readings, straight short and either side of the hole.
+    private var readoutRow: some View {
+        HStack(spacing: 6) {
+            if lipOut {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .foregroundStyle(Theme.lipOut)
+            }
+            if result == .holed {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(Theme.holed)
+            } else if let rotation = arrowRotation {
+                Image(systemName: "arrow.up")
+                    .rotationEffect(.degrees(rotation))
+                    .foregroundStyle(isExactDirection ? Theme.accent : Theme.text)
+            }
+            Text(readout)
+        }
+        .font(.system(size: 16, weight: .bold))
+        .foregroundStyle(angle == nil && result == nil && !lipOut ? Theme.textMuted : Theme.text)
+    }
+
+    /// Clockwise from straight up, the way the arrow is turned: short points
+    /// down, the sides point out, long points up.
+    private var arrowRotation: Double? {
+        if let angle { return 180 - angle }
+        switch result {
+        case .short: return 180
+        case .long, .holeHigh: return 0
+        case .left: return 270
+        case .right: return 90
+        case .shortLeft: return 225
+        case .shortRight: return 135
+        case .longLeft: return 315
+        case .longRight: return 45
+        default: return nil
+        }
+    }
+
+    /// Straight short, or exactly beside the hole on either side.
+    private var isExactDirection: Bool {
+        if let angle { return angle == 0 || abs(angle) == 90 }
+        return result == .short || result == .left || result == .right
+    }
+
     private var readout: String {
         let direction: String? = {
             if let angle, let result {
-                return "\(result.emoji) \(L(result.labelKey)) · \(MissAngle.displayDegrees(angle))°"
+                return "\(L(result.labelKey)) · \(MissAngle.displayDegrees(angle))°"
             }
-            if let result { return "\(result.emoji) \(L(result.labelKey))" }
+            if let result { return L(result.labelKey) }
             return nil
         }()
-        if lipOut, let direction, result != .holed { return "🔄 \(L("input.lip")) + \(direction)" }
-        if lipOut { return "🕳 \(L("result.lipOut"))" }
+        if lipOut, let direction, result != .holed { return "\(L("input.lip")) + \(direction)" }
+        if lipOut { return L("result.lipOut") }
         return direction ?? L("input.missAngle.none")
     }
 }

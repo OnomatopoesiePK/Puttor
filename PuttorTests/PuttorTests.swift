@@ -1547,6 +1547,40 @@ struct PuttorTests {
         #expect(merged.doublesOrWorse == 2)
     }
 
+    /// The flame follows the sessions that are actually there: it counts the
+    /// given-up ones too, and it goes out as soon as nothing is left from this
+    /// week or the one before.
+    @MainActor
+    @Test func theStreakGoesOutWhenTheSessionsDo() async throws {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2
+        let now = Date()
+        func weeksAgo(_ weeks: Int) -> Date {
+            calendar.date(byAdding: .weekOfYear, value: -weeks, to: now) ?? now
+        }
+        func session(_ date: Date, complete: Bool = true) -> GameSession {
+            let session = GameSession(gameType: .aroundTheHole)
+            session.date = date
+            session.isComplete = complete
+            return session
+        }
+
+        let thisWeek = session(now)
+        let lastWeek = session(weeksAgo(1), complete: false)
+        let longAgo = session(weeksAgo(4))
+
+        // Turning up counts, finished or not.
+        #expect(GameScoring.streakWeeks(for: .aroundTheHole, in: [thisWeek, lastWeek, longAgo], now: now) == 2)
+        // Take this week's away and last week still carries it.
+        #expect(GameScoring.streakWeeks(for: .aroundTheHole, in: [lastWeek, longAgo], now: now) == 1)
+        // With only the old one left there is nothing to carry.
+        #expect(GameScoring.streakWeeks(for: .aroundTheHole, in: [longAgo], now: now) == 0)
+        // And nothing at all leaves no flame.
+        #expect(GameScoring.streakWeeks(for: .aroundTheHole, in: [], now: now) == 0)
+        // Another drill's sessions are not this drill's.
+        #expect(GameScoring.streakWeeks(for: .ladder, in: [thisWeek, lastWeek], now: now) == 0)
+    }
+
     /// The heart marks one putter and one way of reading: marking another
     /// moves it, marking the same one again clears it.
     @MainActor

@@ -28,6 +28,18 @@ struct GameStatsView: View {
     /// Newest first for the list, oldest first for the chart's left-to-right time axis.
     private var recent: [GameSession] { Array(history.prefix(recentCount)) }
     private var chartSessions: [GameSession] { recent.reversed() }
+    /// Every session of a training drill, finished or given up, because both
+    /// count for the flame and both have to be removable. The scored drills
+    /// list the rounds that have a score.
+    private var listed: [GameSession] {
+        gameType.isTrainingDrill
+            ? Array(GameScoring.allSessions(for: gameType, in: allSessions).prefix(recentCount))
+            : recent
+    }
+    /// Anything to show at all, counting the given-up sessions of a drill.
+    private var hasSessions: Bool {
+        gameType.isTrainingDrill ? !GameScoring.allSessions(for: gameType, in: allSessions).isEmpty : !history.isEmpty
+    }
     private var best: GameSession? { GameScoring.bestSession(for: gameType, in: allSessions) }
     private var average: Double? { GameScoring.recentAverage(for: gameType, in: allSessions) }
 
@@ -45,7 +57,7 @@ struct GameStatsView: View {
                         MissSideCard(tally: sides)
                     }
                 }
-                if history.isEmpty {
+                if !hasSessions {
                     emptyState
                 } else {
                     // A drill you either finish or don't is measured by turning
@@ -68,7 +80,7 @@ struct GameStatsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .toolbar {
-            if best != nil {
+            if best != nil || hasSessions {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showResetConfirm = true
@@ -233,7 +245,7 @@ struct GameStatsView: View {
 
     private var roundsCard: some View {
         VStack(spacing: 0) {
-            ForEach(Array(recent.enumerated()), id: \.element.id) { index, session in
+            ForEach(Array(listed.enumerated()), id: \.element.id) { index, session in
                 Button {
                     sessionToDelete = session
                 } label: {
@@ -249,6 +261,11 @@ struct GameStatsView: View {
                                 Text(session.configSummary)
                                     .font(.system(size: 10)).foregroundStyle(Theme.textMuted)
                                     .lineLimit(1)
+                            }
+                            if !session.isComplete {
+                                Text(L("game.drill.stopped"))
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(Theme.error)
                             }
                         }
                         Spacer()
@@ -279,7 +296,7 @@ struct GameStatsView: View {
                     Text("\(session.date.formatted(date: .abbreviated, time: .shortened)) · \(GameScoreFormat.text(session.score, for: gameType))")
                 }
 
-                if index < recent.count - 1 {
+                if index < listed.count - 1 {
                     Rectangle().fill(Theme.borderLight).frame(height: 1)
                 }
             }
