@@ -33,10 +33,9 @@ struct TutorialOverlay: View {
     /// the opening follows around whatever it shows.
     private static let holeRadius = Theme.Radius.lg + margin
     private static let movement = Animation.smooth(duration: 0.45)
-    /// How high a card may start. It reaches into the status bar's strip: the
-    /// tutorial holds the screen upright, so nothing else needs that space,
-    /// and the room bought there keeps the writing a size larger.
-    private static let topLimit = margin
+    /// How high a card may start: clear of the status bar, like everything
+    /// else on screen.
+    private static var topLimit: CGFloat { windowInsets.top + margin }
 
     var body: some View {
         GeometryReader { geo in
