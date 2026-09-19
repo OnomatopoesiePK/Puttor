@@ -1138,3 +1138,6 @@
 "evolution.par5" = "Ø 5 杆洞";
 "setup.scorecardKnown" = "已保存记分卡:%@。标准杆将自动填入。";
 "setup.scorecardHoles" = "%d 洞";
+"stats.threePutts" = "三推";
+"stats.lipOuts" = "擦洞而出";
+"stats.ofPutts" = "共 %ld 推";

@@ -163,11 +163,26 @@ struct RoundSummaryView: View {
                         }
                         .fixedSize(horizontal: false, vertical: true)
                     }
-                    playingStatWide(
-                        L("stats.girProximity"),
-                        stats.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
-                        subtitle: L("stats.firstPutt")
-                    )
+                    // The last row as the statistics tab has it: 3-putts and
+                    // lip-outs beside the proximity.
+                    HStack(spacing: Theme.Spacing.sm) {
+                        playingStat(
+                            L("stats.threePutts"),
+                            "\(stats.threePuttHoles)",
+                            subtitle: String(format: L("stats.overHoles"), stats.holes)
+                        )
+                        playingStat(
+                            L("stats.lipOuts"),
+                            "\(stats.lipOutCount)",
+                            subtitle: String(format: L("stats.ofPutts"), stats.totalPutts)
+                        )
+                        playingStat(
+                            L("stats.girProximity"),
+                            stats.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
+                            subtitle: L("stats.firstPutt")
+                        )
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
                 }
 
@@ -377,31 +392,6 @@ struct RoundSummaryView: View {
         score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
     }
 
-
-    /// A full-width row rather than a tile: the proximity is one number with a
-    /// long name, and a seventh square in a three-column grid left a hole.
-    private func playingStatWide(_ label: String, _ value: String, subtitle: String) -> some View {
-        HStack(spacing: Theme.Spacing.sm) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(Theme.text)
-                Text(subtitle)
-                    .font(.system(size: 10))
-                    .foregroundStyle(Theme.textMuted)
-            }
-            Spacer(minLength: 0)
-            Text(value)
-                .font(.system(size: 22, weight: .black))
-                .foregroundStyle(Theme.text)
-                .lineLimit(1).minimumScaleFactor(0.6)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, Theme.Spacing.md)
-        .padding(.vertical, Theme.Spacing.sm)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
-    }
 
     private func playingStat(_ label: String, _ value: String, subtitle: String, color: Color = Theme.primary, highlighted: Bool = false) -> some View {
         // Every box the same size, whatever length its label happens to be —

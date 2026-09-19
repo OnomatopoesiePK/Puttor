@@ -1138,3 +1138,6 @@
 "evolution.par5" = "Ø PAR 5";
 "setup.scorecardKnown" = "Scorecard saved: %@. The pars are filled in.";
 "setup.scorecardHoles" = "%d holes";
+"stats.threePutts" = "3-PUTTS";
+"stats.lipOuts" = "LIP-OUTS";
+"stats.ofPutts" = "of %ld putts";

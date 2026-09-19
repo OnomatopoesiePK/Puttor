@@ -1047,3 +1047,6 @@
 "evolution.par5" = "Ø PAR 5";
 "setup.scorecardKnown" = "Carte de score enregistrée : %@. Les pars sont préremplis.";
 "setup.scorecardHoles" = "%d trous";
+"stats.threePutts" = "3-PUTTS";
+"stats.lipOuts" = "LIP-OUTS";
+"stats.ofPutts" = "sur %ld putts";

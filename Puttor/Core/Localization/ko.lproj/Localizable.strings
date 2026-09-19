@@ -1047,3 +1047,6 @@
 "evolution.par5" = "Ø 파 5";
 "setup.scorecardKnown" = "스코어카드 저장됨: %@. 파가 미리 입력됩니다.";
 "setup.scorecardHoles" = "%d개 홀";
+"stats.threePutts" = "3퍼트";
+"stats.lipOuts" = "립아웃";
+"stats.ofPutts" = "퍼트 %ld개 중";

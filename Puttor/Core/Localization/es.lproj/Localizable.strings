@@ -1138,3 +1138,6 @@
 "evolution.par5" = "Ø PAR 5";
 "setup.scorecardKnown" = "Tarjeta guardada: %@. Los pares se rellenan solos.";
 "setup.scorecardHoles" = "%d hoyos";
+"stats.threePutts" = "3 PUTTS";
+"stats.lipOuts" = "LIP-OUTS";
+"stats.ofPutts" = "de %ld putts";
