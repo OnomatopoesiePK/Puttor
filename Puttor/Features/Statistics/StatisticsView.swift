@@ -784,6 +784,14 @@ private struct StatisticsPane: View {
                                     decimalText(data.scoreAggregated.avgPuttsOffGir),
                                     subtitle: String(format: L("stats.overHoles"), data.scoreAggregated.nonGirPuttedHoles)
                                 )
+                            }
+                            // The chances at the green between the greens
+                            // and the putting, a pair of their own so the
+                            // grids keep their shape with or without them.
+                            if showsGirOpportunity(data) {
+                                girOpportunityRow(data.scoreAggregated)
+                            }
+                            LazyVGrid(columns: playingStatColumns, spacing: Theme.Spacing.sm) {
                                 // Counted from the putts alone, so every
                                 // round in the filter counts, scored or not.
                                 playingStat(
@@ -796,8 +804,8 @@ private struct StatisticsPane: View {
                                     String(format: "%.1f", Double(data.aggregated.lipOutCount) / Double(max(1, filteredRounds.count))),
                                     subtitle: String(format: L("stats.totalInRounds"), data.aggregated.lipOutCount, filteredRounds.count)
                                 )
-                                // A ninth tile completes the three-wide
-                                // grid; two wide, it would stand alone.
+                                // A third tile completes the three-wide row;
+                                // two wide, it would stand alone.
                                 if !dense {
                                     playingStat(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
                                 }
@@ -805,13 +813,8 @@ private struct StatisticsPane: View {
                             if dense {
                                 playingStatWide(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
                             }
-                            // Rows of their own under the grid, so the grid
-                            // keeps its shape with or without them.
                             if showsParAverages(data) {
                                 parAverageRow(data.scoreAggregated)
-                            }
-                            if showsGirOpportunity(data) {
-                                girOpportunityRow(data.scoreAggregated)
                             }
                             scoreCoverageNote(data)
                         }

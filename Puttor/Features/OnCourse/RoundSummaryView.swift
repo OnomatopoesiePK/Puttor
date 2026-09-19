@@ -117,15 +117,15 @@ struct RoundSummaryView: View {
                             highlighted: RoundHighlights.strongGreensInRegulation(stats.girPercent)
                         )
                         playingStat(
-                            L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%",
-                            subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)",
-                            highlighted: RoundHighlights.strongScrambling(stats.scramblePercent)
-                        )
-                        playingStat(
                             L("stats.conversion"),
                             stats.girCount > 0 ? "\(Int(stats.girConversionPercent.rounded()))%" : "—",
                             subtitle: "\(stats.girConversions)/\(stats.girCount)",
                             highlighted: RoundHighlights.strongConversion(stats.girConversionPercent)
+                        )
+                        playingStat(
+                            L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%",
+                            subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)",
+                            highlighted: RoundHighlights.strongScrambling(stats.scramblePercent)
                         )
                         playingStat(
                             L("stats.puttsGir"),
@@ -137,16 +137,6 @@ struct RoundSummaryView: View {
                             stats.avgPuttsOffGir.map { String(format: "%.2f", $0) } ?? "—",
                             subtitle: String(format: L("stats.overHoles"), stats.nonGirPuttedHoles)
                         )
-                        // Where putt 0 or the course's card gave the pars.
-                        if !stats.parHoles.isEmpty {
-                            ForEach(HoleDetails.pars, id: \.self) { par in
-                                playingStat(
-                                    String(format: L("stats.parAverage"), par),
-                                    stats.averageStrokes(onPar: par).map { String(format: "%.2f", $0) } ?? "—",
-                                    subtitle: String(format: L("stats.overHoles"), stats.parHoles[par] ?? 0)
-                                )
-                            }
-                        }
                     }
                     if stats.girOpportunityAnswered > 0 {
                         HStack(spacing: Theme.Spacing.sm) {
@@ -165,8 +155,9 @@ struct RoundSummaryView: View {
                         }
                         .fixedSize(horizontal: false, vertical: true)
                     }
-                    // The last row as the statistics tab has it: 3-putts and
-                    // lip-outs beside the proximity.
+                    // The same order as the statistics tab: the chances at the
+                    // green, then 3-putts and lip-outs beside the proximity,
+                    // then the pars.
                     HStack(spacing: Theme.Spacing.sm) {
                         playingStat(
                             L("stats.threePutts"),
@@ -185,6 +176,19 @@ struct RoundSummaryView: View {
                         )
                     }
                     .fixedSize(horizontal: false, vertical: true)
+                    // Where putt 0 or the course's card gave the pars.
+                    if !stats.parHoles.isEmpty {
+                        HStack(spacing: Theme.Spacing.sm) {
+                            ForEach(HoleDetails.pars, id: \.self) { par in
+                                playingStat(
+                                    String(format: L("stats.parAverage"), par),
+                                    stats.averageStrokes(onPar: par).map { String(format: "%.2f", $0) } ?? "—",
+                                    subtitle: String(format: L("stats.overHoles"), stats.parHoles[par] ?? 0)
+                                )
+                            }
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 }
 
