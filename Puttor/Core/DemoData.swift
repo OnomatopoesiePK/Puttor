@@ -73,6 +73,19 @@ enum DemoData {
             config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .intention)]
             config.save()
         }
+        if arguments.contains(shareRoundsArgument) {
+            var config = CustomModeConfig.defaultConfig
+            config.fields = [
+                CustomField(kind: .puttForCategory),
+                CustomField(kind: .holePar),
+                CustomField(kind: .girOpportunity),
+                CustomField(kind: .intention),
+            ]
+            config.resultStyle = .angle
+            config.save()
+            simulateShareRounds(into: ModelContext(container))
+            return
+        }
         if arguments.contains(puttZeroRoundArgument) {
             var config = CustomModeConfig.defaultConfig
             config.fields = [
@@ -293,19 +306,62 @@ enum DemoData {
         for round in rounds where round.courseName == puttZeroCourse {
             context.delete(round)
         }
+        simulateRound(named: puttZeroCourse, on: Date(), holes: 18, withHoleDetails: true, gaining: 1, everyScore: false, into: context)
+        try? context.save()
+    }
 
+    /// Four rounds to share: eighteen holes and nine, each once with putt 0
+    /// asking the par and the GIR opportunity and once without it, every
+    /// score from eagle to double bogey in each, and two strokes gained in
+    /// one of each pair and two lost in the other.
+    static let shareRoundsArgument = "-PuttorShareRounds"
+    static let shareRoundsOtherCourse = "Au Park"
+
+    static func simulateShareRounds(into context: ModelContext) {
+        let rounds = (try? context.fetch(FetchDescriptor<Round>())) ?? []
+        for round in rounds where round.courseName == puttZeroCourse || round.courseName == shareRoundsOtherCourse {
+            context.delete(round)
+        }
+        let day: TimeInterval = 86_400
+        simulateRound(named: puttZeroCourse, on: Date().addingTimeInterval(-day), holes: 18, withHoleDetails: true, gaining: 2, everyScore: true, into: context)
+        simulateRound(named: shareRoundsOtherCourse, on: Date().addingTimeInterval(-2 * day), holes: 18, withHoleDetails: false, gaining: -2, everyScore: true, into: context)
+        simulateRound(named: puttZeroCourse, on: Date().addingTimeInterval(-3 * day), holes: 9, withHoleDetails: true, gaining: -2, everyScore: true, into: context)
+        simulateRound(named: shareRoundsOtherCourse, on: Date().addingTimeInterval(-4 * day), holes: 9, withHoleDetails: false, gaining: 2, everyScore: true, into: context)
+        try? context.save()
+    }
+
+    /// A round in Custom mode on the par 72 card, with intentions and the
+    /// dial. Seeds are tried in turn until the putting gains about `gaining`
+    /// strokes and — where `everyScore` — an eagle, a birdie, a par, a bogey
+    /// and a double or worse are all on the card, so the same round comes
+    /// back on every launch. With the hole details the par and GIR
+    /// opportunity of each hole are kept; a green is only hit where there
+    /// was a chance to hit it either way.
+    @discardableResult
+    static func simulateRound(named name: String, on date: Date, holes: Int, withHoleDetails: Bool,
+                              gaining target: Double, everyScore: Bool, into context: ModelContext) -> Round {
+        let pars = Array(puttZeroPars.prefix(holes))
         var plan: [PlannedHole] = []
-        for seed in UInt64(1)...500 {
-            var rng = SeededGenerator(seed: seed)
-            let candidate = puttZeroPars.map { planHole(par: $0, rng: &rng) }
+        var best = Double.infinity
+        for seed in UInt64(1)...400_000 {
+            var rng = SeededGenerator(seed: seed &* 7919 &+ UInt64(holes))
+            let candidate = pars.map { planHole(par: $0, rng: &rng) }
             let gained = candidate.reduce(0.0) { total, hole in
                 total + StrokesGained.baseline(at: hole.putts[0].distance).expectedPutts - Double(hole.putts.count)
             }
-            plan = candidate
-            if abs(gained - 1) < 0.1 { break }
+            let scores = Set(candidate.map { hole in min(2, max(-2, hole.putts[0].category.strokesRelativeToPar + hole.putts.count - 1)) })
+            let covers = !everyScore || scores.isSuperset(of: [-2, -1, 0, 1, 2])
+            guard covers else { continue }
+            let miss = abs(gained - target)
+            if miss < best {
+                best = miss
+                plan = candidate
+            }
+            if miss < 0.12 { break }
         }
 
-        let round = Round(courseName: puttZeroCourse, date: Date(), stimp: 10, inputMode: .custom)
+        let round = Round(courseName: name, date: date, stimp: 10, inputMode: .custom)
+        round.holeCount = holes
         round.readingMethod = ReadingMethod(.aimPoint)
         round.tracksScoreCategory = true
         round.isComplete = true
@@ -313,7 +369,9 @@ enum DemoData {
         var details: [Int: HoleDetails] = [:]
         for (index, hole) in plan.enumerated() {
             let number = index + 1
-            details[number] = HoleDetails(par: hole.par, girOpportunity: hole.girOpportunity)
+            if withHoleDetails {
+                details[number] = HoleDetails(par: hole.par, girOpportunity: hole.girOpportunity)
+            }
             for (puttIndex, planned) in hole.putts.enumerated() {
                 let putt = Putt(
                     holeNumber: number,
@@ -327,14 +385,14 @@ enum DemoData {
                     missAngleDeg: planned.angle
                 )
                 putt.intention = planned.intention
-                putt.createdAt = Date().addingTimeInterval(Double(number * 10 + puttIndex) - 400)
+                putt.createdAt = date.addingTimeInterval(Double(number * 10 + puttIndex) - 400)
                 putt.round = round
                 round.putts.append(putt)
                 context.insert(putt)
             }
         }
         round.holeDetails = details
-        try? context.save()
+        return round
     }
 
     /// A hole: a chance at the green about two times in three, the green hit

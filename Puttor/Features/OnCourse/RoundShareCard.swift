@@ -13,10 +13,14 @@
 import SwiftUI
 import UIKit
 import LinkPresentation
+import SwiftData
 
 struct RoundShareCard: View {
     let round: Round
     var useFeet = false
+    /// The player's own averages from their other rounds: a figure better
+    /// than its average is written green, a worse one red.
+    var baseline = ShareBaseline()
 
     private var putts: [Putt] {
         round.putts.sorted { $0.holeNumber != $1.holeNumber ? $0.holeNumber < $1.holeNumber : $0.puttNumber < $1.puttNumber }
@@ -39,14 +43,16 @@ struct RoundShareCard: View {
 
     var body: some View {
         let stats = stats
-        VStack(alignment: .leading, spacing: 12) {
-            header
+        VStack(alignment: .leading, spacing: 10) {
+            header(stats)
             if showsScorecard {
                 scorecard(stats)
             }
             HStack(spacing: 10) {
-                metricBox(stats.sgTotal, metric: .sg, highlighted: RoundHighlights.strongStrokesGained(stats.sgTotal))
-                metricBox(stats.pcgTotal, metric: .pcg, highlighted: RoundHighlights.strongPCG(stats.pcgTotal))
+                metricBox(stats.sgTotal, metric: .sg, highlighted: RoundHighlights.strongStrokesGained(stats.sgTotal),
+                          colour: baseline.tone(stats.sgTotal / Double(max(1, stats.holes)), against: baseline.sgPerHole, higherIsBetter: true))
+                metricBox(stats.pcgTotal, metric: .pcg, highlighted: RoundHighlights.strongPCG(stats.pcgTotal),
+                          colour: baseline.tone(stats.pcgTotal / Double(max(1, stats.holes)), against: baseline.pcgPerHole, higherIsBetter: true))
             }
             if let highlight {
                 highlightRow(highlight)
@@ -60,18 +66,67 @@ struct RoundShareCard: View {
 
     // MARK: - Header and footer
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
-                .font(.system(size: 22, weight: .heavy))
-                .foregroundStyle(Theme.text)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-            Text(([round.date.formatted(date: .long, time: .omitted)] + [round.putter?.name].compactMap { $0 }).joined(separator: " · "))
-                .font(.system(size: 12))
-                .foregroundStyle(Theme.textSecondary)
-                .lineLimit(1)
+    /// The course and the result on one line, the date and putter under
+    /// the course: the result as strokes where every hole has its par,
+    /// "75 (+3)" with the par raised beside it, against par otherwise.
+    private func header(_ stats: RoundStats) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
+                    .font(.system(size: 22, weight: .heavy))
+                    .foregroundStyle(Theme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                Text(([Self.dateText(round.date)] + [round.putter?.name].compactMap { $0 }).joined(separator: " · "))
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+            if tracksScore {
+                result(stats)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .shareHighlight(RoundHighlights.scoreUnderPar(stats.scoreRelativeToPar))
+            }
         }
+    }
+
+    private func result(_ stats: RoundStats) -> some View {
+        let relative = stats.scoreRelativeToPar
+        let colour = baseline.tone(Double(relative) / Double(max(1, stats.scoredHoles)), against: baseline.scorePerHole, higherIsBetter: false)
+            ?? (relative < 0 ? Theme.primary : (relative > 0 ? Theme.error : Theme.text))
+        let par = roundHoles.compactMap { round.holeDetails[$0]?.par }.reduce(0, +)
+        return HStack(alignment: .firstTextBaseline, spacing: 4) {
+            if showsScorecard {
+                Text("\(stats.strokesSum)")
+                    .font(.system(size: 30, weight: .black))
+                    .foregroundStyle(Theme.text)
+                Text("(\(stats.scoreRelativeToParText))")
+                    .font(.system(size: 16, weight: .heavy))
+                    .foregroundStyle(colour)
+                Text("\(par)")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(Theme.textMuted)
+                    .baselineOffset(14)
+            } else {
+                Text(stats.scoreRelativeToParText)
+                    .font(.system(size: 30, weight: .black))
+                    .foregroundStyle(colour)
+            }
+        }
+        .lineLimit(1)
+        .fixedSize()
+    }
+
+    /// The date as the app's language writes it in figures: 19.09.2026 in
+    /// German, 19/09/2026 in British English, 09/19/2026 in American.
+    static func dateText(_ date: Date) -> String {
+        let code = LocalizationManager.shared.languageCode
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: code == "en" ? "en_GB" : code)
+        formatter.setLocalizedDateFormatFromTemplate("ddMMyyyy")
+        return formatter.string(from: date)
     }
 
     private var footer: some View {
@@ -99,10 +154,6 @@ struct RoundShareCard: View {
     private func scorecard(_ stats: RoundStats) -> some View {
         let details = round.holeDetails
         let nines = stride(from: 0, to: roundHoles.count, by: 9).map { Array(roundHoles[$0..<min($0 + 9, roundHoles.count)]) }
-        let totalPar = roundHoles.compactMap { details[$0]?.par }.reduce(0, +)
-        let strokes = stats.strokesSum
-        let relative = stats.scoreRelativeToPar
-
         return VStack(spacing: 8) {
             Text(L("share.scorecard"))
                 .font(.system(size: 10, weight: .bold))
@@ -111,31 +162,9 @@ struct RoundShareCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             ForEach(nines, id: \.self) { nine in
-                // One row is the whole card: its total stands below it.
+                // One row is the whole card: its total stands at the top.
                 nineRow(nine, details: details, stats: stats, showsTotal: nines.count > 1)
             }
-
-            Rectangle().fill(Theme.border).frame(height: 1)
-
-            HStack(alignment: .lastTextBaseline) {
-                Text(String(format: L("input.holePar.value"), totalPar))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Theme.textSecondary)
-                Spacer()
-                Text(L("share.total"))
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(1.2)
-                    .foregroundStyle(Theme.textMuted)
-                Text("\(strokes)")
-                    .font(.system(size: 30, weight: .black))
-                    .foregroundStyle(Theme.text)
-                Text(stats.scoreRelativeToParText)
-                    .font(.system(size: 16, weight: .heavy))
-                    .foregroundStyle(relative < 0 ? Theme.primary : (relative > 0 ? Theme.error : Theme.text))
-            }
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .shareHighlight(RoundHighlights.scoreUnderPar(relative))
         }
         .padding(12)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(Theme.surface))
@@ -194,9 +223,9 @@ struct RoundShareCard: View {
 
     // MARK: - Strokes gained, PCG and the highlight
 
-    private func metricBox(_ value: Double, metric: MetricValue.Metric, highlighted: Bool) -> some View {
+    private func metricBox(_ value: Double, metric: MetricValue.Metric, highlighted: Bool, colour: Color?) -> some View {
         VStack(spacing: 2) {
-            MetricValue(value: value, metric: metric, size: 22, colour: value > 0 ? Theme.primary : (value < 0 ? Theme.error : Theme.text))
+            MetricValue(value: value, metric: metric, size: 22, colour: colour ?? (value > 0 ? Theme.primary : (value < 0 ? Theme.error : Theme.text)))
             Text(L(metric == .sg ? "stats.sgPutting" : "share.pcg"))
                 .font(.system(size: 8, weight: .bold))
                 .tracking(0.8)
@@ -242,75 +271,81 @@ struct RoundShareCard: View {
         var id: String { label }
     }
 
-    /// Only what the round has: the score figures where it was entered with
-    /// the score reference, the chances at the green where they were asked,
-    /// the putting always.
+    /// Three rows as a card reads them — the putts, the greens and the
+    /// scrambles; the birdies, the approach and the putts after a green hit;
+    /// the mistakes and the putts after a green missed — and the chances at
+    /// the green under them where they were asked. Without the score
+    /// reference, only what the putts say. Each figure is written green or
+    /// red against the player's own average, per hole where rounds differ in
+    /// length.
     private func tiles(_ stats: RoundStats) -> [Tile] {
-        let averagePerHole = Tile(label: L("summary.avgPerHole"), value: String(format: "%.2f", stats.avgPuttsPerHole),
-                                  subtitle: String(format: L("stats.overHoles"), stats.holes), colour: Theme.text,
-                                  highlighted: RoundHighlights.lowPuttsPerHole(stats.avgPuttsPerHole))
-        let totalPutts = Tile(label: L("summary.putts"), value: "\(stats.totalPutts)",
-                              subtitle: String(format: L("stats.overHoles"), stats.holes), colour: Theme.text)
-        var tiles: [Tile] = []
-        if tracksScore {
-            if !showsScorecard {
-                let score = stats.scoreRelativeToPar
-                tiles.append(Tile(
-                    label: L("stats.score"), value: stats.scoreRelativeToParText,
-                    subtitle: String(format: L("stats.overHoles"), stats.scoredHoles),
-                    colour: score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text),
-                    highlighted: RoundHighlights.scoreUnderPar(score)
-                ))
-            }
-            tiles.append(Tile(label: L("stats.gir"), value: "\(Int(stats.girPercent.rounded()))%",
-                              subtitle: "\(stats.girCount)/\(stats.holes)",
-                              highlighted: RoundHighlights.strongGreensInRegulation(stats.girPercent)))
-            tiles.append(Tile(label: L("stats.conversion"),
-                              value: stats.girCount > 0 ? "\(Int(stats.girConversionPercent.rounded()))%" : "—",
-                              subtitle: "\(stats.girConversions)/\(stats.girCount)",
-                              highlighted: RoundHighlights.strongConversion(stats.girConversionPercent)))
-            tiles.append(Tile(label: L("stats.scramble"), value: "\(Int(stats.scramblePercent.rounded()))%",
-                              subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)",
-                              highlighted: RoundHighlights.strongScrambling(stats.scramblePercent)))
-            tiles.append(Tile(label: L("stats.puttsGir"), value: stats.avgPuttsOnGir.map { String(format: "%.2f", $0) } ?? "—",
-                              subtitle: String(format: L("stats.overHoles"), stats.girPuttedHoles)))
-            tiles.append(Tile(label: L("stats.puttsNoGir"), value: stats.avgPuttsOffGir.map { String(format: "%.2f", $0) } ?? "—",
-                              subtitle: String(format: L("stats.overHoles"), stats.nonGirPuttedHoles)))
-            // Three putting figures side by side, the chances at the green
-            // as a pair after them.
-            tiles.append(averagePerHole)
-            if stats.girOpportunityAnswered > 0 {
-                tiles.append(Tile(label: L("stats.girOpportunity"),
-                                  value: stats.girOpportunityPercent.map { "\(Int($0.rounded()))%" } ?? "—",
-                                  subtitle: "\(stats.girOpportunities)/\(stats.girOpportunityAnswered)",
-                                  highlighted: stats.girOpportunityPercent.map(RoundHighlights.manyGirOpportunities) ?? false))
-                tiles.append(Tile(label: L("stats.girOpportunityConversion"),
-                                  value: stats.girOpportunityConversionPercent.map { "\(Int($0.rounded()))%" } ?? "—",
-                                  subtitle: "\(stats.girOpportunitiesConverted)/\(stats.girOpportunities)",
-                                  highlighted: stats.girOpportunityConversionPercent.map(RoundHighlights.strongGirOpportunityConversion) ?? false))
-            }
+        let holes = Double(max(1, stats.holes))
+        func tone(_ value: Double?, _ average: Double?, higher: Bool) -> Color {
+            baseline.tone(value, against: average, higherIsBetter: higher) ?? Theme.text
         }
-        if !tracksScore { tiles.append(averagePerHole) }
-        tiles.append(totalPutts)
-        tiles.append(Tile(label: L("stats.threePutts"), value: "\(stats.threePuttHoles)",
-                          subtitle: String(format: L("stats.overHoles"), stats.holes)))
-        tiles.append(Tile(label: L("stats.lipOuts"), value: "\(stats.lipOutCount)",
-                          subtitle: String(format: L("stats.ofPutts"), stats.totalPutts)))
-        if tracksScore {
-            tiles.append(Tile(label: L("stats.girProximity"),
-                              value: stats.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
-                              subtitle: L("stats.firstPutt")))
+        let totalPutts = Tile(label: L("summary.putts"), value: "\(stats.totalPutts)",
+                              subtitle: String(format: L("stats.overHoles"), stats.holes),
+                              colour: tone(Double(stats.totalPutts) / holes, baseline.puttsPerHole, higher: false),
+                              highlighted: RoundHighlights.lowPuttsPerHole(stats.avgPuttsPerHole))
+        let threePutts = Tile(label: L("stats.threePutts"), value: "\(stats.threePuttHoles)",
+                              subtitle: String(format: L("stats.overHoles"), stats.holes),
+                              colour: tone(Double(stats.threePuttHoles) / holes, baseline.threePuttsPerHole, higher: false))
+        let lipOuts = Tile(label: L("stats.lipOuts"), value: "\(stats.lipOutCount)",
+                           subtitle: String(format: L("stats.ofPutts"), stats.totalPutts),
+                           colour: tone(Double(stats.lipOutCount) / Double(max(1, stats.totalPutts)), baseline.lipOutsPerPutt, higher: false))
+        guard tracksScore else { return [totalPutts, threePutts, lipOuts] }
+
+        let conversion: Double? = stats.girCount > 0 ? stats.girConversionPercent : nil
+        let scramble: Double? = stats.scrambleAttempts > 0 ? stats.scramblePercent : nil
+        var tiles: [Tile] = [
+            totalPutts,
+            Tile(label: L("stats.gir"), value: "\(Int(stats.girPercent.rounded()))%",
+                 subtitle: "\(stats.girCount)/\(stats.holes)",
+                 colour: tone(stats.girPercent, baseline.girPercent, higher: true),
+                 highlighted: RoundHighlights.strongGreensInRegulation(stats.girPercent)),
+            Tile(label: L("stats.scramble"), value: "\(Int(stats.scramblePercent.rounded()))%",
+                 subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)",
+                 colour: tone(scramble, baseline.scramblePercent, higher: true),
+                 highlighted: RoundHighlights.strongScrambling(stats.scramblePercent)),
+            Tile(label: L("stats.conversion"),
+                 value: conversion.map { "\(Int($0.rounded()))%" } ?? "—",
+                 subtitle: "\(stats.girConversions)/\(stats.girCount)",
+                 colour: tone(conversion, baseline.conversionPercent, higher: true),
+                 highlighted: RoundHighlights.strongConversion(stats.girConversionPercent)),
+            Tile(label: L("stats.girProximity"),
+                 value: stats.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
+                 subtitle: L("stats.firstPutt"),
+                 colour: tone(stats.avgGirProximityM, baseline.proximity, higher: false)),
+            Tile(label: L("stats.puttsGir"), value: stats.avgPuttsOnGir.map { String(format: "%.2f", $0) } ?? "—",
+                 subtitle: String(format: L("stats.overHoles"), stats.girPuttedHoles),
+                 colour: tone(stats.avgPuttsOnGir, baseline.puttsOnGir, higher: false)),
+            threePutts,
+            lipOuts,
+            Tile(label: L("stats.puttsNoGir"), value: stats.avgPuttsOffGir.map { String(format: "%.2f", $0) } ?? "—",
+                 subtitle: String(format: L("stats.overHoles"), stats.nonGirPuttedHoles),
+                 colour: tone(stats.avgPuttsOffGir, baseline.puttsOffGir, higher: false)),
+        ]
+        if stats.girOpportunityAnswered > 0 {
+            tiles.append(Tile(label: L("stats.girOpportunity"),
+                              value: stats.girOpportunityPercent.map { "\(Int($0.rounded()))%" } ?? "—",
+                              subtitle: "\(stats.girOpportunities)/\(stats.girOpportunityAnswered)",
+                              colour: tone(stats.girOpportunityPercent, baseline.girOpportunityPercent, higher: true),
+                              highlighted: stats.girOpportunityPercent.map(RoundHighlights.manyGirOpportunities) ?? false))
+            tiles.append(Tile(label: L("stats.girOpportunityConversion"),
+                              value: stats.girOpportunityConversionPercent.map { "\(Int($0.rounded()))%" } ?? "—",
+                              subtitle: "\(stats.girOpportunitiesConverted)/\(stats.girOpportunities)",
+                              colour: tone(stats.girOpportunityConversionPercent, baseline.girOpportunityConversionPercent, higher: true),
+                              highlighted: stats.girOpportunityConversionPercent.map(RoundHighlights.strongGirOpportunityConversion) ?? false))
         }
         return tiles
     }
 
-    /// Rows of three; where one tile would be left alone, the last two rows
-    /// share four between them instead.
+    /// Rows of three, and a pair of its own at the end.
     private func rows(_ tiles: [Tile]) -> [[Tile]] {
         var rows: [[Tile]] = []
         var rest = tiles[...]
         while !rest.isEmpty {
-            let take = rest.count == 4 ? 2 : min(3, rest.count)
+            let take = min(3, rest.count)
             rows.append(Array(rest.prefix(take)))
             rest = rest.dropFirst(take)
         }
@@ -365,7 +400,7 @@ struct RoundShareCard: View {
 
 private extension View {
     /// The app's pulse, held still: a picture cannot breathe, so the good
-    /// number keeps the glow it would have at its brightest but one.
+    /// number keeps the glow, and the size, it would have near its brightest.
     func shareHighlight(_ isActive: Bool) -> some View {
         background(
             RoundedRectangle(cornerRadius: Theme.Radius.md)
@@ -375,6 +410,8 @@ private extension View {
             RoundedRectangle(cornerRadius: Theme.Radius.md)
                 .stroke(Theme.primary.opacity(isActive ? 0.9 : 0), lineWidth: isActive ? 2.5 : 0)
         )
+        .scaleEffect(isActive ? 1.04 : 1)
+        .zIndex(isActive ? 1 : 0)
     }
 }
 
@@ -385,11 +422,11 @@ enum RoundShareImage {
     static let maxAspect: CGFloat = 5.0 / 4.0
 
     @MainActor
-    static func render(_ round: Round, useFeet: Bool) -> UIImage? {
+    static func render(_ round: Round, useFeet: Bool, baseline: ShareBaseline = ShareBaseline()) -> UIImage? {
         var width: CGFloat = 400
         var image: UIImage?
         for _ in 0..<4 {
-            let renderer = ImageRenderer(content: RoundShareCard(round: round, useFeet: useFeet).frame(width: width))
+            let renderer = ImageRenderer(content: RoundShareCard(round: round, useFeet: useFeet, baseline: baseline).frame(width: width))
             renderer.scale = pixelWidth / width
             renderer.isOpaque = true
             guard let rendered = renderer.uiImage else { return image }
@@ -444,5 +481,72 @@ final class ShareImageItem: NSObject, UIActivityItemSource {
         metadata.imageProvider = NSItemProvider(object: image)
         metadata.iconProvider = NSItemProvider(object: image)
         return metadata
+    }
+}
+
+/// The player's averages from their other rounds, per hole where a round's
+/// length would otherwise decide: what a shared figure is measured against.
+/// Nil wherever those rounds cannot say.
+struct ShareBaseline {
+    var puttsPerHole: Double?
+    var threePuttsPerHole: Double?
+    var lipOutsPerPutt: Double?
+    var sgPerHole: Double?
+    var pcgPerHole: Double?
+    var scorePerHole: Double?
+    var girPercent: Double?
+    var scramblePercent: Double?
+    var conversionPercent: Double?
+    var proximity: Double?
+    var puttsOnGir: Double?
+    var puttsOffGir: Double?
+    var girOpportunityPercent: Double?
+    var girOpportunityConversionPercent: Double?
+
+    init() {}
+
+    /// Every round but `round`, the score figures only from those entered
+    /// with the score reference, as the statistics tab takes them.
+    init(excluding round: Round, from rounds: [Round], useFeet: Bool = false) {
+        var all: [RoundStats] = []
+        var scored: [RoundStats] = []
+        for other in rounds where other.persistentModelID != round.persistentModelID {
+            let stats = RoundStats.compute(putts: other.putts, useFeet: useFeet)
+            guard stats.holes > 0 else { continue }
+            all.append(stats)
+            if other.tracksScoreCategory && stats.scoredHoles > 0 && stats.pickedUpWithoutScore == 0 {
+                scored.append(stats)
+            }
+        }
+        if !all.isEmpty {
+            let merged = RoundStats.merge(all, useFeet: useFeet)
+            let holes = Double(max(1, merged.holes))
+            puttsPerHole = Double(merged.totalPutts) / holes
+            threePuttsPerHole = Double(merged.threePuttHoles) / holes
+            lipOutsPerPutt = merged.totalPutts > 0 ? Double(merged.lipOutCount) / Double(merged.totalPutts) : nil
+            sgPerHole = merged.sgTotal / holes
+            pcgPerHole = merged.pcgTotal / holes
+        }
+        if !scored.isEmpty {
+            let merged = RoundStats.merge(scored, useFeet: useFeet)
+            scorePerHole = merged.scoredHoles > 0 ? Double(merged.scoreRelativeToPar) / Double(merged.scoredHoles) : nil
+            girPercent = merged.holes > 0 ? merged.girPercent : nil
+            scramblePercent = merged.scrambleAttempts > 0 ? merged.scramblePercent : nil
+            conversionPercent = merged.girCount > 0 ? merged.girConversionPercent : nil
+            proximity = merged.avgGirProximityM
+            puttsOnGir = merged.avgPuttsOnGir
+            puttsOffGir = merged.avgPuttsOffGir
+            girOpportunityPercent = merged.girOpportunityPercent
+            girOpportunityConversionPercent = merged.girOpportunityConversionPercent
+        }
+    }
+
+    /// Green where the figure beats the average, red where it falls short,
+    /// white where it matches; nil where either is missing.
+    func tone(_ value: Double?, against average: Double?, higherIsBetter: Bool) -> Color? {
+        guard let value, let average else { return nil }
+        let margin = max(abs(average) * 0.01, 0.001)
+        if abs(value - average) <= margin { return Theme.text }
+        return (value > average) == higherIsBetter ? Theme.primary : Theme.error
     }
 }

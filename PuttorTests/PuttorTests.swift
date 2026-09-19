@@ -363,32 +363,34 @@ struct PuttorTests {
         try context.save()
         let quickImage = try #require(RoundShareImage.render(quick, useFeet: false))
         #expect(quickImage.size.height < fullImage.size.height * (fullImage.size.width / quickImage.size.width))
+    }
 
-        // Written out to look at, where the test is run with somewhere to put them.
-        if let folder = ProcessInfo.processInfo.environment["PUTTOR_SHARE_PREVIEW_DIR"] {
-            try fullImage.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent("share-18.png"))
-            try quickImage.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent("share-quick9.png"))
-            // The front nine alone, as a nine-hole round with its scorecard.
-            full.holeCount = 9
-            for putt in full.putts where putt.holeNumber > 9 {
-                full.putts.removeAll { $0.id == putt.id }
-                context.delete(putt)
+    /// The four rounds simulated for sharing: every score from eagle to a
+    /// double or worse on each card, two strokes gained or lost as asked, the
+    /// par and GIR opportunity only where putt 0 asked them — and each shares
+    /// as a picture within four to five.
+    @MainActor
+    @Test func theShareRoundsPlayEveryScoreAndGainOrLoseTwo() async throws {
+        let context = try Self.makeInMemoryContext()
+        DemoData.simulateShareRounds(into: context)
+        let rounds = try context.fetch(FetchDescriptor<Round>(sortBy: [SortDescriptor(\.date, order: .reverse)]))
+        #expect(rounds.count == 4)
+        let targets: [Double] = [2, -2, -2, 2]
+        for (index, round) in rounds.enumerated() {
+            let stats = RoundStats.compute(putts: round.putts)
+            #expect(abs(stats.sgTotal - targets[index]) < 0.3, "\(round.courseName) \(round.holeCount): \(stats.sgTotal)")
+            let scores = Set(Set(round.putts.map(\.holeNumber)).compactMap { hole in
+                RoundStats.holeScoreRelativeToPar(round.putts.filter { $0.holeNumber == hole }).map { min(2, max(-2, $0)) }
+            })
+            #expect(scores == [-2, -1, 0, 1, 2], "\(round.courseName) \(round.holeCount)")
+            #expect(round.holeDetails.isEmpty == (round.courseName == DemoData.shareRoundsOtherCourse))
+            let baseline = ShareBaseline(excluding: round, from: rounds)
+            let image = try #require(RoundShareImage.render(round, useFeet: false, baseline: baseline))
+            #expect(image.size.height <= image.size.width * 1.25 + 1)
+            if let folder = ProcessInfo.processInfo.environment["PUTTOR_SHARE_PREVIEW_DIR"] {
+                let name = "round-\(round.holeCount)-\(round.holeDetails.isEmpty ? "plain" : "putt0").png"
+                try image.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent(name))
             }
-            // A birdie on 1 and an eagle on 2, so the circles show too.
-            for (hole, category) in [(1, ScoreCategory.birdie), (2, .eagle)] {
-                for putt in full.putts where putt.holeNumber == hole && putt.puttNumber > 1 {
-                    full.putts.removeAll { $0.id == putt.id }
-                    context.delete(putt)
-                }
-                if let first = full.putts.first(where: { $0.holeNumber == hole }) {
-                    first.puttFor = category
-                    first.result = .holed
-                    first.missAngleDeg = nil
-                }
-            }
-            try context.save()
-            let nineImage = try #require(RoundShareImage.render(full, useFeet: false))
-            try nineImage.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent("share-9.png"))
         }
     }
 

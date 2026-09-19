@@ -270,7 +270,10 @@ struct RoundSummaryView: View {
             Spacer()
             // The round as a picture: to Instagram, WhatsApp and the rest, or Photos.
             Button {
-                if let image = RoundShareImage.render(round, useFeet: useFeet) {
+                // Measured against the player's other rounds.
+                let others = (try? modelContext.fetch(FetchDescriptor<Round>())) ?? []
+                let baseline = ShareBaseline(excluding: round, from: others, useFeet: useFeet)
+                if let image = RoundShareImage.render(round, useFeet: useFeet, baseline: baseline) {
                     sharedImage = SharedImage(image: image, title: round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
                 }
             } label: {
