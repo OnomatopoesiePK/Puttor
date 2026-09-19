@@ -153,12 +153,14 @@ struct RoundSummaryView: View {
                             playingStat(
                                 L("stats.girOpportunity"),
                                 stats.girOpportunityPercent.map { "\(Int($0.rounded()))%" } ?? "—",
-                                subtitle: "\(stats.girOpportunities)/\(stats.girOpportunityAnswered)"
+                                subtitle: "\(stats.girOpportunities)/\(stats.girOpportunityAnswered)",
+                                highlighted: stats.girOpportunityPercent.map(RoundHighlights.manyGirOpportunities) ?? false
                             )
                             playingStat(
                                 L("stats.girOpportunityConversion"),
                                 stats.girOpportunityConversionPercent.map { "\(Int($0.rounded()))%" } ?? "—",
-                                subtitle: "\(stats.girOpportunitiesConverted)/\(stats.girOpportunities)"
+                                subtitle: "\(stats.girOpportunitiesConverted)/\(stats.girOpportunities)",
+                                highlighted: stats.girOpportunityConversionPercent.map(RoundHighlights.strongGirOpportunityConversion) ?? false
                             )
                         }
                         .fixedSize(horizontal: false, vertical: true)

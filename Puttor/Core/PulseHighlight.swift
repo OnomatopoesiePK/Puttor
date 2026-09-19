@@ -62,6 +62,11 @@ enum RoundHighlights {
     static func strongPCG(_ pcgTotal: Double) -> Bool { pcgTotal >= 3 }
     /// Fourteen greens out of eighteen, as a rate so nine-hole rounds count too.
     static func strongGreensInRegulation(_ girPercent: Double) -> Bool { girPercent >= 14.0 / 18.0 * 100 }
+    /// A chance at the green on fourteen holes of eighteen, as a rate of the
+    /// holes answered, the same mark as the greens themselves.
+    static func manyGirOpportunities(_ percent: Double) -> Bool { percent >= 14.0 / 18.0 * 100 - 1e-9 }
+    /// More than four chances in five turned into a green.
+    static func strongGirOpportunityConversion(_ percent: Double) -> Bool { percent > 80 }
     static func strongScrambling(_ scramblePercent: Double) -> Bool { scramblePercent >= 70 }
     /// More than half the greens hit turned into a birdie or better.
     static func strongConversion(_ conversionPercent: Double) -> Bool { conversionPercent > 50 }

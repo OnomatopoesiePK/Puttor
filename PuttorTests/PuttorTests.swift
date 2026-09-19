@@ -323,6 +323,17 @@ struct PuttorTests {
         #expect(session.isOnPrePutt)
     }
 
+    /// GIR opportunities pulse from fourteen of eighteen, seven of nine on a
+    /// nine-hole round; their conversion above 80 %.
+    @Test func girOpportunityHighlightsKeepToTheirMarks() async throws {
+        #expect(RoundHighlights.manyGirOpportunities(14.0 / 18.0 * 100))
+        #expect(!RoundHighlights.manyGirOpportunities(13.0 / 18.0 * 100))
+        #expect(RoundHighlights.manyGirOpportunities(7.0 / 9.0 * 100))
+        #expect(!RoundHighlights.manyGirOpportunities(6.0 / 9.0 * 100))
+        #expect(RoundHighlights.strongGirOpportunityConversion(81))
+        #expect(!RoundHighlights.strongGirOpportunityConversion(80))
+    }
+
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {
         #expect(ScoreCategory.bogey.next == .double)
         #expect(ScoreCategory.double.next == .plus3)
