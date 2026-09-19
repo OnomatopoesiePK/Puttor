@@ -156,6 +156,19 @@ struct OnCourseListView: View {
         }.reduce(0, +)
     }
 
+    /// The round's score for its row: against par, coloured as the summary
+    /// colours it, with the strokes where every hole has its par. None for a
+    /// round entered without the score reference, or with a picked-up hole
+    /// left without a score.
+    private func scoreText(_ round: Round) -> (relative: String, colour: Color, strokes: Int?)? {
+        guard round.tracksScoreCategory else { return nil }
+        let stats = RoundStats.compute(putts: round.putts)
+        guard stats.scoredHoles > 0, stats.pickedUpWithoutScore == 0 else { return nil }
+        let score = stats.scoreRelativeToPar
+        let colour = score < 0 ? Theme.primary : (score > 0 ? Theme.error : Theme.text)
+        return (stats.scoreRelativeToParText, colour, stats.averageStrokesPerRound.map { Int($0.rounded()) })
+    }
+
     private func roundCard(_ round: Round) -> some View {
         Button {
             roundToOpen = round
@@ -193,10 +206,17 @@ struct OnCourseListView: View {
                             Text("·")
                             Text(putter.name)
                         }
-                        // How the round was recorded, which says how much the
-                        // statistics can read from it.
-                        Text("·")
-                        Text(L(round.inputMode.labelKey))
+                        // The card against par, and in strokes where the
+                        // round knows every hole's par.
+                        if let score = scoreText(round) {
+                            Text("·")
+                            Text(score.relative)
+                                .fontWeight(.bold)
+                                .foregroundStyle(score.colour)
+                            if let strokes = score.strokes {
+                                Text("(\(strokes))")
+                            }
+                        }
                     }
                     .lineLimit(1)
                     .font(.system(size: 13))
@@ -243,12 +263,20 @@ struct OnCourseListView: View {
                 }
 
                 VStack(spacing: 3) {
-                    Text(round.isComplete ? L("onCourse.complete") : L("onCourse.inProgress"))
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Theme.textSecondary)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill((round.isComplete ? Theme.primary : Theme.accent).opacity(0.13)))
+                    HStack(spacing: 5) {
+                        // How the round was recorded, by its first letter,
+                        // which says how much the statistics can read from it.
+                        Text(String(L(round.inputMode.labelKey).prefix(1)))
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(Theme.accent)
+                            .accessibilityLabel(L(round.inputMode.labelKey))
+                        Text(round.isComplete ? L("onCourse.complete") : L("onCourse.inProgress"))
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(Theme.textSecondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill((round.isComplete ? Theme.primary : Theme.accent).opacity(0.13)))
+                    }
 
                     if round.isComplete {
                         MetricValue(value: strokesGained(round), metric: .sg, size: 12)
