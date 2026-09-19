@@ -270,9 +270,7 @@ struct CustomModeSettingsView: View {
                         .transition(.opacity)
                 }
             }
-            if field.kind == .girOpportunity {
-                girOpportunityPresetPicker(of: field)
-            }
+
             fieldPreview(field.id.uuidString, .field(field))
                 .padding(.top, 2)
         }
@@ -309,33 +307,6 @@ struct CustomModeSettingsView: View {
         }
         .padding(.leading, 32)
         .padding(.vertical, 6)
-    }
-
-    /// What each hole's first putt starts on: yes or no.
-    private func girOpportunityPresetPicker(of field: CustomField) -> some View {
-        HStack(spacing: 8) {
-            Text(L("custom.girOpportunity.preset"))
-                .font(.subheadline)
-                .foregroundStyle(Theme.text)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 8)
-            Picker(L("custom.girOpportunity.preset"), selection: Binding(
-                get: { field.girOpportunityPreset },
-                set: { newValue in
-                    guard let idx = draftConfig.fields.firstIndex(where: { $0.id == field.id }) else { return }
-                    draftConfig.fields[idx].girOpportunityPreset = newValue
-                    hasPendingChanges = true
-                }
-            )) {
-                Text(L("common.yes")).tag(true)
-                Text(L("common.no")).tag(false)
-            }
-            .pickerStyle(.segmented)
-            .fixedSize()
-        }
-        .frame(minHeight: 44)
-        .padding(.leading, 32)
-        .disabled(!isEditing)
     }
 
     /// Switches one part of the intention on or off; the last one stays on.

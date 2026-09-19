@@ -217,51 +217,71 @@ struct PuttorTests {
         #expect(putts.last?.result == .holed)
     }
 
-    /// The GIR opportunity rides on each hole's first putt: the preset fills
-    /// it in, follow-ups leave it alone, and the playing statistics read how
-    /// many chances there were and how many became greens in regulation.
+    /// Putt 0 asks the par and the GIR opportunity before a hole's first
+    /// putt, saves each answer on the spot and goes on once both are given.
+    /// The playing statistics read the chances, the par averages and the
+    /// card in strokes from them.
     @MainActor
-    @Test func girOpportunityIsAskedPerHoleAndCounted() async throws {
+    @Test func puttZeroAsksAboutTheHoleAndFeedsTheStatistics() async throws {
         let context = try Self.makeInMemoryContext()
         let round = Round(courseName: "Test", startingHole: 1)
         context.insert(round)
         try context.save()
 
         let session = RoundSession(round: round, modelContext: context)
-        session.girOpportunityPreset = true
-        #expect(session.draftIsFirstPutt)
-        #expect(session.draftGirOpportunity == true)
+        session.prePuttKinds = [.holePar, .girOpportunity]
+        #expect(session.isOnPrePutt)
 
-        // Hole 1: a chance, and the green hit — birdie putt missed, par holed.
+        // Hole 1, par 4: a chance, the green hit, two putts for par.
+        session.setHolePar(4)
+        #expect(session.isOnPrePutt)
+        session.setGirOpportunity(true)
+        #expect(!session.isOnPrePutt)
+        #expect(round.putts.isEmpty)
         session.draftPuttFor = .birdie
         session.draftResult = .short
         session.recordDraft()
-        #expect(!session.draftIsFirstPutt)
-        #expect(session.draftGirOpportunity == nil)
         session.draftResult = .holed
         session.recordDraft()
 
-        // Hole 2: a chance, green missed.
-        #expect(session.draftGirOpportunity == true)
+        // Hole 2, par 4: a chance, the green missed, one putt for par.
+        #expect(session.currentHole == 2)
+        #expect(session.isOnPrePutt)
+        session.setGirOpportunity(true)
+        session.setHolePar(4)
         session.draftPuttFor = .par
         session.draftResult = .holed
         session.recordDraft()
 
-        // Hole 3: no chance.
-        session.draftGirOpportunity = false
-        session.draftPuttFor = .par
+        // Hole 3, par 3: no chance, a bogey.
+        session.setHolePar(3)
+        session.setGirOpportunity(false)
+        session.draftPuttFor = .bogey
         session.draftResult = .holed
         session.recordDraft()
 
-        let first = round.putts.filter { $0.puttNumber == 1 }.sorted { $0.holeNumber < $1.holeNumber }
-        #expect(first.map(\.girOpportunity) == [true, true, false])
-        #expect(round.putts.filter { $0.puttNumber == 2 }.allSatisfy { $0.girOpportunity == nil })
+        // Opened again from its chip, putt 0 goes back to the finished hole's putts.
+        session.jumpToHole(3)
+        session.openPrePutt()
+        #expect(session.isOnPrePutt)
+        session.setHolePar(3)
+        #expect(!session.isOnPrePutt)
+        #expect(session.reviewedPutt?.holeNumber == 3)
 
+        // Going straight on to the putt skips putt 0.
+        session.jumpToHole(4)
+        #expect(session.isOnPrePutt)
+        session.startNewPutt()
+        #expect(!session.isOnPrePutt)
+
+        #expect(round.holeDetails[1] == HoleDetails(par: 4, girOpportunity: true))
         let stats = RoundStats.compute(putts: round.putts)
         #expect(stats.girOpportunityAnswered == 3)
         #expect(stats.girOpportunities == 2)
         #expect(stats.girOpportunitiesConverted == 1)
-        #expect(stats.girOpportunityConversionPercent == 50)
+        #expect(stats.averageStrokes(onPar: 4) == 4)
+        #expect(stats.averageStrokes(onPar: 3) == 4)
+        #expect(stats.averageStrokesPerRound == 12)
     }
 
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {

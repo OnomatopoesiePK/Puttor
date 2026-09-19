@@ -38,10 +38,6 @@ final class Putt {
     var intentionLineRaw: String?
     var intentionSituationRaw: String?
     var intentionExecuted: Bool?
-    /// Whether the approach into this hole was a real chance at a green in
-    /// regulation — a clear shot at it, within reach. A question about the
-    /// hole, so only its first putt carries it; nil where it was not asked.
-    var girOpportunity: Bool?
 
     // Legacy columns from when each putt carried its own strokes-gained value.
     // Strokes gained is now a per-hole figure derived from the hole's putts, and

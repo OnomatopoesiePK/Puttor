@@ -55,6 +55,8 @@ struct PuttorArchive: Codable {
         var tracksScoreCategory: Bool
         /// Optional, so archives from before it was asked still read.
         var readingModeRaw: String?
+        /// Optional for the same reason: par and GIR opportunity per hole.
+        var holeDetailsData: Data?
         var putts: [PuttRecord]
     }
 
@@ -79,7 +81,6 @@ struct PuttorArchive: Codable {
         var intentionLineRaw: String?
         var intentionSituationRaw: String?
         var intentionExecuted: Bool?
-        var girOpportunity: Bool?
     }
 
     struct SessionRecord: Codable {
@@ -188,6 +189,7 @@ struct PuttorArchive: Codable {
                 notes: round.notes,
                 tracksScoreCategory: round.tracksScoreCategory,
                 readingModeRaw: round.readingModeRaw,
+                holeDetailsData: round.holeDetailsData,
                 putts: round.putts
                     .sorted { ($0.holeNumber, $0.puttNumber) < ($1.holeNumber, $1.puttNumber) }
                     .map { putt in
@@ -211,8 +213,7 @@ struct PuttorArchive: Codable {
                             intentionSpeedRaw: putt.intentionSpeedRaw,
                             intentionLineRaw: putt.intentionLineRaw,
                             intentionSituationRaw: putt.intentionSituationRaw,
-                            intentionExecuted: putt.intentionExecuted,
-                            girOpportunity: putt.girOpportunity
+                            intentionExecuted: putt.intentionExecuted
                         )
                     }
             )
@@ -298,6 +299,7 @@ struct PuttorArchive: Codable {
             round.precipitationRaw = record.precipitationRaw
             round.grainyGreens = record.grainyGreens
             round.readingModeRaw = record.readingModeRaw
+            round.holeDetailsData = record.holeDetailsData
             round.isTournament = record.isTournament
             round.playFormatRaw = record.playFormatRaw
             round.startingHole = record.startingHole
@@ -333,7 +335,6 @@ struct PuttorArchive: Codable {
                 putt.intentionLineRaw = puttRecord.intentionLineRaw
                 putt.intentionSituationRaw = puttRecord.intentionSituationRaw
                 putt.intentionExecuted = puttRecord.intentionExecuted
-                putt.girOpportunity = puttRecord.girOpportunity
                 putt.round = round
                 round.putts.append(putt)
                 context.insert(putt)

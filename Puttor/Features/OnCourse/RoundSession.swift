@@ -38,9 +38,6 @@ final class RoundSession {
     var draftHillSlopePct: Double = 0
     var draftDoubleBreak: DoubleBreakType?
     var draftIntention = PuttIntention()
-    /// Whether the hole was a GIR opportunity. Only the first putt of a hole
-    /// asks, and only where the field is in the layout.
-    var draftGirOpportunity: Bool?
     var draftPuttFor: ScoreCategory = .birdie
     var draftResult: PuttResult?
     var draftLipOut = false
@@ -62,13 +59,14 @@ final class RoundSession {
     /// which score the putt is for? Custom mode can leave that field out.
     var asksForScoreCategory: Bool = true
 
-    /// Set by the input view where the layout asks about the GIR opportunity:
-    /// what each hole's first putt starts on. Nil where it is not asked.
-    var girOpportunityPreset: Bool? {
-        didSet {
-            if reviewIndex == nil, draftIsFirstPutt { draftGirOpportunity = girOpportunityPreset }
-        }
-    }
+    /// Set by the input view: what putt 0 asks about each hole before its
+    /// first putt — its par, whether the approach was a GIR opportunity.
+    /// Empty where the layout asks neither, and then there is no putt 0.
+    var prePuttKinds: [CustomFieldKind] = []
+    /// Putt 0 opened again from its chip, to change what was said.
+    private var reopenedPrePutt = false
+    /// Holes where the player went on to the first putt without answering.
+    private var skippedPrePutt: Set<Int> = []
 
     private let defaultFirstPuttDistance: Double
     private let useFeet: Bool
@@ -134,11 +132,74 @@ final class RoundSession {
         puttsOnHole(hole).filter { $0.puttNumber > 0 }
     }
 
-    /// The draft is the first putt of its hole — the one that says whether
-    /// the hole was a GIR opportunity.
-    var draftIsFirstPutt: Bool {
-        if let reviewedPutt { return reviewedPutt.puttNumber == 1 }
-        return realPuttsOnHole(currentHole).isEmpty
+    // MARK: - Putt 0
+
+    /// What has been said about the displayed hole before its first putt.
+    var displayedHoleDetails: HoleDetails { round.holeDetails[displayHole] ?? HoleDetails() }
+
+    private func prePuttAnswered(_ hole: Int) -> Bool {
+        let details = round.holeDetails[hole] ?? HoleDetails()
+        return prePuttKinds.allSatisfy { kind in
+            switch kind {
+            case .holePar: return details.par != nil
+            case .girOpportunity: return details.girOpportunity != nil
+            default: return true
+            }
+        }
+    }
+
+    /// Putt 0 is on screen: opened from its chip, or the hole is untouched
+    /// and what it asks is not all answered yet.
+    var isOnPrePutt: Bool {
+        guard !prePuttKinds.isEmpty else { return false }
+        if reopenedPrePutt { return true }
+        return reviewIndex == nil
+            && puttsOnHole(currentHole).isEmpty
+            && !skippedPrePutt.contains(currentHole)
+            && !prePuttAnswered(currentHole)
+    }
+
+    /// Back to putt 0 of the displayed hole, to change what was said.
+    func openPrePutt() {
+        guard !prePuttKinds.isEmpty else { return }
+        currentHole = displayHole
+        reviewIndex = nil
+        reopenedPrePutt = true
+    }
+
+    func setHolePar(_ par: Int?) {
+        updateHoleDetails { $0.par = par }
+    }
+
+    func setGirOpportunity(_ value: Bool?) {
+        updateHoleDetails { $0.girOpportunity = value }
+    }
+
+    /// Saved on the spot; once everything putt 0 asks is answered, on to the
+    /// hole's first putt — or, where it was reopened on a hole already
+    /// putted, back to the putts.
+    private func updateHoleDetails(_ change: (inout HoleDetails) -> Void) {
+        let hole = displayHole
+        var all = round.holeDetails
+        var details = all[hole] ?? HoleDetails()
+        change(&details)
+        all[hole] = details
+        round.holeDetails = all
+        try? modelContext.save()
+        guard prePuttAnswered(hole) else { return }
+        leavePrePutt()
+    }
+
+    /// Leaves putt 0 for the hole's putts: the first one, or the next slot.
+    private func leavePrePutt() {
+        reopenedPrePutt = false
+        skippedPrePutt.insert(currentHole)
+        if canStartNewPutt {
+            startNewPutt()
+        } else if let last = realPuttsOnHole(currentHole).last,
+                  let idx = allPutts.firstIndex(where: { $0.id == last.id }) {
+            loadDraft(fromReviewIndex: idx)
+        }
     }
 
     var canRecord: Bool { draftResult != nil || draftLipOut }
@@ -162,7 +223,6 @@ final class RoundSession {
             || draftBadStroke != p.badStroke
             || draftBadStrokeType != p.badStrokeType
             || draftWrongAim != p.wrongAim
-            || (p.puttNumber == 1 && draftGirOpportunity != p.girOpportunity)
     }
 
     /// The displayed hole still needs another putt — either nothing is recorded
@@ -242,6 +302,9 @@ final class RoundSession {
     func startNewPutt() {
         guard canStartNewPutt else { return }
         currentHole = displayHole
+        // Going on to the putt leaves putt 0 behind, answered or not.
+        reopenedPrePutt = false
+        skippedPrePutt.insert(currentHole)
         if let last = realPuttsOnHole(displayHole).last {
             resetAfterMiss(previousPuttFor: last.puttFor)
         } else {
@@ -257,7 +320,6 @@ final class RoundSession {
         draftHillSlopePct = 0
         draftDoubleBreak = nil
         draftIntention = PuttIntention()
-        draftGirOpportunity = girOpportunityPreset
         draftPuttFor = .birdie
         draftResult = nil
         draftLipOut = false
@@ -267,6 +329,7 @@ final class RoundSession {
         draftBadStrokeType = nil
         draftWrongAim = false
         reviewIndex = nil
+        reopenedPrePutt = false
     }
 
     private func resetAfterMiss(previousPuttFor: ScoreCategory) {
@@ -275,7 +338,6 @@ final class RoundSession {
         draftHillSlopePct = 0
         draftDoubleBreak = nil
         draftIntention = PuttIntention()
-        draftGirOpportunity = nil
         draftPuttFor = previousPuttFor.next
         draftResult = nil
         draftLipOut = false
@@ -285,10 +347,12 @@ final class RoundSession {
         draftBadStrokeType = nil
         draftWrongAim = false
         reviewIndex = nil
+        reopenedPrePutt = false
     }
 
     func loadDraft(fromReviewIndex index: Int) {
         guard allPutts.indices.contains(index) else { return }
+        reopenedPrePutt = false
         let p = allPutts[index]
         reviewIndex = index
         draftDistanceM = p.distanceM
@@ -296,7 +360,6 @@ final class RoundSession {
         draftHillSlopePct = p.hillSlopePct
         draftDoubleBreak = p.doubleBreak
         draftIntention = p.intention
-        draftGirOpportunity = p.girOpportunity
         draftPuttFor = p.puttFor
         draftResult = p.result
         draftLipOut = p.lipOut
@@ -321,7 +384,6 @@ final class RoundSession {
             putt.hillSlopePct = draftHillSlopePct
             putt.doubleBreak = draftDoubleBreak
             putt.intention = draftIntention
-            if putt.puttNumber == 1 { putt.girOpportunity = draftGirOpportunity }
             putt.puttFor = draftPuttFor
             putt.result = effectiveResult
             putt.lipOut = draftLipOut
@@ -413,7 +475,6 @@ final class RoundSession {
             missAngleDeg: effectiveResult.isHoled ? nil : draftMissAngle
         )
         putt.intention = draftIntention
-        if puttNumber == 1 { putt.girOpportunity = draftGirOpportunity }
         putt.round = round
         round.putts.append(putt)
         modelContext.insert(putt)

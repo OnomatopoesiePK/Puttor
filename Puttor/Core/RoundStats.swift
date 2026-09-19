@@ -104,6 +104,23 @@ struct RoundStats {
         girOpportunities > 0 ? Double(girOpportunitiesConverted) / Double(girOpportunities) * 100 : nil
     }
 
+    /// Scored holes whose par was given, by par: how many, and their score
+    /// against it summed.
+    var parHoles: [Int: Int] = [:]
+    var parScoreSum: [Int: Int] = [:]
+
+    /// The average strokes on the holes of a par, where any were played.
+    func averageStrokes(onPar par: Int) -> Double? {
+        guard let holes = parHoles[par], holes > 0 else { return nil }
+        return Double(par) + Double(parScoreSum[par] ?? 0) / Double(holes)
+    }
+
+    /// Rounds whose every scored hole has its par, and their strokes summed:
+    /// the card in strokes rather than against par.
+    var strokesRounds: Int = 0
+    var strokesSum: Int = 0
+    var averageStrokesPerRound: Double? { strokesRounds > 0 ? Double(strokesSum) / Double(strokesRounds) : nil }
+
     var avgPuttsOnGir: Double? { girPuttedHoles > 0 ? Double(girPutts) / Double(girPuttedHoles) : nil }
     var avgPuttsOffGir: Double? { nonGirPuttedHoles > 0 ? Double(nonGirPutts) / Double(nonGirPuttedHoles) : nil }
     var avgGirProximityM: Double? { girProximityCount > 0 ? girProximitySumM / Double(girProximityCount) : nil }
@@ -240,8 +257,20 @@ struct RoundStats {
         return samples.reduce(0, +) / Double(samples.count)
     }
 
-    static func compute(putts: [Putt], useFeet: Bool = false) -> RoundStats {
+    /// `holeDetails` are what putt 0 said about each hole; left out, they are
+    /// read off the putts' round.
+    static func compute(putts: [Putt], holeDetails: [Int: HoleDetails]? = nil, useFeet: Bool = false) -> RoundStats {
         var stats = RoundStats()
+        let details = holeDetails ?? putts.first?.round?.holeDetails ?? [:]
+        var parSum = 0
+        var scoredWithPar = 0
+        func countPar(_ hole: Int, score: Int) {
+            guard let par = details[hole]?.par else { return }
+            stats.parHoles[par, default: 0] += 1
+            stats.parScoreSum[par, default: 0] += score
+            parSum += par
+            scoredWithPar += 1
+        }
 
         // puttNumber == 0 is a sentinel for "holed out from off the green, 0 putts" —
         // it marks the hole as played but isn't itself a putt for counting/SG/category purposes.
@@ -291,6 +320,7 @@ struct RoundStats {
             stats.scoreRelativeToPar += relative
             stats.scoredHoles += 1
             stats.countHole(scored: relative)
+            countPar(hole, score: relative)
             if score == nil { stats.pickedUpWithoutScore += 1 }
         }
 
@@ -307,10 +337,10 @@ struct RoundStats {
                 stats.scoreRelativeToPar += score
                 stats.scoredHoles += 1
                 stats.countHole(scored: score)
+                countPar(hole, score: score)
             }
 
-            // Asked with the hole's first putt, so read from that one.
-            if let opportunity = realOnHole.first(where: { $0.puttNumber == 1 })?.girOpportunity {
+            if let opportunity = details[hole]?.girOpportunity {
                 stats.girOpportunityAnswered += 1
                 if opportunity {
                     stats.girOpportunities += 1
@@ -351,6 +381,11 @@ struct RoundStats {
                     stats.scrambleSuccesses += 1
                 }
             }
+        }
+
+        if stats.scoredHoles > 0 && scoredWithPar == stats.scoredHoles {
+            stats.strokesRounds = 1
+            stats.strokesSum = parSum + stats.scoreRelativeToPar
         }
 
         return stats
@@ -463,6 +498,12 @@ struct RoundStats {
         merged.girOpportunityAnswered = list.reduce(0) { $0 + $1.girOpportunityAnswered }
         merged.girOpportunities = list.reduce(0) { $0 + $1.girOpportunities }
         merged.girOpportunitiesConverted = list.reduce(0) { $0 + $1.girOpportunitiesConverted }
+        merged.strokesRounds = list.reduce(0) { $0 + $1.strokesRounds }
+        merged.strokesSum = list.reduce(0) { $0 + $1.strokesSum }
+        for r in list {
+            merged.parHoles.merge(r.parHoles, uniquingKeysWith: +)
+            merged.parScoreSum.merge(r.parScoreSum, uniquingKeysWith: +)
+        }
         merged.girPutts = list.reduce(0) { $0 + $1.girPutts }
         merged.girPuttedHoles = list.reduce(0) { $0 + $1.girPuttedHoles }
         merged.nonGirPutts = list.reduce(0) { $0 + $1.nonGirPutts }

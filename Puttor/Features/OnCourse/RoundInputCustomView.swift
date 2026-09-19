@@ -43,7 +43,7 @@ struct RoundInputCustomView: View {
                     // Without that field every putt would carry the default par
                     // and the round would report a scorecard nobody entered.
                     new.asksForScoreCategory = config.fields.contains { $0.kind == .puttForCategory }
-                    new.girOpportunityPreset = config.fields.first { $0.kind == .girOpportunity }?.girOpportunityPreset
+                    new.prePuttKinds = config.prePuttKinds
                     session = new
                 }
             }
@@ -70,36 +70,10 @@ struct RoundInputCustomView: View {
 
             ScrollView {
                 VStack(spacing: Theme.Spacing.md) {
-                    if let holeOutCategory = session.displayedHoleOutCategory {
-                        HoleOutCategoryCard(category: holeOutCategory) { newCategory in
-                            session.updateHoleOutCategory(session.displayHole, to: newCategory)
-                        }
-                    }
-                    if session.isDisplayingPickUp {
-                        PickUpScoreCard(category: session.displayedPickUpScore) { newScore in
-                            session.updatePickUpScore(session.displayHole, to: newScore)
-                        }
-                    }
-
-                    section {
-                        let distance = Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 })
-                        if config.distanceStyle == .numpad {
-                            DistanceNumpadView(value: distance, useFeet: useFeet)
-                        } else {
-                            DistancePickerView(value: distance, useFeet: useFeet)
-                        }
-                    }
-
-                    // The GIR opportunity is a question about the hole, asked
-                    // with its first putt only.
-                    ForEach(config.fields.filter { $0.kind != .girOpportunity || session.draftIsFirstPutt }) { field in
-                        section {
-                            fieldContent(field, session)
-                        }
-                    }
-
-                    section {
-                        resultContent(session)
+                    if session.isOnPrePutt {
+                        prePuttContent(session)
+                    } else {
+                        puttContent(session)
                     }
                 }
                 .padding(.horizontal, Theme.Spacing.edge)
@@ -147,6 +121,61 @@ struct RoundInputCustomView: View {
         }
     }
 
+    /// Putt 0: what the layout asks about the hole before its first putt.
+    /// Each answer is saved as it is given, and the last one moves on.
+    @ViewBuilder
+    private func prePuttContent(_ session: RoundSession) -> some View {
+        Text(L("input.prePutt.hint"))
+            .font(.system(size: 12))
+            .foregroundStyle(Theme.textSecondary)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+        ForEach(session.prePuttKinds) { kind in
+            section {
+                switch kind {
+                case .holePar:
+                    HoleParFieldView(par: Binding(get: { session.displayedHoleDetails.par }, set: { session.setHolePar($0) }))
+                default:
+                    GirOpportunityFieldView(value: Binding(get: { session.displayedHoleDetails.girOpportunity }, set: { session.setGirOpportunity($0) }))
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func puttContent(_ session: RoundSession) -> some View {
+        if let holeOutCategory = session.displayedHoleOutCategory {
+            HoleOutCategoryCard(category: holeOutCategory) { newCategory in
+                session.updateHoleOutCategory(session.displayHole, to: newCategory)
+            }
+        }
+        if session.isDisplayingPickUp {
+            PickUpScoreCard(category: session.displayedPickUpScore) { newScore in
+                session.updatePickUpScore(session.displayHole, to: newScore)
+            }
+        }
+
+        section {
+            let distance = Binding(get: { session.draftDistanceM }, set: { session.draftDistanceM = $0 })
+            if config.distanceStyle == .numpad {
+                DistanceNumpadView(value: distance, useFeet: useFeet)
+            } else {
+                DistancePickerView(value: distance, useFeet: useFeet)
+            }
+        }
+
+        // Putt 0 asks those, once per hole.
+        ForEach(config.fields.filter { !$0.kind.isAskedBeforePutting }) { field in
+            section {
+                fieldContent(field, session)
+            }
+        }
+
+        section {
+            resultContent(session)
+        }
+    }
+
     @ViewBuilder
     private func fieldContent(_ field: CustomField, _ session: RoundSession) -> some View {
         switch field.kind {
@@ -175,8 +204,9 @@ struct RoundInputCustomView: View {
             )
         case .missReasons:
             missReasonRow(session)
-        case .girOpportunity:
-            GirOpportunityFieldView(value: Binding(get: { session.draftGirOpportunity }, set: { session.draftGirOpportunity = $0 }))
+        case .holePar, .girOpportunity:
+            // Asked in putt 0, never with a putt.
+            EmptyView()
         }
     }
 
@@ -383,10 +413,11 @@ struct RoundInputCustomView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(session.canRecord ? Theme.primary : Theme.border))
+                    .background(RoundedRectangle(cornerRadius: Theme.Radius.lg).fill(session.canRecord && !session.isOnPrePutt ? Theme.primary : Theme.border))
                 }
                 .buttonStyle(.plain)
-                .disabled(!session.canRecord)
+                // Putt 0 saves each answer as it is given.
+                .disabled(!session.canRecord || session.isOnPrePutt)
 
                 if !session.isReviewing || session.canStartNewPutt {
                     tapInButton(session, fillsRow: false)
@@ -426,6 +457,9 @@ struct RoundInputCustomView: View {
                 )
         }
         .buttonStyle(.plain)
+        // Nothing to tap in before the first putt.
+        .disabled(session.isOnPrePutt)
+        .opacity(session.isOnPrePutt ? 0.35 : 1)
     }
 
     private func navArrowButton(icon: String, enabled: Bool, action: @escaping () -> Void) -> some View {

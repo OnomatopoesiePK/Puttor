@@ -41,6 +41,11 @@ final class Round {
     /// on the first putt entered from a surface that shows the field.
     var tracksScoreCategory: Bool = true
 
+    /// What was said about each hole before its first putt — its par, and
+    /// whether the approach was a GIR opportunity — as JSON keyed by hole
+    /// number. Nil until a layout asks for either.
+    var holeDetailsData: Data?
+
     @Relationship(deleteRule: .cascade, inverse: \Putt.round)
     var putts: [Putt] = []
 
@@ -72,6 +77,19 @@ final class Round {
     var inputMode: InputMode {
         get { InputMode(rawValue: inputModeRaw) ?? .pro }
         set { inputModeRaw = newValue.rawValue }
+    }
+
+    var holeDetails: [Int: HoleDetails] {
+        get {
+            guard let holeDetailsData,
+                  let decoded = try? JSONDecoder().decode([String: HoleDetails].self, from: holeDetailsData)
+            else { return [:] }
+            return Dictionary(uniqueKeysWithValues: decoded.compactMap { key, value in Int(key).map { ($0, value) } })
+        }
+        set {
+            let encoded = Dictionary(uniqueKeysWithValues: newValue.filter { !$0.value.isEmpty }.map { (String($0.key), $0.value) })
+            holeDetailsData = encoded.isEmpty ? nil : try? JSONEncoder().encode(encoded)
+        }
     }
 
     /// Hole play order for the round: starting on 1 plays 1...18; starting on

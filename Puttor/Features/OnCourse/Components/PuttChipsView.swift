@@ -17,6 +17,12 @@ struct PuttChipsView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
+                // Putt 0, where the layout asks about the hole before its
+                // first putt: tapped, it opens again to change the answers.
+                if !session.prePuttKinds.isEmpty {
+                    prePuttChip
+                }
+
                 ForEach(Array(session.realPuttsOnHole(session.displayHole).enumerated()), id: \.element.id) { index, putt in
                     let globalIndex = session.allPutts.firstIndex { $0.id == putt.id }
                     chip(
@@ -61,6 +67,23 @@ struct PuttChipsView: View {
         .buttonStyle(.plain)
     }
 
+    private var prePuttChip: some View {
+        let details = session.displayedHoleDetails
+        let answered = details.par != nil || details.girOpportunity != nil
+        return Button {
+            session.openPrePutt()
+        } label: {
+            Text("0")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(answered ? Theme.text : Theme.textMuted)
+                .frame(width: side, height: side)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(Theme.surfaceElevated))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(session.isOnPrePutt ? Theme.accent : Theme.border, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L("input.prePutt"))
+    }
+
     private var newPuttSlot: some View {
         Button {
             session.startNewPutt()
@@ -69,7 +92,7 @@ struct PuttChipsView: View {
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(Theme.primary)
                 .frame(width: side, height: side)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(session.isReviewing ? Color.clear : Theme.primary.opacity(0.15)))
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(session.isReviewing || session.isOnPrePutt ? Color.clear : Theme.primary.opacity(0.15)))
                 .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).strokeBorder(Theme.primary, style: StrokeStyle(lineWidth: 1.5, dash: [3])))
         }
         .buttonStyle(.plain)

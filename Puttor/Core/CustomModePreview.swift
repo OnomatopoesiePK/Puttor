@@ -47,7 +47,12 @@ enum CustomModePreview {
             line("custom.preview.doubleBreak", kinds.contains(.doubleBreak), CustomFieldKind.doubleBreak.titleKey),
             line("custom.preview.causes", kinds.contains(.missReasons), CustomFieldKind.missReasons.titleKey),
             line("custom.preview.intention", kinds.contains(.intention), CustomFieldKind.intention.titleKey),
-            // Shown with the playing statistics, so it needs the score reference too.
+            // Shown with the playing statistics, so these need the score reference too.
+            line(
+                "custom.preview.holePar",
+                kinds.contains(.holePar) && kinds.contains(.puttForCategory),
+                kinds.contains(.holePar) ? CustomFieldKind.puttForCategory.titleKey : CustomFieldKind.holePar.titleKey
+            ),
             line(
                 "custom.preview.girOpportunity",
                 kinds.contains(.girOpportunity) && kinds.contains(.puttForCategory),

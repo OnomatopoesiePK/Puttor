@@ -44,6 +44,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
     case doubleBreak
     case missReasons
     case intention
+    case holePar
     case girOpportunity
 
     var id: String { rawValue }
@@ -55,6 +56,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .doubleBreak: return "custom.field.doubleBreak"
         case .missReasons: return "custom.field.missReasons"
         case .intention: return "custom.field.intention"
+        case .holePar: return "custom.field.holePar"
         case .girOpportunity: return "custom.field.girOpportunity"
         }
     }
@@ -66,6 +68,7 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .doubleBreak: return "custom.field.doubleBreak.desc"
         case .missReasons: return "custom.field.missReasons.desc"
         case .intention: return "custom.field.intention.desc"
+        case .holePar: return "custom.field.holePar.desc"
         case .girOpportunity: return "custom.field.girOpportunity.desc"
         }
     }
@@ -77,9 +80,14 @@ enum CustomFieldKind: String, Codable, CaseIterable, Identifiable {
         case .doubleBreak: return "arrow.triangle.branch"
         case .missReasons: return "exclamationmark.triangle.fill"
         case .intention: return "scope"
+        case .holePar: return "number.square.fill"
         case .girOpportunity: return "flag.2.crossed.fill"
         }
     }
+
+    /// Asked once per hole in putt 0, before the first real putt, rather
+    /// than with every putt.
+    var isAskedBeforePutting: Bool { self == .holePar || self == .girOpportunity }
 
     /// Only the slope field offers a simple/complex sub-choice.
     var supportsComplexity: Bool { self == .slope }
@@ -96,13 +104,6 @@ struct CustomField: Identifiable, Codable, Equatable {
     var intentionPartsRaw: [String]? = nil
     /// How far past the hole the intention's normal pace finishes; nil is the default.
     var intentionNormalPastM: Double? = nil
-    /// What the GIR opportunity field starts each hole on; nil is yes.
-    var girOpportunityPresetRaw: Bool? = nil
-
-    var girOpportunityPreset: Bool {
-        get { girOpportunityPresetRaw ?? true }
-        set { girOpportunityPresetRaw = newValue }
-    }
 
     var intentionParts: [IntentionPart] {
         get {
@@ -176,6 +177,11 @@ struct CustomModeConfig: Codable, Equatable {
             return .defaultConfig
         }
         return decoded
+    }
+
+    /// The fields putt 0 asks, par above the GIR opportunity.
+    var prePuttKinds: [CustomFieldKind] {
+        [.holePar, .girOpportunity].filter { kind in fields.contains { $0.kind == kind } }
     }
 
     func save() {

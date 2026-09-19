@@ -16,11 +16,31 @@ enum PlayingStatsMetric: String, CaseIterable, Identifiable, Arrangeable {
     // score under it — and the total just above the putts it splits into.
     case sg, pcg, score, birdies, pars, bogeys, doubles
     case gir, conversion, scramble, totalPutts, puttsGir, puttsNoGir, threePutts, lipOuts, proximity
+    // Only where Custom mode's putt 0 asked for them.
+    case girOpportunity, girOpportunityConversion, par3, par4, par5
 
     var id: String { rawValue }
     var titleKey: String { "evolution.\(rawValue)" }
 
     /// Counted in whole numbers per round, so its scale steps in them too.
+    /// Asked only by some layouts, so its chart stays out until a round has it.
+    var isOptional: Bool {
+        switch self {
+        case .girOpportunity, .girOpportunityConversion, .par3, .par4, .par5: return true
+        default: return false
+        }
+    }
+
+    /// The par a par average is for.
+    var par: Int? {
+        switch self {
+        case .par3: return 3
+        case .par4: return 4
+        case .par5: return 5
+        default: return nil
+        }
+    }
+
     var isWholeNumber: Bool {
         switch self {
         case .score, .birdies, .pars, .bogeys, .doubles, .totalPutts, .threePutts, .lipOuts: return true
@@ -72,6 +92,11 @@ struct PlayingStatsPoint: Identifiable, Equatable {
                     values[.puttsGir] = stats.avgPuttsOnGir
                     values[.puttsNoGir] = stats.avgPuttsOffGir
                     values[.proximity] = stats.avgGirProximityM
+                    values[.girOpportunity] = stats.girOpportunityPercent
+                    values[.girOpportunityConversion] = stats.girOpportunityConversionPercent
+                    for metric in [PlayingStatsMetric.par3, .par4, .par5] {
+                        values[metric] = metric.par.flatMap { stats.averageStrokes(onPar: $0) }
+                    }
                 }
                 return PlayingStatsPoint(id: index, date: round.date, values: values, isNineHoles: round.nineHoles)
             }
@@ -138,7 +163,9 @@ struct PlayingStatsEvolutionView: View {
                 } else if layout.shown.isEmpty {
                     note(L("evolution.noneShown"))
                 } else {
-                    let metrics = layout.shown
+                    let metrics = layout.shown.filter { metric in
+                        !metric.isOptional || points.contains { $0.values[metric] != nil }
+                    }
                     VStack(alignment: .leading, spacing: Self.spacing) {
                         ForEach(Array(metrics.enumerated()), id: \.element) { index, metric in
                             let isLast = index == metrics.count - 1
@@ -335,6 +362,11 @@ struct PlayingStatsEvolutionView: View {
         case .threePutts: return tone(0xFF9E7D, 0xC24A26) // orange
         case .lipOuts: return tone(0xF28AC8, 0xB0357A)    // pink
         case .proximity: return tone(0xB6E36A, 0x5E8A12)  // lime
+        case .girOpportunity: return tone(0x7FD3FF, 0x1478A8)           // sky
+        case .girOpportunityConversion: return tone(0xFF8FA0, 0xC23A50) // rose
+        case .par3: return tone(0xE0C3FF, 0x7A4DB0)       // lilac
+        case .par4: return tone(0xA5E8A0, 0x2E8A28)       // mint
+        case .par5: return tone(0xFFD08A, 0xA8660A)       // apricot
         }
     }
 
@@ -354,6 +386,8 @@ struct PlayingStatsEvolutionView: View {
         case .puttsGir, .puttsNoGir: minimumSpan = 0.5
         case .threePutts, .lipOuts: minimumSpan = 2
         case .proximity: minimumSpan = useFeet ? 3 : 1
+        case .girOpportunity, .girOpportunityConversion: minimumSpan = 20
+        case .par3, .par4, .par5: minimumSpan = 1
         }
         let span = max(high - low, minimumSpan)
         let middle = (low + high) / 2
@@ -365,7 +399,7 @@ struct PlayingStatsEvolutionView: View {
             upper -= lower
             lower = 0
         }
-        if [.gir, .conversion, .scramble].contains(metric), upper > 100 {
+        if [.gir, .conversion, .scramble, .girOpportunity, .girOpportunityConversion].contains(metric), upper > 100 {
             lower = max(0, lower - (upper - 100))
             upper = 100
         }
@@ -404,9 +438,9 @@ struct PlayingStatsEvolutionView: View {
             if abs(value) < 0.05 { return "E" }
             let number = whole ? String(Int(value.rounded())) : String(format: "%.1f", value)
             return value > 0 ? "+\(number)" : number
-        case .gir, .conversion, .scramble:
+        case .gir, .conversion, .scramble, .girOpportunity, .girOpportunityConversion:
             return "\(Int(value.rounded()))%"
-        case .puttsGir, .puttsNoGir:
+        case .puttsGir, .puttsNoGir, .par3, .par4, .par5:
             return String(format: onAxis ? "%.1f" : "%.2f", value)
         case .totalPutts, .birdies, .pars, .bogeys, .doubles, .threePutts, .lipOuts:
             return whole ? String(Int(value.rounded())) : String(format: "%.1f", value)

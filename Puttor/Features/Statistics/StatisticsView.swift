@@ -481,6 +481,7 @@ private struct StatisticsPane: View {
         StatsKey(
             roundIDs: filteredRounds.map(\.persistentModelID),
             puttCount: filteredRounds.reduce(0) { $0 + $1.putts.count },
+            holeDetails: filteredRounds.map(\.holeDetailsData),
             useFeet: useFeet
         )
     }
@@ -488,6 +489,8 @@ private struct StatisticsPane: View {
     private struct StatsKey: Equatable {
         let roundIDs: [PersistentIdentifier]
         let puttCount: Int
+        /// Par and GIR opportunity change without a putt changing.
+        let holeDetails: [Data?]
         let useFeet: Bool
     }
 
@@ -760,7 +763,7 @@ private struct StatisticsPane: View {
                             LazyVGrid(columns: playingStatColumns, spacing: Theme.Spacing.sm) {
                                 // An average per round compares across
                                 // filters; a running total only grows.
-                                playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: L("stats.svp.perRound"))
+                                playingStat(L("stats.svp.avgScore"), avgScorePerRoundText(data.avgScorePerRound), subtitle: strokesPerRoundText(data))
                                 playingStat(L("stats.gir"), "\(Int(data.scoreAggregated.girPercent.rounded()))%", subtitle: "\(data.scoreAggregated.girCount)/\(data.scoreAggregated.holes)")
                                 playingStat(
                                     L("stats.conversion"),
@@ -802,8 +805,11 @@ private struct StatisticsPane: View {
                             if dense {
                                 playingStatWide(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
                             }
-                            // A pair of their own under the grid, so the
-                            // grid keeps its shape with or without them.
+                            // Rows of their own under the grid, so the grid
+                            // keeps its shape with or without them.
+                            if showsParAverages(data) {
+                                parAverageRow(data.scoreAggregated)
+                            }
                             if showsGirOpportunity(data) {
                                 girOpportunityRow(data.scoreAggregated)
                             }
@@ -1336,6 +1342,37 @@ private struct StatisticsPane: View {
         .padding(.vertical, Theme.Spacing.sm)
         .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+    }
+
+    /// Under the average score, the strokes it stands for — where every
+    /// scored round in view has the par of each of its holes.
+    private func strokesPerRoundText(_ data: StatsBundle) -> String {
+        let stats = data.scoreAggregated
+        guard let strokes = stats.averageStrokesPerRound, stats.strokesRounds == data.scoredRoundCount else {
+            return L("stats.svp.perRound")
+        }
+        let number = abs(strokes - strokes.rounded()) < 0.05 ? String(Int(strokes.rounded())) : String(format: "%.1f", strokes)
+        return String(format: L("stats.strokesPerRound"), number)
+    }
+
+    /// Where the layout asks for the par, or rounds gave it.
+    private func showsParAverages(_ data: StatsBundle) -> Bool {
+        !data.scoreAggregated.parHoles.isEmpty
+            || CustomModeConfig.load().fields.contains { $0.kind == .holePar }
+    }
+
+    /// The average score on the par 3s, 4s and 5s.
+    private func parAverageRow(_ stats: RoundStats) -> some View {
+        HStack(spacing: Theme.Spacing.sm) {
+            ForEach(HoleDetails.pars, id: \.self) { par in
+                playingStat(
+                    String(format: L("stats.parAverage"), par),
+                    stats.averageStrokes(onPar: par).map { String(format: "%.2f", $0) } ?? "—",
+                    subtitle: String(format: L("stats.overHoles"), stats.parHoles[par] ?? 0)
+                )
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     /// Where the layout asks about GIR opportunities, or rounds did.

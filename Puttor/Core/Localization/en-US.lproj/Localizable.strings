@@ -401,7 +401,7 @@
 "stats.dispersion" = "MISS DISPERSION";
 "stats.rounds.info" = "One tile per round in the current filter, showing that round's strokes gained putting.\n\nFor each hole: the putts the tour would expect from where the first putt stood, less the putts actually taken.";
 "stats.sgPutting.info" = "Strokes gained per hole, summed over a round and then averaged across the filtered rounds.\n\nPCG underneath is the same rounds' per-putt figure: how each result compares with the tour's odds of holing from that distance.";
-"stats.playingStats.info" = "Score is the average strokes over par per round.\n\nGIR counts holes played for eagle or birdie, birdie conversion how many of those greens were turned into a birdie or an eagle off one or two putts, scramble the par saves among holes played for par with the green missed.\n\nThe putting figures count only holes that were actually putted. 3-putts and lip-outs are averaged per round over every round in the filter; proximity is the length of the first putt on greens hit in regulation.\n\nAll of it needs the score reference (\"putt for\"): every mode has it except Custom without that field.\n\nGIR opportunity is the share of holes where the approach was a real chance at the green in regulation, GIR conversion how many of those chances became a green in regulation. Both only count holes where the field was answered.\n\nThe arrow on the right slides in how each figure moved from round to round, over the same rounds as the filter above. Swipe right or tap the arrow on the left to come back.";
+"stats.playingStats.info" = "Score is the average strokes over par per round.\n\nGIR counts holes played for eagle or birdie, birdie conversion how many of those greens were turned into a birdie or an eagle off one or two putts, scramble the par saves among holes played for par with the green missed.\n\nThe putting figures count only holes that were actually putted. 3-putts and lip-outs are averaged per round over every round in the filter; proximity is the length of the first putt on greens hit in regulation.\n\nAll of it needs the score reference (\"putt for\"): every mode has it except Custom without that field.\n\nGIR opportunity is the share of holes where the approach was a real chance at the green in regulation, GIR conversion how many of those chances became a green in regulation. Both only count holes where the field was answered.\n\nWith the hole par asked, the average score also shows the strokes it stands for, and Ø par 3, 4 and 5 give the average strokes on those holes.\n\nThe arrow on the right slides in how each figure moved from round to round, over the same rounds as the filter above. Swipe right or tap the arrow on the left to come back.";
 "stats.dispersion.info" = "Every missed putt is placed in the direction it missed, as far from the hole as it finished from it. The rings mark 1, 2 and 3 meters of distance left. They are drawn as ellipses stretched sideways, because a putt seldom misses far to the side: the sides reach 1.5 m, the top and bottom 3 m. As soon as one miss lies more than 1.5 m to the side, the plot goes back to circles.\n\nThe first menu picks which break directions to show, the second what the colors mean: the strength of the break, the length of the putt, or how much it ran up or down the hill, the last two need the slope field as well.\n\nThe two fields underneath narrow the plot to putts struck from a band of distances, both ends included, so a slope filter can be read one distance at a time.\n\nA bigger dot means more misses in the same spot, and once a color filter is on, each dot is shaded by the class it falls into.\n\nNeeds the complex result field: Detailed mode, or Custom with the result set to complex.\n\nThe sentences underneath read every putt in the selection. A direction is only named when more than 60 percent of the misses go that way: over all misses, per break direction, on straight putts, uphill, downhill, inside 1.5 m, 1.5–3 m, 3–6 m and from 6 m. A slice that only repeats all misses is left out. Where one reason stands out behind a habit, it is named underneath. A miss only counts as long when the next putt is more than 1 m: a ball that stops just past the hole had the right pace. Two exceptions are named from 30 percent: misses inside 3 m that come up short, and putts from 8 m that finish more than 1 m from the hole. The findings are grouped into length, line and break, and distance left. Each group shows at most three, one per direction, and the groups and the findings in them are ordered by roughly how many putts they cost.";
 "pattern.title" = "WHAT YOUR MISSES KEEP DOING";
 "pattern.category.length" = "LENGTH";
@@ -1113,11 +1113,27 @@
 "common.yes" = "Yes";
 "common.no" = "No";
 "custom.field.girOpportunity" = "GIR opportunity";
-"custom.field.girOpportunity.desc" = "Whether the approach was a real chance at the green in regulation. Asked on each hole's first putt";
+"custom.field.girOpportunity.desc" = "Whether the approach was a real chance at the green in regulation. Asked in putt 0 before the first putt";
 "input.girOpportunity" = "GIR OPPORTUNITY";
 "input.girOpportunity.question" = "Clear shot at the green in regulation?";
-"input.girOpportunity.info" = "Yes when the shot into the green was a realistic chance at a green in regulation: within reach, from a playable lie, with a clear line to the green. No when trees, a bad lie or the distance took that chance away before the shot.\n\nIt is asked once per hole, with the first putt. The playing statistics then show how often you had that chance, and how often you turned it into a green in regulation.";
-"custom.girOpportunity.preset" = "Preset";
+"input.girOpportunity.info" = "Yes when the shot into the green was a realistic chance at a green in regulation: within reach, from a playable lie, with a clear line to the green. No when trees, a bad lie or the distance took that chance away before the shot.\n\nIt is asked once per hole, in putt 0 before the first putt. The playing statistics then show how often you had that chance, and how often you turned it into a green in regulation.";
 "custom.preview.girOpportunity" = "GIR opportunity and GIR conversion";
 "stats.girOpportunity" = "GIR\nOPPORTUNITY";
 "stats.girOpportunityConversion" = "GIR\nCONVERSION";
+
+/* Putt 0: hole par */
+"custom.field.holePar" = "Hole par";
+"custom.field.holePar.desc" = "Par 3, 4 or 5, asked in putt 0 before the first putt. Gives the score in strokes and the average on each par";
+"input.holePar" = "PAR";
+"input.holePar.value" = "Par %d";
+"input.holePar.info" = "The hole's par. With it the score can be given in strokes as well as against par, and the playing statistics show your average on the par 3s, 4s and 5s.\n\nIt is asked once per hole, in putt 0 before the first putt.";
+"input.prePutt" = "Putt 0";
+"input.prePutt.hint" = "Before the first putt. Each answer is saved straight away, and once all are given the first putt follows.";
+"custom.preview.holePar" = "Score in strokes and the average on par 3, 4 and 5";
+"stats.strokesPerRound" = "%@ strokes";
+"stats.parAverage" = "Ø PAR %d";
+"evolution.girOpportunity" = "GIR OPPORTUNITY %";
+"evolution.girOpportunityConversion" = "GIR CONVERSION %";
+"evolution.par3" = "Ø PAR 3";
+"evolution.par4" = "Ø PAR 4";
+"evolution.par5" = "Ø PAR 5";
