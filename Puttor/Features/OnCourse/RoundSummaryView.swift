@@ -663,8 +663,6 @@ struct RoundSummaryView: View {
                         .foregroundStyle(fg)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                        // Circled for under par, boxed for over, as a card marks it.
-                        .scoreMark(score, colour: fg, size: holeCount == 9 ? 38 : 32)
                 } else if pickedUp {
                     PickUpBallIcon()
                         .foregroundStyle(Theme.accent)
@@ -675,10 +673,36 @@ struct RoundSummaryView: View {
                 }
             }
             .frame(maxWidth: .infinity, minHeight: holeCount == 9 ? 64 : 54)
-            .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(bg))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(isOpen ? Theme.accent : Theme.border, lineWidth: isOpen ? 2 : 1))
+            .background(cellShape(score).fill(bg))
+            .overlay(cellBorder(score, colour: fg))
+            // The hole opened below: an amber ring just outside the cell.
+            .overlay(cellShape(score).inset(by: -3).stroke(Theme.accent, lineWidth: isOpen ? 2 : 0))
+            .contentShape(cellShape(score))
         }
         .buttonStyle(.plain)
+    }
+
+    /// The scorecard's marks as the cell itself, the way a card marks them:
+    /// under par the hole turns round, over it stays square, and the border
+    /// thickens in the score's colour — doubled for an eagle or better and a
+    /// double bogey or worse. A par keeps the plain cell.
+    private func cellShape(_ score: Int?) -> HoleCellShape {
+        HoleCellShape(isRound: (score ?? 0) < 0)
+    }
+
+    @ViewBuilder
+    private func cellBorder(_ score: Int?, colour: Color) -> some View {
+        let shape = cellShape(score)
+        if let score, score != 0 {
+            ZStack {
+                shape.stroke(colour, lineWidth: 3)
+                if abs(score) >= 2 {
+                    shape.inset(by: 5).stroke(colour, lineWidth: 2)
+                }
+            }
+        } else {
+            shape.stroke(Theme.border, lineWidth: 1)
+        }
     }
 
     private func holeDetail(_ hole: Int) -> some View {
@@ -824,5 +848,27 @@ struct RoundSummaryView: View {
                 .scoreMark(mark, colour: color, size: mark == nil ? 10 : 17, lineWidth: 1.2)
             Text(label).font(.system(size: 11)).foregroundStyle(Theme.textSecondary)
         }
+    }
+}
+
+/// A hole's cell: round for a score under par, the usual rounded square
+/// otherwise. Insettable, so a second ring can sit inside the first.
+struct HoleCellShape: InsettableShape {
+    var isRound: Bool
+    var insetAmount: CGFloat = 0
+
+    func path(in rect: CGRect) -> Path {
+        let inner = rect.insetBy(dx: insetAmount, dy: insetAmount)
+        if isRound {
+            let side = min(inner.width, inner.height)
+            return Path(ellipseIn: CGRect(x: inner.midX - side / 2, y: inner.midY - side / 2, width: side, height: side))
+        }
+        return Path(roundedRect: inner, cornerRadius: max(0, Theme.Radius.sm - insetAmount))
+    }
+
+    func inset(by amount: CGFloat) -> HoleCellShape {
+        var copy = self
+        copy.insetAmount += amount
+        return copy
     }
 }
