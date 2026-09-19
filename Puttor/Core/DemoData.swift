@@ -28,6 +28,14 @@ enum DemoData {
     /// with `-PuttorNoRounds` as well, the three are all there is.
     static let simulatedRoundsArgument = "-PuttorSimulatedRounds"
     static let simulatedCourse = "Simulated"
+    /// One eighteen-hole round in Custom mode with putt 0: par and GIR
+    /// opportunity asked, intentions, the result on the dial — and about a
+    /// stroke gained on the greens. A green is only hit where there was a
+    /// chance to hit it.
+    static let puttZeroRoundArgument = "-PuttorPuttZeroRound"
+    static let puttZeroCourse = "Seeblick Links"
+    /// A par 72 card.
+    static let puttZeroPars = [4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4]
     /// The tutorial as a first launch has it. Any other launch argument means
     /// a test that is not about the tutorial, so it stays out of the way.
     static let tutorialArgument = "-PuttorTutorial"
@@ -64,6 +72,19 @@ enum DemoData {
             var config = CustomModeConfig.defaultConfig
             config.fields = [CustomField(kind: .puttForCategory), CustomField(kind: .intention)]
             config.save()
+        }
+        if arguments.contains(puttZeroRoundArgument) {
+            var config = CustomModeConfig.defaultConfig
+            config.fields = [
+                CustomField(kind: .puttForCategory),
+                CustomField(kind: .holePar),
+                CustomField(kind: .girOpportunity),
+                CustomField(kind: .intention),
+            ]
+            config.resultStyle = .angle
+            config.save()
+            simulatePuttZeroRound(into: ModelContext(container))
+            return
         }
         if arguments.contains(emptyArgument) {
             let context = ModelContext(container)
@@ -245,6 +266,112 @@ enum DemoData {
             category = steppedDown(category)
             distance = simulatedLeave(angle: angle, intention: intention, from: distance, rng: &rng)
         }
+    }
+
+    /// One putt of a planned hole, before it becomes a Putt.
+    private struct PlannedPutt {
+        var distance: Double
+        var side: Double
+        var hill: Double
+        var category: ScoreCategory
+        var intention: PuttIntention
+        var angle: Double?
+        var lipOut: Bool
+    }
+
+    private struct PlannedHole {
+        var par: Int
+        var girOpportunity: Bool
+        var putts: [PlannedPutt]
+    }
+
+    /// The round of `puttZeroRoundArgument`. Seeds are tried in turn until
+    /// the putting comes to about one stroke gained, so the round is the same
+    /// on every launch.
+    static func simulatePuttZeroRound(into context: ModelContext) {
+        let rounds = (try? context.fetch(FetchDescriptor<Round>())) ?? []
+        for round in rounds where round.courseName == puttZeroCourse {
+            context.delete(round)
+        }
+
+        var plan: [PlannedHole] = []
+        for seed in UInt64(1)...500 {
+            var rng = SeededGenerator(seed: seed)
+            let candidate = puttZeroPars.map { planHole(par: $0, rng: &rng) }
+            let gained = candidate.reduce(0.0) { total, hole in
+                total + StrokesGained.baseline(at: hole.putts[0].distance).expectedPutts - Double(hole.putts.count)
+            }
+            plan = candidate
+            if abs(gained - 1) < 0.1 { break }
+        }
+
+        let round = Round(courseName: puttZeroCourse, date: Date(), stimp: 10, inputMode: .custom)
+        round.readingMethod = ReadingMethod(.aimPoint)
+        round.tracksScoreCategory = true
+        round.isComplete = true
+        context.insert(round)
+        var details: [Int: HoleDetails] = [:]
+        for (index, hole) in plan.enumerated() {
+            let number = index + 1
+            details[number] = HoleDetails(par: hole.par, girOpportunity: hole.girOpportunity)
+            for (puttIndex, planned) in hole.putts.enumerated() {
+                let putt = Putt(
+                    holeNumber: number,
+                    puttNumber: puttIndex + 1,
+                    distanceM: planned.distance,
+                    sideSlopePct: planned.side,
+                    hillSlopePct: planned.hill,
+                    puttFor: planned.category,
+                    result: planned.angle.map(MissAngle.result(for:)) ?? .holed,
+                    lipOut: planned.lipOut,
+                    missAngleDeg: planned.angle
+                )
+                putt.intention = planned.intention
+                putt.createdAt = Date().addingTimeInterval(Double(number * 10 + puttIndex) - 400)
+                putt.round = round
+                round.putts.append(putt)
+                context.insert(putt)
+            }
+        }
+        round.holeDetails = details
+        try? context.save()
+    }
+
+    /// A hole: a chance at the green about two times in three, the green hit
+    /// on most of those and never without one, then putted out.
+    private static func planHole(par: Int, rng: inout SeededGenerator) -> PlannedHole {
+        let opportunity = Double.random(in: 0...1, using: &rng) < 0.65
+        let greenHit = opportunity && Double.random(in: 0...1, using: &rng) < 0.7
+        var category: ScoreCategory
+        var distance: Double
+        if greenHit {
+            // In regulation: for birdie, or for eagle on a par 5 reached in two.
+            category = par == 5 && Double.random(in: 0...1, using: &rng) < 0.25 ? .eagle : .birdie
+            distance = tenth(Double.random(in: 3...14, using: &rng))
+        } else {
+            // Up and down to save par, or a bogey putt after a worse miss.
+            category = Double.random(in: 0...1, using: &rng) < 0.75 ? .par : .bogey
+            distance = tenth(Double.random(in: 0.8...5, using: &rng))
+        }
+
+        var putts: [PlannedPutt] = []
+        for number in 1...4 {
+            let reach = number == 1 ? 1.0 : 0.6
+            let side = tenth(Double.random(in: -4...4, using: &rng) * reach)
+            let hill = tenth(Double.random(in: -3...3, using: &rng) * reach)
+            let intention = simulatedIntention(distance: distance, side: side, matchPlay: false, rng: &rng)
+            let odds = StrokesGained.baseline(at: distance).makeProbability * (intention.executed == true ? 1.2 : 0.75)
+            let holed = number == 4 || Double.random(in: 0...1, using: &rng) < min(0.99, odds)
+            let angle = holed ? nil : simulatedMissAngle(side: side, speed: intention.speed, rng: &rng)
+            putts.append(PlannedPutt(
+                distance: distance, side: side, hill: hill, category: category, intention: intention,
+                angle: angle, lipOut: !holed && Double.random(in: 0...1, using: &rng) < 0.1
+            ))
+            guard let angle else { break }
+            category = steppedDown(category)
+            distance = simulatedLeave(angle: angle, intention: intention, from: distance, rng: &rng)
+        }
+        return PlannedHole(par: par, girOpportunity: opportunity, putts: putts)
     }
 
     /// Tap-ins firm, long ones dying at the hole, a line that allows for more
