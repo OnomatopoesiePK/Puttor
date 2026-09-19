@@ -1145,3 +1145,7 @@
 "stats.par.gir" = "GIR %";
 "stats.par.putts" = "Ø 每洞推杆";
 "stats.parStats.info" = "按标准杆划分的球洞,标准杆来自推杆 0 或球场记分卡。左右滑动查看三张图:相对标准杆的平均成绩、标准杆上果岭比例、每个推杆洞的平均推杆数,分别针对 3、4、5 杆洞。";
+"summary.share" = "分享本轮";
+"share.scorecard" = "记分卡";
+"share.total" = "总杆";
+"share.pcg" = "对比巡回赛概率";

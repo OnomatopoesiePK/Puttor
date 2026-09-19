@@ -1054,3 +1054,7 @@
 "stats.par.gir" = "GIR %";
 "stats.par.putts" = "Ø PUTTS PAR TROU";
 "stats.parStats.info" = "Les trous selon leur par, là où il a été indiqué au putt 0 ou vient de la carte du parcours. Balayez entre trois graphiques : le score moyen par rapport au par, la part de greens en régulation et la moyenne de putts par trou putté, pour les par 3, 4 et 5.";
+"summary.share" = "Partager la partie";
+"share.scorecard" = "CARTE DE SCORE";
+"share.total" = "TOTAL";
+"share.pcg" = "PUTTS FACE AU TOUR";

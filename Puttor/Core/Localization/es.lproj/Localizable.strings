@@ -1145,3 +1145,7 @@
 "stats.par.gir" = "GIR %";
 "stats.par.putts" = "Ø PUTTS POR HOYO";
 "stats.parStats.info" = "Los hoyos según su par, donde se indicó en el putt 0 o vino de la tarjeta del campo. Desliza entre tres gráficos: el resultado medio respecto al par, la parte de greens en regulación y la media de putts por hoyo con putt, para los par 3, 4 y 5.";
+"summary.share" = "Compartir ronda";
+"share.scorecard" = "TARJETA";
+"share.total" = "TOTAL";
+"share.pcg" = "PUTTS FRENTE AL TOUR";

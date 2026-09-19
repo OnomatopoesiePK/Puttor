@@ -6,6 +6,7 @@
 //
 
 import Testing
+import UIKit
 import Foundation
 import SwiftData
 @testable import Puttor
@@ -332,6 +333,63 @@ struct PuttorTests {
         #expect(!RoundHighlights.manyGirOpportunities(6.0 / 9.0 * 100))
         #expect(RoundHighlights.strongGirOpportunityConversion(81))
         #expect(!RoundHighlights.strongGirOpportunityConversion(80))
+    }
+
+    /// The shared picture is 1080 pixels wide and never taller than four to
+    /// five, however much the round holds; and a round with less in it makes
+    /// a shorter one.
+    @MainActor
+    @Test func theSharedRoundStaysWithinFourToFive() async throws {
+        let context = try Self.makeInMemoryContext()
+        DemoData.simulatePuttZeroRound(into: context)
+        let full = try #require(try context.fetch(FetchDescriptor<Round>()).first)
+        let fullImage = try #require(RoundShareImage.render(full, useFeet: false))
+        #expect(abs(fullImage.size.width * fullImage.scale - 1080) < 1)
+        #expect(fullImage.size.height <= fullImage.size.width * 1.25 + 1)
+
+        // Nine holes, entered without the score reference: no scorecard, fewer tiles.
+        let quick = Round(courseName: "Quick nine")
+        quick.holeCount = 9
+        quick.isComplete = true
+        context.insert(quick)
+        for hole in 1...9 {
+            for number in 1...2 {
+                let putt = Putt(holeNumber: hole, puttNumber: number, distanceM: number == 1 ? 6 : 0.8, result: number == 2 ? .holed : .short)
+                putt.round = quick
+                quick.putts.append(putt)
+                context.insert(putt)
+            }
+        }
+        try context.save()
+        let quickImage = try #require(RoundShareImage.render(quick, useFeet: false))
+        #expect(quickImage.size.height < fullImage.size.height * (fullImage.size.width / quickImage.size.width))
+
+        // Written out to look at, where the test is run with somewhere to put them.
+        if let folder = ProcessInfo.processInfo.environment["PUTTOR_SHARE_PREVIEW_DIR"] {
+            try fullImage.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent("share-18.png"))
+            try quickImage.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent("share-quick9.png"))
+            // The front nine alone, as a nine-hole round with its scorecard.
+            full.holeCount = 9
+            for putt in full.putts where putt.holeNumber > 9 {
+                full.putts.removeAll { $0.id == putt.id }
+                context.delete(putt)
+            }
+            // A birdie on 1 and an eagle on 2, so the circles show too.
+            for (hole, category) in [(1, ScoreCategory.birdie), (2, .eagle)] {
+                for putt in full.putts where putt.holeNumber == hole && putt.puttNumber > 1 {
+                    full.putts.removeAll { $0.id == putt.id }
+                    context.delete(putt)
+                }
+                if let first = full.putts.first(where: { $0.holeNumber == hole }) {
+                    first.puttFor = category
+                    first.result = .holed
+                    first.missAngleDeg = nil
+                }
+            }
+            try context.save()
+            let nineImage = try #require(RoundShareImage.render(full, useFeet: false))
+            try nineImage.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent("share-9.png"))
+        }
     }
 
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {

@@ -24,6 +24,8 @@ struct RoundSummaryView: View {
     /// The holes as a scorecard rather than by putts; kept between rounds.
     @AppStorage("summary.holesShowScore") private var holesShowScore = false
     @State private var showHoleColours = false
+    /// The round as a picture, while the share sheet is up.
+    @State private var sharedImage: SharedImage?
 
     private var useFeet: Bool { unitsPref == "imperial" }
 
@@ -266,6 +268,25 @@ struct RoundSummaryView: View {
                 .font(.system(size: 18, weight: .heavy))
                 .foregroundStyle(Theme.text)
             Spacer()
+            // The round as a picture: to Instagram, WhatsApp and the rest, or Photos.
+            Button {
+                if let image = RoundShareImage.render(round, useFeet: useFeet) {
+                    sharedImage = SharedImage(image: image, title: round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
+                }
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(Theme.primary)
+                    .frame(width: 34, height: 32)
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(Theme.primary, lineWidth: 1.5))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L("summary.share"))
+            .sheet(item: $sharedImage) { shared in
+                ActivityView(items: [shared.activityItem])
+                    .presentationDetents([.medium, .large])
+                    .ignoresSafeArea()
+            }
             Button { onDone() } label: {
                 Text(L("summary.done"))
                     .font(.system(size: 12, weight: .bold))
@@ -550,7 +571,8 @@ struct RoundSummaryView: View {
     private var holeLegend: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 10, alignment: .leading)], alignment: .leading, spacing: 6) {
             ForEach(holeColourKey, id: \.label) { entry in
-                legendDot(entry.colour, entry.label)
+                // On the scorecard the key wears the marks the holes do.
+                legendDot(entry.colour, entry.label, mark: showsScorecard ? Int(entry.sample) : nil)
             }
         }
     }
@@ -609,7 +631,13 @@ struct RoundSummaryView: View {
                     // The strokes played where the hole's par is known, as a
                     // card reads; against par otherwise.
                     let par = round.holeDetails[hole]?.par
-                    Text(score.map { s in par.map { String($0 + s) } ?? scoreCardText(s) } ?? "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
+                    Text(score.map { s in par.map { String($0 + s) } ?? scoreCardText(s) } ?? "–")
+                        .font(.system(size: 17, weight: .black))
+                        .foregroundStyle(fg)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        // Circled for under par, boxed for over, as a card marks it.
+                        .scoreMark(score, colour: fg, size: holeCount == 9 ? 38 : 32)
                 } else if pickedUp {
                     PickUpBallIcon()
                         .foregroundStyle(Theme.accent)
@@ -619,7 +647,7 @@ struct RoundSummaryView: View {
                     Text(played ? "\(count)" : "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: holeCount == 9 ? 64 : 48)
+            .frame(maxWidth: .infinity, minHeight: holeCount == 9 ? 64 : 54)
             .background(RoundedRectangle(cornerRadius: Theme.Radius.sm).fill(bg))
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.sm).stroke(isOpen ? Theme.accent : Theme.border, lineWidth: isOpen ? 2 : 1))
         }
@@ -763,9 +791,10 @@ struct RoundSummaryView: View {
         }
     }
 
-    private func legendDot(_ color: Color, _ label: String) -> some View {
+    private func legendDot(_ color: Color, _ label: String, mark: Int? = nil) -> some View {
         HStack(spacing: 5) {
-            Circle().fill(color).frame(width: 10, height: 10)
+            Circle().fill(color).frame(width: mark == nil ? 10 : 7, height: mark == nil ? 10 : 7)
+                .scoreMark(mark, colour: color, size: mark == nil ? 10 : 17, lineWidth: 1.2)
             Text(label).font(.system(size: 11)).foregroundStyle(Theme.textSecondary)
         }
     }

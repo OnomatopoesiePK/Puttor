@@ -1145,3 +1145,7 @@
 "stats.par.gir" = "GIR %";
 "stats.par.putts" = "Ø PUTTS PRO LOCH";
 "stats.parStats.info" = "Die Löcher nach ihrem Par, wo es in Putt 0 angegeben wurde oder aus der Scorecard des Platzes kam. Wische zwischen drei Grafiken: der durchschnittliche Score gegen Par, der Anteil der Greens in Regulation und die durchschnittlichen Putts pro geputtetem Loch, jeweils für Par 3, 4 und 5.";
+"summary.share" = "Runde teilen";
+"share.scorecard" = "SCORECARD";
+"share.total" = "GESAMT";
+"share.pcg" = "PUTTS GEGEN TOUR-QUOTE";

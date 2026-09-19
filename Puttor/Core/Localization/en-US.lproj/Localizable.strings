@@ -1145,3 +1145,7 @@
 "stats.par.gir" = "GIR %";
 "stats.par.putts" = "Ø PUTTS PER HOLE";
 "stats.parStats.info" = "The holes by their par, where it was given in putt 0 or came from the course's scorecard. Swipe between three charts: the average score against par, the share of greens hit in regulation, and the average putts per putted hole, each for the par 3s, 4s and 5s.";
+"summary.share" = "Share round";
+"share.scorecard" = "SCORECARD";
+"share.total" = "TOTAL";
+"share.pcg" = "PUTTS VS TOUR ODDS";

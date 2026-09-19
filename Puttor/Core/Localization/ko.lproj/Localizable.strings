@@ -1054,3 +1054,7 @@
 "stats.par.gir" = "GIR %";
 "stats.par.putts" = "Ø 홀당 퍼트";
 "stats.parStats.info" = "퍼트 0에서 입력했거나 코스 스코어카드에서 가져온 파별 홀 통계입니다. 세 개의 차트를 좌우로 넘겨 보세요: 파 대비 평균 스코어, 레귤레이션 온 비율, 퍼트한 홀당 평균 퍼트 수를 파 3, 4, 5별로 보여 줍니다.";
+"summary.share" = "라운드 공유";
+"share.scorecard" = "스코어카드";
+"share.total" = "합계";
+"share.pcg" = "투어 확률 대비";
