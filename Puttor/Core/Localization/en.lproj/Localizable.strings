@@ -1130,7 +1130,6 @@
 "input.prePutt.hint" = "Before the first putt. Each answer is saved straight away, and once all are given the first putt follows.";
 "custom.preview.holePar" = "Score in strokes and the average on par 3, 4 and 5";
 "stats.strokesPerRound" = "%@ strokes";
-"stats.parAverage" = "Ø PAR %d";
 "evolution.girOpportunity" = "GIR OPPORTUNITY %";
 "evolution.girOpportunityConversion" = "GIR CONVERSION %";
 "evolution.par3" = "Ø PAR 3";
@@ -1141,3 +1140,8 @@
 "stats.threePutts" = "3-PUTTS";
 "stats.lipOuts" = "LIP-OUTS";
 "stats.ofPutts" = "of %ld putts";
+"stats.parStats" = "PAR 3 · 4 · 5";
+"stats.par.score" = "Ø SCORE TO PAR";
+"stats.par.gir" = "GIR %";
+"stats.par.putts" = "Ø PUTTS PER HOLE";
+"stats.parStats.info" = "The holes by their par, where it was given in putt 0 or came from the course's scorecard. Swipe between three charts: the average score against par, the share of greens hit in regulation, and the average putts per putted hole, each for the par 3s, 4s and 5s.";

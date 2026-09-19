@@ -156,8 +156,7 @@ struct RoundSummaryView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     }
                     // The same order as the statistics tab: the chances at the
-                    // green, then 3-putts and lip-outs beside the proximity,
-                    // then the pars.
+                    // green, then 3-putts and lip-outs beside the proximity.
                     HStack(spacing: Theme.Spacing.sm) {
                         playingStat(
                             L("stats.threePutts"),
@@ -176,19 +175,6 @@ struct RoundSummaryView: View {
                         )
                     }
                     .fixedSize(horizontal: false, vertical: true)
-                    // Where putt 0 or the course's card gave the pars.
-                    if !stats.parHoles.isEmpty {
-                        HStack(spacing: Theme.Spacing.sm) {
-                            ForEach(HoleDetails.pars, id: \.self) { par in
-                                playingStat(
-                                    String(format: L("stats.parAverage"), par),
-                                    stats.averageStrokes(onPar: par).map { String(format: "%.2f", $0) } ?? "—",
-                                    subtitle: String(format: L("stats.overHoles"), stats.parHoles[par] ?? 0)
-                                )
-                            }
-                        }
-                        .fixedSize(horizontal: false, vertical: true)
-                    }
                 }
                 }
 
@@ -201,6 +187,14 @@ struct RoundSummaryView: View {
                         holeDetail(expandedHole)
                     }
                     holeLegend
+                }
+
+                // The holes by their par, where putt 0 or the course's card gave it.
+                if round.tracksScoreCategory && !stats.parHoles.isEmpty {
+                    card {
+                        Text(L("stats.parStats")).font(.system(size: 10, weight: .bold)).tracking(1.2).foregroundStyle(Theme.textMuted)
+                        ParStatsView(stats: stats)
+                    }
                 }
 
                 card {

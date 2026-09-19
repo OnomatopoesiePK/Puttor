@@ -2021,10 +2021,16 @@ struct PuttorTests {
     @Test func statisticsSectionsStartInOrderAndKeepTheirArrangement() async throws {
         let fresh = Arrangement<StatisticsSection>(text: "")
         #expect(fresh.shown == StatisticsSection.allCases)
-        let arranged = fresh.hiding(at: IndexSet(integer: 0)).moving(from: IndexSet(integer: 4), to: 0)
+        let arranged = fresh.hiding(at: IndexSet(integer: 0)).moving(from: IndexSet(integer: 5), to: 0)
         #expect(arranged.hidden == [.rounds])
         #expect(arranged.shown.first == .dispersion)
         #expect(Arrangement<StatisticsSection>(text: arranged.text) == arranged)
+        // A section the stored text never knew joins after the one it follows.
+        let before = StatisticsSection.allCases.filter { $0 != .parStats && $0 != .totals }.map(\.rawValue) + ["totals"]
+        let older = Arrangement<StatisticsSection>(text: before.joined(separator: ","))
+        let at = try #require(older.shown.firstIndex(of: .playingStats))
+        #expect(older.shown[at + 1] == .parStats)
+        #expect(older.shown.last == .totals)
     }
 
     /// The charts keep the order they were put in and stay out once taken

@@ -1130,7 +1130,6 @@
 "input.prePutt.hint" = "Vor dem ersten Putt. Jede Antwort wird sofort gespeichert, und sobald alle gegeben sind, geht es zum ersten Putt.";
 "custom.preview.holePar" = "Score in Schlägen und Schnitt auf Par 3, 4 und 5";
 "stats.strokesPerRound" = "%@ Schläge";
-"stats.parAverage" = "Ø PAR %d";
 "evolution.girOpportunity" = "GIR-CHANCE %";
 "evolution.girOpportunityConversion" = "GIR-VERWERTUNG %";
 "evolution.par3" = "Ø PAR 3";
@@ -1141,3 +1140,8 @@
 "stats.threePutts" = "3-PUTTS";
 "stats.lipOuts" = "LIP-OUTS";
 "stats.ofPutts" = "von %ld Putts";
+"stats.parStats" = "PAR 3 · 4 · 5";
+"stats.par.score" = "Ø SCORE ZU PAR";
+"stats.par.gir" = "GIR %";
+"stats.par.putts" = "Ø PUTTS PRO LOCH";
+"stats.parStats.info" = "Die Löcher nach ihrem Par, wo es in Putt 0 angegeben wurde oder aus der Scorecard des Platzes kam. Wische zwischen drei Grafiken: der durchschnittliche Score gegen Par, der Anteil der Greens in Regulation und die durchschnittlichen Putts pro geputtetem Loch, jeweils für Par 3, 4 und 5.";

@@ -9,7 +9,7 @@
 import Foundation
 
 enum StatisticsSection: String, CaseIterable, Identifiable, Arrangeable {
-    case rounds, totals, strokesGained, playingStats, scoreVsPutting, dispersion
+    case rounds, totals, strokesGained, playingStats, parStats, scoreVsPutting, dispersion
     case makeByDistance, situation, missTendency, leaveByMiss, missReasons
     case intentionOutcome
 
@@ -22,6 +22,7 @@ enum StatisticsSection: String, CaseIterable, Identifiable, Arrangeable {
         case .totals: return "stats.section.totals"
         case .strokesGained: return "stats.sgPutting"
         case .playingStats: return "stats.playingStats"
+        case .parStats: return "stats.parStats"
         case .scoreVsPutting: return "stats.scoreVsPutting"
         case .dispersion: return "stats.dispersion"
         case .makeByDistance: return "chart.makeVsTour"

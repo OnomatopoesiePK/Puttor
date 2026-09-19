@@ -109,6 +109,29 @@ struct RoundStats {
     var parHoles: [Int: Int] = [:]
     var parScoreSum: [Int: Int] = [:]
 
+    /// Holes of a par played out (not picked up), the greens hit on them, and
+    /// the putts on those of them that were putted.
+    var parPlayedHoles: [Int: Int] = [:]
+    var parGirs: [Int: Int] = [:]
+    var parPuttedHoles: [Int: Int] = [:]
+    var parPutts: [Int: Int] = [:]
+
+    /// The average score against par on the holes of a par.
+    func averageScoreToPar(onPar par: Int) -> Double? {
+        guard let holes = parHoles[par], holes > 0 else { return nil }
+        return Double(parScoreSum[par] ?? 0) / Double(holes)
+    }
+
+    func girPercent(onPar par: Int) -> Double? {
+        guard let holes = parPlayedHoles[par], holes > 0 else { return nil }
+        return Double(parGirs[par] ?? 0) / Double(holes) * 100
+    }
+
+    func averagePutts(onPar par: Int) -> Double? {
+        guard let holes = parPuttedHoles[par], holes > 0 else { return nil }
+        return Double(parPutts[par] ?? 0) / Double(holes)
+    }
+
     /// The average strokes on the holes of a par, where any were played.
     func averageStrokes(onPar par: Int) -> Double? {
         guard let holes = parHoles[par], holes > 0 else { return nil }
@@ -340,6 +363,15 @@ struct RoundStats {
                 countPar(hole, score: score)
             }
 
+            if let par = details[hole]?.par {
+                stats.parPlayedHoles[par, default: 0] += 1
+                if category.isGreenInRegulation { stats.parGirs[par, default: 0] += 1 }
+                if !realOnHole.isEmpty {
+                    stats.parPuttedHoles[par, default: 0] += 1
+                    stats.parPutts[par, default: 0] += realOnHole.count
+                }
+            }
+
             if let opportunity = details[hole]?.girOpportunity {
                 stats.girOpportunityAnswered += 1
                 if opportunity {
@@ -503,6 +535,10 @@ struct RoundStats {
         for r in list {
             merged.parHoles.merge(r.parHoles, uniquingKeysWith: +)
             merged.parScoreSum.merge(r.parScoreSum, uniquingKeysWith: +)
+            merged.parPlayedHoles.merge(r.parPlayedHoles, uniquingKeysWith: +)
+            merged.parGirs.merge(r.parGirs, uniquingKeysWith: +)
+            merged.parPuttedHoles.merge(r.parPuttedHoles, uniquingKeysWith: +)
+            merged.parPutts.merge(r.parPutts, uniquingKeysWith: +)
         }
         merged.girPutts = list.reduce(0) { $0 + $1.girPutts }
         merged.girPuttedHoles = list.reduce(0) { $0 + $1.girPuttedHoles }

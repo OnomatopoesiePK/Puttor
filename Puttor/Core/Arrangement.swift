@@ -16,7 +16,8 @@ protocol Arrangeable: RawRepresentable, CaseIterable, Identifiable, Hashable whe
 
 /// Which items show, in what order, and which were taken out, kept as one
 /// line of text: the items in order, the taken-out ones marked. An item the
-/// text has never heard of joins the end of the shown ones.
+/// text has never heard of joins the shown ones after the item it follows in
+/// its own order, or at the end where that one is not shown.
 struct Arrangement<Item: Arrangeable>: Equatable {
     private(set) var shown: [Item]
     private(set) var hidden: [Item]
@@ -31,7 +32,15 @@ struct Arrangement<Item: Arrangeable>: Equatable {
             else { continue }
             if isHidden { hidden.append(item) } else { shown.append(item) }
         }
-        shown += Item.allCases.filter { !shown.contains($0) && !hidden.contains($0) }
+        let all = Array(Item.allCases)
+        for (index, item) in all.enumerated() where !shown.contains(item) && !hidden.contains(item) {
+            let before = all[..<index].last { shown.contains($0) }
+            if let before, let at = shown.firstIndex(of: before) {
+                shown.insert(item, at: at + 1)
+            } else {
+                shown.append(item)
+            }
+        }
         self.shown = shown
         self.hidden = hidden
     }

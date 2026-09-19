@@ -1039,7 +1039,6 @@
 "input.prePutt.hint" = "Avant le premier putt. Chaque réponse est enregistrée aussitôt, et une fois toutes données, le premier putt suit.";
 "custom.preview.holePar" = "Score en coups et moyenne sur les par 3, 4 et 5";
 "stats.strokesPerRound" = "%@ coups";
-"stats.parAverage" = "Ø PAR %d";
 "evolution.girOpportunity" = "OCCASION DE GIR %";
 "evolution.girOpportunityConversion" = "CONVERSION GIR %";
 "evolution.par3" = "Ø PAR 3";
@@ -1050,3 +1049,8 @@
 "stats.threePutts" = "3-PUTTS";
 "stats.lipOuts" = "LIP-OUTS";
 "stats.ofPutts" = "sur %ld putts";
+"stats.parStats" = "PAR 3 · 4 · 5";
+"stats.par.score" = "Ø SCORE PAR RAPPORT AU PAR";
+"stats.par.gir" = "GIR %";
+"stats.par.putts" = "Ø PUTTS PAR TROU";
+"stats.parStats.info" = "Les trous selon leur par, là où il a été indiqué au putt 0 ou vient de la carte du parcours. Balayez entre trois graphiques : le score moyen par rapport au par, la part de greens en régulation et la moyenne de putts par trou putté, pour les par 3, 4 et 5.";

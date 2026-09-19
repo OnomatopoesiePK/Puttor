@@ -1039,7 +1039,6 @@
 "input.prePutt.hint" = "첫 퍼트 전입니다. 답은 바로 저장되고, 모두 답하면 첫 퍼트로 넘어갑니다.";
 "custom.preview.holePar" = "타수 스코어와 파 3, 4, 5별 평균";
 "stats.strokesPerRound" = "%@타";
-"stats.parAverage" = "Ø 파 %d";
 "evolution.girOpportunity" = "GIR 기회 %";
 "evolution.girOpportunityConversion" = "GIR 전환율 %";
 "evolution.par3" = "Ø 파 3";
@@ -1050,3 +1049,8 @@
 "stats.threePutts" = "3퍼트";
 "stats.lipOuts" = "립아웃";
 "stats.ofPutts" = "퍼트 %ld개 중";
+"stats.parStats" = "파 3 · 4 · 5";
+"stats.par.score" = "Ø 파 대비 스코어";
+"stats.par.gir" = "GIR %";
+"stats.par.putts" = "Ø 홀당 퍼트";
+"stats.parStats.info" = "퍼트 0에서 입력했거나 코스 스코어카드에서 가져온 파별 홀 통계입니다. 세 개의 차트를 좌우로 넘겨 보세요: 파 대비 평균 스코어, 레귤레이션 온 비율, 퍼트한 홀당 평균 퍼트 수를 파 3, 4, 5별로 보여 줍니다.";

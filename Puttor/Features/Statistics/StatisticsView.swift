@@ -813,9 +813,6 @@ private struct StatisticsPane: View {
                             if dense {
                                 playingStatWide(L("stats.girProximity"), girProximityText(data), subtitle: L("stats.firstPutt"))
                             }
-                            if showsParAverages(data) {
-                                parAverageRow(data.scoreAggregated)
-                            }
                             scoreCoverageNote(data)
                         }
                         // A lazy grid asks for no width of its own: without
@@ -834,6 +831,14 @@ private struct StatisticsPane: View {
                 // Or pushed across with a swipe to the left. Sideways only: a
                 // drag up or down still scrolls the tab.
                 .gesture(HorizontalSwipe(direction: .left) { openEvolution() })
+            }
+        case .parStats:
+            // Only where the pars were given, in putt 0 or from a course's card.
+            if !data.scoreAggregated.parHoles.isEmpty {
+                CollapsibleStatSection(title: L("stats.parStats"), storageKey: "parStats", infoKey: "stats.parStats.info") {
+                    ParStatsView(stats: data.scoreAggregated)
+                        .padding(.top, 10)
+                }
             }
         case .scoreVsPutting:
             CollapsibleStatSection(title: sectionTitle(L("stats.scoreVsPutting"), marked: data.hasRoundsWithoutScore), storageKey: "scoreVsPutting", infoKey: "stats.svp.note") {
@@ -1356,26 +1361,6 @@ private struct StatisticsPane: View {
         }
         let number = abs(strokes - strokes.rounded()) < 0.05 ? String(Int(strokes.rounded())) : String(format: "%.1f", strokes)
         return String(format: L("stats.strokesPerRound"), number)
-    }
-
-    /// Where the layout asks for the par, or rounds gave it.
-    private func showsParAverages(_ data: StatsBundle) -> Bool {
-        !data.scoreAggregated.parHoles.isEmpty
-            || CustomModeConfig.load().fields.contains { $0.kind == .holePar }
-    }
-
-    /// The average score on the par 3s, 4s and 5s.
-    private func parAverageRow(_ stats: RoundStats) -> some View {
-        HStack(spacing: Theme.Spacing.sm) {
-            ForEach(HoleDetails.pars, id: \.self) { par in
-                playingStat(
-                    String(format: L("stats.parAverage"), par),
-                    stats.averageStrokes(onPar: par).map { String(format: "%.2f", $0) } ?? "—",
-                    subtitle: String(format: L("stats.overHoles"), stats.parHoles[par] ?? 0)
-                )
-            }
-        }
-        .fixedSize(horizontal: false, vertical: true)
     }
 
     /// Where the layout asks about GIR opportunities, or rounds did.
