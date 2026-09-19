@@ -289,7 +289,6 @@
 "summary.holes.coloursPutts" = "色：ホールのパット数";
 "summary.holes.coloursScore" = "色：パーに対するスコア";
 "summary.holes.switchHint" = "横の矢印でパット数とスコアを切り替えます。";
-"summary.holes.tripleOrWorse" = "トリプルボギー以上";
 "summary.avgPerHole" = "Ø パット/ホール";
 "summary.sg" = "SG";
 "summary.highlight" = "ハイライト";

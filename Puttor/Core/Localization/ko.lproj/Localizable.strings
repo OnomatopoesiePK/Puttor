@@ -268,7 +268,6 @@
 "summary.holes.coloursPutts" = "색: 그 홀의 퍼트 수";
 "summary.holes.coloursScore" = "색: 파 대비 스코어";
 "summary.holes.switchHint" = "옆의 화살표로 퍼트와 스코어를 번갈아 볼 수 있습니다.";
-"summary.holes.tripleOrWorse" = "트리플 보기 이상";
 "summary.avgPerHole" = "홀당 평균 퍼트";
 "summary.sg" = "SG";
 "summary.highlight" = "하이라이트";

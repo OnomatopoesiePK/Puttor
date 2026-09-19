@@ -289,7 +289,6 @@
 "summary.holes.coloursPutts" = "Farben: Putts auf dem Loch";
 "summary.holes.coloursScore" = "Farben: Score zum Par";
 "summary.holes.switchHint" = "Die Pfeile daneben wechseln zwischen Putts und Score.";
-"summary.holes.tripleOrWorse" = "Triple-Bogey oder schlechter";
 "summary.avgPerHole" = "Ø Putts/Loch";
 "summary.sg" = "SG";
 "summary.highlight" = "HIGHLIGHT";

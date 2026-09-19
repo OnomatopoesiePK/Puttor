@@ -550,9 +550,10 @@ struct RoundSummaryView: View {
                 ("3", Theme.error, L("summary.threePlusPutts")),
             ]
         }
-        let scores: [(Int, ScoreCategory)] = [(-2, .eagle), (-1, .birdie), (0, .par), (1, .bogey), (2, .double), (3, .plus3)]
+        // Worse than a double wears the double's colour, so it needs no key of its own.
+        let scores: [(Int, ScoreCategory)] = [(-2, .eagle), (-1, .birdie), (0, .par), (1, .bogey), (2, .double)]
         return scores.map { score, category in
-            (scoreCardText(score), category.color, L(score >= 3 ? "summary.holes.tripleOrWorse" : category.labelKey))
+            (scoreCardText(score), category.color, L(category.labelKey))
         }
     }
 
