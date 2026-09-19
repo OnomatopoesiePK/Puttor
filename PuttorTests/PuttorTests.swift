@@ -384,7 +384,7 @@ struct PuttorTests {
             })
             #expect(scores == [-2, -1, 0, 1, 2], "\(round.courseName) \(round.holeCount)")
             #expect(round.holeDetails.isEmpty == (round.courseName == DemoData.shareRoundsOtherCourse))
-            let baseline = ShareBaseline(excluding: round, from: rounds)
+            let baseline = RoundBaseline(excluding: round, from: rounds)
             let image = try #require(RoundShareImage.render(round, useFeet: false, baseline: baseline))
             #expect(image.size.height <= image.size.width * 1.25 + 1)
             if let folder = ProcessInfo.processInfo.environment["PUTTOR_SHARE_PREVIEW_DIR"] {
@@ -392,6 +392,34 @@ struct PuttorTests {
                 try image.pngData()?.write(to: URL(fileURLWithPath: folder).appendingPathComponent(name))
             }
         }
+    }
+
+    /// A round's figures are measured against the player's last ten other
+    /// rounds only: older ones, and the round itself, leave the average be.
+    @MainActor
+    @Test func theBaselineTakesTheLastTenOtherRounds() async throws {
+        let context = try Self.makeInMemoryContext()
+        func round(daysAgo: Double, puttsPerHole: Int) -> Round {
+            let round = Round(courseName: "R", date: Date(timeIntervalSinceNow: -daysAgo * 86_400))
+            context.insert(round)
+            for hole in 1...9 {
+                for number in 1...puttsPerHole {
+                    let putt = Putt(holeNumber: hole, puttNumber: number, distanceM: 3, result: number == puttsPerHole ? .holed : .short)
+                    putt.round = round
+                    round.putts.append(putt)
+                    context.insert(putt)
+                }
+            }
+            return round
+        }
+        let shown = round(daysAgo: 0, puttsPerHole: 1)
+        let recent = (1...10).map { round(daysAgo: Double($0), puttsPerHole: 2) }
+        let old = (11...12).map { round(daysAgo: Double($0), puttsPerHole: 4) }
+        try context.save()
+
+        let baseline = RoundBaseline(excluding: shown, from: [shown] + recent + old)
+        #expect(baseline.puttsPerHole == 2)
+        #expect(baseline.tone(1, against: baseline.puttsPerHole, higherIsBetter: false) == Theme.primary)
     }
 
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {

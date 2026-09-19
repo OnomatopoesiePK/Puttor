@@ -24,6 +24,9 @@ struct RoundSummaryView: View {
     /// The holes as a scorecard rather than by putts; kept between rounds.
     @AppStorage("summary.holesShowScore") private var holesShowScore = false
     @State private var showHoleColours = false
+    /// The player's averages over their last ten other rounds, which the
+    /// playing stats are written green or red against.
+    @State private var baseline = RoundBaseline()
     /// The round as a picture, while the share sheet is up.
     @State private var sharedImage: SharedImage?
 
@@ -50,6 +53,8 @@ struct RoundSummaryView: View {
     var body: some View {
         VStack(spacing: 0) {
         topBar
+            // The averages the playing stats are coloured against, read once.
+            .onAppear(perform: loadBaseline)
         ScrollView {
             VStack(spacing: Theme.Spacing.md) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -110,34 +115,40 @@ struct RoundSummaryView: View {
                             // In strokes where every hole has its par.
                             subtitle: stats.averageStrokesPerRound.map { String(format: L("stats.strokesPerRound"), String(Int($0.rounded()))) }
                                 ?? String(format: L("stats.overHoles"), stats.scoredHoles),
-                            color: scoreColor(stats.scoreRelativeToPar),
+                            color: tone(Double(stats.scoreRelativeToPar) / Double(max(1, stats.scoredHoles)), baseline.scorePerHole,
+                                        higher: false, fallback: scoreColor(stats.scoreRelativeToPar)),
                             highlighted: RoundHighlights.scoreUnderPar(stats.scoreRelativeToPar)
                         )
                         playingStat(
                             L("stats.gir"), "\(Int(stats.girPercent.rounded()))%",
                             subtitle: "\(stats.girCount)/\(stats.holes)",
+                            color: tone(stats.girPercent, baseline.girPercent, higher: true),
                             highlighted: RoundHighlights.strongGreensInRegulation(stats.girPercent)
                         )
                         playingStat(
                             L("stats.conversion"),
                             stats.girCount > 0 ? "\(Int(stats.girConversionPercent.rounded()))%" : "—",
                             subtitle: "\(stats.girConversions)/\(stats.girCount)",
+                            color: tone(stats.girCount > 0 ? stats.girConversionPercent : nil, baseline.conversionPercent, higher: true),
                             highlighted: RoundHighlights.strongConversion(stats.girConversionPercent)
                         )
                         playingStat(
                             L("stats.scramble"), "\(Int(stats.scramblePercent.rounded()))%",
                             subtitle: "\(stats.scrambleSuccesses)/\(stats.scrambleAttempts)",
+                            color: tone(stats.scrambleAttempts > 0 ? stats.scramblePercent : nil, baseline.scramblePercent, higher: true),
                             highlighted: RoundHighlights.strongScrambling(stats.scramblePercent)
                         )
                         playingStat(
                             L("stats.puttsGir"),
                             stats.avgPuttsOnGir.map { String(format: "%.2f", $0) } ?? "—",
-                            subtitle: String(format: L("stats.overHoles"), stats.girPuttedHoles)
+                            subtitle: String(format: L("stats.overHoles"), stats.girPuttedHoles),
+                            color: tone(stats.avgPuttsOnGir, baseline.puttsOnGir, higher: false)
                         )
                         playingStat(
                             L("stats.puttsNoGir"),
                             stats.avgPuttsOffGir.map { String(format: "%.2f", $0) } ?? "—",
-                            subtitle: String(format: L("stats.overHoles"), stats.nonGirPuttedHoles)
+                            subtitle: String(format: L("stats.overHoles"), stats.nonGirPuttedHoles),
+                            color: tone(stats.avgPuttsOffGir, baseline.puttsOffGir, higher: false)
                         )
                     }
                     if stats.girOpportunityAnswered > 0 {
@@ -146,12 +157,14 @@ struct RoundSummaryView: View {
                                 L("stats.girOpportunity"),
                                 stats.girOpportunityPercent.map { "\(Int($0.rounded()))%" } ?? "—",
                                 subtitle: "\(stats.girOpportunities)/\(stats.girOpportunityAnswered)",
+                                color: tone(stats.girOpportunityPercent, baseline.girOpportunityPercent, higher: true),
                                 highlighted: stats.girOpportunityPercent.map(RoundHighlights.manyGirOpportunities) ?? false
                             )
                             playingStat(
                                 L("stats.girOpportunityConversion"),
                                 stats.girOpportunityConversionPercent.map { "\(Int($0.rounded()))%" } ?? "—",
                                 subtitle: "\(stats.girOpportunitiesConverted)/\(stats.girOpportunities)",
+                                color: tone(stats.girOpportunityConversionPercent, baseline.girOpportunityConversionPercent, higher: true),
                                 highlighted: stats.girOpportunityConversionPercent.map(RoundHighlights.strongGirOpportunityConversion) ?? false
                             )
                         }
@@ -163,17 +176,20 @@ struct RoundSummaryView: View {
                         playingStat(
                             L("stats.threePutts"),
                             "\(stats.threePuttHoles)",
-                            subtitle: String(format: L("stats.overHoles"), stats.holes)
+                            subtitle: String(format: L("stats.overHoles"), stats.holes),
+                            color: tone(Double(stats.threePuttHoles) / Double(max(1, stats.holes)), baseline.threePuttsPerHole, higher: false)
                         )
                         playingStat(
                             L("stats.lipOuts"),
                             "\(stats.lipOutCount)",
-                            subtitle: String(format: L("stats.ofPutts"), stats.totalPutts)
+                            subtitle: String(format: L("stats.ofPutts"), stats.totalPutts),
+                            color: tone(Double(stats.lipOutCount) / Double(max(1, stats.totalPutts)), baseline.lipOutsPerPutt, higher: false)
                         )
                         playingStat(
                             L("stats.girProximity"),
                             stats.avgGirProximityM.map { UnitConverter.formatDistance($0, useFeet: useFeet) } ?? "—",
-                            subtitle: L("stats.firstPutt")
+                            subtitle: L("stats.firstPutt"),
+                            color: tone(stats.avgGirProximityM, baseline.proximity, higher: false)
                         )
                     }
                     .fixedSize(horizontal: false, vertical: true)
@@ -262,6 +278,17 @@ struct RoundSummaryView: View {
     /// Drawn in the content rather than the navigation bar, matching the input
     /// screens — toolbar items carry their own capsule background, which an
     /// outlined button shows through as a stray shape around it.
+    private func loadBaseline() {
+        let rounds = (try? modelContext.fetch(FetchDescriptor<Round>())) ?? []
+        baseline = RoundBaseline(excluding: round, from: rounds, useFeet: useFeet)
+    }
+
+    /// Green where the round beats the player's average, red where it falls
+    /// short; `fallback` where there is no average to go by.
+    private func tone(_ value: Double?, _ average: Double?, higher: Bool, fallback: Color = Theme.primary) -> Color {
+        baseline.tone(value, against: average, higherIsBetter: higher) ?? fallback
+    }
+
     private var topBar: some View {
         HStack {
             Text(L("summary.title"))
@@ -270,9 +297,6 @@ struct RoundSummaryView: View {
             Spacer()
             // The round as a picture: to Instagram, WhatsApp and the rest, or Photos.
             Button {
-                // Measured against the player's other rounds.
-                let others = (try? modelContext.fetch(FetchDescriptor<Round>())) ?? []
-                let baseline = ShareBaseline(excluding: round, from: others, useFeet: useFeet)
                 if let image = RoundShareImage.render(round, useFeet: useFeet, baseline: baseline) {
                     sharedImage = SharedImage(image: image, title: round.courseName.isEmpty ? L("onCourse.unnamedCourse") : round.courseName)
                 }

@@ -18,9 +18,9 @@ import SwiftData
 struct RoundShareCard: View {
     let round: Round
     var useFeet = false
-    /// The player's own averages from their other rounds: a figure better
-    /// than its average is written green, a worse one red.
-    var baseline = ShareBaseline()
+    /// The player's averages over their last ten other rounds: a figure
+    /// better than its average is written green, a worse one red.
+    var baseline = RoundBaseline()
 
     private var putts: [Putt] {
         round.putts.sorted { $0.holeNumber != $1.holeNumber ? $0.holeNumber < $1.holeNumber : $0.puttNumber < $1.puttNumber }
@@ -422,7 +422,7 @@ enum RoundShareImage {
     static let maxAspect: CGFloat = 5.0 / 4.0
 
     @MainActor
-    static func render(_ round: Round, useFeet: Bool, baseline: ShareBaseline = ShareBaseline()) -> UIImage? {
+    static func render(_ round: Round, useFeet: Bool, baseline: RoundBaseline = RoundBaseline()) -> UIImage? {
         var width: CGFloat = 400
         var image: UIImage?
         for _ in 0..<4 {
@@ -484,10 +484,14 @@ final class ShareImageItem: NSObject, UIActivityItemSource {
     }
 }
 
-/// The player's averages from their other rounds, per hole where a round's
-/// length would otherwise decide: what a shared figure is measured against.
+/// The player's averages over their last ten other rounds, per hole where a
+/// round's length would otherwise decide: what a round's figures are written
+/// green or red against, on the summary and on the shared picture alike.
 /// Nil wherever those rounds cannot say.
-struct ShareBaseline {
+struct RoundBaseline {
+    /// How many of the player's latest rounds the averages are taken over.
+    static let roundCount = 10
+
     var puttsPerHole: Double?
     var threePuttsPerHole: Double?
     var lipOutsPerPutt: Double?
@@ -505,12 +509,16 @@ struct ShareBaseline {
 
     init() {}
 
-    /// Every round but `round`, the score figures only from those entered
-    /// with the score reference, as the statistics tab takes them.
+    /// The latest ten rounds but `round`, the score figures only from those
+    /// entered with the score reference, as the statistics tab takes them.
     init(excluding round: Round, from rounds: [Round], useFeet: Bool = false) {
         var all: [RoundStats] = []
         var scored: [RoundStats] = []
-        for other in rounds where other.persistentModelID != round.persistentModelID {
+        let latest = rounds
+            .filter { $0.persistentModelID != round.persistentModelID && !$0.putts.isEmpty }
+            .sorted { $0.date > $1.date }
+            .prefix(Self.roundCount)
+        for other in latest {
             let stats = RoundStats.compute(putts: other.putts, useFeet: useFeet)
             guard stats.holes > 0 else { continue }
             all.append(stats)
