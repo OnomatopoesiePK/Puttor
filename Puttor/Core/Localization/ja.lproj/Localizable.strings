@@ -1137,3 +1137,5 @@
 "evolution.par3" = "Ø パー3";
 "evolution.par4" = "Ø パー4";
 "evolution.par5" = "Ø パー5";
+"setup.scorecardKnown" = "スコアカード保存済み:%@。パーは自動で入力されます。";
+"setup.scorecardHoles" = "%dホール";

@@ -14,12 +14,14 @@ struct RoundSetupView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Putter.name) private var putters: [Putter]
+    @Query private var rounds: [Round]
 
     var existingRound: Round? = nil
     var onCreated: (Round) -> Void = { _ in }
     var onSaved: () -> Void = {}
 
     @State private var courseName: String
+    @FocusState private var courseNameFocused: Bool
     @State private var date: Date
     @State private var putterID: PersistentIdentifier?
     @State private var stimp: Double
@@ -91,7 +93,10 @@ struct RoundSetupView: View {
                             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
                             .foregroundStyle(Theme.text)
                             .submitLabel(.done)
+                            .focused($courseNameFocused)
                             .onSubmit { TutorialController.shared.advance(from: .courseName) }
+                        courseSuggestions
+                        scorecardNote
                     }
                     .tutorialTarget(.courseName, cornerRadius: Theme.Radius.md)
 
@@ -526,6 +531,84 @@ struct RoundSetupView: View {
             )
     }
 
+    /// Courses played before, other rounds' than this one.
+    private var knownCourses: [CourseScorecard] {
+        CourseScorecard.courses(in: rounds.filter { $0.persistentModelID != existingRound?.persistentModelID })
+    }
+
+    /// The course the name picks out, if it was played before.
+    private var selectedCourse: CourseScorecard? {
+        let key = CourseScorecard.key(courseName)
+        return knownCourses.first { $0.id == key }
+    }
+
+    /// While the name is typed: the courses played before that it matches,
+    /// with a note on those whose scorecard is known.
+    @ViewBuilder
+    private var courseSuggestions: some View {
+        let suggestions = CourseScorecard.suggestions(for: courseName, in: knownCourses)
+        if courseNameFocused && !suggestions.isEmpty && TutorialController.shared.step == nil {
+            VStack(spacing: 0) {
+                ForEach(suggestions) { course in
+                    Button {
+                        courseName = course.name
+                        courseNameFocused = false
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: course.hasScorecard ? "flag.fill" : "clock.arrow.circlepath")
+                                .font(.system(size: 13))
+                                .foregroundStyle(course.hasScorecard ? Theme.primary : Theme.textMuted)
+                                .frame(width: 20)
+                            Text(course.name)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(Theme.text)
+                                .lineLimit(1)
+                            Spacer(minLength: 8)
+                            if course.hasScorecard {
+                                Text(scorecardSummary(course))
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        .padding(.horizontal, Theme.Spacing.md)
+                        .padding(.vertical, 10)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    if course.id != suggestions.last?.id {
+                        Rectangle().fill(Theme.border).frame(height: 1)
+                    }
+                }
+            }
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.md).fill(Theme.surfaceElevated))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md).stroke(Theme.border, lineWidth: 1))
+            .padding(.top, 4)
+        }
+    }
+
+    /// Under a name whose course has a scorecard: its pars come along.
+    @ViewBuilder
+    private var scorecardNote: some View {
+        if existingRound == nil, let course = selectedCourse, course.hasScorecard {
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.seal.fill")
+                    .foregroundStyle(Theme.primary)
+                Text(String(format: L("setup.scorecardKnown"), scorecardSummary(course)))
+                    .foregroundStyle(Theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .font(.system(size: 12))
+            .padding(.top, 4)
+        }
+    }
+
+    /// "Par 72" for a full card, "Par 36 · 9 holes" for a part of one.
+    private func scorecardSummary(_ course: CourseScorecard) -> String {
+        let par = String(format: L("input.holePar.value"), course.totalPar)
+        return course.pars.count == 18 ? par : "\(par) · \(String(format: L("setup.scorecardHoles"), course.pars.count))"
+    }
+
     private func startRound() {
         let tutorial = TutorialController.shared
         // The first round, played along with the tutorial, is entered in Pro.
@@ -567,6 +650,10 @@ struct RoundSetupView: View {
             inputMode: mode
         )
         round.readingMethod = readingMethod
+        // A course played before brings its pars along.
+        if let course = selectedCourse, course.hasScorecard {
+            round.holeDetails = course.holeDetails
+        }
         modelContext.insert(round)
         try? modelContext.save()
         tutorial.advance(from: .startRound)

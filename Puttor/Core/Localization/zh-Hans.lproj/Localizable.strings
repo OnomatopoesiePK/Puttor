@@ -1137,3 +1137,5 @@
 "evolution.par3" = "Ø 3 杆洞";
 "evolution.par4" = "Ø 4 杆洞";
 "evolution.par5" = "Ø 5 杆洞";
+"setup.scorecardKnown" = "已保存记分卡:%@。标准杆将自动填入。";
+"setup.scorecardHoles" = "%d 洞";

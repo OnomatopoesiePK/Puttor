@@ -284,6 +284,45 @@ struct PuttorTests {
         #expect(stats.averageStrokesPerRound == 12)
     }
 
+    /// A course remembers the pars its rounds gave, the latest winning, and
+    /// a new round there starts with them: putt 0 then asks only the GIR
+    /// opportunity, or nothing at all.
+    @MainActor
+    @Test func aCoursesScorecardFillsInTheParsOfTheNextRound() async throws {
+        let context = try Self.makeInMemoryContext()
+        let older = Round(courseName: "Seeblick", date: Date(timeIntervalSinceNow: -7200))
+        older.holeDetails = [1: HoleDetails(par: 5), 2: HoleDetails(par: 3)]
+        let newer = Round(courseName: " seeblick ", date: Date(timeIntervalSinceNow: -3600))
+        newer.holeDetails = [1: HoleDetails(par: 4, girOpportunity: true)]
+        context.insert(older)
+        context.insert(newer)
+        try context.save()
+
+        let course = try #require(CourseScorecard.course(named: "SEEBLICK", in: [older, newer]))
+        #expect(course.pars == [1: 4, 2: 3])
+        #expect(course.totalPar == 7)
+        #expect(CourseScorecard.suggestions(for: "see", in: [course]).map(\.name) == ["seeblick"])
+
+        let round = Round(courseName: "Seeblick")
+        round.holeDetails = course.holeDetails
+        context.insert(round)
+        try context.save()
+
+        let session = RoundSession(round: round, modelContext: context)
+        session.prePuttKinds = [.holePar, .girOpportunity]
+        #expect(session.isOnPrePutt)
+        #expect(session.prePuttShownKinds == [.girOpportunity])
+        session.setGirOpportunity(false)
+        #expect(!session.isOnPrePutt)
+
+        // With only the par asked, a hole on the card goes straight to its putt.
+        session.prePuttKinds = [.holePar]
+        session.jumpToHole(2)
+        #expect(!session.isOnPrePutt)
+        session.jumpToHole(3)
+        #expect(session.isOnPrePutt)
+    }
+
     @Test func scoreCategoryStepDownReachesTheDeeperCategories() async throws {
         #expect(ScoreCategory.bogey.next == .double)
         #expect(ScoreCategory.double.next == .plus3)

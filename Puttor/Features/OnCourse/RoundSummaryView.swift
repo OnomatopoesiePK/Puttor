@@ -105,7 +105,9 @@ struct RoundSummaryView: View {
                         playingStat(
                             L(stats.pickedUpHoles > 0 ? "stats.gbe" : "stats.score"),
                             stats.scoreRelativeToParText,
-                            subtitle: String(format: L("stats.overHoles"), stats.scoredHoles),
+                            // In strokes where every hole has its par.
+                            subtitle: stats.averageStrokesPerRound.map { String(format: L("stats.strokesPerRound"), String(Int($0.rounded()))) }
+                                ?? String(format: L("stats.overHoles"), stats.scoredHoles),
                             color: scoreColor(stats.scoreRelativeToPar),
                             highlighted: RoundHighlights.scoreUnderPar(stats.scoreRelativeToPar)
                         )
@@ -135,6 +137,31 @@ struct RoundSummaryView: View {
                             stats.avgPuttsOffGir.map { String(format: "%.2f", $0) } ?? "—",
                             subtitle: String(format: L("stats.overHoles"), stats.nonGirPuttedHoles)
                         )
+                        // Where putt 0 or the course's card gave the pars.
+                        if !stats.parHoles.isEmpty {
+                            ForEach(HoleDetails.pars, id: \.self) { par in
+                                playingStat(
+                                    String(format: L("stats.parAverage"), par),
+                                    stats.averageStrokes(onPar: par).map { String(format: "%.2f", $0) } ?? "—",
+                                    subtitle: String(format: L("stats.overHoles"), stats.parHoles[par] ?? 0)
+                                )
+                            }
+                        }
+                    }
+                    if stats.girOpportunityAnswered > 0 {
+                        HStack(spacing: Theme.Spacing.sm) {
+                            playingStat(
+                                L("stats.girOpportunity"),
+                                stats.girOpportunityPercent.map { "\(Int($0.rounded()))%" } ?? "—",
+                                subtitle: "\(stats.girOpportunities)/\(stats.girOpportunityAnswered)"
+                            )
+                            playingStat(
+                                L("stats.girOpportunityConversion"),
+                                stats.girOpportunityConversionPercent.map { "\(Int($0.rounded()))%" } ?? "—",
+                                subtitle: "\(stats.girOpportunitiesConverted)/\(stats.girOpportunities)"
+                            )
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
                     }
                     playingStatWide(
                         L("stats.girProximity"),
@@ -588,7 +615,10 @@ struct RoundSummaryView: View {
             VStack(spacing: 2) {
                 Text("\(hole)").font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textMuted)
                 if showsScorecard {
-                    Text(score.map(scoreCardText) ?? "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
+                    // The strokes played where the hole's par is known, as a
+                    // card reads; against par otherwise.
+                    let par = round.holeDetails[hole]?.par
+                    Text(score.map { s in par.map { String($0 + s) } ?? scoreCardText(s) } ?? "–").font(.system(size: 18, weight: .black)).foregroundStyle(fg)
                 } else if pickedUp {
                     PickUpBallIcon()
                         .foregroundStyle(Theme.accent)
@@ -664,6 +694,11 @@ struct RoundSummaryView: View {
             let holeScore = round.tracksScoreCategory ? RoundStats.holeScoreRelativeToPar(holeRecords) : nil
             if holeScore != nil || !holePutts.isEmpty {
                 HStack(spacing: 8) {
+                    if let par = round.holeDetails[hole]?.par {
+                        Text(String(format: L("input.holePar.value"), par))
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
                     if let holeScore {
                         Text(String(format: L("summary.holeScore"), scoreText(holeScore)))
                             .font(.system(size: 12, weight: .bold))

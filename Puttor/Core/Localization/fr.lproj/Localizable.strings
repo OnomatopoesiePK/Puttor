@@ -1046,3 +1046,5 @@
 "evolution.par3" = "Ø PAR 3";
 "evolution.par4" = "Ø PAR 4";
 "evolution.par5" = "Ø PAR 5";
+"setup.scorecardKnown" = "Carte de score enregistrée : %@. Les pars sont préremplis.";
+"setup.scorecardHoles" = "%d trous";

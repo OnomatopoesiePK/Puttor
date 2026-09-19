@@ -1046,3 +1046,5 @@
 "evolution.par3" = "Ø 파 3";
 "evolution.par4" = "Ø 파 4";
 "evolution.par5" = "Ø 파 5";
+"setup.scorecardKnown" = "스코어카드 저장됨: %@. 파가 미리 입력됩니다.";
+"setup.scorecardHoles" = "%d개 홀";

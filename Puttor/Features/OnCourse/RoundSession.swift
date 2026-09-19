@@ -167,8 +167,19 @@ final class RoundSession {
         reopenedPrePutt = true
     }
 
+    /// What putt 0 shows: everything when opened again from its chip; on a
+    /// fresh hole, not the par its course's scorecard already gave.
+    var prePuttShownKinds: [CustomFieldKind] {
+        if reopenedPrePutt { return prePuttKinds }
+        let details = displayedHoleDetails
+        return prePuttKinds.filter { !($0 == .holePar && details.par != nil && details.parFromScorecard == true) }
+    }
+
     func setHolePar(_ par: Int?) {
-        updateHoleDetails { $0.par = par }
+        updateHoleDetails {
+            $0.par = par
+            $0.parFromScorecard = nil
+        }
     }
 
     func setGirOpportunity(_ value: Bool?) {

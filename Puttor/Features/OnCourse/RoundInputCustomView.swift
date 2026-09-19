@@ -130,7 +130,7 @@ struct RoundInputCustomView: View {
             .foregroundStyle(Theme.textSecondary)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
-        ForEach(session.prePuttKinds) { kind in
+        ForEach(session.prePuttShownKinds) { kind in
             section {
                 switch kind {
                 case .holePar:
@@ -311,6 +311,13 @@ struct RoundInputCustomView: View {
                     HStack(spacing: 2) {
                         Text("\(session.displayHole)").font(.system(size: 30, weight: .black)).foregroundStyle(Theme.primary)
                         Image(systemName: "chevron.down").font(.system(size: 10, weight: .heavy)).foregroundStyle(Theme.primary)
+                    }
+                    // The hole's par, once putt 0 or the course's card gave it.
+                    if let par = session.displayedHoleDetails.par {
+                        Text(String(format: L("input.holePar.value"), par).uppercased())
+                            .font(.system(size: 9, weight: .bold))
+                            .tracking(0.8)
+                            .foregroundStyle(Theme.textSecondary)
                     }
                 }
             }

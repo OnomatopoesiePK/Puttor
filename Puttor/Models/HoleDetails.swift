@@ -15,6 +15,9 @@ struct HoleDetails: Codable, Equatable {
     var par: Int?
     /// A clear shot at the green in regulation, within reach.
     var girOpportunity: Bool?
+    /// The par came from the course's scorecard rather than being entered,
+    /// so putt 0 need not ask it again.
+    var parFromScorecard: Bool?
 
     var isEmpty: Bool { par == nil && girOpportunity == nil }
 
